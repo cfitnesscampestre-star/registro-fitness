@@ -9,16 +9,40 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Fitness">
-<meta name="theme-color" content="#070d0a">
+<meta name="theme-color" content="#1a7a45">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="description" content="Sistema de control fitness — Club Campestre Aguascalientes">
 
-<!-- Íconos para iOS (Apple Touch Icon) -->
-<link rel="apple-touch-icon" sizes="180x180" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'><rect width='180' height='180' rx='36' fill='%231a7a45'/><text x='90' y='115' font-size='90' text-anchor='middle' fill='white'>💪</text><text x='90' y='165' font-size='22' text-anchor='middle' fill='%235effa0' font-family='sans-serif' font-weight='bold'>FITNESS</text></svg>">
-<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><rect width='64' height='64' rx='14' fill='%231a7a45'/><text x='32' y='44' font-size='36' text-anchor='middle' fill='white'>💪</text></svg>">
+<!-- Favicon SVG (funciona en todos los navegadores modernos) -->
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml;charset=utf-8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><rect width='64' height='64' rx='14' fill='%231a7a45'/><text x='32' y='46' font-size='38' text-anchor='middle' fill='white' font-family='Apple Color Emoji,Segoe UI Emoji,sans-serif'>💪</text></svg>">
 
-<!-- PWA Manifest inline -->
-<link rel="manifest" href="data:application/json,%7B%22name%22%3A%22Fitness%20Control%20%E2%80%94%20Club%20Campestre%22%2C%22short_name%22%3A%22Fitness%22%2C%22description%22%3A%22Sistema%20de%20control%20fitness%22%2C%22start_url%22%3A%22.%2F%22%2C%22display%22%3A%22standalone%22%2C%22background_color%22%3A%22%23070d0a%22%2C%22theme_color%22%3A%22%231a7a45%22%2C%22orientation%22%3A%22portrait%22%2C%22icons%22%3A%5B%7B%22src%22%3A%22data%3Aimage%2Fsvg%2Bxml%2C%3Csvg%20xmlns%3D'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg'%20viewBox%3D'0%200%20192%20192'%3E%3Crect%20width%3D'192'%20height%3D'192'%20rx%3D'38'%20fill%3D'%231a7a45'%2F%3E%3Ctext%20x%3D'96'%20y%3D'130'%20font-size%3D'110'%20text-anchor%3D'middle'%20fill%3D'white'%3E%F0%9F%92%AA%3C%2Ftext%3E%3C%2Fsvg%3E%22%2C%22sizes%22%3A%22192x192%22%2C%22type%22%3A%22image%2Fsvg%2Bxml%22%7D%5D%7D">
+<!-- Apple Touch Icon para iOS -->
+<link rel="apple-touch-icon" href="data:image/svg+xml;charset=utf-8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'><rect width='180' height='180' rx='40' fill='%231a7a45'/><text x='90' y='122' font-size='96' text-anchor='middle' fill='white' font-family='Apple Color Emoji,Segoe UI Emoji,sans-serif'>💪</text><text x='90' y='165' font-size='24' text-anchor='middle' fill='%235effa0' font-family='Arial,sans-serif' font-weight='bold' letter-spacing='2'>FITNESS</text></svg>">
+
+<!-- PWA Manifest -->
+<script>
+(function(){
+  const icon='data:image/svg+xml;charset=utf-8,'+encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 192 192"><rect width="192" height="192" rx="40" fill="#1a7a45"/><text x="96" y="128" font-size="108" text-anchor="middle" fill="white" font-family="Apple Color Emoji,Segoe UI Emoji,sans-serif">💪</text><text x="96" y="175" font-size="26" text-anchor="middle" fill="#5effa0" font-family="Arial,sans-serif" font-weight="bold" letter-spacing="2">FITNESS</text></svg>');
+  const manifest={
+    name:'Fitness Control — Club Campestre',
+    short_name:'Fitness',
+    description:'Sistema de control fitness',
+    start_url:'./index.html',
+    display:'standalone',
+    background_color:'#070d0a',
+    theme_color:'#1a7a45',
+    orientation:'portrait-primary',
+    icons:[
+      {src:icon,sizes:'192x192',type:'image/svg+xml',purpose:'any maskable'},
+      {src:icon,sizes:'512x512',type:'image/svg+xml',purpose:'any maskable'}
+    ]
+  };
+  const blob=new Blob([JSON.stringify(manifest)],{type:'application/manifest+json'});
+  const link=document.createElement('link');
+  link.rel='manifest';link.href=URL.createObjectURL(blob);
+  document.head.appendChild(link);
+})();
+</script>
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Outfit:wght@400;500;600&family=DM+Mono&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
@@ -93,7 +117,7 @@ main{padding:1.4rem;max-width:1500px;margin:0 auto;}
 table{width:100%;border-collapse:collapse;font-size:.81rem;}
 thead th{background:var(--panel2);padding:8px 11px;text-align:left;
   font-size:.66rem;text-transform:uppercase;letter-spacing:1.5px;color:var(--txt2);font-weight:500;}
-tbody tr{border-bottom:1px solid #0e1f17;transition:background .15s;}
+tbody tr{border-bottom:1px solid var(--border);transition:background .15s;}
 tbody tr:hover{background:#0f1e15;}
 tbody td{padding:9px 11px;color:var(--txt);}
 
@@ -102,12 +126,12 @@ tbody td{padding:9px 11px;color:var(--txt);}
 .cpl{background:#0f2d1c;color:var(--neon);}
 .cho{background:#2a2310;color:var(--gold2);}
 .cok{background:#0e2d18;color:var(--v3);}
-.cwn{background:#2a2010;color:var(--gold2);}
-.cbd{background:#2d1010;color:var(--red2);}
+.cwn{background:rgba(255,208,107,.15);color:var(--gold2);}
+.cbd{background:rgba(224,80,80,.15);color:var(--red2);}
 
 /* BAR */
 .bw{display:flex;align-items:center;gap:6px;}
-.bar{height:5px;border-radius:3px;background:#0e1f17;width:65px;overflow:hidden;}
+.bar{height:5px;border-radius:3px;background:var(--border);width:65px;overflow:hidden;}
 .bf{height:100%;border-radius:3px;}
 .mono{font-family:'DM Mono',monospace;font-size:.77rem;}
 
@@ -182,7 +206,7 @@ select.ctrl option{background:var(--panel);}
 .graph-wrap{position:relative;height:240px;}
 
 /* ALERT */
-.arow{display:flex;align-items:center;gap:9px;padding:7px 0;border-bottom:1px solid #0e1f17;}
+.arow{display:flex;align-items:center;gap:9px;padding:7px 0;border-bottom:1px solid var(--border);}
 .arow:last-child{border:none;}
 .adot{width:7px;height:7px;border-radius:50%;flex-shrink:0;}
 
@@ -199,7 +223,7 @@ select.ctrl option{background:var(--panel);}
 .kpi-trend{font-size:.68rem;margin-top:3px;display:flex;align-items:center;gap:3px;}
 .trend-up{color:var(--neon);}.trend-dn{color:var(--red2);}.trend-eq{color:var(--txt2);}
 .kpi-meta{font-size:.63rem;color:var(--txt3);margin-top:1px;}
-.kpi-bar-wrap{height:3px;background:#0e1f17;border-radius:2px;margin-top:6px;overflow:hidden;}
+.kpi-bar-wrap{height:3px;background:var(--border);border-radius:2px;margin-top:6px;overflow:hidden;}
 .kpi-bar-fill{height:100%;border-radius:2px;transition:width .6s;}
 
 /* HEATMAP */
@@ -379,6 +403,15 @@ html.tema-claro .alert-card{background:#f5faf5;}
 
 /* Ocultar controles de escritura para rol usuario */
 body.rol-usuario .solo-admin{display:none!important;}
+
+/* Login y roles en tema claro */
+html.tema-claro #login-screen{background:var(--bg);}
+html.tema-claro .login-box{background:#fff;border-color:#1a7a45;box-shadow:0 8px 40px rgba(26,122,69,.2);}
+html.tema-claro .role-btn{background:#f5faf5;border-color:#c2d8c2;}
+html.tema-claro .role-btn.selected{background:#e0f5ea;border-color:#1a7a45;}
+html.tema-claro .rol-admin{background:#e0f5ea;color:#1a7a45;border-color:#1a7a45;}
+html.tema-claro .rol-usuario{background:#e8f4fb;color:#1a5fa3;border-color:#a0c8e8;}
+html.tema-claro .login-field input{background:#fff;border-color:#c2d8c2;color:#1a2a1e;}
 </style>
 </head>
 <body>
@@ -433,7 +466,7 @@ body.rol-usuario .solo-admin{display:none!important;}
   </div>
   <div class="hr">
     <span id="rol-badge-hdr" class="rol-badge rol-admin no-print">🛡️ Coordinador</span>
-    <button class="theme-toggle no-print" id="theme-btn" onclick="toggleTema()" title="Cambiar apariencia">🌙 Oscuro</button>
+    <button class="theme-toggle no-print" id="theme-btn" onclick="toggleTema()" title="Cambiar apariencia" style="font-size:1.1rem;padding:4px 9px">🌙</button>
     <button class="btn bg solo-admin" onclick="abrirModal('m-clase')">+ Clase</button>
     <button class="btn br solo-admin" onclick="abrirModal('m-falta')">⚠ Falta</button>
     <button class="btn bo solo-admin" onclick="abrirModalInstructor(null)">👤 Instructores</button>
@@ -442,8 +475,9 @@ body.rol-usuario .solo-admin{display:none!important;}
     <button class="btn" style="background:#1a3a6a;color:#88ccff;border:1px solid #2a5a9a" onclick="exportarExcelCompleto()">📊 Excel</button>
     <button class="btn" style="background:#5a1a1a;color:#ff9090;border:1px solid #8a2a2a" onclick="exportarPDFCompleto()">📄 PDF</button>
     <button class="btn" style="background:#1a2a4a;color:#88ccff;border:1px solid #2a4a7a" onclick="abrirModal('m-suplencias')">🔄 Suplencias</button>
-    <button class="btn br no-print solo-admin" onclick="confirmarLimpiezaTotal()" title="Borrar todos los datos">🗑</button>
-    <button class="btn" style="background:#1a1a1a;color:var(--txt2);border:1px solid var(--border)" onclick="cerrarSesion()" title="Cerrar sesión">🚪</button>
+    <button class="btn solo-admin no-print" style="background:#0a1a10;color:var(--txt3);border:1px solid #0e1f17;font-size:.6rem;padding:4px 6px;opacity:.35" onclick="confirmarLimpiezaTotal()" title="⚠ Borrar todos los datos">⚙</button>
+    <button class="btn solo-admin no-print" style="background:var(--panel2);color:var(--txt2);border:1px solid var(--border);font-size:.72rem;padding:5px 8px" onclick="abrirModalCambiarPass()" title="Cambiar contraseña">🔑</button>
+    <button class="btn no-print" style="background:var(--panel2);color:var(--txt2);border:1px solid var(--border)" onclick="cerrarSesion()" title="Cerrar sesión">🚪</button>
   </div>
 </div>
 
@@ -692,7 +726,27 @@ body.rol-usuario .solo-admin{display:none!important;}
 
 </main>
 
-<!-- MODAL SALÓN -->
+<!-- MODAL CAMBIAR CONTRASEÑA (solo admin) -->
+<div class="ov" id="m-cambiar-pass">
+<div class="modal narrow">
+  <button class="mcls" onclick="cerrarModal('m-cambiar-pass')">✕</button>
+  <div class="mttl">🔑 Cambiar Contraseña</div>
+  <div style="font-size:.72rem;color:var(--txt2);margin-bottom:1rem">Las contraseñas se guardan localmente en este dispositivo. Si usas el sistema en otro equipo, deberás cambiarla allí también.</div>
+  <div style="background:var(--panel2);border:1px solid var(--border);border-radius:10px;padding:.9rem;margin-bottom:.8rem">
+    <div style="font-size:.68rem;text-transform:uppercase;letter-spacing:1px;color:var(--neon);margin-bottom:.6rem">🛡️ Coordinador</div>
+    <div class="fg"><label>Contraseña actual</label><input type="password" id="cp-admin-actual" placeholder="Contraseña actual..."></div>
+    <div class="fg"><label>Nueva contraseña</label><input type="password" id="cp-admin-nueva" placeholder="Nueva contraseña..."></div>
+    <div class="fg"><label>Confirmar nueva</label><input type="password" id="cp-admin-confirma" placeholder="Repetir nueva contraseña..."></div>
+    <button class="bsave" style="margin-top:.3rem" onclick="cambiarPass('admin')">Cambiar contraseña de Coordinador</button>
+  </div>
+  <div style="background:var(--panel2);border:1px solid var(--border);border-radius:10px;padding:.9rem">
+    <div style="font-size:.68rem;text-transform:uppercase;letter-spacing:1px;color:var(--blue);margin-bottom:.6rem">👁️ Consulta (usuario)</div>
+    <div class="fg"><label>Nueva contraseña para Consulta</label><input type="password" id="cp-user-nueva" placeholder="Nueva contraseña..."></div>
+    <div class="fg"><label>Confirmar nueva</label><input type="password" id="cp-user-confirma" placeholder="Repetir nueva contraseña..."></div>
+    <button class="bsave" style="margin-top:.3rem;background:#1a5fa3" onclick="cambiarPass('usuario')">Cambiar contraseña de Consulta</button>
+  </div>
+</div>
+</div>
 <div class="ov" id="m-salon">
 <div class="modal" style="width:520px">
   <button class="mcls" onclick="cerrarModal('m-salon')">✕</button>
@@ -1458,7 +1512,7 @@ function renderCal(){
     DIAS.forEach(dia=>{
       const clases=(mapa[`${dia}||${hora}`]||[]).slice(0,2);
       const has=clases.length>0;
-      html+=`<div style="background:${has?'#0c1e13':'var(--panel2)'};border:1px solid #0e1f17;border-radius:5px;padding:3px;min-height:46px">`;
+      html+=`<div style="background:${has?'var(--panel2)':'var(--bg)'};border:1px solid var(--border);border-radius:5px;padding:3px;min-height:46px">`;
       clases.forEach(c=>{
         const col=c.promAsis===null?'#1a5a30':c.promAsis<=3?'#5a1010':c.promAsis<=8?'#4a3a10':'#1a5a30';
         const txt=c.promAsis!==null?`${c.inst} ${c.promAsis}p`:`${c.inst}`;
@@ -1541,12 +1595,12 @@ function renderDiagnostico(){
         ${lista.map((i,n)=>{
           const pct=totalGlobal>0?Math.round(i.totalAsis/totalGlobal*100):0;
           const afoP=Math.round(i.totalAsis/i.cnt/(i.cap||20)*100);
-          return `<div style="display:flex;align-items:center;gap:.7rem;padding:.6rem 0;border-bottom:1px solid #0e1f17">
+          return `<div style="display:flex;align-items:center;gap:.7rem;padding:.6rem 0;border-bottom:1px solid var(--border)">
             <span style="font-family:'Bebas Neue',sans-serif;font-size:1.1rem;color:${n<3?'var(--gold2)':'var(--txt3)'};min-width:22px">${n+1}</span>
             <div style="flex:1">
-              <div style="font-size:.84rem;font-weight:600">${i.nombre}${i.suplencias>0?`<span style="font-size:.69rem;background:#0d2a3a;color:var(--blue);border-radius:4px;padding:1px 5px;margin-left:5px">🔄 ${i.suplencias} sup.</span>`:''}</div>
+              <div style="font-size:.84rem;font-weight:600">${i.nombre}${i.suplencias>0?`<span style="font-size:.69rem;background:rgba(77,184,232,.15);color:var(--blue);border-radius:4px;padding:1px 5px;margin-left:5px">🔄 ${i.suplencias} sup.</span>`:''}</div>
               <div style="font-size:.7rem;color:var(--txt2);margin-top:2px">${i.cnt} sesiones · Prom. ${Math.round(i.totalAsis/i.cnt)} pers/clase · Aforo <strong style="color:${pctCol(afoP)}">${afoP}%</strong></div>
-              <div style="height:4px;background:#0e1f17;border-radius:2px;margin-top:5px">
+              <div style="height:4px;background:var(--border);border-radius:2px;margin-top:5px">
                 <div style="height:100%;width:${pct}%;background:${pctCol(afoP)};border-radius:2px;transition:width .6s"></div>
               </div>
             </div>
@@ -1578,8 +1632,8 @@ function renderDiagnostico(){
         plugins:{legend:{labels:{color:'#7aaa90',font:{size:11}}},
           tooltip:{callbacks:{label:c=>c.datasetIndex===0?`Asistentes: ${c.raw}`:`Aforo: ${c.raw}%`}}},
         scales:{
-          x:{ticks:{color:'#7aaa90',font:{size:10}},grid:{color:'#0e1f17'}},
-          y:{ticks:{color:'#7aaa90',font:{family:'DM Mono',size:10}},grid:{color:'#0e1f17'},title:{display:true,text:'Asistentes',color:'#7aaa90',font:{size:10}}},
+          x:{ticks:{color:chartTxtColor,font:{size:10}},grid:{color:chartGridColor}},
+          y:{ticks:{color:chartTxtColor,font:{family:'DM Mono',size:10}},grid:{color:chartGridColor},title:{display:true,text:'Asistentes',color:chartTxtColor,font:{size:10}}},
           y2:{position:'right',ticks:{color:'var(--gold2)',font:{family:'DM Mono',size:10},callback:v=>v+'%'},grid:{display:false},max:100,title:{display:true,text:'Aforo %',color:'var(--gold2)',font:{size:10}}}
         }}
     });
@@ -1703,9 +1757,9 @@ function terminarRecorrido(){
       <div style="background:var(--panel2);border-radius:8px;padding:.7rem;text-align:center;border-top:2px solid var(--gold2)"><div class="klbl">Asistentes</div><div style="font-family:'Bebas Neue',sans-serif;font-size:1.7rem;color:var(--gold2)">${totalAsis}</div></div>
       <div style="background:var(--panel2);border-radius:8px;padding:.7rem;text-align:center;border-top:2px solid ${pctCol(aforoProm)}"><div class="klbl">Aforo</div><div style="font-family:'Bebas Neue',sans-serif;font-size:1.7rem;color:${pctCol(aforoProm)}">${aforoProm}%</div></div>
     </div>`;
-  if(ausentes.length>0)html+=`<div style="background:#2d1010;border:1px solid var(--red);border-radius:7px;padding:.6rem .8rem;margin-bottom:.6rem;font-size:.78rem"><strong style="color:var(--red2)">⚠ Ausentes:</strong> ${ausentes.map(a=>`${a.inst_nombre} (${a.clase} ${a.hora})`).join(', ')}</div>`;
-  if(suplentes.length>0)html+=`<div style="background:#0d2a3a;border:1px solid var(--blue);border-radius:7px;padding:.6rem .8rem;margin-bottom:.6rem;font-size:.78rem"><strong style="color:var(--blue)">🔄 Suplentes:</strong> ${suplentes.map(a=>`${nombreSuplente(a.suplente_id)} por ${a.inst_nombre} (${a.clase})`).join(', ')}</div>`;
-  if(bajo3.length>0)html+=`<div style="background:#2a2010;border:1px solid var(--gold);border-radius:7px;padding:.6rem .8rem;margin-bottom:.6rem;font-size:.78rem"><strong style="color:var(--gold2)">⚠ ≤3 asist.:</strong> ${bajo3.map(a=>`${a.clase} ${a.hora} (${a.asis}p)`).join(', ')}</div>`;
+  if(ausentes.length>0)html+=`<div style="background:rgba(224,80,80,.12);border:1px solid var(--red);border-radius:7px;padding:.6rem .8rem;margin-bottom:.6rem;font-size:.78rem"><strong style="color:var(--red2)">⚠ Ausentes:</strong> ${ausentes.map(a=>`${a.inst_nombre} (${a.clase} ${a.hora})`).join(', ')}</div>`;
+  if(suplentes.length>0)html+=`<div style="background:rgba(77,184,232,.1);border:1px solid var(--blue);border-radius:7px;padding:.6rem .8rem;margin-bottom:.6rem;font-size:.78rem"><strong style="color:var(--blue)">🔄 Suplentes:</strong> ${suplentes.map(a=>`${nombreSuplente(a.suplente_id)} por ${a.inst_nombre} (${a.clase})`).join(', ')}</div>`;
+  if(bajo3.length>0)html+=`<div style="background:rgba(232,184,75,.12);border:1px solid var(--gold);border-radius:7px;padding:.6rem .8rem;margin-bottom:.6rem;font-size:.78rem"><strong style="color:var(--gold2)">⚠ ≤3 asist.:</strong> ${bajo3.map(a=>`${a.clase} ${a.hora} (${a.asis}p)`).join(', ')}</div>`;
   html+=`<div style="max-height:200px;overflow-y:auto">
     <table style="width:100%;border-collapse:collapse;font-size:.77rem">
       <thead><tr>${['Clase','Instructor','Hora','Asist.','Aforo','Pres.','Suplente','Obs.'].map(h=>`<th style="padding:5px 8px;border-bottom:1px solid var(--border);color:var(--txt2);font-size:.65rem;text-transform:uppercase">${h}</th>`).join('')}</tr></thead>
@@ -1714,7 +1768,7 @@ function terminarRecorrido(){
         const col=i.asis<=3?'var(--red2)':i.asis<=8?'var(--gold2)':'var(--v3)';
         const pres=i.presente==='si'?'✅':i.presente==='no'?'❌':'🔄';
         const afoP=Math.round(i.asis/cap*100);
-        return `<tr style="background:${n%2?'var(--panel2)':'transparent'};border-bottom:1px solid #0e1f17">
+        return `<tr style="background:${n%2?'var(--panel2)':'transparent'};border-bottom:1px solid var(--border)">
           <td style="padding:4px 8px;font-weight:600">${i.clase}</td>
           <td style="padding:4px 8px;color:var(--txt2)">${i.inst_nombre.split(' ')[0]}</td>
           <td style="padding:4px 8px;text-align:center;font-family:monospace">${i.hora}</td>
@@ -1893,7 +1947,7 @@ function renderReporteSuplencias(){
         const sup=instructores.find(i=>i.id===r.suplente_id);
         const afoP=r.cap>0?Math.round(r.asistentes/r.cap*100):0;
         const fd=new Date(r.fecha+'T12:00:00').toLocaleDateString('es-MX',{day:'2-digit',month:'short',year:'numeric'});
-        return `<tr style="background:${n%2?'var(--panel2)':'transparent'};border-bottom:1px solid #0e1f17">
+        return `<tr style="background:${n%2?'var(--panel2)':'transparent'};border-bottom:1px solid var(--border)">
           <td style="padding:6px 10px;font-family:monospace;font-size:.78rem">${fd}</td>
           <td style="padding:6px 10px;font-weight:600">${r.clase}</td>
           <td style="padding:6px 10px;font-family:monospace">${r.hora}</td>
@@ -2260,15 +2314,14 @@ function aplicarTema(t) {
   temaActual = t;
   if(t === 'claro') {
     document.documentElement.classList.add('tema-claro');
-    document.getElementById('theme-btn').innerHTML = '☀️ Claro';
+    document.getElementById('theme-btn').textContent = '☀️';
     document.getElementById('theme-btn').title = 'Cambiar a modo oscuro';
   } else {
     document.documentElement.classList.remove('tema-claro');
-    document.getElementById('theme-btn').innerHTML = '🌙 Oscuro';
+    document.getElementById('theme-btn').textContent = '🌙';
     document.getElementById('theme-btn').title = 'Cambiar a modo claro';
   }
   localStorage.setItem('fc_tema', t);
-  // Redibujar gráficas con nuevos colores
   setTimeout(()=>{if(typeof renderDashboard==='function')renderDashboard();},80);
 }
 function toggleTema() {
@@ -3088,13 +3141,22 @@ function renderHeatmap() {
   }));
 
   function cellColor(val) {
-    if(val===0)return'var(--panel2)';
+    if(val===0) return 'var(--panel2)';
     const pct = val/maxVal;
-    if(pct<0.25)return'#1a1a0a';
-    if(pct<0.45)return'#2a3a10';
-    if(pct<0.65)return'#1a5a20';
-    if(pct<0.80)return'#1a7a35';
-    return'#1aaa50';
+    const isDark = temaActual !== 'claro';
+    if(isDark){
+      if(pct<0.25)return'#1a1a0a';
+      if(pct<0.45)return'#2a3a10';
+      if(pct<0.65)return'#1a5a20';
+      if(pct<0.80)return'#1a7a35';
+      return'#1aaa50';
+    } else {
+      if(pct<0.25)return'#d4eedd';
+      if(pct<0.45)return'#a8d8b8';
+      if(pct<0.65)return'#6db990';
+      if(pct<0.80)return'#3a9a68';
+      return'#1a7a45';
+    }
   }
   function cellTextColor(val){
     if(val===0)return'var(--txt3)';
@@ -3128,9 +3190,13 @@ function renderHeatmap() {
   document.getElementById('hmap-grid').innerHTML = html;
 
   // Leyenda
+  const isDarkLegend = temaActual !== 'claro';
+  const legendColors = isDarkLegend
+    ? ['#1a1a0a','#2a3a10','#1a5a20','#1a7a35','#1aaa50']
+    : ['#d4eedd','#a8d8b8','#6db990','#3a9a68','#1a7a45'];
   document.getElementById('hmap-legend').innerHTML =
     `<span>Menor</span>
-    ${['#1a1a0a','#2a3a10','#1a5a20','#1a7a35','#1aaa50'].map(c=>`<span class="hmap-sq" style="background:${c}"></span>`).join('')}
+    ${legendColors.map(c=>`<span class="hmap-sq" style="background:${c}"></span>`).join('')}
     <span>Mayor</span>
     &nbsp;&nbsp; <span style="opacity:.7">Clic en celda = diagnóstico de ese horario</span>`;
 
@@ -3298,10 +3364,10 @@ function renderAlertas() {
   const resumen = {red:alertas.filter(a=>a.tipo==='red').length,gold:alertas.filter(a=>a.tipo==='gold').length,blue:alertas.filter(a=>a.tipo==='blue').length,green:alertas.filter(a=>a.tipo==='green').length};
   container.innerHTML =
     `<div style="display:flex;gap:.5rem;flex-wrap:wrap;margin-bottom:1rem">
-      ${resumen.red>0?`<span style="background:#2d1010;color:var(--red2);border:1px solid var(--red);border-radius:20px;padding:3px 10px;font-size:.72rem">🔴 ${resumen.red} crítica(s)</span>`:''}
-      ${resumen.gold>0?`<span style="background:#2a2010;color:var(--gold2);border:1px solid var(--gold);border-radius:20px;padding:3px 10px;font-size:.72rem">⚠️ ${resumen.gold} advertencia(s)</span>`:''}
-      ${resumen.blue>0?`<span style="background:#0d2040;color:var(--blue);border:1px solid #1a5a8a;border-radius:20px;padding:3px 10px;font-size:.72rem">📋 ${resumen.blue} info</span>`:''}
-      ${resumen.green>0?`<span style="background:#0d2a18;color:var(--neon);border:1px solid var(--verde);border-radius:20px;padding:3px 10px;font-size:.72rem">📈 ${resumen.green} positiva(s)</span>`:''}
+      ${resumen.red>0?`<span style="background:rgba(224,80,80,.15);color:var(--red2);border:1px solid var(--red);border-radius:20px;padding:3px 10px;font-size:.72rem">🔴 ${resumen.red} crítica(s)</span>`:''}
+      ${resumen.gold>0?`<span style="background:rgba(232,184,75,.15);color:var(--gold2);border:1px solid var(--gold);border-radius:20px;padding:3px 10px;font-size:.72rem">⚠️ ${resumen.gold} advertencia(s)</span>`:''}
+      ${resumen.blue>0?`<span style="background:rgba(77,184,232,.12);color:var(--blue);border:1px solid var(--blue);border-radius:20px;padding:3px 10px;font-size:.72rem">📋 ${resumen.blue} info</span>`:''}
+      ${resumen.green>0?`<span style="background:rgba(94,255,160,.1);color:var(--neon);border:1px solid var(--verde);border-radius:20px;padding:3px 10px;font-size:.72rem">📈 ${resumen.green} positiva(s)</span>`:''}
     </div>` +
     alertas.map(a=>`
       <div class="alert-card alrt-${a.tipo}">
@@ -3349,7 +3415,7 @@ function renderQuickAlerts() {
     return;
   }
   document.getElementById('quick-alerts').innerHTML =
-    `<div style="background:#1a0a0a;border:1px solid var(--red);border-radius:10px;padding:.75rem 1rem;display:flex;align-items:center;gap:.7rem;cursor:pointer" onclick="irAlertas()">
+    `<div style="background:rgba(224,80,80,.1);border:1px solid var(--red);border-radius:10px;padding:.75rem 1rem;display:flex;align-items:center;gap:.7rem;cursor:pointer" onclick="irAlertas()">
       <span style="font-size:1.1rem">🔴</span>
       <div style="flex:1;font-size:.78rem"><strong style="color:var(--red2)">${alertas.length} alerta(s) crítica(s)</strong> — ${alertas[0].texto.replace(/<[^>]+>/g,'')}</div>
       <span style="font-size:.72rem;color:var(--red2)">Ver todas →</span>
@@ -3566,7 +3632,9 @@ function intentarLogin() {
   const errEl = document.getElementById('login-error');
   errEl.style.display = 'none';
 
-  const passCorrecta = rolLoginSeleccionado === 'admin' ? PASS_ADMIN : PASS_USUARIO;
+  const passCorrecta = rolLoginSeleccionado === 'admin'
+    ? (localStorage.getItem('fc_pass_admin') || PASS_ADMIN)
+    : (localStorage.getItem('fc_pass_usuario') || PASS_USUARIO);
 
   if(pass === passCorrecta) {
     rolActual = rolLoginSeleccionado;
@@ -3611,6 +3679,37 @@ function cerrarSesion() {
   document.getElementById('login-pass').value = '';
   document.getElementById('login-error').style.display = 'none';
   document.getElementById('login-screen').classList.remove('oculto');
+}
+
+function abrirModalCambiarPass() {
+  // Limpiar campos
+  ['cp-admin-actual','cp-admin-nueva','cp-admin-confirma','cp-user-nueva','cp-user-confirma'].forEach(id=>{
+    document.getElementById(id).value='';
+  });
+  document.getElementById('m-cambiar-pass').classList.add('on');
+}
+
+function cambiarPass(tipo) {
+  if(tipo === 'admin') {
+    const actual = document.getElementById('cp-admin-actual').value;
+    const nueva  = document.getElementById('cp-admin-nueva').value.trim();
+    const conf   = document.getElementById('cp-admin-confirma').value.trim();
+    const passActual = localStorage.getItem('fc_pass_admin') || PASS_ADMIN;
+    if(actual !== passActual){ alert('❌ La contraseña actual del Coordinador es incorrecta.'); return; }
+    if(!nueva || nueva.length < 4){ alert('❌ La nueva contraseña debe tener al menos 4 caracteres.'); return; }
+    if(nueva !== conf){ alert('❌ Las contraseñas nuevas no coinciden.'); return; }
+    localStorage.setItem('fc_pass_admin', nueva);
+    alert('✅ Contraseña de Coordinador actualizada.\nAnótala: ' + nueva);
+    cerrarModal('m-cambiar-pass');
+  } else {
+    const nueva = document.getElementById('cp-user-nueva').value.trim();
+    const conf  = document.getElementById('cp-user-confirma').value.trim();
+    if(!nueva || nueva.length < 4){ alert('❌ La nueva contraseña debe tener al menos 4 caracteres.'); return; }
+    if(nueva !== conf){ alert('❌ Las contraseñas nuevas no coinciden.'); return; }
+    localStorage.setItem('fc_pass_usuario', nueva);
+    alert('✅ Contraseña de Consulta actualizada.\nAnótala: ' + nueva);
+    cerrarModal('m-cambiar-pass');
+  }
 }
 
 // Agregar animación shake al CSS dinámicamente
