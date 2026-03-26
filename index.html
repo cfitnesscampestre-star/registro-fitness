@@ -475,8 +475,33 @@ html.tema-claro .login-field input{background:#fff;border-color:#c2d8c2;color:#1
     <button class="btn" style="background:#1a3a6a;color:#88ccff;border:1px solid #2a5a9a" onclick="exportarExcelCompleto()">📊 Excel</button>
     <button class="btn" style="background:#5a1a1a;color:#ff9090;border:1px solid #8a2a2a" onclick="exportarPDFCompleto()">📄 PDF</button>
     <button class="btn" style="background:#1a2a4a;color:#88ccff;border:1px solid #2a4a7a" onclick="abrirModal('m-suplencias')">🔄 Suplencias</button>
-    <button class="btn solo-admin no-print" style="background:#0a1a10;color:var(--txt3);border:1px solid #0e1f17;font-size:.6rem;padding:4px 6px;opacity:.35" onclick="confirmarLimpiezaTotal()" title="⚠ Borrar todos los datos">⚙</button>
-    <button class="btn solo-admin no-print" style="background:var(--panel2);color:var(--txt2);border:1px solid var(--border);font-size:.72rem;padding:5px 8px" onclick="abrirModalCambiarPass()" title="Cambiar contraseña">🔑</button>
+    <!-- Menú Coordinación -->
+    <div class="no-print" style="position:relative" id="coord-menu-wrap">
+      <button class="btn solo-admin" id="coord-menu-btn"
+        style="background:var(--panel2);color:var(--txt2);border:1px solid var(--border);display:flex;align-items:center;gap:5px"
+        onclick="toggleCoordMenu()" title="Opciones de coordinación">
+        ⚙ Coord. <span style="font-size:.65rem">▾</span>
+      </button>
+      <div id="coord-menu-dropdown" style="display:none;position:absolute;right:0;top:calc(100% + 6px);z-index:500;
+        background:var(--panel);border:1px solid var(--verde);border-radius:10px;
+        min-width:200px;overflow:hidden;box-shadow:0 8px 24px rgba(0,0,0,.5);animation:fadeUp .15s ease">
+        <div style="padding:.5rem .8rem;font-size:.65rem;color:var(--txt3);text-transform:uppercase;letter-spacing:1px;border-bottom:1px solid var(--border)">
+          Administración
+        </div>
+        <button onclick="abrirModalCambiarPass();toggleCoordMenu()" style="width:100%;background:none;border:none;border-bottom:1px solid var(--border);
+          padding:.6rem 1rem;color:var(--txt);font-family:'Outfit',sans-serif;font-size:.82rem;
+          text-align:left;cursor:pointer;display:flex;align-items:center;gap:.6rem;transition:background .15s"
+          onmouseover="this.style.background='var(--panel2)'" onmouseout="this.style.background='none'">
+          🔑 Cambiar contraseña
+        </button>
+        <button onclick="confirmarLimpiezaTotal();toggleCoordMenu()" style="width:100%;background:none;border:none;
+          padding:.6rem 1rem;color:var(--red2);font-family:'Outfit',sans-serif;font-size:.82rem;
+          text-align:left;cursor:pointer;display:flex;align-items:center;gap:.6rem;transition:background .15s"
+          onmouseover="this.style.background='#2d1010'" onmouseout="this.style.background='none'">
+          🗑 Borrar todos los datos
+        </button>
+      </div>
+    </div>
     <button class="btn no-print" style="background:var(--panel2);color:var(--txt2);border:1px solid var(--border)" onclick="cerrarSesion()" title="Cerrar sesión">🚪</button>
   </div>
 </div>
@@ -499,6 +524,18 @@ html.tema-claro .login-field input{background:#fff;border-color:#c2d8c2;color:#1
 
 <!-- ══ DASHBOARD ══ -->
 <div class="vista on" id="v-dashboard">
+  <!-- Filtro de periodo del dashboard -->
+  <div style="display:flex;align-items:center;gap:.6rem;flex-wrap:wrap;margin-bottom:1rem;padding:.7rem 1rem;background:var(--panel);border:1px solid var(--border);border-radius:12px">
+    <span style="font-size:.72rem;text-transform:uppercase;letter-spacing:1px;color:var(--txt2)">📅 Periodo</span>
+    <input type="date" id="dash-fecha-ini" class="ctrl" style="width:140px" onchange="renderDashboard()">
+    <span style="color:var(--txt3);font-size:.8rem">→</span>
+    <input type="date" id="dash-fecha-fin" class="ctrl" style="width:140px" onchange="renderDashboard()">
+    <button class="btn bo" style="padding:5px 11px;font-size:.72rem" onclick="setDashPeriodo(7)">7 días</button>
+    <button class="btn bo" style="padding:5px 11px;font-size:.72rem" onclick="setDashPeriodo(30)">30 días</button>
+    <button class="btn bo" style="padding:5px 11px;font-size:.72rem" onclick="setDashPeriodo(90)">3 meses</button>
+    <button class="btn bo" style="padding:5px 11px;font-size:.72rem" onclick="setDashPeriodo(0)">Todo</button>
+    <span id="dash-periodo-lbl" style="font-size:.72rem;color:var(--neon);margin-left:.3rem"></span>
+  </div>
   <div class="krow" id="kpi-row"></div>
   <!-- ALERTAS RÁPIDAS INLINE -->
   <div id="quick-alerts" style="margin-bottom:1rem"></div>
@@ -1324,15 +1361,74 @@ function eliminarInstructor(){
 
 // ═══ DASHBOARD ═══
 let chartClases=null;
+// ═══ DASHBOARD PERIODO ═══
+function initDashPeriodo(){
+  // Solo inicializa si los campos están vacíos
+  if(!document.getElementById('dash-fecha-ini').value){
+    const fin=new Date();
+    const ini=new Date();ini.setDate(ini.getDate()-30);
+    document.getElementById('dash-fecha-ini').value=ini.toISOString().slice(0,10);
+    document.getElementById('dash-fecha-fin').value=fin.toISOString().slice(0,10);
+  }
+}
+function setDashPeriodo(dias){
+  const fin=new Date();
+  const finStr=fin.toISOString().slice(0,10);
+  document.getElementById('dash-fecha-fin').value=finStr;
+  if(dias===0){
+    document.getElementById('dash-fecha-ini').value='';
+  } else {
+    const ini=new Date();ini.setDate(ini.getDate()-dias);
+    document.getElementById('dash-fecha-ini').value=ini.toISOString().slice(0,10);
+  }
+  renderDashboard();
+}
+function getDashRegistros(){
+  const ini=document.getElementById('dash-fecha-ini')?.value||'';
+  const fin=document.getElementById('dash-fecha-fin')?.value||'';
+  return registros.filter(r=>{
+    const f=r.fecha||'';
+    if(ini&&f<ini)return false;
+    if(fin&&f>fin)return false;
+    return true;
+  });
+}
+function getDashPeriodoLbl(){
+  const ini=document.getElementById('dash-fecha-ini')?.value||'';
+  const fin=document.getElementById('dash-fecha-fin')?.value||'';
+  if(!ini&&!fin)return 'Todo el historial';
+  const fmt=d=>d?new Date(d+'T12:00:00').toLocaleDateString('es-MX',{day:'2-digit',month:'short',year:'numeric'}):'';
+  if(!ini)return `Hasta ${fmt(fin)}`;
+  if(!fin)return `Desde ${fmt(ini)}`;
+  return `${fmt(ini)} — ${fmt(fin)}`;
+}
+// statsInst con filtro de periodo
+function statsInstPeriodo(inst,regsBase){
+  const recs=regsBase.filter(r=>r.inst_id===inst.id);
+  const imp=recs.filter(r=>r.estado==='ok'||r.estado==='sub');
+  const faltas=recs.filter(r=>r.estado==='falta').length;
+  const horas=(imp.length*1).toFixed(1);
+  const afoRecs=imp.filter(r=>parseInt(r.cap||0)>0);
+  const aforo=afoRecs.length>0?Math.round(afoRecs.reduce((a,r)=>a+(parseInt(r.asistentes)||0)/parseInt(r.cap)*100,0)/afoRecs.length):0;
+  const totalAsis=imp.reduce((a,r)=>a+(parseInt(r.asistentes)||0),0);
+  return{impartidas:imp.length,faltas,horas,aforo,totalAsis};
+}
+
 function renderDashboard(){
-  const allS=instructores.map(i=>({...i,...statsInst(i)}));
+  initDashPeriodo();
+  const regsBase=getDashRegistros();
+  const lbl=getDashPeriodoLbl();
+  const lblEl=document.getElementById('dash-periodo-lbl');
+  if(lblEl)lblEl.textContent=`(${regsBase.length} registros · ${lbl})`;
+
+  const allS=instructores.map(i=>({...i,...statsInstPeriodo(i,regsBase)}));
   const totProg=instructores.reduce((a,i)=>a+(i.horario||[]).length,0);
   const totImp=allS.reduce((a,i)=>a+i.impartidas,0);
   const totFalt=allS.reduce((a,i)=>a+i.faltas,0);
   const totAsis=allS.reduce((a,i)=>a+i.totalAsis,0);
   const aforoProm=allS.length>0?Math.round(allS.reduce((a,i)=>a+i.aforo,0)/allS.length):0;
   const pct=totProg>0?Math.round(totImp/totProg*100):0;
-  const totSuplencias=registros.filter(r=>r.estado==='sub').length;
+  const totSuplencias=regsBase.filter(r=>r.estado==='sub').length;
 
   document.getElementById('kpi-row').innerHTML=`
     <div class="kpi"><div class="klbl">Clases / Semana</div><div class="kval">${totProg}</div><div class="ksub">Programadas</div></div>
@@ -1376,9 +1472,9 @@ function renderDashboard(){
     ?'<div class="empty">✅ Sin faltas</div>'
     :wf.map(i=>`<div class="arow"><div class="adot" style="background:${i.faltas>2?'var(--red2)':'var(--gold2)'}"></div><span style="flex:1;font-size:.83rem">${i.nombre}</span><span class="mono" style="color:${i.faltas>2?'var(--red2)':'var(--gold2)'}">${i.faltas}</span></div>`).join('');
 
-  // Gráfica conectada al aforo real — clickable para diagnóstico
+  // Gráfica conectada al aforo real — filtrada por periodo — clickable para diagnóstico
   const claseMap={};
-  registros.filter(r=>(r.estado==='ok'||r.estado==='sub')&&parseInt(r.cap||0)>0).forEach(r=>{
+  regsBase.filter(r=>(r.estado==='ok'||r.estado==='sub')&&parseInt(r.cap||0)>0).forEach(r=>{
     const asis=parseInt(r.asistentes)||0;
     const cap=parseInt(r.cap)||20;
     if(!claseMap[r.clase])claseMap[r.clase]={sumPct:0,cnt:0,totalAsis:0};
@@ -1510,9 +1606,11 @@ function renderCal(){
   HORAS_CAL.forEach(hora=>{
     html+=`<div style="padding:5px 6px;color:var(--txt3);font-family:'DM Mono',monospace;font-size:.69rem;display:flex;align-items:flex-start;padding-top:8px">${hora}</div>`;
     DIAS.forEach(dia=>{
-      const clases=(mapa[`${dia}||${hora}`]||[]).slice(0,2);
+      const clases=(mapa[`${dia}||${hora}`]||[]); // SIN límite — mostrar todas
       const has=clases.length>0;
-      html+=`<div style="background:${has?'var(--panel2)':'var(--bg)'};border:1px solid var(--border);border-radius:5px;padding:3px;min-height:46px">`;
+      // Si hay más de 2, la celda crece con scroll interno
+      const maxH=clases.length>2?`max-height:${clases.length*20+10}px;overflow-y:auto`:`min-height:46px`;
+      html+=`<div style="background:${has?'var(--panel2)':'var(--bg)'};border:1px solid var(--border);border-radius:5px;padding:3px;${maxH}">`;
       clases.forEach(c=>{
         const col=c.promAsis===null?'#1a5a30':c.promAsis<=3?'#5a1010':c.promAsis<=8?'#4a3a10':'#1a5a30';
         const txt=c.promAsis!==null?`${c.inst} ${c.promAsis}p`:`${c.inst}`;
@@ -2231,7 +2329,7 @@ function genReporteSemanal(){
   HORAS_CAL.forEach(h=>{
     let row=`<tr><td style="padding:4px 7px;font-family:monospace;font-size:.7rem;color:#555;border-right:2px solid #ccc;white-space:nowrap">${h}</td>`;
     DIAS.forEach(d=>{
-      const clases=(mapa[`${d}||${h}`]||[]).slice(0,2);
+      const clases=(mapa[`${d}||${h}`]||[]);
       if(clases.length>0){
         const c=clases.map(cl=>{
           const pct=cl.prom!==null?Math.round(cl.prom/cl.cap*100):null;
@@ -2324,6 +2422,26 @@ function aplicarTema(t) {
   localStorage.setItem('fc_tema', t);
   setTimeout(()=>{if(typeof renderDashboard==='function')renderDashboard();},80);
 }
+function toggleCoordMenu(){
+  const dd=document.getElementById('coord-menu-dropdown');
+  if(!dd)return;
+  const isOpen=dd.style.display!=='none';
+  dd.style.display=isOpen?'none':'block';
+  // Cerrar al hacer clic fuera
+  if(!isOpen){
+    setTimeout(()=>{
+      function clickFuera(e){
+        const wrap=document.getElementById('coord-menu-wrap');
+        if(wrap&&!wrap.contains(e.target)){
+          dd.style.display='none';
+          document.removeEventListener('click',clickFuera);
+        }
+      }
+      document.addEventListener('click',clickFuera);
+    },0);
+  }
+}
+
 function toggleTema() {
   aplicarTema(temaActual === 'oscuro' ? 'claro' : 'oscuro');
 }
@@ -2706,12 +2824,16 @@ let histPagina=0;
 const HIST_POR_PAG=25;
 
 function inicializarFiltrosHistorial(){
-  // Fechas: último mes por defecto
-  const fin=new Date();
-  const ini=new Date();ini.setDate(ini.getDate()-30);
-  document.getElementById('hist-fecha-ini').value=ini.toISOString().slice(0,10);
-  document.getElementById('hist-fecha-fin').value=fin.toISOString().slice(0,10);
-  // Instructores
+  // Solo pone fechas por defecto si los campos están vacíos (primera vez)
+  const iniEl=document.getElementById('hist-fecha-ini');
+  const finEl=document.getElementById('hist-fecha-fin');
+  if(!iniEl.value&&!finEl.value){
+    const fin=new Date();
+    const ini=new Date();ini.setDate(ini.getDate()-30);
+    iniEl.value=ini.toISOString().slice(0,10);
+    finEl.value=fin.toISOString().slice(0,10);
+  }
+  // Actualizar selectores de instructor y clase SIN tocar las fechas
   const selInst=document.getElementById('hist-inst-fil');
   const curInst=selInst.value;
   selInst.innerHTML='<option value="">— Todos los instructores —</option>'+
