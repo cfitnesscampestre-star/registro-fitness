@@ -272,6 +272,7 @@ html.tema-claro .alert-card{background:#f5faf5;}
     <button class="btn" style="background:#1a3a6a;color:#88ccff;border:1px solid #2a5a9a" onclick="exportarExcelCompleto()" title="Exportar todo el sistema a Excel">📊 Excel Total</button>
     <button class="btn" style="background:#5a1a1a;color:#ff9090;border:1px solid #8a2a2a" onclick="exportarPDFCompleto()" title="Generar PDF ejecutivo completo">📄 PDF Total</button>
     <button class="btn" style="background:#1a2a4a;color:#88ccff;border:1px solid #2a4a7a" onclick="abrirModal('m-suplencias')">🔄 Suplencias</button>
+    <button class="btn br no-print" onclick="confirmarLimpiezaTotal()" title="Borrar TODOS los datos del sistema">🗑 Limpiar datos</button>
   </div>
 </div>
 
@@ -393,7 +394,7 @@ html.tema-claro .alert-card{background:#f5faf5;}
     </div>
     <div class="twrap">
       <table>
-        <thead><tr><th>Fecha</th><th>Hora</th><th>Clases</th><th>Asistentes</th><th>Aforo Prom.</th><th>Ausentes/Suplentes</th><th></th></tr></thead>
+        <thead><tr><th>Fecha</th><th>Hora</th><th>Clases</th><th>Asistentes</th><th>Aforo Prom.</th><th>Ausentes/Suplentes</th><th>Ver</th><th>Eliminar</th></tr></thead>
         <tbody id="tb-rec"></tbody>
       </table>
     </div>
@@ -1169,6 +1170,26 @@ function renderDashboard(){
   const chartGridColor = temaActual==='claro' ? '#d0e8d0' : '#0e1f17';
   if(chartClases)chartClases.destroy();
   const ctx=document.getElementById('chart-clases');
+  // Si no hay datos reales, mostrar mensaje en lugar de gráfica vacía
+  const chartWrap=document.querySelector('.graph-wrap');
+  let emptyMsg=document.getElementById('chart-empty-msg');
+  if(labels.length===0){
+    if(chartClases){chartClases.destroy();chartClases=null;}
+    if(ctx)ctx.style.display='none';
+    if(!emptyMsg){
+      emptyMsg=document.createElement('div');
+      emptyMsg.id='chart-empty-msg';
+      emptyMsg.className='empty';
+      emptyMsg.style.cssText='height:200px;display:flex;align-items:center;justify-content:center;font-size:.85rem';
+      emptyMsg.textContent='Sin clases registradas aún. Agrega aforo con "+ Clase" o "🚶 Recorrido".';
+      if(chartWrap)chartWrap.appendChild(emptyMsg);
+    }
+    emptyMsg.style.display='flex';
+    return;
+  }
+  // Hay datos — restaurar canvas y ocultar mensaje vacío
+  if(ctx)ctx.style.display='block';
+  if(emptyMsg)emptyMsg.style.display='none';
   chartClases=new Chart(ctx.getContext('2d'),{
     type:'bar',
     data:{labels,datasets:[
@@ -1609,22 +1630,30 @@ function imprimirRecorrido(){
   document.getElementById('m-print').classList.add('on');
 }
 function renderRecorridos(){
-  if(recorridos.length===0){document.getElementById('tb-rec').innerHTML=`<tr><td colspan="7"><div class="empty">Sin recorridos aún. Usa 🚶 Recorrido para iniciar.</div></td></tr>`;return;}
+  if(recorridos.length===0){document.getElementById('tb-rec').innerHTML=`<tr><td colspan="8"><div class="empty">Sin recorridos aún. Usa 🚶 Recorrido para iniciar.</div></td></tr>`;return;}
   document.getElementById('tb-rec').innerHTML=recorridos.slice().reverse().map(r=>{
-    const f=new Date(r.fecha+'T12:00:00').toLocaleDateString('es-MX',{day:'2-digit',month:'short',year:'numeric'});
+    const f=new Date((r.fecha||'')+'T12:00:00').toLocaleDateString('es-MX',{day:'2-digit',month:'short',year:'numeric'});
     return `<tr>
-      <td>${f}</td><td class="mono">${r.hora}</td>
-      <td>${r.dia} · ${r.visitadas} clases</td>
-      <td class="mono">${r.totalAsis}</td>
-      <td style="color:${pctCol(r.aforoProm)};font-weight:600">${r.aforoProm}%</td>
-      <td class="${r.ausentes>0?'tr':'tg'}">${r.ausentes>0?r.ausentes+' ausente(s)':'—'}${r.suplentes>0?` <span style="color:var(--blue)">🔄 ${r.suplentes} sup.</span>`:''}</td>
-      <td><button class="abtn" onclick="verRec(${r.id})">Ver</button></td>
+      <td>${f}</td><td class="mono">${r.hora||'—'}</td>
+      <td>${r.dia||'—'} · ${r.visitadas||0} clases</td>
+      <td class="mono">${r.totalAsis||0}</td>
+      <td style="color:${pctCol(r.aforoProm||0)};font-weight:600">${r.aforoProm||0}%</td>
+      <td class="${(r.ausentes||0)>0?'tr':'tg'}">${(r.ausentes||0)>0?r.ausentes+' ausente(s)':'—'}${(r.suplentes||0)>0?` <span style="color:var(--blue)">🔄 ${r.suplentes} sup.</span>`:''}</td>
+      <td><button class="abtn" onclick="verRec(${r.id})">👁 Ver</button></td>
+      <td><button class="abtn" style="color:var(--red2);border-color:var(--red)" onclick="eliminarRecorrido(${r.id})">🗑</button></td>
     </tr>`;
   }).join('');
 }
+function eliminarRecorrido(id){
+  if(!confirm('¿Eliminar este recorrido? Esta acción no se puede deshacer.'))return;
+  recorridos=recorridos.filter(r=>r.id!==id);
+  renderRecorridos();
+  renderAll();
+  alert('🗑 Recorrido eliminado');
+}
 function verRec(id){
   const r=recorridos.find(x=>x.id===id);if(!r)return;
-  recActual={...recActual,fecha:r.fecha,hora:r.hora,dia:r.dia,items:r.items};
+  recActual={...recActual,fecha:r.fecha,hora:r.hora,dia:r.dia,items:r.items||[]};
   terminarRecorrido();
 }
 
@@ -2843,18 +2872,29 @@ function renderHeatmap() {
   const metric = document.getElementById('hm-metric').value;
   const claseFil = document.getElementById('hm-clase-fil').value;
 
-  // Poblar filtro de clases
-  const todasClases = [...new Set(instructores.flatMap(i=>(i.horario||[]).map(h=>h.clase)))].sort();
+  // Poblar filtro de clases SOLO con clases que tienen registros reales
+  const clasesConRegistros = [...new Set(registros.filter(r=>r.estado==='ok'||r.estado==='sub').map(r=>r.clase))].filter(Boolean).sort();
   const selClase = document.getElementById('hm-clase-fil');
   const curVal = selClase.value;
   selClase.innerHTML = '<option value="">Todas las clases</option>' +
-    todasClases.map(c=>`<option value="${c}" ${c===curVal?'selected':''}>${c}</option>`).join('');
+    clasesConRegistros.map(c=>`<option value="${c}" ${c===curVal?'selected':''}>${c}</option>`).join('');
+
+  // Si no hay ningún registro real, mostrar estado vacío
+  const regsValidos=registros.filter(r=>(r.estado==='ok'||r.estado==='sub')&&parseInt(r.cap||0)>0);
+  if(regsValidos.length===0){
+    document.getElementById('hmap-grid').innerHTML='<div class="empty" style="padding:2rem">Sin datos de aforo registrados aún. Registra clases con aforo para ver el mapa de calor.</div>';
+    document.getElementById('hm-top5').innerHTML='<div class="empty" style="font-size:.75rem">Sin datos</div>';
+    document.getElementById('hm-bot5').innerHTML='<div class="empty" style="font-size:.75rem">Sin datos</div>';
+    document.getElementById('hmap-insight').innerHTML='💡 Registra clases para ver insights de horarios.';
+    document.getElementById('hmap-legend').innerHTML='';
+    return;
+  }
 
   // Construir matriz día x hora
   const matriz = {};
   HORAS_CAL.forEach(h => { matriz[h]={}; DIAS.forEach(d=>{ matriz[h][d]={sum:0,cnt:0,sesiones:0}; }); });
 
-  registros.filter(r=>(r.estado==='ok'||r.estado==='sub')&&parseInt(r.cap||0)>0&&(!claseFil||r.clase===claseFil)).forEach(r => {
+  regsValidos.filter(r=>!claseFil||r.clase===claseFil).forEach(r => {
     const asisN=parseInt(r.asistentes)||0;
     const capN=parseInt(r.cap)||getCapClase(r.clase)||20;
     const hSlot = HORAS_CAL.reduce((best,h)=>{
@@ -3272,6 +3312,33 @@ async function inicializarFirebase(){
     console.warn('Firebase error:', e.message);
     setIndicador('🔴 Error Firebase · Solo modo local');
   }
+}
+
+// ═══ LIMPIAR TODOS LOS DATOS ═══
+async function confirmarLimpiezaTotal(){
+  const resp=prompt('⚠️ ATENCIÓN: Esto borrará TODOS los datos del sistema (instructores, clases, recorridos) de Firebase y este dispositivo.\n\nEscribe BORRAR para confirmar:');
+  if(resp!=='BORRAR'){alert('Operación cancelada.');return;}
+  // Limpiar memoria
+  instructores=[];
+  registros=[];
+  recorridos=[];
+  // Limpiar localStorage
+  try{
+    localStorage.removeItem('fc_instructores');
+    localStorage.removeItem('fc_registros');
+    localStorage.removeItem('fc_recorridos');
+    localStorage.removeItem('fc_ts');
+  }catch(e){}
+  // Limpiar Firebase
+  if(fbDb){
+    try{
+      await fbDb.ref('fitness').set({instructores:[],registros:{},recorridos:{},ts:Date.now()});
+    }catch(e){console.warn('Error borrando Firebase:',e);}
+  }
+  renderAll();
+  renderRecorridos();
+  renderCal();
+  alert('✅ Todos los datos han sido eliminados. El sistema está limpio.');
 }
 
 async function sincronizarFirebase(){
