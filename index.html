@@ -1,8 +1,24 @@
 <!DOCTYPE html>
 <html lang="es"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Fitness Control — Club Campestre Aguascalientes</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Fitness Control — Club Campestre</title>
+
+<!-- PWA: Instalable como app -->
+<meta name="application-name" content="Fitness Control">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Fitness">
+<meta name="theme-color" content="#070d0a">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="description" content="Sistema de control fitness — Club Campestre Aguascalientes">
+
+<!-- Íconos para iOS (Apple Touch Icon) -->
+<link rel="apple-touch-icon" sizes="180x180" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'><rect width='180' height='180' rx='36' fill='%231a7a45'/><text x='90' y='115' font-size='90' text-anchor='middle' fill='white'>💪</text><text x='90' y='165' font-size='22' text-anchor='middle' fill='%235effa0' font-family='sans-serif' font-weight='bold'>FITNESS</text></svg>">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><rect width='64' height='64' rx='14' fill='%231a7a45'/><text x='32' y='44' font-size='36' text-anchor='middle' fill='white'>💪</text></svg>">
+
+<!-- PWA Manifest inline -->
+<link rel="manifest" href="data:application/json,%7B%22name%22%3A%22Fitness%20Control%20%E2%80%94%20Club%20Campestre%22%2C%22short_name%22%3A%22Fitness%22%2C%22description%22%3A%22Sistema%20de%20control%20fitness%22%2C%22start_url%22%3A%22.%2F%22%2C%22display%22%3A%22standalone%22%2C%22background_color%22%3A%22%23070d0a%22%2C%22theme_color%22%3A%22%231a7a45%22%2C%22orientation%22%3A%22portrait%22%2C%22icons%22%3A%5B%7B%22src%22%3A%22data%3Aimage%2Fsvg%2Bxml%2C%3Csvg%20xmlns%3D'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg'%20viewBox%3D'0%200%20192%20192'%3E%3Crect%20width%3D'192'%20height%3D'192'%20rx%3D'38'%20fill%3D'%231a7a45'%2F%3E%3Ctext%20x%3D'96'%20y%3D'130'%20font-size%3D'110'%20text-anchor%3D'middle'%20fill%3D'white'%3E%F0%9F%92%AA%3C%2Ftext%3E%3C%2Fsvg%3E%22%2C%22sizes%22%3A%22192x192%22%2C%22type%22%3A%22image%2Fsvg%2Bxml%22%7D%5D%7D">
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Outfit:wght@400;500;600&family=DM+Mono&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
@@ -248,9 +264,162 @@ html.tema-claro .alert-card{background:#f5faf5;}
   .g2,.g3{grid-template-columns:1fr;}
   .fr,.fr3{grid-template-columns:1fr;}
 }
+
+/* ═══ MOBILE RESPONSIVE MEJORADO ═══ */
+@media(max-width:768px){
+  #hdr{height:auto;padding:.55rem .8rem;flex-wrap:wrap;gap:.35rem;}
+  #hdr > div:first-child{gap:7px;}
+  .htit{font-size:.95rem;}
+  .hsub{font-size:.54rem;}
+  #sync-indicator{font-size:.54rem;}
+  img[alt="Club Campestre"]{height:32px!important;}
+
+  /* Botones header: scroll horizontal sin wrap */
+  .hr{
+    width:100%;overflow-x:auto;flex-wrap:nowrap;
+    padding-bottom:2px;gap:.28rem;
+    scrollbar-width:none;-ms-overflow-style:none;
+  }
+  .hr::-webkit-scrollbar{display:none;}
+  .hr .btn,.hr .theme-toggle{
+    font-size:.65rem;padding:5px 8px;white-space:nowrap;flex-shrink:0;
+  }
+
+  /* Tabs: scroll horizontal */
+  #tabs{padding:0 .3rem;overflow-x:auto;}
+  .tab{padding:9px 11px;font-size:.7rem;white-space:nowrap;}
+
+  main{padding:.6rem;}
+
+  /* KPIs: 2 por fila */
+  .krow{grid-template-columns:repeat(2,1fr);gap:.45rem;}
+  .kval{font-size:1.55rem;}
+  .kpi{padding:.75rem .85rem;}
+
+  /* Tablas scrollables */
+  .twrap{overflow-x:auto;-webkit-overflow-scrolling:touch;}
+  table{font-size:.7rem;}
+  thead th{padding:5px 6px;font-size:.58rem;}
+  tbody td{padding:6px 6px;}
+
+  /* Modales */
+  .modal,.modal.wide,.modal.narrow{width:96vw!important;padding:1rem;}
+  .mttl{font-size:1rem;}
+  .fr,.fr3{grid-template-columns:1fr;}
+
+  /* Recorrido */
+  .rec-num{font-size:2rem;}
+  .num-inp{font-size:1.8rem;width:76px;}
+
+  /* Gráfica */
+  .graph-wrap{height:160px;}
+
+  /* Panel headers: columna en móvil */
+  .phdr{flex-direction:column;align-items:flex-start;gap:.4rem;}
+  .phdr > div{width:100%;flex-wrap:wrap;}
+
+  /* Heatmap */
+  .hmap-cell{padding:2px 1px;font-size:.55rem;}
+
+  /* Grids de salones */
+  #salones-body > div{grid-template-columns:1fr!important;}
+}
+
+@media(max-width:420px){
+  .krow{grid-template-columns:repeat(2,1fr);}
+  .kval{font-size:1.35rem;}
+  .tab{padding:8px 8px;font-size:.64rem;}
+  main{padding:.4rem;}
+  .hr .btn,.hr .theme-toggle{font-size:.6rem;padding:4px 6px;}
+}
+
+/* ═══ PANTALLA DE LOGIN ═══ */
+#login-screen{
+  position:fixed;inset:0;background:var(--bg);z-index:9999;
+  display:flex;align-items:center;justify-content:center;padding:1rem;
+}
+#login-screen.oculto{display:none;}
+.login-box{
+  background:var(--panel);border:1px solid var(--verde);border-radius:18px;
+  padding:1.8rem 2rem;width:360px;max-width:96vw;
+  box-shadow:0 8px 40px rgba(26,122,69,.25);animation:fadeUp .3s ease;
+}
+.login-logo{display:flex;align-items:center;gap:10px;margin-bottom:1.3rem;}
+.login-title{font-family:'Bebas Neue',sans-serif;font-size:1.4rem;letter-spacing:2px;color:var(--neon);line-height:1;}
+.login-sub{font-size:.62rem;color:var(--txt2);letter-spacing:1px;text-transform:uppercase;}
+.login-role-btns{display:grid;grid-template-columns:1fr 1fr;gap:.5rem;margin-bottom:.9rem;}
+.role-btn{
+  background:var(--panel2);border:2px solid var(--border);border-radius:10px;
+  padding:.7rem .4rem;text-align:center;cursor:pointer;transition:all .2s;
+}
+.role-btn:hover{border-color:var(--v3);}
+.role-btn.selected{border-color:var(--verde);background:#0d2218;}
+.role-btn .role-icon{font-size:1.4rem;display:block;margin-bottom:2px;}
+.role-btn .role-name{font-size:.73rem;font-weight:600;color:var(--txt);}
+.role-btn .role-desc{font-size:.6rem;color:var(--txt2);margin-top:1px;}
+.login-field{margin-bottom:.75rem;}
+.login-field label{font-size:.63rem;text-transform:uppercase;letter-spacing:1px;color:var(--txt2);display:block;margin-bottom:3px;}
+.login-field input{
+  width:100%;background:var(--panel2);border:1px solid var(--border);border-radius:8px;
+  padding:9px 12px;color:var(--txt);font-family:'Outfit',sans-serif;font-size:.88rem;
+  outline:none;transition:border-color .2s;
+}
+.login-field input:focus{border-color:var(--v3);}
+.login-error{color:var(--red2);font-size:.73rem;margin-bottom:.6rem;display:none;padding:.4rem .7rem;background:#1a0505;border-radius:6px;}
+.login-btn{
+  width:100%;background:var(--v2);color:#fff;border:none;border-radius:10px;
+  padding:10px;font-family:'Outfit',sans-serif;font-weight:600;font-size:.9rem;
+  cursor:pointer;transition:background .2s;
+}
+.login-btn:hover{background:var(--v3);}
+.login-info{font-size:.63rem;color:var(--txt3);text-align:center;margin-top:.75rem;line-height:1.5;}
+.rol-badge{font-size:.58rem;padding:2px 7px;border-radius:10px;font-weight:600;display:inline-flex;align-items:center;gap:3px;}
+.rol-admin{background:#0d2218;color:var(--neon);border:1px solid var(--verde);}
+.rol-usuario{background:#0d2030;color:var(--blue);border:1px solid #1a5a8a;}
+
+/* Ocultar controles de escritura para rol usuario */
+body.rol-usuario .solo-admin{display:none!important;}
 </style>
 </head>
 <body>
+
+<!-- ═══ PANTALLA DE LOGIN ═══ -->
+<div id="login-screen">
+  <div class="login-box">
+    <div class="login-logo">
+      <div class="hico">💪</div>
+      <div>
+        <div class="login-title">Fitness Control</div>
+        <div class="login-sub">Club Campestre Aguascalientes</div>
+      </div>
+    </div>
+
+    <div style="font-size:.7rem;color:var(--txt2);margin-bottom:.6rem">Selecciona tu perfil:</div>
+    <div class="login-role-btns">
+      <div class="role-btn selected" id="role-btn-admin" onclick="seleccionarRol('admin')">
+        <span class="role-icon">🛡️</span>
+        <div class="role-name">Coordinador</div>
+        <div class="role-desc">Acceso total</div>
+      </div>
+      <div class="role-btn" id="role-btn-usuario" onclick="seleccionarRol('usuario')">
+        <span class="role-icon">👁️</span>
+        <div class="role-name">Consulta</div>
+        <div class="role-desc">Solo lectura</div>
+      </div>
+    </div>
+
+    <div class="login-field">
+      <label>Contraseña</label>
+      <input type="password" id="login-pass" placeholder="Ingresa tu contraseña..." onkeydown="if(event.key==='Enter')intentarLogin()">
+    </div>
+    <div class="login-error" id="login-error">❌ Contraseña incorrecta. Intenta de nuevo.</div>
+    <button class="login-btn" onclick="intentarLogin()">Entrar →</button>
+    <div class="login-info">
+      Coordinador: acceso completo al sistema<br>
+      Consulta: reportes, dashboards y visualización
+    </div>
+  </div>
+</div>
 
 <!-- ═══ HEADER ═══ -->
 <div id="hdr">
@@ -263,16 +432,18 @@ html.tema-claro .alert-card{background:#f5faf5;}
     </div>
   </div>
   <div class="hr">
+    <span id="rol-badge-hdr" class="rol-badge rol-admin no-print">🛡️ Coordinador</span>
     <button class="theme-toggle no-print" id="theme-btn" onclick="toggleTema()" title="Cambiar apariencia">🌙 Oscuro</button>
-    <button class="btn bg" onclick="abrirModal('m-clase')">+ Clase</button>
-    <button class="btn br" onclick="abrirModal('m-falta')">⚠ Falta</button>
-    <button class="btn bo" onclick="abrirModalInstructor(null)">👤 Instructores</button>
-    <button class="btn bb" onclick="iniciarRecorrido()">🚶 Recorrido</button>
+    <button class="btn bg solo-admin" onclick="abrirModal('m-clase')">+ Clase</button>
+    <button class="btn br solo-admin" onclick="abrirModal('m-falta')">⚠ Falta</button>
+    <button class="btn bo solo-admin" onclick="abrirModalInstructor(null)">👤 Instructores</button>
+    <button class="btn bb solo-admin" onclick="iniciarRecorrido()">🚶 Recorrido</button>
     <button class="btn bd" onclick="abrirModal('m-reports')">📋 Reportes</button>
-    <button class="btn" style="background:#1a3a6a;color:#88ccff;border:1px solid #2a5a9a" onclick="exportarExcelCompleto()" title="Exportar todo el sistema a Excel">📊 Excel Total</button>
-    <button class="btn" style="background:#5a1a1a;color:#ff9090;border:1px solid #8a2a2a" onclick="exportarPDFCompleto()" title="Generar PDF ejecutivo completo">📄 PDF Total</button>
+    <button class="btn" style="background:#1a3a6a;color:#88ccff;border:1px solid #2a5a9a" onclick="exportarExcelCompleto()">📊 Excel</button>
+    <button class="btn" style="background:#5a1a1a;color:#ff9090;border:1px solid #8a2a2a" onclick="exportarPDFCompleto()">📄 PDF</button>
     <button class="btn" style="background:#1a2a4a;color:#88ccff;border:1px solid #2a4a7a" onclick="abrirModal('m-suplencias')">🔄 Suplencias</button>
-    <button class="btn br no-print" onclick="confirmarLimpiezaTotal()" title="Borrar TODOS los datos del sistema">🗑 Limpiar datos</button>
+    <button class="btn br no-print solo-admin" onclick="confirmarLimpiezaTotal()" title="Borrar todos los datos">🗑</button>
+    <button class="btn" style="background:#1a1a1a;color:var(--txt2);border:1px solid var(--border)" onclick="cerrarSesion()" title="Cerrar sesión">🚪</button>
   </div>
 </div>
 
@@ -3373,10 +3544,95 @@ function setIndicador(txt){
 }
 
 // Indicador de estado en el header
+// ═══════════════════════════════════════════
+// SISTEMA DE LOGIN CON ROLES
+// ═══════════════════════════════════════════
+// Contraseñas — para cambiarlas, edita estas líneas:
+const PASS_ADMIN   = 'fitness2025';   // Coordinador — acceso total
+const PASS_USUARIO = 'campestre';     // Consulta — solo lectura
+
+let rolActual = null;
+let rolLoginSeleccionado = 'admin';
+
+function seleccionarRol(rol) {
+  rolLoginSeleccionado = rol;
+  document.getElementById('role-btn-admin').classList.toggle('selected', rol === 'admin');
+  document.getElementById('role-btn-usuario').classList.toggle('selected', rol === 'usuario');
+  document.getElementById('login-pass').focus();
+}
+
+function intentarLogin() {
+  const pass = document.getElementById('login-pass').value;
+  const errEl = document.getElementById('login-error');
+  errEl.style.display = 'none';
+
+  const passCorrecta = rolLoginSeleccionado === 'admin' ? PASS_ADMIN : PASS_USUARIO;
+
+  if(pass === passCorrecta) {
+    rolActual = rolLoginSeleccionado;
+    sessionStorage.setItem('fc_rol', rolActual);
+    aplicarRol(rolActual);
+    document.getElementById('login-screen').classList.add('oculto');
+    document.getElementById('login-pass').value = '';
+  } else {
+    errEl.style.display = 'block';
+    document.getElementById('login-pass').value = '';
+    document.getElementById('login-pass').focus();
+    // Shake animation
+    const box = document.querySelector('.login-box');
+    box.style.animation = 'none';
+    setTimeout(()=>box.style.animation='shake .3s ease',10);
+  }
+}
+
+function aplicarRol(rol) {
+  rolActual = rol;
+  document.body.classList.toggle('rol-usuario', rol === 'usuario');
+  document.body.classList.toggle('rol-admin', rol === 'admin');
+
+  const badge = document.getElementById('rol-badge-hdr');
+  if(rol === 'admin') {
+    badge.className = 'rol-badge rol-admin no-print';
+    badge.innerHTML = '🛡️ Coordinador';
+    // Mostrar botones admin
+    document.querySelectorAll('.solo-admin').forEach(el=>el.style.display='');
+  } else {
+    badge.className = 'rol-badge rol-usuario no-print';
+    badge.innerHTML = '👁️ Consulta';
+    // Ocultar botones admin
+    document.querySelectorAll('.solo-admin').forEach(el=>el.style.display='none');
+  }
+}
+
+function cerrarSesion() {
+  if(!confirm('¿Cerrar sesión?')) return;
+  rolActual = null;
+  sessionStorage.removeItem('fc_rol');
+  document.getElementById('login-pass').value = '';
+  document.getElementById('login-error').style.display = 'none';
+  document.getElementById('login-screen').classList.remove('oculto');
+}
+
+// Agregar animación shake al CSS dinámicamente
+(function(){
+  const s = document.createElement('style');
+  s.textContent = '@keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-8px)}75%{transform:translateX(8px)}}';
+  document.head.appendChild(s);
+})();
+
 // ─── Arranque ───
 (function init(){
   // Aplicar tema guardado
   aplicarTema(localStorage.getItem('fc_tema')||'oscuro');
+
+  // Verificar sesión guardada en la pestaña actual
+  const rolGuardado = sessionStorage.getItem('fc_rol');
+  if(rolGuardado === 'admin' || rolGuardado === 'usuario') {
+    aplicarRol(rolGuardado);
+    document.getElementById('login-screen').classList.add('oculto');
+  }
+  // Si no hay sesión, la pantalla de login ya está visible por defecto
+
   const hayLocal = cargarLocal();
   if(hayLocal){
     _origRenderAll();
@@ -3387,6 +3643,53 @@ function setIndicador(txt){
   // Guardar antes de cerrar pestaña
   window.addEventListener('beforeunload', guardarLocal);
 })();
+</script>
+
+<!-- ═══ PWA: Service Worker + Botón instalación ═══ -->
+<script>
+if('serviceWorker' in navigator) {
+  const swCode = `
+    const CACHE='fitness-ctrl-v1';
+    self.addEventListener('install',e=>{self.skipWaiting();});
+    self.addEventListener('activate',e=>{self.clients.claim();});
+    self.addEventListener('fetch',e=>{
+      if(e.request.method!=='GET')return;
+      e.respondWith(
+        fetch(e.request).then(r=>{
+          const rc=r.clone();
+          caches.open(CACHE).then(c=>c.put(e.request,rc));
+          return r;
+        }).catch(()=>caches.match(e.request))
+      );
+    });
+  `;
+  const blob=new Blob([swCode],{type:'application/javascript'});
+  navigator.serviceWorker.register(URL.createObjectURL(blob))
+    .catch(()=>{});
+}
+
+let _pwaPrompt=null;
+window.addEventListener('beforeinstallprompt',e=>{
+  e.preventDefault();_pwaPrompt=e;
+  if(document.getElementById('btn-instalar'))return;
+  const b=document.createElement('button');
+  b.id='btn-instalar';b.className='btn no-print';
+  b.style.cssText='background:#0d2218;color:var(--neon);border:1px solid var(--verde);font-size:.65rem;padding:5px 8px;white-space:nowrap;flex-shrink:0;';
+  b.innerHTML='📲 Instalar';b.title='Instalar en pantalla de inicio';
+  b.onclick=async()=>{
+    if(!_pwaPrompt)return;
+    _pwaPrompt.prompt();
+    const{outcome}=await _pwaPrompt.userChoice;
+    if(outcome==='accepted')b.remove();
+    _pwaPrompt=null;
+  };
+  const hr=document.querySelector('.hr');
+  if(hr)hr.insertBefore(b,hr.firstChild);
+});
+window.addEventListener('appinstalled',()=>{
+  const b=document.getElementById('btn-instalar');
+  if(b)b.remove();_pwaPrompt=null;
+});
 </script>
 </body>
 </html>
