@@ -101,7 +101,8 @@ main{padding:1.4rem;max-width:1500px;margin:0 auto;}
 .kpi::after{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:var(--v3);}
 .kpi.gd::after{background:var(--gold2);}.kpi.rd::after{background:var(--red2);}.kpi.bl::after{background:var(--blue);}.kpi.nn::after{background:var(--neon);}
 .klbl{font-size:.66rem;text-transform:uppercase;letter-spacing:1.5px;color:var(--txt2);margin-bottom:5px;}
-.kval{font-family:'Bebas Neue',sans-serif;font-size:2.1rem;line-height:1;color:var(--w);}
+.kval{font-family:'Bebas Neue',sans-serif;font-size:2.1rem;line-height:1;color:var(--neon);}
+html.tema-claro .kval{color:var(--verde);}
 .ksub{font-size:.7rem;color:var(--txt3);margin-top:2px;}
 
 /* PANEL */
@@ -465,8 +466,6 @@ html.tema-claro .login-field input{background:#fff;border-color:#c2d8c2;color:#1
     </div>
   </div>
   <div class="hr">
-    <span id="rol-badge-hdr" class="rol-badge rol-admin no-print">🛡️ Coordinador</span>
-    <button class="theme-toggle no-print" id="theme-btn" onclick="toggleTema()" title="Cambiar apariencia" style="font-size:1.1rem;padding:4px 9px">🌙</button>
     <button class="btn bg solo-admin" onclick="abrirModal('m-clase')">+ Clase</button>
     <button class="btn br solo-admin" onclick="abrirModal('m-falta')">⚠ Falta</button>
     <button class="btn bo solo-admin" onclick="abrirModalInstructor(null)">👤 Instructores</button>
@@ -484,10 +483,17 @@ html.tema-claro .login-field input{background:#fff;border-color:#c2d8c2;color:#1
       </button>
       <div id="coord-menu-dropdown" style="display:none;position:absolute;right:0;top:calc(100% + 6px);z-index:500;
         background:var(--panel);border:1px solid var(--verde);border-radius:10px;
-        min-width:200px;overflow:hidden;box-shadow:0 8px 24px rgba(0,0,0,.5);animation:fadeUp .15s ease">
+        min-width:210px;overflow:hidden;box-shadow:0 8px 24px rgba(0,0,0,.5);animation:fadeUp .15s ease">
         <div style="padding:.5rem .8rem;font-size:.65rem;color:var(--txt3);text-transform:uppercase;letter-spacing:1px;border-bottom:1px solid var(--border)">
           Administración
         </div>
+        <button onclick="toggleTema();toggleCoordMenu()" id="coord-tema-btn"
+          style="width:100%;background:none;border:none;border-bottom:1px solid var(--border);
+          padding:.6rem 1rem;color:var(--txt);font-family:'Outfit',sans-serif;font-size:.82rem;
+          text-align:left;cursor:pointer;display:flex;align-items:center;gap:.6rem;transition:background .15s"
+          onmouseover="this.style.background='var(--panel2)'" onmouseout="this.style.background='none'">
+          <span id="coord-tema-icon">🌙</span> Cambiar apariencia
+        </button>
         <button onclick="abrirModalCambiarPass();toggleCoordMenu()" style="width:100%;background:none;border:none;border-bottom:1px solid var(--border);
           padding:.6rem 1rem;color:var(--txt);font-family:'Outfit',sans-serif;font-size:.82rem;
           text-align:left;cursor:pointer;display:flex;align-items:center;gap:.6rem;transition:background .15s"
@@ -497,7 +503,7 @@ html.tema-claro .login-field input{background:#fff;border-color:#c2d8c2;color:#1
         <button onclick="confirmarLimpiezaTotal();toggleCoordMenu()" style="width:100%;background:none;border:none;
           padding:.6rem 1rem;color:var(--red2);font-family:'Outfit',sans-serif;font-size:.82rem;
           text-align:left;cursor:pointer;display:flex;align-items:center;gap:.6rem;transition:background .15s"
-          onmouseover="this.style.background='#2d1010'" onmouseout="this.style.background='none'">
+          onmouseover="this.style.background='rgba(224,80,80,.1)'" onmouseout="this.style.background='none'">
           🗑 Borrar todos los datos
         </button>
       </div>
@@ -1431,8 +1437,8 @@ function renderDashboard(){
   const totSuplencias=regsBase.filter(r=>r.estado==='sub').length;
 
   document.getElementById('kpi-row').innerHTML=`
-    <div class="kpi"><div class="klbl">Clases / Semana</div><div class="kval">${totProg}</div><div class="ksub">Programadas</div></div>
-    <div class="kpi gd" style="position:relative"><div class="klbl">Impartidas</div><div class="kval">${totImp}</div>
+    <div class="kpi"><div class="klbl">Clases / Semana</div><div class="kval" style="color:var(--neon)">${totProg}</div><div class="ksub">Programadas</div></div>
+    <div class="kpi gd" style="position:relative"><div class="klbl">Impartidas</div><div class="kval" style="color:var(--neon)">${totImp}</div>
       <div class="ksub">${pct}% cumplimiento</div>
       <div class="kpi-meta">Meta: ≥90%</div>
       <div class="kpi-bar-wrap"><div class="kpi-bar-fill" style="width:${Math.min(pct,100)}%;background:${semColorKpi(pct,90)}"></div></div>
@@ -1441,7 +1447,7 @@ function renderDashboard(){
     <div class="kpi rd" style="position:relative"><div class="klbl">Faltas</div><div class="kval" style="color:${totFalt===0?'var(--neon)':totFalt<=3?'var(--gold2)':'var(--red2)'}">${totFalt}</div><div class="ksub">Registradas</div>
       <div class="kpi-sem">${totFalt===0?'🟢':totFalt<=3?'🟡':'🔴'}</div>
     </div>
-    <div class="kpi bl"><div class="klbl">Total Asistentes</div><div class="kval">${totAsis.toLocaleString()}</div><div class="ksub">Entradas acumuladas</div></div>
+    <div class="kpi bl"><div class="klbl">Total Asistentes</div><div class="kval" style="color:var(--blue)">${totAsis.toLocaleString()}</div><div class="ksub">Entradas acumuladas</div></div>
     <div class="kpi nn" style="position:relative"><div class="klbl">Aforo Prom.</div>
       <div class="kval" style="color:${semColorKpi(aforoProm)}">${aforoProm}%</div>
       <div class="ksub">Ocupación por clase</div>
@@ -1449,7 +1455,7 @@ function renderDashboard(){
       <div class="kpi-bar-wrap"><div class="kpi-bar-fill" style="width:${Math.min(aforoProm,100)}%;background:${semColorKpi(aforoProm)}"></div></div>
       <div class="kpi-sem">${aforoProm>=60?'🟢':aforoProm>=35?'🟡':'🔴'}</div>
     </div>
-    <div class="kpi"><div class="klbl">Instructores</div><div class="kval">${instructores.length}</div><div class="ksub">Activos</div></div>
+    <div class="kpi"><div class="klbl">Instructores</div><div class="kval" style="color:var(--neon)">${instructores.length}</div><div class="ksub">Activos</div></div>
     <div class="kpi" style="cursor:pointer" onclick="abrirModal('m-suplencias')"><div class="klbl">Suplencias</div><div class="kval" style="color:var(--blue)">${totSuplencias}</div><div class="ksub">Ver reporte →</div></div>`;
 
   renderQuickAlerts();
@@ -1515,7 +1521,7 @@ function renderDashboard(){
     type:'bar',
     data:{labels,datasets:[
       {label:'Aforo %',data:vals,backgroundColor:colors,borderRadius:5,borderSkipped:false,yAxisID:'y'},
-      {label:'Asis. Prom.',data:vals2,backgroundColor:'rgba(200,169,74,0.3)',borderRadius:5,borderSkipped:false,yAxisID:'y2',type:'bar'}
+      {label:'Asis. Prom.',data:vals2,backgroundColor:temaActual==='claro'?'rgba(200,169,74,0.35)':'rgba(94,255,160,0.55)',borderRadius:5,borderSkipped:false,yAxisID:'y2',type:'bar'}
     ]},
     options:{responsive:true,maintainAspectRatio:false,
       plugins:{
@@ -1542,7 +1548,7 @@ function renderDashboard(){
       scales:{
         x:{ticks:{color:chartTxtColor,font:{family:'DM Mono',size:10}},grid:{color:chartGridColor}},
         y:{ticks:{color:chartTxtColor,font:{family:'DM Mono',size:10},callback:v=>v+'%'},grid:{color:chartGridColor},max:100,title:{display:true,text:'Aforo %',color:chartTxtColor,font:{size:10}}},
-        y2:{position:'right',ticks:{color:temaActual==='claro'?'#9a7800':'var(--gold2)',font:{family:'DM Mono',size:10}},grid:{display:false},title:{display:true,text:'Asis. Prom.',color:temaActual==='claro'?'#9a7800':'var(--gold2)',font:{size:10}}}
+        y2:{position:'right',ticks:{color:temaActual==='claro'?'#9a7800':'var(--neon)',font:{family:'DM Mono',size:10}},grid:{display:false},title:{display:true,text:'Asis. Prom.',color:temaActual==='claro'?'#9a7800':'var(--neon)',font:{size:10}}}
       }
     }
   });
@@ -2410,14 +2416,13 @@ function genReporteMensual(){
 let temaActual = localStorage.getItem('fc_tema') || 'oscuro';
 function aplicarTema(t) {
   temaActual = t;
+  const iconEl = document.getElementById('coord-tema-icon');
   if(t === 'claro') {
     document.documentElement.classList.add('tema-claro');
-    document.getElementById('theme-btn').textContent = '☀️';
-    document.getElementById('theme-btn').title = 'Cambiar a modo oscuro';
+    if(iconEl) iconEl.textContent = '☀️';
   } else {
     document.documentElement.classList.remove('tema-claro');
-    document.getElementById('theme-btn').textContent = '🌙';
-    document.getElementById('theme-btn').title = 'Cambiar a modo claro';
+    if(iconEl) iconEl.textContent = '🌙';
   }
   localStorage.setItem('fc_tema', t);
   setTimeout(()=>{if(typeof renderDashboard==='function')renderDashboard();},80);
@@ -3780,16 +3785,9 @@ function aplicarRol(rol) {
   document.body.classList.toggle('rol-usuario', rol === 'usuario');
   document.body.classList.toggle('rol-admin', rol === 'admin');
 
-  const badge = document.getElementById('rol-badge-hdr');
   if(rol === 'admin') {
-    badge.className = 'rol-badge rol-admin no-print';
-    badge.innerHTML = '🛡️ Coordinador';
-    // Mostrar botones admin
     document.querySelectorAll('.solo-admin').forEach(el=>el.style.display='');
   } else {
-    badge.className = 'rol-badge rol-usuario no-print';
-    badge.innerHTML = '👁️ Consulta';
-    // Ocultar botones admin
     document.querySelectorAll('.solo-admin').forEach(el=>el.style.display='none');
   }
 }
