@@ -14,15 +14,15 @@
 <meta name="description" content="Sistema de control fitness — Club Campestre Aguascalientes">
 
 <!-- Favicon SVG (funciona en todos los navegadores modernos) -->
-<link rel="icon" type="image/svg+xml" href="data:image/svg+xml;charset=utf-8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><rect width='64' height='64' rx='14' fill='%231a7a45'/><text x='32' y='46' font-size='38' text-anchor='middle' fill='white' font-family='Apple Color Emoji,Segoe UI Emoji,sans-serif'>💪</text></svg>">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml;charset=utf-8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><rect width='64' height='64' rx='14' fill='%231a7a45'/><text x='32' y='46' font-size='38' text-anchor='middle' fill='white' font-family='Apple Color Emoji,Segoe UI Emoji,sans-serif'><svg class="ico" viewBox="0 0 20 20"><path d="M12 4 Q16 5 15 9 L14 11 Q15 14 13 16 Q10 18 7 15 L5 12 Q3 9 6 7 L9 8 L11 5 Z" stroke="currentColor" stroke-width="1.3" fill="none" stroke-linejoin="round"/></svg></text></svg>">
 
 <!-- Apple Touch Icon para iOS -->
-<link rel="apple-touch-icon" href="data:image/svg+xml;charset=utf-8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'><rect width='180' height='180' rx='40' fill='%231a7a45'/><text x='90' y='122' font-size='96' text-anchor='middle' fill='white' font-family='Apple Color Emoji,Segoe UI Emoji,sans-serif'>💪</text><text x='90' y='165' font-size='24' text-anchor='middle' fill='%235effa0' font-family='Arial,sans-serif' font-weight='bold' letter-spacing='2'>FITNESS</text></svg>">
+<link rel="apple-touch-icon" href="data:image/svg+xml;charset=utf-8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'><rect width='180' height='180' rx='40' fill='%231a7a45'/><text x='90' y='122' font-size='96' text-anchor='middle' fill='white' font-family='Apple Color Emoji,Segoe UI Emoji,sans-serif'><svg class="ico" viewBox="0 0 20 20"><path d="M12 4 Q16 5 15 9 L14 11 Q15 14 13 16 Q10 18 7 15 L5 12 Q3 9 6 7 L9 8 L11 5 Z" stroke="currentColor" stroke-width="1.3" fill="none" stroke-linejoin="round"/></svg></text><text x='90' y='165' font-size='24' text-anchor='middle' fill='%235effa0' font-family='Arial,sans-serif' font-weight='bold' letter-spacing='2'>FITNESS</text></svg>">
 
 <!-- PWA Manifest -->
 <script>
 (function(){
-  const icon='data:image/svg+xml;charset=utf-8,'+encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 192 192"><rect width="192" height="192" rx="40" fill="#1a7a45"/><text x="96" y="128" font-size="108" text-anchor="middle" fill="white" font-family="Apple Color Emoji,Segoe UI Emoji,sans-serif">💪</text><text x="96" y="175" font-size="26" text-anchor="middle" fill="#5effa0" font-family="Arial,sans-serif" font-weight="bold" letter-spacing="2">FITNESS</text></svg>');
+  const icon='data:image/svg+xml;charset=utf-8,'+encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 192 192"><rect width="192" height="192" rx="40" fill="#1a7a45"/><text x="96" y="128" font-size="108" text-anchor="middle" fill="white" font-family="Apple Color Emoji,Segoe UI Emoji,sans-serif"><svg class="ico" viewBox="0 0 20 20"><path d="M12 4 Q16 5 15 9 L14 11 Q15 14 13 16 Q10 18 7 15 L5 12 Q3 9 6 7 L9 8 L11 5 Z" stroke="currentColor" stroke-width="1.3" fill="none" stroke-linejoin="round"/></svg></text><text x="96" y="175" font-size="26" text-anchor="middle" fill="#5effa0" font-family="Arial,sans-serif" font-weight="bold" letter-spacing="2">FITNESS</text></svg>');
   const manifest={
     name:'Fitness Control — Club Campestre',
     short_name:'Fitness',
@@ -50,7 +50,7 @@
 <style>
 /* ═══ TEMA OSCURO (default) ═══ */
 :root{
-  --bg:#070d0a;--panel:#0e1712;--panel2:#131f17;--border:#1c3025;
+  --bg:#0f1f18;--panel:rgba(22,42,30,0.72);--panel2:rgba(18,34,24,0.80);--border:#1c3025;
   --verde:#1a7a45;--v2:#2da05a;--v3:#52c97d;--neon:#5effa0;
   --gold:#e8b84b;--gold2:#ffd06b;--red:#e05050;--red2:#ff7070;
   --blue:#4db8e8;--txt:#dff0e8;--txt2:#7aaa90;--txt3:#3d6650;--w:#f0fff8;
@@ -65,7 +65,28 @@ html.tema-claro{
   --shadow:0 2px 16px rgba(26,122,69,.12);
 }
 *{margin:0;padding:0;box-sizing:border-box;}
-body{background:var(--bg);color:var(--txt);font-family:'Outfit',sans-serif;min-height:100vh;overflow-x:hidden;}
+body{
+  background:var(--bg);
+  background-image:
+    radial-gradient(ellipse at 20% 20%, rgba(26,122,69,.18) 0%, transparent 55%),
+    radial-gradient(ellipse at 80% 80%, rgba(26,122,69,.12) 0%, transparent 50%),
+    radial-gradient(ellipse at 60% 10%, rgba(77,184,232,.08) 0%, transparent 40%);
+  color:var(--txt);font-family:'Outfit',sans-serif;min-height:100vh;overflow-x:hidden;
+}
+
+/* Glassmorphism para paneles en tema oscuro */
+.panel{
+  -webkit-backdrop-filter:blur(12px);
+  backdrop-filter:blur(12px);
+}
+.kpi{
+  -webkit-backdrop-filter:blur(8px);
+  backdrop-filter:blur(8px);
+}
+.modal{
+  -webkit-backdrop-filter:blur(16px);
+  backdrop-filter:blur(16px);
+}
 
 /* HEADER */
 #hdr{background:linear-gradient(90deg,var(--panel),#0a1510);border-bottom:1px solid var(--border);
@@ -276,6 +297,55 @@ html.tema-claro .bsave:hover{background:#2e9c5e;}
 html.tema-claro .hmap-cell{border:1px solid #e0e8e0;}
 html.tema-claro .alert-card{background:#f5faf5;}
 
+
+/* ═══ BARRA DE FILTRO DASHBOARD — respeta ambos temas ═══ */
+.dash-filter-bar {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+html.tema-claro .dash-filter-bar {
+  background: #ffffff;
+  border-color: #c2d8c2;
+  box-shadow: 0 1px 8px rgba(26,122,69,.10);
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+/* ═══ GLASSMORPHISM GLOBAL — paneles flotantes y filtros ═══ */
+html:not(.tema-claro) .panel,
+html:not(.tema-claro) .kpi,
+html:not(.tema-claro) .modal,
+html:not(.tema-claro) #coord-menu-dropdown,
+html:not(.tema-claro) .rec-card,
+html:not(.tema-claro) .diag-card,
+html:not(.tema-claro) .sch-slot,
+html:not(.tema-claro) .alert-card {
+  backdrop-filter:blur(14px);
+  -webkit-backdrop-filter:blur(14px);
+}
+html:not(.tema-claro) .panel { background:rgba(15,28,20,0.75); }
+html:not(.tema-claro) .kpi   { background:rgba(15,28,20,0.70); }
+html:not(.tema-claro) .modal { background:rgba(12,22,16,0.88); }
+html:not(.tema-claro) .rec-card,
+html:not(.tema-claro) .diag-card,
+html:not(.tema-claro) .sch-slot { background:rgba(15,28,20,0.72); }
+html:not(.tema-claro) .alert-card { background:rgba(15,28,20,0.65); }
+/* ═══ SISTEMA DE ICONOS SVG ═══ */
+.ico{
+  display:inline-block;width:1.1em;height:1.1em;
+  vertical-align:middle;flex-shrink:0;color:inherit;
+  line-height:1;
+}
+.ico-ok{color:var(--neon);}
+.ico-err{color:var(--red2);}
+.ico-warn{color:var(--gold2);}
+.btn .ico{width:.9em;height:.9em;margin-right:3px;vertical-align:-0.1em;}
+td .ico{width:1em;height:1em;}
+.diag-icon .ico{width:1.2em;height:1.2em;color:#fff;}
+.alert-icon .ico{width:1em;height:1em;}
+/* ───────────────────────────── */
+
 /* Botón de tema */
 .theme-toggle{background:none;border:1px solid var(--border);border-radius:8px;color:var(--txt2);padding:5px 10px;cursor:pointer;font-size:.75rem;font-family:'Outfit',sans-serif;transition:all .25s;display:flex;align-items:center;gap:5px;}
 .theme-toggle:hover{border-color:var(--v3);color:var(--txt);}
@@ -421,7 +491,7 @@ html.tema-claro .login-field input{background:#fff;border-color:#c2d8c2;color:#1
 <div id="login-screen">
   <div class="login-box">
     <div class="login-logo">
-      <div class="hico">💪</div>
+      <div class="hico"><svg class="ico" viewBox="0 0 20 20"><path d="M12 4 Q16 5 15 9 L14 11 Q15 14 13 16 Q10 18 7 15 L5 12 Q3 9 6 7 L9 8 L11 5 Z" stroke="currentColor" stroke-width="1.3" fill="none" stroke-linejoin="round"/></svg></div>
       <div>
         <div class="login-title">Fitness Control</div>
         <div class="login-sub">Club Campestre Aguascalientes</div>
@@ -431,12 +501,12 @@ html.tema-claro .login-field input{background:#fff;border-color:#c2d8c2;color:#1
     <div style="font-size:.7rem;color:var(--txt2);margin-bottom:.6rem">Selecciona tu perfil:</div>
     <div class="login-role-btns">
       <div class="role-btn selected" id="role-btn-admin" onclick="seleccionarRol('admin')">
-        <span class="role-icon">🛡️</span>
+        <span class="role-icon"><svg class="ico" viewBox="0 0 20 20"><path d="M10 2 L17 5 L17 11 Q17 16 10 19 Q3 16 3 11 L3 5 Z" stroke="currentColor" stroke-width="1.4" fill="none" stroke-linejoin="round"/></svg>️</span>
         <div class="role-name">Coordinador</div>
         <div class="role-desc">Acceso total</div>
       </div>
       <div class="role-btn" id="role-btn-usuario" onclick="seleccionarRol('usuario')">
-        <span class="role-icon">👁️</span>
+        <span class="role-icon"><svg class="ico" viewBox="0 0 20 20"><path d="M2 10 Q6 4 10 4 Q14 4 18 10 Q14 16 10 16 Q6 16 2 10" stroke="currentColor" stroke-width="1.4" fill="none"/><circle cx="10" cy="10" r="2.5" stroke="currentColor" stroke-width="1.3" fill="none"/></svg>️</span>
         <div class="role-name">Consulta</div>
         <div class="role-desc">Solo lectura</div>
       </div>
@@ -446,7 +516,7 @@ html.tema-claro .login-field input{background:#fff;border-color:#c2d8c2;color:#1
       <label>Contraseña</label>
       <input type="password" id="login-pass" placeholder="Ingresa tu contraseña..." onkeydown="if(event.key==='Enter')intentarLogin()">
     </div>
-    <div class="login-error" id="login-error">❌ Contraseña incorrecta. Intenta de nuevo.</div>
+    <div class="login-error" id="login-error"><svg class="ico ico-err" viewBox="0 0 20 20"><circle cx="10" cy="10" r="8" stroke="currentColor" stroke-width="1.5" fill="none"/><line x1="7" y1="7" x2="13" y2="13" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><line x1="13" y1="7" x2="7" y2="13" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg> Contraseña incorrecta. Intenta de nuevo.</div>
     <button class="login-btn" onclick="intentarLogin()">Entrar →</button>
     <div class="login-info">
       Coordinador: acceso completo al sistema<br>
@@ -462,28 +532,29 @@ html.tema-claro .login-field input{background:#fff;border-color:#c2d8c2;color:#1
     <div>
       <div class="htit">Fitness Control</div>
       <div class="hsub">Coordinación Fitness</div>
-      <div id="sync-indicator" style="font-size:.6rem;color:var(--txt2);letter-spacing:.5px;margin-top:2px;opacity:.85">💾 Iniciando...</div>
+      <div id="sync-indicator" style="font-size:.6rem;color:var(--txt2);letter-spacing:.5px;margin-top:2px;opacity:.85"><svg class="ico" viewBox="0 0 20 20"><rect x="3" y="3" width="14" height="14" rx="2" stroke="currentColor" stroke-width="1.4" fill="none"/><rect x="7" y="3" width="6" height="5" rx="0.5" stroke="currentColor" stroke-width="1.3" fill="none"/><rect x="5" y="11" width="10" height="5" rx="1" stroke="currentColor" stroke-width="1.3" fill="none"/><line x1="10" y1="4" x2="10" y2="7.5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg> Iniciando...</div>
     </div>
   </div>
   <div class="hr">
     <button class="btn bg solo-admin" onclick="abrirModal('m-clase')">+ Clase</button>
-    <button class="btn br solo-admin" onclick="abrirModal('m-falta')">⚠ Falta</button>
-    <button class="btn bo solo-admin" onclick="abrirModalInstructor(null)">👤 Instructores</button>
-    <button class="btn bb solo-admin" onclick="iniciarRecorrido()">🚶 Recorrido</button>
-    <button class="btn bd" onclick="abrirModal('m-reports')">📋 Reportes</button>
-    <button class="btn" style="background:#1a3a6a;color:#88ccff;border:1px solid #2a5a9a" onclick="exportarExcelCompleto()">📊 Excel</button>
-    <button class="btn" style="background:#5a1a1a;color:#ff9090;border:1px solid #8a2a2a" onclick="exportarPDFCompleto()">📄 PDF</button>
-    <button class="btn" style="background:#1a2a4a;color:#88ccff;border:1px solid #2a4a7a" onclick="abrirModal('m-suplencias')">🔄 Suplencias</button>
+    <button class="btn br solo-admin" onclick="abrirModal('m-falta')"><svg class="ico ico-warn" viewBox="0 0 20 20"><path d="M10 3 L18 17 H2 Z" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linejoin="round"/><line x1="10" y1="9" x2="10" y2="13" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><circle cx="10" cy="15.5" r="0.8" fill="currentColor"/></svg> Falta</button>
+    <button class="btn bo solo-admin" onclick="abrirModalInstructor(null)"><svg class="ico" viewBox="0 0 20 20"><circle cx="10" cy="7" r="3.5" stroke="currentColor" stroke-width="1.4" fill="none"/><path d="M3 18 Q3 12 10 12 Q17 12 17 18" stroke="currentColor" stroke-width="1.4" fill="none" stroke-linecap="round"/></svg> Instructores</button>
+    <button class="btn bb solo-admin" onclick="iniciarRecorrido()"><svg class="ico" viewBox="0 0 20 20"><circle cx="10" cy="4" r="2" stroke="currentColor" stroke-width="1.4" fill="none"/><path d="M10 6 L9 11 L7 16 M10 6 L11 11 L13 16 M9 11 L12 11" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg> Recorrido</button>
+    <button class="btn bd" onclick="abrirModal('m-reports')"><svg class="ico" viewBox="0 0 20 20"><rect x="5" y="3" width="10" height="14" rx="2" stroke="currentColor" stroke-width="1.5" fill="none"/><rect x="8" y="2" width="4" height="2.5" rx="1" stroke="currentColor" stroke-width="1.2" fill="none"/><line x1="8" y1="9" x2="12" y2="9" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/><line x1="8" y1="12" x2="13" y2="12" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg> Reportes</button>
+    <button class="btn" style="background:#1a3a6a;color:#88ccff;border:1px solid #2a5a9a" onclick="exportarExcelCompleto()"><svg class="ico" viewBox="0 0 20 20"><rect x="3" y="12" width="3" height="5" rx="1" stroke="currentColor" stroke-width="1.4" fill="none"/><rect x="8.5" y="8" width="3" height="9" rx="1" stroke="currentColor" stroke-width="1.4" fill="none"/><rect x="14" y="4" width="3" height="13" rx="1" stroke="currentColor" stroke-width="1.4" fill="none"/></svg> Excel</button>
+    <button class="btn" style="background:#5a1a1a;color:#ff9090;border:1px solid #8a2a2a" onclick="exportarPDFCompleto()"><svg class="ico" viewBox="0 0 20 20"><path d="M5 3 H13 L16 6 V17 H5 Z" stroke="currentColor" stroke-width="1.4" fill="none" stroke-linejoin="round"/><polyline points="13,3 13,6 16,6" stroke="currentColor" stroke-width="1.3" fill="none" stroke-linejoin="round"/><line x1="8" y1="10" x2="13" y2="10" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/><line x1="8" y1="13" x2="13" y2="13" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg> PDF</button>
+    <button class="btn" style="background:#1a2a4a;color:#88ccff;border:1px solid #2a4a7a" onclick="abrirModal('m-suplencias')"><svg class="ico" viewBox="0 0 20 20"><path d="M4 10a6 6 0 0 1 6-6 6 6 0 0 1 5.2 3" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round"/><path d="M16 10a6 6 0 0 1-6 6 6 6 0 0 1-5.2-3" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round"/><polyline points="14.5,7 15.5,3.8 18.5,5" stroke="currentColor" stroke-width="1.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/><polyline points="5.5,13 4.5,16.2 1.5,15" stroke="currentColor" stroke-width="1.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg> Suplencias</button>
     <!-- Menú Coordinación -->
     <div class="no-print" style="position:relative" id="coord-menu-wrap">
       <button class="btn solo-admin" id="coord-menu-btn"
         style="background:var(--panel2);color:var(--txt2);border:1px solid var(--border);display:flex;align-items:center;gap:5px"
         onclick="toggleCoordMenu()" title="Opciones de coordinación">
-        ⚙ Coord. <span style="font-size:.65rem">▾</span>
+        <svg class="ico" viewBox="0 0 20 20"><circle cx="10" cy="10" r="3" stroke="currentColor" stroke-width="1.3" fill="none"/><path d="M10 2 L10 5 M10 15 L10 18 M2 10 L5 10 M15 10 L18 10 M4.2 4.2 L6.4 6.4 M13.6 13.6 L15.8 15.8 M15.8 4.2 L13.6 6.4 M6.4 13.6 L4.2 15.8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg> Coord. <span style="font-size:.65rem">▾</span>
       </button>
       <div id="coord-menu-dropdown" style="display:none;position:absolute;right:0;top:calc(100% + 6px);z-index:500;
-        background:var(--panel);border:1px solid var(--verde);border-radius:10px;
-        min-width:210px;overflow:hidden;box-shadow:0 8px 24px rgba(0,0,0,.5);animation:fadeUp .15s ease">
+        background:rgba(14,30,20,0.82);border:1px solid var(--verde);border-radius:12px;
+        min-width:210px;overflow:hidden;box-shadow:0 8px 32px rgba(0,0,0,.7);animation:fadeUp .15s ease;
+        backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px)">
         <div style="padding:.5rem .8rem;font-size:.65rem;color:var(--txt3);text-transform:uppercase;letter-spacing:1px;border-bottom:1px solid var(--border)">
           Administración
         </div>
@@ -492,38 +563,38 @@ html.tema-claro .login-field input{background:#fff;border-color:#c2d8c2;color:#1
           padding:.6rem 1rem;color:var(--txt);font-family:'Outfit',sans-serif;font-size:.82rem;
           text-align:left;cursor:pointer;display:flex;align-items:center;gap:.6rem;transition:background .15s"
           onmouseover="this.style.background='var(--panel2)'" onmouseout="this.style.background='none'">
-          <span id="coord-tema-icon">🌙</span> Cambiar apariencia
+          <span id="coord-tema-icon"><svg class="ico" viewBox="0 0 20 20"><path d="M14 4 Q10 4 8 7 Q6 10 8 13 Q10 16 14 16 Q11 14 11 10 Q11 6 14 4" stroke="currentColor" stroke-width="1.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></span> Cambiar apariencia
         </button>
         <button onclick="abrirModalCambiarPass();toggleCoordMenu()" style="width:100%;background:none;border:none;border-bottom:1px solid var(--border);
           padding:.6rem 1rem;color:var(--txt);font-family:'Outfit',sans-serif;font-size:.82rem;
           text-align:left;cursor:pointer;display:flex;align-items:center;gap:.6rem;transition:background .15s"
           onmouseover="this.style.background='var(--panel2)'" onmouseout="this.style.background='none'">
-          🔑 Cambiar contraseña
+          <svg class="ico" viewBox="0 0 20 20"><circle cx="7" cy="9" r="4" stroke="currentColor" stroke-width="1.4" fill="none"/><line x1="10.8" y1="11" x2="17" y2="17" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><line x1="14" y1="15" x2="16" y2="13" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg> Cambiar contraseña
         </button>
         <button onclick="confirmarLimpiezaTotal();toggleCoordMenu()" style="width:100%;background:none;border:none;
           padding:.6rem 1rem;color:var(--red2);font-family:'Outfit',sans-serif;font-size:.82rem;
           text-align:left;cursor:pointer;display:flex;align-items:center;gap:.6rem;transition:background .15s"
           onmouseover="this.style.background='rgba(224,80,80,.1)'" onmouseout="this.style.background='none'">
-          🗑 Borrar todos los datos
+          <svg class="ico" viewBox="0 0 20 20"><polyline points="5,6 15,6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><path d="M8 6V4h4v2" stroke="currentColor" stroke-width="1.4" fill="none" stroke-linecap="round"/><rect x="6" y="6" width="8" height="10" rx="1.5" stroke="currentColor" stroke-width="1.4" fill="none"/><line x1="9" y1="9" x2="9" y2="14" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/><line x1="11" y1="9" x2="11" y2="14" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg> Borrar todos los datos
         </button>
       </div>
     </div>
-    <button class="btn no-print" style="background:var(--panel2);color:var(--txt2);border:1px solid var(--border)" onclick="cerrarSesion()" title="Cerrar sesión">🚪</button>
+    <button class="btn no-print" style="background:var(--panel2);color:var(--txt2);border:1px solid var(--border)" onclick="cerrarSesion()" title="Cerrar sesión"><svg class="ico" viewBox="0 0 20 20"><rect x="4" y="2" width="12" height="16" rx="1" stroke="currentColor" stroke-width="1.4" fill="none"/><circle cx="13.5" cy="10" r="1" fill="currentColor"/></svg></button>
   </div>
 </div>
 
 <!-- ═══ TABS ═══ -->
 <div id="tabs">
-  <div class="tab on" data-v="dashboard">📊 Dashboard</div>
-  <div class="tab" data-v="instructores">👥 Instructores</div>
-  <div class="tab" data-v="calendario">📅 Calendario</div>
-  <div class="tab" data-v="historial">📋 Historial Clases</div>
-  <div class="tab" data-v="diagnostico">🔬 Diagnóstico</div>
-  <div class="tab" data-v="top10">🔎 Top 10</div>
-  <div class="tab" data-v="recorridos">🚶 Recorridos</div>
-  <div class="tab" data-v="heatmap">🌡 Mapa de Calor</div>
-  <div class="tab" data-v="alertas">🔔 Alertas</div>
-  <div class="tab" data-v="salones">🏠 Salones</div>
+  <div class="tab on" data-v="dashboard"><svg class="ico" viewBox="0 0 20 20"><rect x="3" y="12" width="3" height="5" rx="1" stroke="currentColor" stroke-width="1.4" fill="none"/><rect x="8.5" y="8" width="3" height="9" rx="1" stroke="currentColor" stroke-width="1.4" fill="none"/><rect x="14" y="4" width="3" height="13" rx="1" stroke="currentColor" stroke-width="1.4" fill="none"/></svg> Dashboard</div>
+  <div class="tab" data-v="instructores"><svg class="ico" viewBox="0 0 20 20"><circle cx="8" cy="6" r="3" stroke="currentColor" stroke-width="1.4" fill="none"/><path d="M2 17 Q2 12 8 12 Q14 12 14 17" stroke="currentColor" stroke-width="1.4" fill="none" stroke-linecap="round"/><circle cx="14" cy="6" r="2.5" stroke="currentColor" stroke-width="1.3" fill="none"/><path d="M14 11 Q18 11 18 16" stroke="currentColor" stroke-width="1.3" fill="none" stroke-linecap="round"/></svg> Instructores</div>
+  <div class="tab" data-v="calendario"><svg class="ico" viewBox="0 0 20 20"><rect x="3" y="4" width="14" height="13" rx="2" stroke="currentColor" stroke-width="1.4" fill="none"/><line x1="3" y1="9" x2="17" y2="9" stroke="currentColor" stroke-width="1.3"/><line x1="7" y1="2" x2="7" y2="6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><line x1="13" y1="2" x2="13" y2="6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><circle cx="7" cy="12.5" r="1" fill="currentColor"/><circle cx="10" cy="12.5" r="1" fill="currentColor"/><circle cx="13" cy="12.5" r="1" fill="currentColor"/></svg> Calendario</div>
+  <div class="tab" data-v="historial"><svg class="ico" viewBox="0 0 20 20"><rect x="5" y="3" width="10" height="14" rx="2" stroke="currentColor" stroke-width="1.5" fill="none"/><rect x="8" y="2" width="4" height="2.5" rx="1" stroke="currentColor" stroke-width="1.2" fill="none"/><line x1="8" y1="9" x2="12" y2="9" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/><line x1="8" y1="12" x2="13" y2="12" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg> Historial Clases</div>
+  <div class="tab" data-v="diagnostico"><svg class="ico" viewBox="0 0 20 20"><line x1="10" y1="3" x2="10" y2="13" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><path d="M7 10 L4 16 L16 16" stroke="currentColor" stroke-width="1.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/><line x1="13" y1="10" x2="7" y2="10" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/><line x1="8" y1="5" x2="12" y2="5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg> Diagnóstico</div>
+  <div class="tab" data-v="top10"><svg class="ico" viewBox="0 0 20 20"><circle cx="8.5" cy="8.5" r="5" stroke="currentColor" stroke-width="1.5" fill="none"/><line x1="12.5" y1="12.5" x2="17" y2="17" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg> Top 10</div>
+  <div class="tab" data-v="recorridos"><svg class="ico" viewBox="0 0 20 20"><circle cx="10" cy="4" r="2" stroke="currentColor" stroke-width="1.4" fill="none"/><path d="M10 6 L9 11 L7 16 M10 6 L11 11 L13 16 M9 11 L12 11" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg> Recorridos</div>
+  <div class="tab" data-v="heatmap"><svg class="ico" viewBox="0 0 20 20"><rect x="8.5" y="3" width="3" height="10" rx="1.5" stroke="currentColor" stroke-width="1.3" fill="none"/><circle cx="10" cy="15" r="3" stroke="currentColor" stroke-width="1.3" fill="none"/><line x1="10" y1="11.5" x2="10" y2="12.5" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/></svg> Mapa de Calor</div>
+  <div class="tab" data-v="alertas"><svg class="ico" viewBox="0 0 20 20"><path d="M10 2 Q14 2 15 7 L16 14 L4 14 L5 7 Q6 2 10 2" stroke="currentColor" stroke-width="1.4" fill="none" stroke-linejoin="round"/><path d="M7.5 14 Q7.5 17 10 17 Q12.5 17 12.5 14" stroke="currentColor" stroke-width="1.3" fill="none"/></svg> Alertas</div>
+  <div class="tab" data-v="salones"><svg class="ico" viewBox="0 0 20 20"><path d="M3 10 L10 3 L17 10 L17 17 L3 17 Z" stroke="currentColor" stroke-width="1.4" fill="none" stroke-linejoin="round"/><rect x="7.5" y="12" width="5" height="5" rx="0.5" stroke="currentColor" stroke-width="1.3" fill="none"/></svg> Salones</div>
 </div>
 
 <main>
@@ -531,8 +602,8 @@ html.tema-claro .login-field input{background:#fff;border-color:#c2d8c2;color:#1
 <!-- ══ DASHBOARD ══ -->
 <div class="vista on" id="v-dashboard">
   <!-- Filtro de periodo del dashboard -->
-  <div style="display:flex;align-items:center;gap:.6rem;flex-wrap:wrap;margin-bottom:1rem;padding:.7rem 1rem;background:var(--panel);border:1px solid var(--border);border-radius:12px">
-    <span style="font-size:.72rem;text-transform:uppercase;letter-spacing:1px;color:var(--txt2)">📅 Periodo</span>
+  <div class="dash-filter-bar" style="display:flex;align-items:center;gap:.6rem;flex-wrap:wrap;margin-bottom:1rem;padding:.7rem 1rem;border-radius:12px">
+    <span style="font-size:.72rem;text-transform:uppercase;letter-spacing:1px;color:var(--txt2)"><svg class="ico" viewBox="0 0 20 20"><rect x="3" y="4" width="14" height="13" rx="2" stroke="currentColor" stroke-width="1.4" fill="none"/><line x1="3" y1="9" x2="17" y2="9" stroke="currentColor" stroke-width="1.3"/><line x1="7" y1="2" x2="7" y2="6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><line x1="13" y1="2" x2="13" y2="6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><circle cx="7" cy="12.5" r="1" fill="currentColor"/><circle cx="10" cy="12.5" r="1" fill="currentColor"/><circle cx="13" cy="12.5" r="1" fill="currentColor"/></svg> Periodo</span>
     <input type="date" id="dash-fecha-ini" class="ctrl" style="width:140px" onchange="renderDashboard()">
     <span style="color:var(--txt3);font-size:.8rem">→</span>
     <input type="date" id="dash-fecha-fin" class="ctrl" style="width:140px" onchange="renderDashboard()">
@@ -546,12 +617,12 @@ html.tema-claro .login-field input{background:#fff;border-color:#c2d8c2;color:#1
   <!-- ALERTAS RÁPIDAS INLINE -->
   <div id="quick-alerts" style="margin-bottom:1rem"></div>
   <div class="g2">
-    <div class="panel"><div class="phdr"><span class="pttl">🏆 Ranking Aforo</span><span id="rank-count-lbl" style="font-size:.7rem;color:var(--txt2)"></span></div><div class="pbody" id="rank-p" style="max-height:380px;overflow-y:auto;padding-right:4px"></div></div>
-    <div class="panel"><div class="phdr"><span class="pttl">⚠ Alertas Faltas</span></div><div class="pbody" id="alerts-p"></div></div>
+    <div class="panel"><div class="phdr"><span class="pttl"><svg class="ico" viewBox="0 0 20 20"><path d="M6 3 H14 L13 11 Q12 14 10 14 Q8 14 7 11 Z" stroke="currentColor" stroke-width="1.3" fill="none" stroke-linejoin="round"/><line x1="10" y1="14" x2="10" y2="16.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/><line x1="7" y1="17" x2="13" y2="17" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><path d="M6 4 Q3 4 3 7 Q3 10 6 11" stroke="currentColor" stroke-width="1.3" fill="none" stroke-linecap="round"/><path d="M14 4 Q17 4 17 7 Q17 10 14 11" stroke="currentColor" stroke-width="1.3" fill="none" stroke-linecap="round"/></svg> Ranking Aforo</span><span id="rank-count-lbl" style="font-size:.7rem;color:var(--txt2)"></span></div><div class="pbody" id="rank-p" style="max-height:380px;overflow-y:auto;padding-right:4px"></div></div>
+    <div class="panel"><div class="phdr"><span class="pttl"><svg class="ico ico-warn" viewBox="0 0 20 20"><path d="M10 3 L18 17 H2 Z" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linejoin="round"/><line x1="10" y1="9" x2="10" y2="13" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><circle cx="10" cy="15.5" r="0.8" fill="currentColor"/></svg> Alertas Faltas</span></div><div class="pbody" id="alerts-p"></div></div>
   </div>
   <div class="panel">
     <div class="phdr">
-      <span class="pttl">📊 Aforo por Tipo de Clase — Haz clic para diagnóstico</span>
+      <span class="pttl"><svg class="ico" viewBox="0 0 20 20"><rect x="3" y="12" width="3" height="5" rx="1" stroke="currentColor" stroke-width="1.4" fill="none"/><rect x="8.5" y="8" width="3" height="9" rx="1" stroke="currentColor" stroke-width="1.4" fill="none"/><rect x="14" y="4" width="3" height="13" rx="1" stroke="currentColor" stroke-width="1.4" fill="none"/></svg> Aforo por Tipo de Clase — Haz clic para diagnóstico</span>
       <span style="font-size:.72rem;color:var(--txt2)">% aforo y cantidad de asistentes · clic en barra = diagnóstico</span>
     </div>
     <div class="pbody"><div class="graph-wrap"><canvas id="chart-clases"></canvas></div></div>
@@ -562,9 +633,9 @@ html.tema-claro .login-field input{background:#fff;border-color:#c2d8c2;color:#1
 <div class="vista" id="v-instructores">
   <div class="panel">
     <div class="phdr">
-      <span class="pttl" id="inst-count-lbl">👥 Instructores</span>
+      <span class="pttl" id="inst-count-lbl"><svg class="ico" viewBox="0 0 20 20"><circle cx="8" cy="6" r="3" stroke="currentColor" stroke-width="1.4" fill="none"/><path d="M2 17 Q2 12 8 12 Q14 12 14 17" stroke="currentColor" stroke-width="1.4" fill="none" stroke-linecap="round"/><circle cx="14" cy="6" r="2.5" stroke="currentColor" stroke-width="1.3" fill="none"/><path d="M14 11 Q18 11 18 16" stroke="currentColor" stroke-width="1.3" fill="none" stroke-linecap="round"/></svg> Instructores</span>
       <div style="display:flex;gap:.5rem;flex-wrap:wrap">
-        <input class="ctrl" type="text" placeholder="🔍 Buscar..." oninput="filterInst(this.value)" style="width:180px">
+        <input class="ctrl" type="text" placeholder="Buscar..."ico" viewBox="0 0 20 20"><circle cx="8.5" cy="8.5" r="5" stroke="currentColor" stroke-width="1.5" fill="none"/><line x1="12.5" y1="12.5" x2="17" y2="17" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg> Buscar..." oninput="filterInst(this.value)" style="width:180px">
         <button class="btn bg" onclick="abrirModalInstructor(null)">+ Nuevo</button>
       </div>
     </div>
@@ -581,12 +652,12 @@ html.tema-claro .login-field input{background:#fff;border-color:#c2d8c2;color:#1
 <div class="vista" id="v-calendario">
   <div class="panel">
     <div class="phdr">
-      <span class="pttl">📅 Calendario Semanal</span>
+      <span class="pttl"><svg class="ico" viewBox="0 0 20 20"><rect x="3" y="4" width="14" height="13" rx="2" stroke="currentColor" stroke-width="1.4" fill="none"/><line x1="3" y1="9" x2="17" y2="9" stroke="currentColor" stroke-width="1.3"/><line x1="7" y1="2" x2="7" y2="6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><line x1="13" y1="2" x2="13" y2="6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><circle cx="7" cy="12.5" r="1" fill="currentColor"/><circle cx="10" cy="12.5" r="1" fill="currentColor"/><circle cx="13" cy="12.5" r="1" fill="currentColor"/></svg> Calendario Semanal</span>
       <div style="display:flex;align-items:center;gap:.6rem;flex-wrap:wrap">
         <button class="btn bo" onclick="cambiarSemana(-1)" style="padding:5px 12px">◀ Anterior</button>
         <span id="cal-semana-lbl" style="font-size:.8rem;color:var(--gold2);font-family:'DM Mono',monospace;min-width:180px;text-align:center">—</span>
         <button class="btn bo" onclick="cambiarSemana(1)" style="padding:5px 12px">Siguiente ▶</button>
-        <button class="btn bg" onclick="irSemanaActual()" style="padding:5px 10px;font-size:.72rem">📍 Hoy</button>
+        <button class="btn bg" onclick="irSemanaActual()" style="padding:5px 10px;font-size:.72rem"><svg class="ico" viewBox="0 0 20 20"><path d="M10 2 Q14 2 14 7 Q14 12 10 18 Q6 12 6 7 Q6 2 10 2" stroke="currentColor" stroke-width="1.4" fill="none" stroke-linejoin="round"/><circle cx="10" cy="7" r="2" stroke="currentColor" stroke-width="1.2" fill="none"/></svg> Hoy</button>
       </div>
     </div>
     <div class="pbody" style="overflow-x:auto"><div id="cal-grid" style="min-width:600px"></div></div>
@@ -597,7 +668,7 @@ html.tema-claro .login-field input{background:#fff;border-color:#c2d8c2;color:#1
 <div class="vista" id="v-diagnostico">
   <div class="panel">
     <div class="phdr">
-      <span class="pttl">🔬 Diagnóstico por Clase</span>
+      <span class="pttl"><svg class="ico" viewBox="0 0 20 20"><line x1="10" y1="3" x2="10" y2="13" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><path d="M7 10 L4 16 L16 16" stroke="currentColor" stroke-width="1.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/><line x1="13" y1="10" x2="7" y2="10" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/><line x1="8" y1="5" x2="12" y2="5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg> Diagnóstico por Clase</span>
       <div style="display:flex;gap:.5rem;align-items:center;flex-wrap:wrap">
         <select class="ctrl" id="diag-clase-sel" onchange="renderDiagnostico()" style="width:160px"></select>
         <select class="ctrl" id="diag-periodo" onchange="renderDiagnostico()" style="width:140px">
@@ -621,7 +692,7 @@ html.tema-claro .login-field input{background:#fff;border-color:#c2d8c2;color:#1
 <div class="vista" id="v-top10">
   <div class="panel">
     <div class="phdr">
-      <span class="pttl">🔎 Top 10 Clases a Revisar</span>
+      <span class="pttl"><svg class="ico" viewBox="0 0 20 20"><circle cx="8.5" cy="8.5" r="5" stroke="currentColor" stroke-width="1.5" fill="none"/><line x1="12.5" y1="12.5" x2="17" y2="17" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg> Top 10 Clases a Revisar</span>
       <span style="font-size:.73rem;color:var(--txt2)">≤3 asistentes en 3+ ocurrencias</span>
     </div>
     <div class="twrap">
@@ -637,7 +708,7 @@ html.tema-claro .login-field input{background:#fff;border-color:#c2d8c2;color:#1
 <div class="vista" id="v-recorridos">
   <div class="panel">
     <div class="phdr">
-      <span class="pttl">🚶 Historial de Recorridos</span>
+      <span class="pttl"><svg class="ico" viewBox="0 0 20 20"><circle cx="10" cy="4" r="2" stroke="currentColor" stroke-width="1.4" fill="none"/><path d="M10 6 L9 11 L7 16 M10 6 L11 11 L13 16 M9 11 L12 11" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg> Historial de Recorridos</span>
       <button class="btn bg" onclick="iniciarRecorrido()">+ Nuevo Recorrido</button>
     </div>
     <div class="twrap">
@@ -653,7 +724,7 @@ html.tema-claro .login-field input{background:#fff;border-color:#c2d8c2;color:#1
 <div class="vista" id="v-historial">
   <div class="panel">
     <div class="phdr">
-      <span class="pttl">📋 Historial de Clases</span>
+      <span class="pttl"><svg class="ico" viewBox="0 0 20 20"><rect x="5" y="3" width="10" height="14" rx="2" stroke="currentColor" stroke-width="1.5" fill="none"/><rect x="8" y="2" width="4" height="2.5" rx="1" stroke="currentColor" stroke-width="1.2" fill="none"/><line x1="8" y1="9" x2="12" y2="9" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/><line x1="8" y1="12" x2="13" y2="12" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg> Historial de Clases</span>
       <div style="display:flex;gap:.5rem;flex-wrap:wrap;align-items:center">
         <input class="ctrl" type="date" id="hist-fecha-ini" style="width:140px" onchange="renderHistorial()">
         <input class="ctrl" type="date" id="hist-fecha-fin" style="width:140px" onchange="renderHistorial()">
@@ -665,11 +736,11 @@ html.tema-claro .login-field input{background:#fff;border-color:#c2d8c2;color:#1
         </select>
         <select class="ctrl" id="hist-estado-fil" style="width:130px" onchange="renderHistorial()">
           <option value="">— Todos los estados —</option>
-          <option value="ok">✅ Impartidas</option>
-          <option value="sub">🔄 Con Suplente</option>
-          <option value="falta">❌ Faltas</option>
+          <option value="ok"><svg class="ico ico-ok" viewBox="0 0 20 20"><circle cx="10" cy="10" r="8" stroke="currentColor" stroke-width="1.5" fill="none"/><polyline points="6,10 9,13 14,7" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg> Impartidas</option>
+          <option value="sub"><svg class="ico" viewBox="0 0 20 20"><path d="M4 10a6 6 0 0 1 6-6 6 6 0 0 1 5.2 3" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round"/><path d="M16 10a6 6 0 0 1-6 6 6 6 0 0 1-5.2-3" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round"/><polyline points="14.5,7 15.5,3.8 18.5,5" stroke="currentColor" stroke-width="1.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/><polyline points="5.5,13 4.5,16.2 1.5,15" stroke="currentColor" stroke-width="1.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg> Con Suplente</option>
+          <option value="falta"><svg class="ico ico-err" viewBox="0 0 20 20"><circle cx="10" cy="10" r="8" stroke="currentColor" stroke-width="1.5" fill="none"/><line x1="7" y1="7" x2="13" y2="13" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><line x1="13" y1="7" x2="7" y2="13" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg> Faltas</option>
         </select>
-        <button class="btn bo" onclick="limpiarFiltrosHistorial()">✕ Limpiar</button>
+        <button class="btn bo" onclick="limpiarFiltrosHistorial()"><svg class="ico" viewBox="0 0 20 20"><line x1="5" y1="5" x2="15" y2="15" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><line x1="15" y1="5" x2="5" y2="15" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg> Limpiar</button>
       </div>
     </div>
     <div style="padding:.6rem 1.2rem;background:var(--panel2);border-bottom:1px solid var(--border);font-size:.75rem;color:var(--txt2)" id="hist-resumen">
@@ -704,7 +775,7 @@ html.tema-claro .login-field input{background:#fff;border-color:#c2d8c2;color:#1
 <div class="vista" id="v-heatmap">
   <div class="panel">
     <div class="phdr">
-      <span class="pttl">🌡 Mapa de Calor — Asistencia por Horario</span>
+      <span class="pttl"><svg class="ico" viewBox="0 0 20 20"><rect x="8.5" y="3" width="3" height="10" rx="1.5" stroke="currentColor" stroke-width="1.3" fill="none"/><circle cx="10" cy="15" r="3" stroke="currentColor" stroke-width="1.3" fill="none"/><line x1="10" y1="11.5" x2="10" y2="12.5" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/></svg> Mapa de Calor — Asistencia por Horario</span>
       <div style="display:flex;gap:.5rem;align-items:center;flex-wrap:wrap">
         <select class="ctrl" id="hm-metric" onchange="renderHeatmap()" style="width:160px">
           <option value="aforo">% Aforo promedio</option>
@@ -712,15 +783,15 @@ html.tema-claro .login-field input{background:#fff;border-color:#c2d8c2;color:#1
           <option value="sesiones">Nº de sesiones</option>
         </select>
         <select class="ctrl" id="hm-inst-fil" onchange="hmInstChange()" style="width:190px">
-          <option value="">👤 Todos los instructores</option>
+          <option value=""><svg class="ico" viewBox="0 0 20 20"><circle cx="10" cy="7" r="3.5" stroke="currentColor" stroke-width="1.4" fill="none"/><path d="M3 18 Q3 12 10 12 Q17 12 17 18" stroke="currentColor" stroke-width="1.4" fill="none" stroke-linecap="round"/></svg> Todos los instructores</option>
         </select>
         <select class="ctrl" id="hm-clase-fil" onchange="renderHeatmap()" style="width:165px">
-          <option value="">📋 Todas las clases</option>
+          <option value=""><svg class="ico" viewBox="0 0 20 20"><rect x="5" y="3" width="10" height="14" rx="2" stroke="currentColor" stroke-width="1.5" fill="none"/><rect x="8" y="2" width="4" height="2.5" rx="1" stroke="currentColor" stroke-width="1.2" fill="none"/><line x1="8" y1="9" x2="12" y2="9" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/><line x1="8" y1="12" x2="13" y2="12" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg> Todas las clases</option>
         </select>
-        <button class="btn bo" id="hm-clear-btn" onclick="hmClearFiltros()" style="padding:5px 10px;font-size:.72rem;display:none">✕ Limpiar</button>
+        <button class="btn bo" id="hm-clear-btn" onclick="hmClearFiltros()" style="padding:5px 10px;font-size:.72rem;display:none"><svg class="ico" viewBox="0 0 20 20"><line x1="5" y1="5" x2="15" y2="15" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><line x1="15" y1="5" x2="5" y2="15" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg> Limpiar</button>
       </div>
     </div>
-    <div id="hmap-context-banner" style="display:none;padding:.55rem 1.2rem;border-bottom:1px solid var(--border);font-size:.75rem;color:var(--txt2);background:var(--panel2);align-items:center;gap:.5rem;flex-wrap:wrap"></div>
+    <div id="hmap-context-banner" style="backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)" style="display:none;padding:.55rem 1.2rem;border-bottom:1px solid var(--border);font-size:.75rem;color:var(--txt2);background:var(--panel2);align-items:center;gap:.5rem;flex-wrap:wrap"></div>
     <div class="pbody">
       <div class="hmap-wrap" id="hmap-grid"></div>
       <div class="hmap-legend" id="hmap-legend"></div>
@@ -728,15 +799,15 @@ html.tema-claro .login-field input{background:#fff;border-color:#c2d8c2;color:#1
     </div>
   </div>
   <div class="panel">
-    <div class="phdr"><span class="pttl">📊 Ranking de Horarios</span></div>
+    <div class="phdr"><span class="pttl"><svg class="ico" viewBox="0 0 20 20"><rect x="3" y="12" width="3" height="5" rx="1" stroke="currentColor" stroke-width="1.4" fill="none"/><rect x="8.5" y="8" width="3" height="9" rx="1" stroke="currentColor" stroke-width="1.4" fill="none"/><rect x="14" y="4" width="3" height="13" rx="1" stroke="currentColor" stroke-width="1.4" fill="none"/></svg> Ranking de Horarios</span></div>
     <div class="pbody">
       <div class="g2">
         <div>
-          <div style="font-size:.68rem;text-transform:uppercase;letter-spacing:1.5px;color:var(--neon);margin-bottom:.6rem">🏆 Top 5 — Horarios con Mayor Demanda</div>
+          <div style="font-size:.68rem;text-transform:uppercase;letter-spacing:1.5px;color:var(--neon);margin-bottom:.6rem"><svg class="ico" viewBox="0 0 20 20"><path d="M6 3 H14 L13 11 Q12 14 10 14 Q8 14 7 11 Z" stroke="currentColor" stroke-width="1.3" fill="none" stroke-linejoin="round"/><line x1="10" y1="14" x2="10" y2="16.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/><line x1="7" y1="17" x2="13" y2="17" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><path d="M6 4 Q3 4 3 7 Q3 10 6 11" stroke="currentColor" stroke-width="1.3" fill="none" stroke-linecap="round"/><path d="M14 4 Q17 4 17 7 Q17 10 14 11" stroke="currentColor" stroke-width="1.3" fill="none" stroke-linecap="round"/></svg> Top 5 — Horarios con Mayor Demanda</div>
           <div id="hm-top5"></div>
         </div>
         <div>
-          <div style="font-size:.68rem;text-transform:uppercase;letter-spacing:1.5px;color:var(--red2);margin-bottom:.6rem">⚠ Top 5 — Horarios Críticos a Revisar</div>
+          <div style="font-size:.68rem;text-transform:uppercase;letter-spacing:1.5px;color:var(--red2);margin-bottom:.6rem"><svg class="ico ico-warn" viewBox="0 0 20 20"><path d="M10 3 L18 17 H2 Z" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linejoin="round"/><line x1="10" y1="9" x2="10" y2="13" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><circle cx="10" cy="15.5" r="0.8" fill="currentColor"/></svg> Top 5 — Horarios Críticos a Revisar</div>
           <div id="hm-bot5"></div>
         </div>
       </div>
@@ -748,8 +819,8 @@ html.tema-claro .login-field input{background:#fff;border-color:#c2d8c2;color:#1
 <div class="vista" id="v-alertas">
   <div class="panel">
     <div class="phdr">
-      <span class="pttl">🔔 Centro de Alertas</span>
-      <button class="btn bg" onclick="renderAlertas()" style="font-size:.72rem;padding:5px 11px">🔄 Actualizar</button>
+      <span class="pttl"><svg class="ico" viewBox="0 0 20 20"><path d="M10 2 Q14 2 15 7 L16 14 L4 14 L5 7 Q6 2 10 2" stroke="currentColor" stroke-width="1.4" fill="none" stroke-linejoin="round"/><path d="M7.5 14 Q7.5 17 10 17 Q12.5 17 12.5 14" stroke="currentColor" stroke-width="1.3" fill="none"/></svg> Centro de Alertas</span>
+      <button class="btn bg" onclick="renderAlertas()" style="font-size:.72rem;padding:5px 11px"><svg class="ico" viewBox="0 0 20 20"><path d="M4 10a6 6 0 0 1 6-6 6 6 0 0 1 5.2 3" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round"/><path d="M16 10a6 6 0 0 1-6 6 6 6 0 0 1-5.2-3" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round"/><polyline points="14.5,7 15.5,3.8 18.5,5" stroke="currentColor" stroke-width="1.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/><polyline points="5.5,13 4.5,16.2 1.5,15" stroke="currentColor" stroke-width="1.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg> Actualizar</button>
     </div>
     <div class="pbody" id="alertas-body">
       <div class="empty">Calculando alertas...</div>
@@ -761,13 +832,13 @@ html.tema-claro .login-field input{background:#fff;border-color:#c2d8c2;color:#1
 <div class="vista" id="v-salones">
   <div class="panel">
     <div class="phdr">
-      <span class="pttl">🏠 Capacidad por Salón</span>
+      <span class="pttl"><svg class="ico" viewBox="0 0 20 20"><path d="M3 10 L10 3 L17 10 L17 17 L3 17 Z" stroke="currentColor" stroke-width="1.4" fill="none" stroke-linejoin="round"/><rect x="7.5" y="12" width="5" height="5" rx="0.5" stroke="currentColor" stroke-width="1.3" fill="none"/></svg> Capacidad por Salón</span>
       <button class="btn bg" onclick="abrirModalSalon(null)">+ Nuevo Salón</button>
     </div>
     <div class="pbody" id="salones-body"></div>
   </div>
   <div class="panel">
-    <div class="phdr"><span class="pttl">📋 Asignación Clase → Salón</span></div>
+    <div class="phdr"><span class="pttl"><svg class="ico" viewBox="0 0 20 20"><rect x="5" y="3" width="10" height="14" rx="2" stroke="currentColor" stroke-width="1.5" fill="none"/><rect x="8" y="2" width="4" height="2.5" rx="1" stroke="currentColor" stroke-width="1.2" fill="none"/><line x1="8" y1="9" x2="12" y2="9" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/><line x1="8" y1="12" x2="13" y2="12" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg> Asignación Clase → Salón</span></div>
     <div class="pbody" id="asignacion-body"></div>
   </div>
 </div>
@@ -777,18 +848,18 @@ html.tema-claro .login-field input{background:#fff;border-color:#c2d8c2;color:#1
 <!-- MODAL CAMBIAR CONTRASEÑA (solo admin) -->
 <div class="ov" id="m-cambiar-pass">
 <div class="modal narrow">
-  <button class="mcls" onclick="cerrarModal('m-cambiar-pass')">✕</button>
-  <div class="mttl">🔑 Cambiar Contraseña</div>
+  <button class="mcls" onclick="cerrarModal('m-cambiar-pass')"><svg class="ico" viewBox="0 0 20 20"><line x1="5" y1="5" x2="15" y2="15" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><line x1="15" y1="5" x2="5" y2="15" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></button>
+  <div class="mttl"><svg class="ico" viewBox="0 0 20 20"><circle cx="7" cy="9" r="4" stroke="currentColor" stroke-width="1.4" fill="none"/><line x1="10.8" y1="11" x2="17" y2="17" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><line x1="14" y1="15" x2="16" y2="13" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg> Cambiar Contraseña</div>
   <div style="font-size:.72rem;color:var(--txt2);margin-bottom:1rem">Las contraseñas se guardan localmente en este dispositivo. Si usas el sistema en otro equipo, deberás cambiarla allí también.</div>
   <div style="background:var(--panel2);border:1px solid var(--border);border-radius:10px;padding:.9rem;margin-bottom:.8rem">
-    <div style="font-size:.68rem;text-transform:uppercase;letter-spacing:1px;color:var(--neon);margin-bottom:.6rem">🛡️ Coordinador</div>
+    <div style="font-size:.68rem;text-transform:uppercase;letter-spacing:1px;color:var(--neon);margin-bottom:.6rem"><svg class="ico" viewBox="0 0 20 20"><path d="M10 2 L17 5 L17 11 Q17 16 10 19 Q3 16 3 11 L3 5 Z" stroke="currentColor" stroke-width="1.4" fill="none" stroke-linejoin="round"/></svg>️ Coordinador</div>
     <div class="fg"><label>Contraseña actual</label><input type="password" id="cp-admin-actual" placeholder="Contraseña actual..."></div>
     <div class="fg"><label>Nueva contraseña</label><input type="password" id="cp-admin-nueva" placeholder="Nueva contraseña..."></div>
     <div class="fg"><label>Confirmar nueva</label><input type="password" id="cp-admin-confirma" placeholder="Repetir nueva contraseña..."></div>
     <button class="bsave" style="margin-top:.3rem" onclick="cambiarPass('admin')">Cambiar contraseña de Coordinador</button>
   </div>
   <div style="background:var(--panel2);border:1px solid var(--border);border-radius:10px;padding:.9rem">
-    <div style="font-size:.68rem;text-transform:uppercase;letter-spacing:1px;color:var(--blue);margin-bottom:.6rem">👁️ Consulta (usuario)</div>
+    <div style="font-size:.68rem;text-transform:uppercase;letter-spacing:1px;color:var(--blue);margin-bottom:.6rem"><svg class="ico" viewBox="0 0 20 20"><path d="M2 10 Q6 4 10 4 Q14 4 18 10 Q14 16 10 16 Q6 16 2 10" stroke="currentColor" stroke-width="1.4" fill="none"/><circle cx="10" cy="10" r="2.5" stroke="currentColor" stroke-width="1.3" fill="none"/></svg>️ Consulta (usuario)</div>
     <div class="fg"><label>Nueva contraseña para Consulta</label><input type="password" id="cp-user-nueva" placeholder="Nueva contraseña..."></div>
     <div class="fg"><label>Confirmar nueva</label><input type="password" id="cp-user-confirma" placeholder="Repetir nueva contraseña..."></div>
     <button class="bsave" style="margin-top:.3rem;background:#1a5fa3" onclick="cambiarPass('usuario')">Cambiar contraseña de Consulta</button>
@@ -797,7 +868,7 @@ html.tema-claro .login-field input{background:#fff;border-color:#c2d8c2;color:#1
 </div>
 <div class="ov" id="m-salon">
 <div class="modal" style="width:520px">
-  <button class="mcls" onclick="cerrarModal('m-salon')">✕</button>
+  <button class="mcls" onclick="cerrarModal('m-salon')"><svg class="ico" viewBox="0 0 20 20"><line x1="5" y1="5" x2="15" y2="15" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><line x1="15" y1="5" x2="5" y2="15" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></button>
   <div class="mttl" id="ms-ttl">+ Nuevo Salón</div>
 
   <!-- Nombre y capacidad -->
@@ -810,15 +881,15 @@ html.tema-claro .login-field input{background:#fff;border-color:#c2d8c2;color:#1
   <div class="fg">
     <label>Tipo de espacio</label>
     <select id="ms-tipo" onchange="toggleTipoCustom()" style="margin-bottom:4px">
-      <option value="salon">🏋️ Salón general</option>
-      <option value="spinning">🚴 Estudio Spinning</option>
-      <option value="yoga">🧘 Sala Yoga / Pilates</option>
-      <option value="funcional">💪 Área Funcional / CrossFit</option>
-      <option value="cardio">🏃 Sala Cardio</option>
-      <option value="piscina">🏊 Piscina / Alberca</option>
-      <option value="exterior">🌿 Área exterior</option>
-      <option value="multiusos">🔄 Multiusos</option>
-      <option value="otro">✏️ Otro (escribir abajo)</option>
+      <option value="salon"><svg class="ico" viewBox="0 0 20 20"><line x1="2" y1="10" x2="18" y2="10" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/><rect x="2" y="8" width="2.5" height="4" rx="0.8" stroke="currentColor" stroke-width="1.2" fill="none"/><rect x="5" y="7" width="2.5" height="6" rx="0.8" stroke="currentColor" stroke-width="1.2" fill="none"/><rect x="12.5" y="7" width="2.5" height="6" rx="0.8" stroke="currentColor" stroke-width="1.2" fill="none"/><rect x="15.5" y="8" width="2.5" height="4" rx="0.8" stroke="currentColor" stroke-width="1.2" fill="none"/><circle cx="10" cy="10" r="1.5" fill="currentColor"/></svg>️ Salón general</option>
+      <option value="spinning"><svg class="ico" viewBox="0 0 20 20"><circle cx="5" cy="14" r="3.5" stroke="currentColor" stroke-width="1.3" fill="none"/><circle cx="15" cy="14" r="3.5" stroke="currentColor" stroke-width="1.3" fill="none"/><path d="M5 14 L8 8 L12 8 L15 14 M8 8 L10 5" stroke="currentColor" stroke-width="1.3" fill="none" stroke-linecap="round" stroke-linejoin="round"/><circle cx="10" cy="5" r="1" fill="currentColor"/></svg> Estudio Spinning</option>
+      <option value="yoga"><svg class="ico" viewBox="0 0 20 20"><circle cx="10" cy="4" r="1.8" stroke="currentColor" stroke-width="1.3" fill="none"/><path d="M10 6 L10 12 M10 8 L7 10 M10 8 L13 10 M10 12 L8 16 M10 12 L12 16" stroke="currentColor" stroke-width="1.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg> Sala Yoga / Pilates</option>
+      <option value="funcional"><svg class="ico" viewBox="0 0 20 20"><path d="M12 4 Q16 5 15 9 L14 11 Q15 14 13 16 Q10 18 7 15 L5 12 Q3 9 6 7 L9 8 L11 5 Z" stroke="currentColor" stroke-width="1.3" fill="none" stroke-linejoin="round"/></svg> Área Funcional / CrossFit</option>
+      <option value="cardio"><svg class="ico" viewBox="0 0 20 20"><circle cx="12" cy="4" r="1.8" stroke="currentColor" stroke-width="1.3" fill="none"/><path d="M12 6 L10 10 L7 13 M10 10 L13 13 L15 17 M12 6 L14 9" stroke="currentColor" stroke-width="1.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg> Sala Cardio</option>
+      <option value="piscina"><svg class="ico" viewBox="0 0 20 20"><circle cx="13" cy="5" r="1.8" stroke="currentColor" stroke-width="1.3" fill="none"/><path d="M3 10 Q7 7 10 10 Q13 13 17 10" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round"/><path d="M3 14 Q7 11 10 14 Q13 17 17 14" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round"/><path d="M13 7 L10 9" stroke="currentColor" stroke-width="1.4" fill="none" stroke-linecap="round"/></svg> Piscina / Alberca</option>
+      <option value="exterior"><svg class="ico" viewBox="0 0 20 20"><path d="M5 16 Q8 8 16 4 Q14 12 8 15 Z" stroke="currentColor" stroke-width="1.3" fill="none" stroke-linejoin="round"/><line x1="5" y1="16" x2="12" y2="9" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg> Área exterior</option>
+      <option value="multiusos"><svg class="ico" viewBox="0 0 20 20"><path d="M4 10a6 6 0 0 1 6-6 6 6 0 0 1 5.2 3" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round"/><path d="M16 10a6 6 0 0 1-6 6 6 6 0 0 1-5.2-3" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round"/><polyline points="14.5,7 15.5,3.8 18.5,5" stroke="currentColor" stroke-width="1.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/><polyline points="5.5,13 4.5,16.2 1.5,15" stroke="currentColor" stroke-width="1.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg> Multiusos</option>
+      <option value="otro"><svg class="ico" viewBox="0 0 20 20"><path d="M13.5 3.5 L16.5 6.5 L8 15 L4 16 L5 12 Z" stroke="currentColor" stroke-width="1.4" fill="none" stroke-linejoin="round"/><line x1="12" y1="5" x2="15" y2="8" stroke="currentColor" stroke-width="1.3"/></svg>️ Otro (escribir abajo)</option>
     </select>
     <input type="text" id="ms-tipo-custom" placeholder="Escribe el tipo de espacio..." style="display:none">
   </div>
@@ -846,15 +917,15 @@ html.tema-claro .login-field input{background:#fff;border-color:#c2d8c2;color:#1
   </div>
 
   <input type="hidden" id="ms-id" value="">
-  <button class="bsave" onclick="guardarSalon()">💾 Guardar Salón</button>
-  <button class="bdel" id="ms-del" style="display:none;margin-top:.4rem" onclick="eliminarSalon()">🗑 Eliminar Salón</button>
+  <button class="bsave" onclick="guardarSalon()"><svg class="ico" viewBox="0 0 20 20"><rect x="3" y="3" width="14" height="14" rx="2" stroke="currentColor" stroke-width="1.4" fill="none"/><rect x="7" y="3" width="6" height="5" rx="0.5" stroke="currentColor" stroke-width="1.3" fill="none"/><rect x="5" y="11" width="10" height="5" rx="1" stroke="currentColor" stroke-width="1.3" fill="none"/><line x1="10" y1="4" x2="10" y2="7.5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg> Guardar Salón</button>
+  <button class="bdel" id="ms-del" style="display:none;margin-top:.4rem" onclick="eliminarSalon()"><svg class="ico" viewBox="0 0 20 20"><polyline points="5,6 15,6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><path d="M8 6V4h4v2" stroke="currentColor" stroke-width="1.4" fill="none" stroke-linecap="round"/><rect x="6" y="6" width="8" height="10" rx="1.5" stroke="currentColor" stroke-width="1.4" fill="none"/><line x1="9" y1="9" x2="9" y2="14" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/><line x1="11" y1="9" x2="11" y2="14" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg> Eliminar Salón</button>
 </div>
 </div>
 
 <!-- MODAL INSTRUCTOR -->
 <div class="ov" id="m-instructor">
 <div class="modal wide">
-  <button class="mcls" onclick="cerrarModal('m-instructor')">✕</button>
+  <button class="mcls" onclick="cerrarModal('m-instructor')"><svg class="ico" viewBox="0 0 20 20"><line x1="5" y1="5" x2="15" y2="15" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><line x1="15" y1="5" x2="5" y2="15" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></button>
   <div class="mttl" id="mi-ttl">+ Nuevo Instructor</div>
   <div class="fr">
     <div class="fg"><label>Nombre completo</label><input type="text" id="mi-nombre" placeholder="Nombre..."></div>
@@ -897,15 +968,15 @@ html.tema-claro .login-field input{background:#fff;border-color:#c2d8c2;color:#1
   </div>
 
   <input type="hidden" id="mi-id" value="">
-  <button class="bsave" onclick="guardarInstructor()">💾 Guardar</button>
-  <button class="bdel" id="mi-del" style="display:none" onclick="eliminarInstructor()">🗑 Eliminar Instructor</button>
+  <button class="bsave" onclick="guardarInstructor()"><svg class="ico" viewBox="0 0 20 20"><rect x="3" y="3" width="14" height="14" rx="2" stroke="currentColor" stroke-width="1.4" fill="none"/><rect x="7" y="3" width="6" height="5" rx="0.5" stroke="currentColor" stroke-width="1.3" fill="none"/><rect x="5" y="11" width="10" height="5" rx="1" stroke="currentColor" stroke-width="1.3" fill="none"/><line x1="10" y1="4" x2="10" y2="7.5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg> Guardar</button>
+  <button class="bdel" id="mi-del" style="display:none" onclick="eliminarInstructor()"><svg class="ico" viewBox="0 0 20 20"><polyline points="5,6 15,6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><path d="M8 6V4h4v2" stroke="currentColor" stroke-width="1.4" fill="none" stroke-linecap="round"/><rect x="6" y="6" width="8" height="10" rx="1.5" stroke="currentColor" stroke-width="1.4" fill="none"/><line x1="9" y1="9" x2="9" y2="14" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/><line x1="11" y1="9" x2="11" y2="14" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg> Eliminar Instructor</button>
 </div>
 </div>
 
 <!-- REGISTRAR CLASE -->
 <div class="ov" id="m-clase">
 <div class="modal">
-  <button class="mcls" onclick="cerrarModal('m-clase')">✕</button>
+  <button class="mcls" onclick="cerrarModal('m-clase')"><svg class="ico" viewBox="0 0 20 20"><line x1="5" y1="5" x2="15" y2="15" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><line x1="15" y1="5" x2="5" y2="15" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></button>
   <div class="mttl">+ Registrar Clase</div>
   <div class="fr">
     <div class="fg"><label>Instructor</label><select id="rc-inst" onchange="cargarClasesInst('rc')"></select></div>
@@ -925,9 +996,9 @@ html.tema-claro .login-field input{background:#fff;border-color:#c2d8c2;color:#1
     <div class="fg"><label>Duración (min)</label><input type="number" id="rc-dur" value="60"></div>
     <div class="fg"><label>Estado</label>
       <select id="rc-est" onchange="toggleSuplenteClase()">
-        <option value="ok">✅ Impartida</option>
-        <option value="falta">❌ Falta</option>
-        <option value="sub">🔄 Con Suplente</option>
+        <option value="ok"><svg class="ico ico-ok" viewBox="0 0 20 20"><circle cx="10" cy="10" r="8" stroke="currentColor" stroke-width="1.5" fill="none"/><polyline points="6,10 9,13 14,7" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg> Impartida</option>
+        <option value="falta"><svg class="ico ico-err" viewBox="0 0 20 20"><circle cx="10" cy="10" r="8" stroke="currentColor" stroke-width="1.5" fill="none"/><line x1="7" y1="7" x2="13" y2="13" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><line x1="13" y1="7" x2="7" y2="13" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg> Falta</option>
+        <option value="sub"><svg class="ico" viewBox="0 0 20 20"><path d="M4 10a6 6 0 0 1 6-6 6 6 0 0 1 5.2 3" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round"/><path d="M16 10a6 6 0 0 1-6 6 6 6 0 0 1-5.2-3" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round"/><polyline points="14.5,7 15.5,3.8 18.5,5" stroke="currentColor" stroke-width="1.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/><polyline points="5.5,13 4.5,16.2 1.5,15" stroke="currentColor" stroke-width="1.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg> Con Suplente</option>
       </select>
     </div>
   </div>
@@ -936,15 +1007,15 @@ html.tema-claro .login-field input{background:#fff;border-color:#c2d8c2;color:#1
     <label>Instructor Suplente</label>
     <select id="rc-suplente"><option value="">— Seleccionar suplente —</option></select>
   </div>
-  <button class="bsave" onclick="guardarClase()">💾 Guardar</button>
+  <button class="bsave" onclick="guardarClase()"><svg class="ico" viewBox="0 0 20 20"><rect x="3" y="3" width="14" height="14" rx="2" stroke="currentColor" stroke-width="1.4" fill="none"/><rect x="7" y="3" width="6" height="5" rx="0.5" stroke="currentColor" stroke-width="1.3" fill="none"/><rect x="5" y="11" width="10" height="5" rx="1" stroke="currentColor" stroke-width="1.3" fill="none"/><line x1="10" y1="4" x2="10" y2="7.5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg> Guardar</button>
 </div>
 </div>
 
 <!-- REGISTRAR FALTA -->
 <div class="ov" id="m-falta">
 <div class="modal narrow">
-  <button class="mcls" onclick="cerrarModal('m-falta')">✕</button>
-  <div class="mttl">⚠ Registrar Falta</div>
+  <button class="mcls" onclick="cerrarModal('m-falta')"><svg class="ico" viewBox="0 0 20 20"><line x1="5" y1="5" x2="15" y2="15" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><line x1="15" y1="5" x2="5" y2="15" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></button>
+  <div class="mttl"><svg class="ico ico-warn" viewBox="0 0 20 20"><path d="M10 3 L18 17 H2 Z" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linejoin="round"/><line x1="10" y1="9" x2="10" y2="13" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><circle cx="10" cy="15.5" r="0.8" fill="currentColor"/></svg> Registrar Falta</div>
   <div class="fg"><label>Instructor</label><select id="rf-inst" onchange="cargarClasesInst('rf')"></select></div>
   <div class="fr">
     <div class="fg"><label>Clase</label><select id="rf-clase"></select></div>
@@ -963,8 +1034,8 @@ html.tema-claro .login-field input{background:#fff;border-color:#c2d8c2;color:#1
 <!-- RECORRIDO INICIO -->
 <div class="ov" id="m-rec-init">
 <div class="modal narrow">
-  <button class="mcls" onclick="cerrarModal('m-rec-init')">✕</button>
-  <div class="mttl">🚶 Iniciar Recorrido</div>
+  <button class="mcls" onclick="cerrarModal('m-rec-init')"><svg class="ico" viewBox="0 0 20 20"><line x1="5" y1="5" x2="15" y2="15" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><line x1="15" y1="5" x2="5" y2="15" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></button>
+  <div class="mttl"><svg class="ico" viewBox="0 0 20 20"><circle cx="10" cy="4" r="2" stroke="currentColor" stroke-width="1.4" fill="none"/><path d="M10 6 L9 11 L7 16 M10 6 L11 11 L13 16 M9 11 L12 11" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg> Iniciar Recorrido</div>
   <div class="fg"><label>Fecha</label><input type="date" id="ri-fecha"></div>
   <div class="fg"><label>Hora del recorrido</label><input type="time" id="ri-hora" value="07:30" oninput="previewClasesActivas()">
     <span style="font-size:.7rem;color:var(--txt2);margin-top:3px">Se mostrarán las clases activas en ese horario</span>
@@ -1007,9 +1078,9 @@ html.tema-claro .login-field input{background:#fff;border-color:#c2d8c2;color:#1
   <div class="fr">
     <div class="fg"><label>Instructor presente</label>
       <select id="rcc-pres" onchange="toggleSuplenteRec()">
-        <option value="si">✅ Sí presente</option>
-        <option value="no">❌ Ausente</option>
-        <option value="sub">🔄 Sustituto</option>
+        <option value="si"><svg class="ico ico-ok" viewBox="0 0 20 20"><circle cx="10" cy="10" r="8" stroke="currentColor" stroke-width="1.5" fill="none"/><polyline points="6,10 9,13 14,7" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg> Sí presente</option>
+        <option value="no"><svg class="ico ico-err" viewBox="0 0 20 20"><circle cx="10" cy="10" r="8" stroke="currentColor" stroke-width="1.5" fill="none"/><line x1="7" y1="7" x2="13" y2="13" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><line x1="13" y1="7" x2="7" y2="13" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg> Ausente</option>
+        <option value="sub"><svg class="ico" viewBox="0 0 20 20"><path d="M4 10a6 6 0 0 1 6-6 6 6 0 0 1 5.2 3" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round"/><path d="M16 10a6 6 0 0 1-6 6 6 6 0 0 1-5.2-3" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round"/><polyline points="14.5,7 15.5,3.8 18.5,5" stroke="currentColor" stroke-width="1.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/><polyline points="5.5,13 4.5,16.2 1.5,15" stroke="currentColor" stroke-width="1.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg> Sustituto</option>
       </select>
     </div>
     <div class="fg"><label>Observación</label>
@@ -1025,7 +1096,7 @@ html.tema-claro .login-field input{background:#fff;border-color:#c2d8c2;color:#1
     <button class="bsave" style="flex:2;margin:0" onclick="siguienteClaseRec()">Guardar y Sig. →</button>
   </div>
   <div style="text-align:center;margin-top:.7rem">
-    <button class="abtn" style="color:var(--red2)" onclick="terminarRecorrido()">🏁 Terminar aquí</button>
+    <button class="abtn" style="color:var(--red2)" onclick="terminarRecorrido()"><svg class="ico" viewBox="0 0 20 20"><line x1="4" y1="2" x2="4" y2="18" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><path d="M4 2 H16 V8 H4" stroke="currentColor" stroke-width="1.3" fill="none" stroke-linejoin="round"/><line x1="7" y1="2" x2="7" y2="8" stroke="currentColor" stroke-width="1"/><line x1="10" y1="2" x2="10" y2="8" stroke="currentColor" stroke-width="1"/><line x1="13" y1="2" x2="13" y2="8" stroke="currentColor" stroke-width="1"/><line x1="4" y1="5" x2="16" y2="5" stroke="currentColor" stroke-width="1"/></svg> Terminar aquí</button>
   </div>
 </div>
 </div>
@@ -1033,12 +1104,12 @@ html.tema-claro .login-field input{background:#fff;border-color:#c2d8c2;color:#1
 <!-- RECORRIDO RESUMEN -->
 <div class="ov" id="m-rec-res">
 <div class="modal">
-  <button class="mcls" onclick="cerrarModal('m-rec-res')">✕</button>
-  <div class="mttl">🏁 Recorrido Completo</div>
+  <button class="mcls" onclick="cerrarModal('m-rec-res')"><svg class="ico" viewBox="0 0 20 20"><line x1="5" y1="5" x2="15" y2="15" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><line x1="15" y1="5" x2="5" y2="15" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></button>
+  <div class="mttl"><svg class="ico" viewBox="0 0 20 20"><line x1="4" y1="2" x2="4" y2="18" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><path d="M4 2 H16 V8 H4" stroke="currentColor" stroke-width="1.3" fill="none" stroke-linejoin="round"/><line x1="7" y1="2" x2="7" y2="8" stroke="currentColor" stroke-width="1"/><line x1="10" y1="2" x2="10" y2="8" stroke="currentColor" stroke-width="1"/><line x1="13" y1="2" x2="13" y2="8" stroke="currentColor" stroke-width="1"/><line x1="4" y1="5" x2="16" y2="5" stroke="currentColor" stroke-width="1"/></svg> Recorrido Completo</div>
   <div id="rec-res-body"></div>
   <div style="display:flex;gap:.6rem;margin-top:.8rem">
-    <button class="bsave" style="margin:0" onclick="guardarRecorrido()">💾 Guardar</button>
-    <button class="btn bd no-print" style="flex:1" onclick="imprimirRecorrido()">🖨 Imprimir</button>
+    <button class="bsave" style="margin:0" onclick="guardarRecorrido()"><svg class="ico" viewBox="0 0 20 20"><rect x="3" y="3" width="14" height="14" rx="2" stroke="currentColor" stroke-width="1.4" fill="none"/><rect x="7" y="3" width="6" height="5" rx="0.5" stroke="currentColor" stroke-width="1.3" fill="none"/><rect x="5" y="11" width="10" height="5" rx="1" stroke="currentColor" stroke-width="1.3" fill="none"/><line x1="10" y1="4" x2="10" y2="7.5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg> Guardar</button>
+    <button class="btn bd no-print" style="flex:1" onclick="imprimirRecorrido()"><svg class="ico" viewBox="0 0 20 20"><rect x="4" y="7" width="12" height="8" rx="1.5" stroke="currentColor" stroke-width="1.4" fill="none"/><path d="M6 7 V4 H14 V7" stroke="currentColor" stroke-width="1.3" fill="none" stroke-linecap="round"/><rect x="6" y="12" width="8" height="4" rx="1" stroke="currentColor" stroke-width="1.3" fill="none"/><circle cx="13.5" cy="10" r="1" fill="currentColor"/></svg> Imprimir</button>
   </div>
 </div>
 </div>
@@ -1046,8 +1117,8 @@ html.tema-claro .login-field input{background:#fff;border-color:#c2d8c2;color:#1
 <!-- REPORTES -->
 <div class="ov" id="m-reports">
 <div class="modal narrow">
-  <button class="mcls" onclick="cerrarModal('m-reports')">✕</button>
-  <div class="mttl">📋 Generar Reporte</div>
+  <button class="mcls" onclick="cerrarModal('m-reports')"><svg class="ico" viewBox="0 0 20 20"><line x1="5" y1="5" x2="15" y2="15" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><line x1="15" y1="5" x2="5" y2="15" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></button>
+  <div class="mttl"><svg class="ico" viewBox="0 0 20 20"><rect x="5" y="3" width="10" height="14" rx="2" stroke="currentColor" stroke-width="1.5" fill="none"/><rect x="8" y="2" width="4" height="2.5" rx="1" stroke="currentColor" stroke-width="1.2" fill="none"/><line x1="8" y1="9" x2="12" y2="9" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/><line x1="8" y1="12" x2="13" y2="12" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg> Generar Reporte</div>
   <div class="fg"><label>Tipo de Reporte</label>
     <select id="rpt-tipo" onchange="toggleRpt()">
       <option value="diario">Reporte Diario</option>
@@ -1083,15 +1154,15 @@ html.tema-claro .login-field input{background:#fff;border-color:#c2d8c2;color:#1
       <option value="9">Octubre</option><option value="10">Noviembre</option><option value="11">Diciembre</option>
     </select>
   </div>
-  <button class="bsave" onclick="genReporte()">🖨 Generar Reporte</button>
+  <button class="bsave" onclick="genReporte()"><svg class="ico" viewBox="0 0 20 20"><rect x="4" y="7" width="12" height="8" rx="1.5" stroke="currentColor" stroke-width="1.4" fill="none"/><path d="M6 7 V4 H14 V7" stroke="currentColor" stroke-width="1.3" fill="none" stroke-linecap="round"/><rect x="6" y="12" width="8" height="4" rx="1" stroke="currentColor" stroke-width="1.3" fill="none"/><circle cx="13.5" cy="10" r="1" fill="currentColor"/></svg> Generar Reporte</button>
 </div>
 </div>
 
 <!-- REPORTE DE SUPLENCIAS -->
 <div class="ov" id="m-suplencias">
 <div class="modal wide">
-  <button class="mcls" onclick="cerrarModal('m-suplencias')">✕</button>
-  <div class="mttl">🔄 Reporte de Suplencias</div>
+  <button class="mcls" onclick="cerrarModal('m-suplencias')"><svg class="ico" viewBox="0 0 20 20"><line x1="5" y1="5" x2="15" y2="15" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><line x1="15" y1="5" x2="5" y2="15" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></button>
+  <div class="mttl"><svg class="ico" viewBox="0 0 20 20"><path d="M4 10a6 6 0 0 1 6-6 6 6 0 0 1 5.2 3" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round"/><path d="M16 10a6 6 0 0 1-6 6 6 6 0 0 1-5.2-3" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round"/><polyline points="14.5,7 15.5,3.8 18.5,5" stroke="currentColor" stroke-width="1.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/><polyline points="5.5,13 4.5,16.2 1.5,15" stroke="currentColor" stroke-width="1.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg> Reporte de Suplencias</div>
   <div class="fr">
     <div class="fg"><label>Fecha inicio</label><input type="date" id="sup-fecha-ini"></div>
     <div class="fg"><label>Fecha fin</label><input type="date" id="sup-fecha-fin"></div>
@@ -1100,11 +1171,11 @@ html.tema-claro .login-field input{background:#fff;border-color:#c2d8c2;color:#1
     <label>Filtrar por suplente (opcional)</label>
     <select id="sup-filtro-inst"><option value="">— Todos los suplentes —</option></select>
   </div>
-  <button class="bsave" style="margin-bottom:.8rem" onclick="renderReporteSuplencias()">🔍 Consultar</button>
+  <button class="bsave" style="margin-bottom:.8rem" onclick="renderReporteSuplencias()"><svg class="ico" viewBox="0 0 20 20"><circle cx="8.5" cy="8.5" r="5" stroke="currentColor" stroke-width="1.5" fill="none"/><line x1="12.5" y1="12.5" x2="17" y2="17" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg> Consultar</button>
   <div id="sup-body"></div>
   <div id="sup-export-btns" style="display:none;display:flex;gap:.6rem;margin-top:.8rem;flex-wrap:wrap">
-    <button class="btn bd no-print" onclick="imprimirSuplencias()">🖨 Imprimir / PDF</button>
-    <button class="btn bb no-print" onclick="exportarSuplenciasExcel()">📊 Exportar Excel</button>
+    <button class="btn bd no-print" onclick="imprimirSuplencias()"><svg class="ico" viewBox="0 0 20 20"><rect x="4" y="7" width="12" height="8" rx="1.5" stroke="currentColor" stroke-width="1.4" fill="none"/><path d="M6 7 V4 H14 V7" stroke="currentColor" stroke-width="1.3" fill="none" stroke-linecap="round"/><rect x="6" y="12" width="8" height="4" rx="1" stroke="currentColor" stroke-width="1.3" fill="none"/><circle cx="13.5" cy="10" r="1" fill="currentColor"/></svg> Imprimir / PDF</button>
+    <button class="btn bb no-print" onclick="exportarSuplenciasExcel()"><svg class="ico" viewBox="0 0 20 20"><rect x="3" y="12" width="3" height="5" rx="1" stroke="currentColor" stroke-width="1.4" fill="none"/><rect x="8.5" y="8" width="3" height="9" rx="1" stroke="currentColor" stroke-width="1.4" fill="none"/><rect x="14" y="4" width="3" height="13" rx="1" stroke="currentColor" stroke-width="1.4" fill="none"/></svg> Exportar Excel</button>
   </div>
 </div>
 </div>
@@ -1112,8 +1183,8 @@ html.tema-claro .login-field input{background:#fff;border-color:#c2d8c2;color:#1
 <!-- EDITAR REGISTRO -->
 <div class="ov" id="m-edit-reg">
 <div class="modal narrow">
-  <button class="mcls" onclick="cerrarModal('m-edit-reg')">✕</button>
-  <div class="mttl">✏ Editar Registro de Clase</div>
+  <button class="mcls" onclick="cerrarModal('m-edit-reg')"><svg class="ico" viewBox="0 0 20 20"><line x1="5" y1="5" x2="15" y2="15" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><line x1="15" y1="5" x2="5" y2="15" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></button>
+  <div class="mttl"><svg class="ico" viewBox="0 0 20 20"><path d="M13.5 3.5 L16.5 6.5 L8 15 L4 16 L5 12 Z" stroke="currentColor" stroke-width="1.4" fill="none" stroke-linejoin="round"/><line x1="12" y1="5" x2="15" y2="8" stroke="currentColor" stroke-width="1.3"/></svg> Editar Registro de Clase</div>
   <div style="background:var(--panel2);border-radius:10px;padding:.8rem;margin-bottom:1rem;font-size:.82rem" id="er-info-cls">—</div>
   <div class="fr">
     <div class="fg"><label>Asistentes</label>
@@ -1126,9 +1197,9 @@ html.tema-claro .login-field input{background:#fff;border-color:#c2d8c2;color:#1
   <div class="fg">
     <label>Estado</label>
     <select id="er-est" onchange="toggleErSuplente()">
-      <option value="ok">✅ Impartida</option>
-      <option value="sub">🔄 Con Suplente</option>
-      <option value="falta">❌ Falta</option>
+      <option value="ok"><svg class="ico ico-ok" viewBox="0 0 20 20"><circle cx="10" cy="10" r="8" stroke="currentColor" stroke-width="1.5" fill="none"/><polyline points="6,10 9,13 14,7" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg> Impartida</option>
+      <option value="sub"><svg class="ico" viewBox="0 0 20 20"><path d="M4 10a6 6 0 0 1 6-6 6 6 0 0 1 5.2 3" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round"/><path d="M16 10a6 6 0 0 1-6 6 6 6 0 0 1-5.2-3" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round"/><polyline points="14.5,7 15.5,3.8 18.5,5" stroke="currentColor" stroke-width="1.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/><polyline points="5.5,13 4.5,16.2 1.5,15" stroke="currentColor" stroke-width="1.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg> Con Suplente</option>
+      <option value="falta"><svg class="ico ico-err" viewBox="0 0 20 20"><circle cx="10" cy="10" r="8" stroke="currentColor" stroke-width="1.5" fill="none"/><line x1="7" y1="7" x2="13" y2="13" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><line x1="13" y1="7" x2="7" y2="13" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg> Falta</option>
     </select>
   </div>
   <div class="fg" id="er-suplente-row" style="display:none">
@@ -1139,26 +1210,26 @@ html.tema-claro .login-field input{background:#fff;border-color:#c2d8c2;color:#1
     <input type="text" id="er-obs" placeholder="Nota opcional...">
   </div>
   <input type="hidden" id="er-id">
-  <button class="bsave" onclick="guardarEdicionRegistro()">💾 Guardar cambios</button>
-  <button class="bdel" onclick="eliminarRegistro()">🗑 Eliminar este registro</button>
+  <button class="bsave" onclick="guardarEdicionRegistro()"><svg class="ico" viewBox="0 0 20 20"><rect x="3" y="3" width="14" height="14" rx="2" stroke="currentColor" stroke-width="1.4" fill="none"/><rect x="7" y="3" width="6" height="5" rx="0.5" stroke="currentColor" stroke-width="1.3" fill="none"/><rect x="5" y="11" width="10" height="5" rx="1" stroke="currentColor" stroke-width="1.3" fill="none"/><line x1="10" y1="4" x2="10" y2="7.5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg> Guardar cambios</button>
+  <button class="bdel" onclick="eliminarRegistro()"><svg class="ico" viewBox="0 0 20 20"><polyline points="5,6 15,6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><path d="M8 6V4h4v2" stroke="currentColor" stroke-width="1.4" fill="none" stroke-linecap="round"/><rect x="6" y="6" width="8" height="10" rx="1.5" stroke="currentColor" stroke-width="1.4" fill="none"/><line x1="9" y1="9" x2="9" y2="14" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/><line x1="11" y1="9" x2="11" y2="14" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg> Eliminar este registro</button>
 </div>
 </div>
 
 <!-- PRINT MODAL -->
 <div class="ov" id="m-print">
 <div class="modal wide" style="max-height:95vh;width:760px">
-  <button class="mcls" onclick="cerrarModal('m-print')">✕</button>
+  <button class="mcls" onclick="cerrarModal('m-print')"><svg class="ico" viewBox="0 0 20 20"><line x1="5" y1="5" x2="15" y2="15" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><line x1="15" y1="5" x2="5" y2="15" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></button>
   <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.8rem;flex-wrap:wrap;gap:.5rem">
     <div class="mttl" id="print-ttl" style="margin:0">Reporte</div>
     <div style="display:flex;gap:.4rem;flex-wrap:wrap" class="no-print">
-      <button class="btn bg" onclick="imprimirDesdeModal()" title="Abrir diálogo de impresión del sistema">🖨 Imprimir</button>
-      <button class="btn" style="background:#c0392b;color:#fff;border:none" onclick="exportarPDF()" title="Generar archivo PDF">📄 PDF</button>
-      <button class="btn bb" onclick="exportarPrintExcel()" title="Exportar a Excel">📊 Excel</button>
-      <button class="btn bo" onclick="exportarPrintCSV()" title="Exportar CSV plano">📋 CSV</button>
+      <button class="btn bg" onclick="imprimirDesdeModal()" title="Abrir diálogo de impresión del sistema"><svg class="ico" viewBox="0 0 20 20"><rect x="4" y="7" width="12" height="8" rx="1.5" stroke="currentColor" stroke-width="1.4" fill="none"/><path d="M6 7 V4 H14 V7" stroke="currentColor" stroke-width="1.3" fill="none" stroke-linecap="round"/><rect x="6" y="12" width="8" height="4" rx="1" stroke="currentColor" stroke-width="1.3" fill="none"/><circle cx="13.5" cy="10" r="1" fill="currentColor"/></svg> Imprimir</button>
+      <button class="btn" style="background:#c0392b;color:#fff;border:none" onclick="exportarPDF()" title="Generar archivo PDF"><svg class="ico" viewBox="0 0 20 20"><path d="M5 3 H13 L16 6 V17 H5 Z" stroke="currentColor" stroke-width="1.4" fill="none" stroke-linejoin="round"/><polyline points="13,3 13,6 16,6" stroke="currentColor" stroke-width="1.3" fill="none" stroke-linejoin="round"/><line x1="8" y1="10" x2="13" y2="10" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/><line x1="8" y1="13" x2="13" y2="13" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg> PDF</button>
+      <button class="btn bb" onclick="exportarPrintExcel()" title="Exportar a Excel"><svg class="ico" viewBox="0 0 20 20"><rect x="3" y="12" width="3" height="5" rx="1" stroke="currentColor" stroke-width="1.4" fill="none"/><rect x="8.5" y="8" width="3" height="9" rx="1" stroke="currentColor" stroke-width="1.4" fill="none"/><rect x="14" y="4" width="3" height="13" rx="1" stroke="currentColor" stroke-width="1.4" fill="none"/></svg> Excel</button>
+      <button class="btn bo" onclick="exportarPrintCSV()" title="Exportar CSV plano"><svg class="ico" viewBox="0 0 20 20"><rect x="5" y="3" width="10" height="14" rx="2" stroke="currentColor" stroke-width="1.5" fill="none"/><rect x="8" y="2" width="4" height="2.5" rx="1" stroke="currentColor" stroke-width="1.2" fill="none"/><line x1="8" y1="9" x2="12" y2="9" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/><line x1="8" y1="12" x2="13" y2="12" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg> CSV</button>
     </div>
   </div>
   <div style="font-size:.68rem;color:var(--txt3);margin-bottom:.6rem;padding:.4rem .7rem;background:var(--panel2);border-radius:6px;display:flex;gap:1rem;flex-wrap:wrap" class="no-print">
-    <span>💡 <strong>Imprimir</strong> = diálogo del sistema (elige "Guardar como PDF" desde ahí)</span>
+    <span><svg class="ico" viewBox="0 0 20 20"><path d="M10 3 Q14 3 14 8 Q14 11 12 12.5 L12 14.5 L8 14.5 L8 12.5 Q6 11 6 8 Q6 3 10 3" stroke="currentColor" stroke-width="1.3" fill="none" stroke-linejoin="round"/><line x1="8.2" y1="16" x2="11.8" y2="16" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg> <strong>Imprimir</strong> = diálogo del sistema (elige "Guardar como PDF" desde ahí)</span>
     <span>· <strong>PDF</strong> = genera PDF directo sin diálogo</span>
     <span>· <strong>Excel</strong> = tabla completa con formato</span>
   </div>
@@ -1248,7 +1319,7 @@ function getClaseSeleccionada(){
 }
 function actualizarSelectoresClase(){
   const todas=todosLosClasesUnicos();
-  const opts=todas.map(c=>`<option value="${c}">${c}</option>`).join('')+'<option value="__nueva__">✏ Nueva clase...</option>';
+  const opts=todas.map(c=>`<option value="${c}">${c}</option>`).join('')+'<option value="__nueva__"><svg class="ico" viewBox="0 0 20 20"><path d="M13.5 3.5 L16.5 6.5 L8 15 L4 16 L5 12 Z" stroke="currentColor" stroke-width="1.4" fill="none" stroke-linejoin="round"/><line x1="12" y1="5" x2="15" y2="8" stroke="currentColor" stroke-width="1.3"/></svg> Nueva clase...</option>';
   const sel=document.getElementById('s-clase');
   if(sel){const cur=sel.value;sel.innerHTML=opts;sel.value=cur||todas[0];}
 }
@@ -1308,7 +1379,7 @@ function abrirModalInstructor(id){
   actualizarSelectoresClase();
   if(id){
     const inst=instructores.find(i=>i.id===id);
-    document.getElementById('mi-ttl').textContent='✏ Editar Instructor';
+    document.getElementById('mi-ttl').textContent='<svg class="ico" viewBox="0 0 20 20"><path d="M13.5 3.5 L16.5 6.5 L8 15 L4 16 L5 12 Z" stroke="currentColor" stroke-width="1.4" fill="none" stroke-linejoin="round"/><line x1="12" y1="5" x2="15" y2="8" stroke="currentColor" stroke-width="1.3"/></svg> Editar Instructor';
     document.getElementById('mi-id').value=id;
     document.getElementById('mi-nombre').value=inst.nombre;
     document.getElementById('mi-tipo').value=inst.tipo;
@@ -1337,7 +1408,7 @@ function renderSlots(){
       <span style="font-size:.75rem;color:var(--txt2);min-width:70px">${s.dia}</span>
       <span class="mono" style="color:var(--gold2);min-width:46px">${s.hora}</span>
       <span style="flex:1;font-size:.82rem;font-weight:600">${s.clase}</span>
-      <button class="sch-rm" onclick="quitarSlot(${i})">✕</button>
+      <button class="sch-rm" onclick="quitarSlot(${i})"><svg class="ico" viewBox="0 0 20 20"><line x1="5" y1="5" x2="15" y2="15" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><line x1="15" y1="5" x2="5" y2="15" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></button>
     </div>`).join('');
 }
 function agregarSlot(){
@@ -1361,7 +1432,7 @@ function guardarInstructor(){
   if(id){const idx=instructores.findIndex(i=>i.id===id);instructores[idx]={...instructores[idx],...data};}
   else{const nid=Math.max(...instructores.map(i=>i.id),0)+1;instructores.push({id:nid,...data});}
   cerrarModal('m-instructor');renderAll();
-  alert(`✅ Instructor ${id?'actualizado':'agregado'}`);
+  alert(`Instructor ${id?'actualizado':'agregado'}`);
 }
 function eliminarInstructor(){
   const id=parseInt(document.getElementById('mi-id').value);
@@ -1447,10 +1518,10 @@ function renderDashboard(){
       <div class="ksub">${pct}% cumplimiento</div>
       <div class="kpi-meta">Meta: ≥90%</div>
       <div class="kpi-bar-wrap"><div class="kpi-bar-fill" style="width:${Math.min(pct,100)}%;background:${semColorKpi(pct,90)}"></div></div>
-      <div class="kpi-sem">${pct>=90?'🟢':pct>=70?'🟡':'🔴'}</div>
+      <div class="kpi-sem">${pct>=90?'<svg class="ico" viewBox="0 0 20 20"><circle cx="10" cy="10" r="5" fill="var(--neon)"/></svg>':pct>=70?'<svg class="ico" viewBox="0 0 20 20"><circle cx="10" cy="10" r="5" fill="var(--gold2)"/></svg>':'<svg class="ico" viewBox="0 0 20 20"><circle cx="10" cy="10" r="5" fill="var(--red2)"/></svg>'}</div>
     </div>
     <div class="kpi rd" style="position:relative"><div class="klbl">Faltas</div><div class="kval" style="color:${totFalt===0?'var(--neon)':totFalt<=3?'var(--gold2)':'var(--red2)'}">${totFalt}</div><div class="ksub">Registradas</div>
-      <div class="kpi-sem">${totFalt===0?'🟢':totFalt<=3?'🟡':'🔴'}</div>
+      <div class="kpi-sem">${totFalt===0?'<svg class="ico" viewBox="0 0 20 20"><circle cx="10" cy="10" r="5" fill="var(--neon)"/></svg>':totFalt<=3?'<svg class="ico" viewBox="0 0 20 20"><circle cx="10" cy="10" r="5" fill="var(--gold2)"/></svg>':'<svg class="ico" viewBox="0 0 20 20"><circle cx="10" cy="10" r="5" fill="var(--red2)"/></svg>'}</div>
     </div>
     <div class="kpi bl"><div class="klbl">Total Asistentes</div><div class="kval" style="color:var(--blue)">${totAsis.toLocaleString()}</div><div class="ksub">Entradas acumuladas</div></div>
     <div class="kpi nn" style="position:relative"><div class="klbl">Aforo Prom.</div>
@@ -1458,21 +1529,21 @@ function renderDashboard(){
       <div class="ksub">Ocupación por clase</div>
       <div class="kpi-meta">Meta: ≥60% · ${(()=>{const t=calcTendenciaAforo();return`<span class="${t.delta>=0?'trend-up':'trend-dn'}">${t.label||''}</span>`;})()}</div>
       <div class="kpi-bar-wrap"><div class="kpi-bar-fill" style="width:${Math.min(aforoProm,100)}%;background:${semColorKpi(aforoProm)}"></div></div>
-      <div class="kpi-sem">${aforoProm>=60?'🟢':aforoProm>=35?'🟡':'🔴'}</div>
+      <div class="kpi-sem">${aforoProm>=60?'<svg class="ico" viewBox="0 0 20 20"><circle cx="10" cy="10" r="5" fill="var(--neon)"/></svg>':aforoProm>=35?'<svg class="ico" viewBox="0 0 20 20"><circle cx="10" cy="10" r="5" fill="var(--gold2)"/></svg>':'<svg class="ico" viewBox="0 0 20 20"><circle cx="10" cy="10" r="5" fill="var(--red2)"/></svg>'}</div>
     </div>
     <div class="kpi"><div class="klbl">Instructores</div><div class="kval" style="color:var(--neon)">${instructores.length}</div><div class="ksub">Activos</div></div>
     <div class="kpi" style="cursor:pointer" onclick="abrirModal('m-suplencias')"><div class="klbl">Suplencias</div><div class="kval" style="color:var(--blue)">${totSuplencias}</div><div class="ksub">Ver reporte →</div></div>`;
 
   renderQuickAlerts();
 
-  document.getElementById('inst-count-lbl').textContent=`👥 Instructores (${instructores.length})`;
+  document.getElementById('inst-count-lbl').innerHTML=`<svg class="ico" viewBox="0 0 20 20"><circle cx="8" cy="6" r="3" stroke="currentColor" stroke-width="1.4" fill="none"/><path d="M2 17 Q2 12 8 12 Q14 12 14 17" stroke="currentColor" stroke-width="1.4" fill="none" stroke-linecap="round"/><circle cx="14" cy="6" r="2.5" stroke="currentColor" stroke-width="1.3" fill="none"/><path d="M14 11 Q18 11 18 16" stroke="currentColor" stroke-width="1.3" fill="none" stroke-linecap="round"/></svg> Instructores (${instructores.length})`;
 
   // Ranking: TODOS los instructores activos (con al menos 1 clase programada)
   const todosRank = [...allS]
     .filter(i => (i.horario||[]).length > 0)
     .sort((a,b) => b.aforo - a.aforo);
 
-  const medals = ['🥇','🥈','🥉'];
+  const medals = ['<svg class="ico" viewBox="0 0 20 20"><circle cx="10" cy="10" r="5.5" stroke="var(--gold2)" stroke-width="1.5" fill="none"/><text x="10" y="13.5" text-anchor="middle" font-size="7" font-weight="700" fill="var(--gold2)" font-family="Outfit,sans-serif">1</text></svg>','<svg class="ico" viewBox="0 0 20 20"><circle cx="10" cy="10" r="5.5" stroke="#aaa" stroke-width="1.5" fill="none"/><text x="10" y="13.5" text-anchor="middle" font-size="7" font-weight="700" fill="#aaa" font-family="Outfit,sans-serif">2</text></svg>','<svg class="ico" viewBox="0 0 20 20"><circle cx="10" cy="10" r="5.5" stroke="#cd7f32" stroke-width="1.5" fill="none"/><text x="10" y="13.5" text-anchor="middle" font-size="7" font-weight="700" fill="#cd7f32" font-family="Outfit,sans-serif">3</text></svg>'];
   const rankHTML = todosRank.length === 0
     ? '<div class="empty">Sin instructores con clases programadas</div>'
     : `<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.6rem;padding-bottom:.5rem;border-bottom:1px solid var(--border)">
@@ -1481,7 +1552,7 @@ function renderDashboard(){
       </div>` +
       todosRank.map((i,n) => {
         const color = pctCol(i.aforo);
-        const sem = i.aforo>=70?'🟢':i.aforo>=40?'🟡':'🔴';
+        const sem = i.aforo>=70?'<svg class="ico" viewBox="0 0 20 20"><circle cx="10" cy="10" r="5" fill="var(--neon)"/></svg>':i.aforo>=40?'<svg class="ico" viewBox="0 0 20 20"><circle cx="10" cy="10" r="5" fill="var(--gold2)"/></svg>':'<svg class="ico" viewBox="0 0 20 20"><circle cx="10" cy="10" r="5" fill="var(--red2)"/></svg>';
         const label = n < 3 ? medals[n] : `<span style="font-family:'Bebas Neue',sans-serif;font-size:1rem;color:var(--txt3)">${n+1}</span>`;
         const barPct = Math.min(i.aforo, 100);
         return `<div class="arow" style="padding:6px 0">
@@ -1508,7 +1579,7 @@ function renderDashboard(){
 
   const wf=allS.filter(i=>i.faltas>0).sort((a,b)=>b.faltas-a.faltas).slice(0,6);
   document.getElementById('alerts-p').innerHTML=wf.length===0
-    ?'<div class="empty">✅ Sin faltas</div>'
+    ?'<div class="empty"><svg class="ico ico-ok" viewBox="0 0 20 20"><circle cx="10" cy="10" r="8" stroke="currentColor" stroke-width="1.5" fill="none"/><polyline points="6,10 9,13 14,7" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg> Sin faltas</div>'
     :wf.map(i=>`<div class="arow"><div class="adot" style="background:${i.faltas>2?'var(--red2)':'var(--gold2)'}"></div><span style="flex:1;font-size:.83rem">${i.nombre}</span><span class="mono" style="color:${i.faltas>2?'var(--red2)':'var(--gold2)'}">${i.faltas}</span></div>`).join('');
 
   // Gráfica conectada al aforo real — filtrada por periodo — clickable para diagnóstico
@@ -1541,7 +1612,7 @@ function renderDashboard(){
       emptyMsg.id='chart-empty-msg';
       emptyMsg.className='empty';
       emptyMsg.style.cssText='height:200px;display:flex;align-items:center;justify-content:center;font-size:.85rem';
-      emptyMsg.textContent='Sin clases registradas aún. Agrega aforo con "+ Clase" o "🚶 Recorrido".';
+      emptyMsg.textContent='Sin clases registradas aún. Agrega aforo con "+ Clase" o "<svg class="ico" viewBox="0 0 20 20"><circle cx="10" cy="4" r="2" stroke="currentColor" stroke-width="1.4" fill="none"/><path d="M10 6 L9 11 L7 16 M10 6 L11 11 L13 16 M9 11 L12 11" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg> Recorrido".';
       if(chartWrap)chartWrap.appendChild(emptyMsg);
     }
     emptyMsg.style.display='flex';
@@ -1562,7 +1633,7 @@ function renderDashboard(){
         tooltip:{callbacks:{
           label:c=>c.datasetIndex===0?`Aforo: ${c.raw}%`:`Asistentes prom: ${c.raw}`,
           afterBody:(items)=>{
-            if(items[0]&&items[0].datasetIndex===0)return['','📌 Clic para ver diagnóstico'];
+            if(items[0]&&items[0].datasetIndex===0)return['','<svg class="ico" viewBox="0 0 20 20"><path d="M10 2 Q13 2 13 6 Q13 8 11.5 9 L12 14 L8 14 L8.5 9 Q7 8 7 6 Q7 2 10 2" stroke="currentColor" stroke-width="1.3" fill="none" stroke-linejoin="round"/><line x1="10" y1="14" x2="10" y2="18" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg> Clic para ver diagnóstico'];
             return[];
           }
         }}
@@ -1596,7 +1667,7 @@ function renderInst(){
     const clasesList=(inst.horario||[]).slice(0,3).map(h=>`${h.dia.slice(0,3)} ${h.hora} ${h.clase}`).join(' · ');
     const mas=(inst.horario||[]).length>3?` +${(inst.horario||[]).length-3} más`:'';
     const est=s.faltas===0?'cok':s.faltas<=1?'cwn':'cbd';
-    const estL=s.faltas===0?'✅ Cumple':s.faltas<=1?'⚠ Revisar':'❌ Incidencia';
+    const estL=s.faltas===0?'<svg class="ico ico-ok" viewBox="0 0 20 20"><circle cx="10" cy="10" r="8" stroke="currentColor" stroke-width="1.5" fill="none"/><polyline points="6,10 9,13 14,7" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg> Cumple':s.faltas<=1?'<svg class="ico ico-warn" viewBox="0 0 20 20"><path d="M10 3 L18 17 H2 Z" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linejoin="round"/><line x1="10" y1="9" x2="10" y2="13" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><circle cx="10" cy="15.5" r="0.8" fill="currentColor"/></svg> Revisar':'<svg class="ico ico-err" viewBox="0 0 20 20"><circle cx="10" cy="10" r="8" stroke="currentColor" stroke-width="1.5" fill="none"/><line x1="7" y1="7" x2="13" y2="13" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><line x1="13" y1="7" x2="7" y2="13" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg> Incidencia';
     return `<tr>
       <td><strong>${inst.nombre}</strong><br><span style="font-size:.68rem;color:var(--txt2)">${inst.esp||''}</span></td>
       <td><span class="chip ${inst.tipo==='planta'?'cpl':'cho'}">${inst.tipo==='planta'?'Planta':'Honor.'}</span></td>
@@ -1653,7 +1724,7 @@ function renderCal(){
       clases.forEach(c=>{
         const col=c.promAsis===null?'#1a5a30':c.promAsis<=3?'#5a1010':c.promAsis<=8?'#4a3a10':'#1a5a30';
         const txt=c.promAsis!==null?`${c.inst} ${c.promAsis}p`:`${c.inst}`;
-        const subBadge=c.hasSub?'<span style="background:#1a3a5a;border-radius:2px;padding:0 3px;font-size:.58rem;margin-left:2px">🔄</span>':'';
+        const subBadge=c.hasSub?'<span style="background:#1a3a5a;border-radius:2px;padding:0 3px;font-size:.58rem;margin-left:2px"><svg class="ico" viewBox="0 0 20 20"><path d="M4 10a6 6 0 0 1 6-6 6 6 0 0 1 5.2 3" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round"/><path d="M16 10a6 6 0 0 1-6 6 6 6 0 0 1-5.2-3" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round"/><polyline points="14.5,7 15.5,3.8 18.5,5" stroke="currentColor" stroke-width="1.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/><polyline points="5.5,13 4.5,16.2 1.5,15" stroke="currentColor" stroke-width="1.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></span>':'';
         html+=`<div onclick="verDiagClase('${c.clase}')" style="background:${col};border-radius:3px;padding:2px 4px;font-size:.63rem;color:#fff;margin-bottom:1px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;cursor:pointer" title="${c.clase} · ${c.inst} — clic para diagnóstico"><b>${c.clase.slice(0,8)}</b> ${txt}${subBadge}</div>`;
       });
       html+='</div>';
@@ -1723,7 +1794,7 @@ function renderDiagnostico(){
       <div style="background:var(--panel2);border-radius:10px;padding:.9rem;text-align:center;border-top:2px solid var(--blue)">
         <div class="klbl">Instructores / Suplencias</div>
         <div style="font-family:'Bebas Neue',sans-serif;font-size:2rem;color:var(--blue)">${lista.length}</div>
-        <div style="font-size:.7rem;color:var(--txt2);margin-top:2px">🔄 ${totalSuplencias} suplencias</div>
+        <div style="font-size:.7rem;color:var(--txt2);margin-top:2px"><svg class="ico" viewBox="0 0 20 20"><path d="M4 10a6 6 0 0 1 6-6 6 6 0 0 1 5.2 3" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round"/><path d="M16 10a6 6 0 0 1-6 6 6 6 0 0 1-5.2-3" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round"/><polyline points="14.5,7 15.5,3.8 18.5,5" stroke="currentColor" stroke-width="1.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/><polyline points="5.5,13 4.5,16.2 1.5,15" stroke="currentColor" stroke-width="1.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg> ${totalSuplencias} suplencias</div>
       </div>
     </div>
     <div class="g2">
@@ -1735,7 +1806,7 @@ function renderDiagnostico(){
           return `<div style="display:flex;align-items:center;gap:.7rem;padding:.6rem 0;border-bottom:1px solid var(--border)">
             <span style="font-family:'Bebas Neue',sans-serif;font-size:1.1rem;color:${n<3?'var(--gold2)':'var(--txt3)'};min-width:22px">${n+1}</span>
             <div style="flex:1">
-              <div style="font-size:.84rem;font-weight:600">${i.nombre}${i.suplencias>0?`<span style="font-size:.69rem;background:rgba(77,184,232,.15);color:var(--blue);border-radius:4px;padding:1px 5px;margin-left:5px">🔄 ${i.suplencias} sup.</span>`:''}</div>
+              <div style="font-size:.84rem;font-weight:600">${i.nombre}${i.suplencias>0?`<span style="font-size:.69rem;background:rgba(77,184,232,.15);color:var(--blue);border-radius:4px;padding:1px 5px;margin-left:5px"><svg class="ico" viewBox="0 0 20 20"><path d="M4 10a6 6 0 0 1 6-6 6 6 0 0 1 5.2 3" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round"/><path d="M16 10a6 6 0 0 1-6 6 6 6 0 0 1-5.2-3" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round"/><polyline points="14.5,7 15.5,3.8 18.5,5" stroke="currentColor" stroke-width="1.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/><polyline points="5.5,13 4.5,16.2 1.5,15" stroke="currentColor" stroke-width="1.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg> ${i.suplencias} sup.</span>`:''}</div>
               <div style="font-size:.7rem;color:var(--txt2);margin-top:2px">${i.cnt} sesiones · Prom. ${Math.round(i.totalAsis/i.cnt)} pers/clase · Aforo <strong style="color:${pctCol(afoP)}">${afoP}%</strong></div>
               <div style="height:4px;background:var(--border);border-radius:2px;margin-top:5px">
                 <div style="height:100%;width:${pct}%;background:${pctCol(afoP)};border-radius:2px;transition:width .6s"></div>
@@ -1790,14 +1861,14 @@ function renderTop10(){
   });
   const lista=Object.values(grupos).filter(g=>g.bajos>=3).sort((a,b)=>b.bajos-a.bajos).slice(0,10);
   document.getElementById('tb-top10').innerHTML=lista.length===0
-    ?'<tr><td colspan="7"><div class="empty">✅ Sin clases con aforo crítico recurrente</div></td></tr>'
+    ?'<tr><td colspan="7"><div class="empty"><svg class="ico ico-ok" viewBox="0 0 20 20"><circle cx="10" cy="10" r="8" stroke="currentColor" stroke-width="1.5" fill="none"/><polyline points="6,10 9,13 14,7" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg> Sin clases con aforo crítico recurrente</div></td></tr>'
     :lista.map((g,n)=>`<tr>
       <td style="font-family:'Bebas Neue',sans-serif;font-size:1.2rem;color:var(--red2)">${n+1}</td>
       <td><strong>${g.clase}</strong></td><td>${g.inst}</td>
       <td class="mono">${g.hora}</td>
       <td class="tr mono">${g.bajos}×</td>
       <td class="mono">${Math.round(g.totalAsis/g.cnt)} pers.</td>
-      <td><span class="chip cbd">🔄 Revisar</span></td>
+      <td><span class="chip cbd"><svg class="ico" viewBox="0 0 20 20"><path d="M4 10a6 6 0 0 1 6-6 6 6 0 0 1 5.2 3" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round"/><path d="M16 10a6 6 0 0 1-6 6 6 6 0 0 1-5.2-3" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round"/><polyline points="14.5,7 15.5,3.8 18.5,5" stroke="currentColor" stroke-width="1.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/><polyline points="5.5,13 4.5,16.2 1.5,15" stroke="currentColor" stroke-width="1.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg> Revisar</span></td>
     </tr>`).join('');
 }
 
@@ -1894,16 +1965,16 @@ function terminarRecorrido(){
       <div style="background:var(--panel2);border-radius:8px;padding:.7rem;text-align:center;border-top:2px solid var(--gold2)"><div class="klbl">Asistentes</div><div style="font-family:'Bebas Neue',sans-serif;font-size:1.7rem;color:var(--gold2)">${totalAsis}</div></div>
       <div style="background:var(--panel2);border-radius:8px;padding:.7rem;text-align:center;border-top:2px solid ${pctCol(aforoProm)}"><div class="klbl">Aforo</div><div style="font-family:'Bebas Neue',sans-serif;font-size:1.7rem;color:${pctCol(aforoProm)}">${aforoProm}%</div></div>
     </div>`;
-  if(ausentes.length>0)html+=`<div style="background:rgba(224,80,80,.12);border:1px solid var(--red);border-radius:7px;padding:.6rem .8rem;margin-bottom:.6rem;font-size:.78rem"><strong style="color:var(--red2)">⚠ Ausentes:</strong> ${ausentes.map(a=>`${a.inst_nombre} (${a.clase} ${a.hora})`).join(', ')}</div>`;
-  if(suplentes.length>0)html+=`<div style="background:rgba(77,184,232,.1);border:1px solid var(--blue);border-radius:7px;padding:.6rem .8rem;margin-bottom:.6rem;font-size:.78rem"><strong style="color:var(--blue)">🔄 Suplentes:</strong> ${suplentes.map(a=>`${nombreSuplente(a.suplente_id)} por ${a.inst_nombre} (${a.clase})`).join(', ')}</div>`;
-  if(bajo3.length>0)html+=`<div style="background:rgba(232,184,75,.12);border:1px solid var(--gold);border-radius:7px;padding:.6rem .8rem;margin-bottom:.6rem;font-size:.78rem"><strong style="color:var(--gold2)">⚠ ≤3 asist.:</strong> ${bajo3.map(a=>`${a.clase} ${a.hora} (${a.asis}p)`).join(', ')}</div>`;
+  if(ausentes.length>0)html+=`<div style="background:rgba(224,80,80,.12);border:1px solid var(--red);border-radius:7px;padding:.6rem .8rem;margin-bottom:.6rem;font-size:.78rem"><strong style="color:var(--red2)"><svg class="ico ico-warn" viewBox="0 0 20 20"><path d="M10 3 L18 17 H2 Z" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linejoin="round"/><line x1="10" y1="9" x2="10" y2="13" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><circle cx="10" cy="15.5" r="0.8" fill="currentColor"/></svg> Ausentes:</strong> ${ausentes.map(a=>`${a.inst_nombre} (${a.clase} ${a.hora})`).join(', ')}</div>`;
+  if(suplentes.length>0)html+=`<div style="background:rgba(77,184,232,.1);border:1px solid var(--blue);border-radius:7px;padding:.6rem .8rem;margin-bottom:.6rem;font-size:.78rem"><strong style="color:var(--blue)"><svg class="ico" viewBox="0 0 20 20"><path d="M4 10a6 6 0 0 1 6-6 6 6 0 0 1 5.2 3" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round"/><path d="M16 10a6 6 0 0 1-6 6 6 6 0 0 1-5.2-3" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round"/><polyline points="14.5,7 15.5,3.8 18.5,5" stroke="currentColor" stroke-width="1.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/><polyline points="5.5,13 4.5,16.2 1.5,15" stroke="currentColor" stroke-width="1.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg> Suplentes:</strong> ${suplentes.map(a=>`${nombreSuplente(a.suplente_id)} por ${a.inst_nombre} (${a.clase})`).join(', ')}</div>`;
+  if(bajo3.length>0)html+=`<div style="background:rgba(232,184,75,.12);border:1px solid var(--gold);border-radius:7px;padding:.6rem .8rem;margin-bottom:.6rem;font-size:.78rem"><strong style="color:var(--gold2)"><svg class="ico ico-warn" viewBox="0 0 20 20"><path d="M10 3 L18 17 H2 Z" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linejoin="round"/><line x1="10" y1="9" x2="10" y2="13" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><circle cx="10" cy="15.5" r="0.8" fill="currentColor"/></svg> ≤3 asist.:</strong> ${bajo3.map(a=>`${a.clase} ${a.hora} (${a.asis}p)`).join(', ')}</div>`;
   html+=`<div style="max-height:200px;overflow-y:auto">
     <table style="width:100%;border-collapse:collapse;font-size:.77rem">
       <thead><tr>${['Clase','Instructor','Hora','Asist.','Aforo','Pres.','Suplente','Obs.'].map(h=>`<th style="padding:5px 8px;border-bottom:1px solid var(--border);color:var(--txt2);font-size:.65rem;text-transform:uppercase">${h}</th>`).join('')}</tr></thead>
       <tbody>
       ${vis.map((i,n)=>{
         const col=i.asis<=3?'var(--red2)':i.asis<=8?'var(--gold2)':'var(--v3)';
-        const pres=i.presente==='si'?'✅':i.presente==='no'?'❌':'🔄';
+        const pres=i.presente==='si'?'<svg class="ico ico-ok" viewBox="0 0 20 20"><circle cx="10" cy="10" r="8" stroke="currentColor" stroke-width="1.5" fill="none"/><polyline points="6,10 9,13 14,7" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>':i.presente==='no'?'<svg class="ico ico-err" viewBox="0 0 20 20"><circle cx="10" cy="10" r="8" stroke="currentColor" stroke-width="1.5" fill="none"/><line x1="7" y1="7" x2="13" y2="13" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><line x1="13" y1="7" x2="7" y2="13" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>':'<svg class="ico" viewBox="0 0 20 20"><path d="M4 10a6 6 0 0 1 6-6 6 6 0 0 1 5.2 3" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round"/><path d="M16 10a6 6 0 0 1-6 6 6 6 0 0 1-5.2-3" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round"/><polyline points="14.5,7 15.5,3.8 18.5,5" stroke="currentColor" stroke-width="1.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/><polyline points="5.5,13 4.5,16.2 1.5,15" stroke="currentColor" stroke-width="1.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>';
         const afoP=Math.round(i.asis/cap*100);
         return `<tr style="background:${n%2?'var(--panel2)':'transparent'};border-bottom:1px solid var(--border)">
           <td style="padding:4px 8px;font-weight:600">${i.clase}</td>
@@ -1937,7 +2008,7 @@ function guardarRecorrido(){
       asistentes:item.asis,cap:getCapClase(item.clase),dur:60,estado:nuevoEst,fecha:recActual.fecha,tipo:'recorrido',suplente_id:item.suplente_id||null});
   });
   cerrarModal('m-rec-res');renderAll();renderRecorridos();
-  alert(`✅ Recorrido guardado — ${vis.length} clases, ${totalAsis} asistentes`);
+  alert(`Recorrido guardado — ${vis.length} clases, ${totalAsis} asistentes`);
 }
 function imprimirRecorrido(){
   const vis=recActual.items.filter(i=>!i.saltado);
@@ -1956,9 +2027,9 @@ function imprimirRecorrido(){
       <div style="text-align:right"><div style="font-family:'Bebas Neue',sans-serif;font-size:1.4rem;color:#1a7a45">${vis.length} clases</div>
         <div style="font-size:.78rem;color:#555">${totalAsis} asistentes · Aforo ${aforoProm}%</div></div>
     </div>
-    ${ausentes.length>0?`<div style="background:#fff3cd;border:1px solid #ffc107;border-radius:5px;padding:.5rem .7rem;margin-bottom:.6rem;font-size:.8rem"><strong>⚠ Ausentes:</strong> ${ausentes.map(a=>a.inst_nombre+' ('+a.clase+')').join(', ')}</div>`:''}
-    ${suplentes.length>0?`<div style="background:#e8f4f8;border:1px solid #4db8e8;border-radius:5px;padding:.5rem .7rem;margin-bottom:.6rem;font-size:.8rem"><strong>🔄 Suplentes:</strong> ${suplentes.map(a=>nombreSuplente(a.suplente_id)+' sustituyó a '+a.inst_nombre+' ('+a.clase+')').join(', ')}</div>`:''}
-    ${bajo3.length>0?`<div style="background:#f8d7da;border:1px solid #dc3545;border-radius:5px;padding:.5rem .7rem;margin-bottom:.6rem;font-size:.8rem"><strong>⚠ ≤3 asistentes:</strong> ${bajo3.map(a=>a.clase+' ('+a.asis+'p)').join(', ')}</div>`:''}
+    ${ausentes.length>0?`<div style="background:#fff3cd;border:1px solid #ffc107;border-radius:5px;padding:.5rem .7rem;margin-bottom:.6rem;font-size:.8rem"><strong><svg class="ico ico-warn" viewBox="0 0 20 20"><path d="M10 3 L18 17 H2 Z" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linejoin="round"/><line x1="10" y1="9" x2="10" y2="13" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><circle cx="10" cy="15.5" r="0.8" fill="currentColor"/></svg> Ausentes:</strong> ${ausentes.map(a=>a.inst_nombre+' ('+a.clase+')').join(', ')}</div>`:''}
+    ${suplentes.length>0?`<div style="background:#e8f4f8;border:1px solid #4db8e8;border-radius:5px;padding:.5rem .7rem;margin-bottom:.6rem;font-size:.8rem"><strong><svg class="ico" viewBox="0 0 20 20"><path d="M4 10a6 6 0 0 1 6-6 6 6 0 0 1 5.2 3" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round"/><path d="M16 10a6 6 0 0 1-6 6 6 6 0 0 1-5.2-3" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round"/><polyline points="14.5,7 15.5,3.8 18.5,5" stroke="currentColor" stroke-width="1.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/><polyline points="5.5,13 4.5,16.2 1.5,15" stroke="currentColor" stroke-width="1.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg> Suplentes:</strong> ${suplentes.map(a=>nombreSuplente(a.suplente_id)+' sustituyó a '+a.inst_nombre+' ('+a.clase+')').join(', ')}</div>`:''}
+    ${bajo3.length>0?`<div style="background:#f8d7da;border:1px solid #dc3545;border-radius:5px;padding:.5rem .7rem;margin-bottom:.6rem;font-size:.8rem"><strong><svg class="ico ico-warn" viewBox="0 0 20 20"><path d="M10 3 L18 17 H2 Z" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linejoin="round"/><line x1="10" y1="9" x2="10" y2="13" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><circle cx="10" cy="15.5" r="0.8" fill="currentColor"/></svg> ≤3 asistentes:</strong> ${bajo3.map(a=>a.clase+' ('+a.asis+'p)').join(', ')}</div>`:''}
     <table style="width:100%;border-collapse:collapse;font-size:.79rem">
       <thead><tr style="background:#f0f7f3">
         ${['#','Clase','Instructor','Hora','Asis.','Aforo %','Presente','Suplente','Observación'].map(h=>`<th style="padding:6px 8px;border:1px solid #ccc;color:#1a7a45;font-size:.67rem;text-transform:uppercase">${h}</th>`).join('')}
@@ -1975,7 +2046,7 @@ function imprimirRecorrido(){
           <td style="padding:5px 8px;border:1px solid #e0ede5;text-align:center;font-family:monospace">${i.hora}</td>
           <td style="padding:5px 8px;border:1px solid #e0ede5;text-align:center;color:${col};font-weight:700">${i.asis}</td>
           <td style="padding:5px 8px;border:1px solid #e0ede5;text-align:center;color:${col};font-weight:600">${afoP}%</td>
-          <td style="padding:5px 8px;border:1px solid #e0ede5;text-align:center">${i.presente==='si'?'✅ Sí':i.presente==='no'?'❌ Ausente':'🔄 Sustituto'}</td>
+          <td style="padding:5px 8px;border:1px solid #e0ede5;text-align:center">${i.presente==='si'?'<svg class="ico ico-ok" viewBox="0 0 20 20"><circle cx="10" cy="10" r="8" stroke="currentColor" stroke-width="1.5" fill="none"/><polyline points="6,10 9,13 14,7" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg> Sí':i.presente==='no'?'<svg class="ico ico-err" viewBox="0 0 20 20"><circle cx="10" cy="10" r="8" stroke="currentColor" stroke-width="1.5" fill="none"/><line x1="7" y1="7" x2="13" y2="13" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><line x1="13" y1="7" x2="7" y2="13" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg> Ausente':'<svg class="ico" viewBox="0 0 20 20"><path d="M4 10a6 6 0 0 1 6-6 6 6 0 0 1 5.2 3" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round"/><path d="M16 10a6 6 0 0 1-6 6 6 6 0 0 1-5.2-3" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round"/><polyline points="14.5,7 15.5,3.8 18.5,5" stroke="currentColor" stroke-width="1.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/><polyline points="5.5,13 4.5,16.2 1.5,15" stroke="currentColor" stroke-width="1.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg> Sustituto'}</td>
           <td style="padding:5px 8px;border:1px solid #e0ede5;color:#1a5a8a">${i.presente==='sub'?nombreSuplente(i.suplente_id):'—'}</td>
           <td style="padding:5px 8px;border:1px solid #e0ede5;color:#555;font-size:.74rem">${i.obs||'—'}</td>
         </tr>`;
@@ -1992,7 +2063,7 @@ function imprimirRecorrido(){
   document.getElementById('m-print').classList.add('on');
 }
 function renderRecorridos(){
-  if(recorridos.length===0){document.getElementById('tb-rec').innerHTML=`<tr><td colspan="8"><div class="empty">Sin recorridos aún. Usa 🚶 Recorrido para iniciar.</div></td></tr>`;return;}
+  if(recorridos.length===0){document.getElementById('tb-rec').innerHTML=`<tr><td colspan="8"><div class="empty">Sin recorridos aún. Usa <svg class="ico" viewBox="0 0 20 20"><circle cx="10" cy="4" r="2" stroke="currentColor" stroke-width="1.4" fill="none"/><path d="M10 6 L9 11 L7 16 M10 6 L11 11 L13 16 M9 11 L12 11" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg> Recorrido para iniciar.</div></td></tr>`;return;}
   document.getElementById('tb-rec').innerHTML=recorridos.slice().reverse().map(r=>{
     const f=new Date((r.fecha||'')+'T12:00:00').toLocaleDateString('es-MX',{day:'2-digit',month:'short',year:'numeric'});
     return `<tr>
@@ -2000,9 +2071,9 @@ function renderRecorridos(){
       <td>${r.dia||'—'} · ${r.visitadas||0} clases</td>
       <td class="mono">${r.totalAsis||0}</td>
       <td style="color:${pctCol(r.aforoProm||0)};font-weight:600">${r.aforoProm||0}%</td>
-      <td class="${(r.ausentes||0)>0?'tr':'tg'}">${(r.ausentes||0)>0?r.ausentes+' ausente(s)':'—'}${(r.suplentes||0)>0?` <span style="color:var(--blue)">🔄 ${r.suplentes} sup.</span>`:''}</td>
-      <td><button class="abtn" onclick="verRec(${r.id})">👁 Ver</button></td>
-      <td><button class="abtn" style="color:var(--red2);border-color:var(--red)" onclick="eliminarRecorrido(${r.id})">🗑</button></td>
+      <td class="${(r.ausentes||0)>0?'tr':'tg'}">${(r.ausentes||0)>0?r.ausentes+' ausente(s)':'—'}${(r.suplentes||0)>0?` <span style="color:var(--blue)"><svg class="ico" viewBox="0 0 20 20"><path d="M4 10a6 6 0 0 1 6-6 6 6 0 0 1 5.2 3" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round"/><path d="M16 10a6 6 0 0 1-6 6 6 6 0 0 1-5.2-3" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round"/><polyline points="14.5,7 15.5,3.8 18.5,5" stroke="currentColor" stroke-width="1.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/><polyline points="5.5,13 4.5,16.2 1.5,15" stroke="currentColor" stroke-width="1.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg> ${r.suplentes} sup.</span>`:''}</td>
+      <td><button class="abtn" onclick="verRec(${r.id})"><svg class="ico" viewBox="0 0 20 20"><path d="M2 10 Q6 4 10 4 Q14 4 18 10 Q14 16 10 16 Q6 16 2 10" stroke="currentColor" stroke-width="1.4" fill="none"/><circle cx="10" cy="10" r="2.5" stroke="currentColor" stroke-width="1.3" fill="none"/></svg> Ver</button></td>
+      <td><button class="abtn" style="color:var(--red2);border-color:var(--red)" onclick="eliminarRecorrido(${r.id})"><svg class="ico" viewBox="0 0 20 20"><polyline points="5,6 15,6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><path d="M8 6V4h4v2" stroke="currentColor" stroke-width="1.4" fill="none" stroke-linecap="round"/><rect x="6" y="6" width="8" height="10" rx="1.5" stroke="currentColor" stroke-width="1.4" fill="none"/><line x1="9" y1="9" x2="9" y2="14" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/><line x1="11" y1="9" x2="11" y2="14" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg></button></td>
     </tr>`;
   }).join('');
 }
@@ -2011,7 +2082,7 @@ function eliminarRecorrido(id){
   recorridos=recorridos.filter(r=>r.id!==id);
   renderRecorridos();
   renderAll();
-  alert('🗑 Recorrido eliminado');
+  alert('<svg class="ico" viewBox="0 0 20 20"><polyline points="5,6 15,6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><path d="M8 6V4h4v2" stroke="currentColor" stroke-width="1.4" fill="none" stroke-linecap="round"/><rect x="6" y="6" width="8" height="10" rx="1.5" stroke="currentColor" stroke-width="1.4" fill="none"/><line x1="9" y1="9" x2="9" y2="14" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/><line x1="11" y1="9" x2="11" y2="14" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg> Recorrido eliminado');
 }
 function verRec(id){
   const r=recorridos.find(x=>x.id===id);if(!r)return;
@@ -2038,7 +2109,7 @@ function guardarClase(){
     dur:parseInt(document.getElementById('rc-dur').value)||60,
     estado:est,fecha:document.getElementById('rc-fecha').value,tipo:'clase',suplente_id:supId});
   cerrarModal('m-clase');renderAll();
-  alert(`✅ Clase registrada para ${inst.nombre}`);
+  alert(`Clase registrada para ${inst.nombre}`);
 }
 function guardarFalta(){
   const instId=parseInt(document.getElementById('rf-inst').value);
@@ -2049,7 +2120,7 @@ function guardarFalta(){
     fecha:hoy.toISOString().slice(0,10),tipo:'falta',tipo_falta:document.getElementById('rf-tipo').value,
     nota:document.getElementById('rf-nota').value,suplente_id:null});
   cerrarModal('m-falta');renderAll();
-  alert(`⚠ Falta registrada para ${inst.nombre}`);
+  alert(`Falta registrada para ${inst.nombre}`);
 }
 
 // ═══ REPORTE DE SUPLENCIAS ═══
@@ -2242,7 +2313,7 @@ function genReporteInstructor(){
           <div style="font-family:'Bebas Neue',sans-serif;font-size:1.4rem;letter-spacing:1px;color:#1a7a45">${inst.nombre}</div>
           <div style="font-size:.78rem;color:#555;margin-top:2px">${inst.tipo==='planta'?'Instructor de Planta':'Honorarios / Freelance'} &nbsp;·&nbsp; ${inst.esp||''}</div>
         </div>
-        <span style="background:${estBg};color:${estColor};padding:4px 12px;border-radius:20px;font-size:.75rem;font-weight:700">${faltas===0?'✅ Sin faltas':faltas+' falta(s)'}</span>
+        <span style="background:${estBg};color:${estColor};padding:4px 12px;border-radius:20px;font-size:.75rem;font-weight:700">${faltas===0?'<svg class="ico ico-ok" viewBox="0 0 20 20"><circle cx="10" cy="10" r="8" stroke="currentColor" stroke-width="1.5" fill="none"/><polyline points="6,10 9,13 14,7" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg> Sin faltas':faltas+' falta(s)'}</span>
       </div>
       <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:.7rem;margin-bottom:.9rem">
         ${[['Clases',recs.length,'#1a7a45'],['Total Asistentes',totalAsis.toLocaleString(),'#0d6a9e'],['Prom. / Clase',promClase+' pers.','#b87a00'],['Aforo Prom.',aforoProm+'%',aforoProm>=70?'#155724':aforoProm>=45?'#856404':'#c00']].map(([l,v,c])=>
@@ -2338,7 +2409,7 @@ function genReporteDiario(){
           <td style="padding:6px 9px;border:1px solid #e0ede5">${h.inst}</td>
           <td style="padding:6px 9px;border:1px solid #e0ede5;text-align:center;font-weight:600;color:${col}">${h.asis!=null?h.asis:'—'}</td>
           <td style="padding:6px 9px;border:1px solid #e0ede5;text-align:center;color:${col};font-weight:600">${pct!=null?pct+'%':'—'}</td>
-          <td style="padding:6px 9px;border:1px solid #e0ede5;text-align:center">${h.estado==='sub'?'🔄 Suplente':h.asis!=null?'✅ Impartida':'—'}</td>
+          <td style="padding:6px 9px;border:1px solid #e0ede5;text-align:center">${h.estado==='sub'?'<svg class="ico" viewBox="0 0 20 20"><path d="M4 10a6 6 0 0 1 6-6 6 6 0 0 1 5.2 3" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round"/><path d="M16 10a6 6 0 0 1-6 6 6 6 0 0 1-5.2-3" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round"/><polyline points="14.5,7 15.5,3.8 18.5,5" stroke="currentColor" stroke-width="1.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/><polyline points="5.5,13 4.5,16.2 1.5,15" stroke="currentColor" stroke-width="1.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg> Suplente':h.asis!=null?'<svg class="ico ico-ok" viewBox="0 0 20 20"><circle cx="10" cy="10" r="8" stroke="currentColor" stroke-width="1.5" fill="none"/><polyline points="6,10 9,13 14,7" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg> Impartida':'—'}</td>
           <td style="padding:6px 9px;border:1px solid #e0ede5;color:#1a5a8a">${h.estado==='sub'?nombreSuplente(h.suplente_id):'—'}</td>
         </tr>`;
       }).join('')}
@@ -2383,7 +2454,7 @@ function genReporteSemanal(){
   });
   const html=`<div style="${printStyles()}">
     ${pHdr('REPORTE SEMANAL — CALENDARIO',`Club Campestre Aguascalientes · ${semanaStr(getLunes(calOffset))} · ${totalSem} clases programadas`)}
-    <p style="font-size:.7rem;color:#777;margin-bottom:.5rem">🟢 Buen aforo (≥40%) &nbsp; 🟡 Aforo medio (16-40%) &nbsp; 🔴 Aforo bajo (≤15%)</p>
+    <p style="font-size:.7rem;color:#777;margin-bottom:.5rem"><svg class="ico" viewBox="0 0 20 20"><circle cx="10" cy="10" r="5" fill="var(--neon)"/></svg> Buen aforo (≥40%) &nbsp; <svg class="ico" viewBox="0 0 20 20"><circle cx="10" cy="10" r="5" fill="var(--gold2)"/></svg> Aforo medio (16-40%) &nbsp; <svg class="ico" viewBox="0 0 20 20"><circle cx="10" cy="10" r="5" fill="var(--red2)"/></svg> Aforo bajo (≤15%)</p>
     <div style="overflow-x:auto">
     <table style="width:100%;border-collapse:collapse;font-size:.75rem;min-width:580px">
       <thead><tr style="background:#f0f7f3">
@@ -2452,10 +2523,10 @@ function aplicarTema(t) {
   const iconEl = document.getElementById('coord-tema-icon');
   if(t === 'claro') {
     document.documentElement.classList.add('tema-claro');
-    if(iconEl) iconEl.textContent = '☀️';
+    if(iconEl) iconEl.innerHTML = '<svg class="ico" viewBox="0 0 20 20"><circle cx="10" cy="10" r="3.5" stroke="currentColor" stroke-width="1.4" fill="none"/><line x1="10" y1="2" x2="10" y2="4.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><line x1="10" y1="15.5" x2="10" y2="18" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><line x1="2" y1="10" x2="4.5" y2="10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><line x1="15.5" y1="10" x2="18" y2="10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>';
   } else {
     document.documentElement.classList.remove('tema-claro');
-    if(iconEl) iconEl.textContent = '🌙';
+    if(iconEl) iconEl.innerHTML = '<svg class="ico" viewBox="0 0 20 20"><path d="M14 4 Q10 4 8 7 Q6 10 8 13 Q10 16 14 16 Q11 14 11 10 Q11 6 14 4" stroke="currentColor" stroke-width="1.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>';
   }
   localStorage.setItem('fc_tema', t);
   setTimeout(()=>{if(typeof renderDashboard==='function')renderDashboard();},80);
@@ -2695,7 +2766,7 @@ function exportarExcelCompleto() {
   // ── Hoja 2: Instructores
   const instRows = [['Instructor','Tipo','Turno','Especialidades','Clases/sem','Impartidas','Faltas','Total Asistentes','Aforo %','Estado']];
   allS.forEach(i=>{
-    const est = i.faltas===0?'✅ Cumple':i.faltas<=1?'⚠ Revisar':'❌ Incidencia';
+    const est = i.faltas===0?'<svg class="ico ico-ok" viewBox="0 0 20 20"><circle cx="10" cy="10" r="8" stroke="currentColor" stroke-width="1.5" fill="none"/><polyline points="6,10 9,13 14,7" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg> Cumple':i.faltas<=1?'<svg class="ico ico-warn" viewBox="0 0 20 20"><path d="M10 3 L18 17 H2 Z" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linejoin="round"/><line x1="10" y1="9" x2="10" y2="13" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><circle cx="10" cy="15.5" r="0.8" fill="currentColor"/></svg> Revisar':'<svg class="ico ico-err" viewBox="0 0 20 20"><circle cx="10" cy="10" r="8" stroke="currentColor" stroke-width="1.5" fill="none"/><line x1="7" y1="7" x2="13" y2="13" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><line x1="13" y1="7" x2="7" y2="13" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg> Incidencia';
     instRows.push([i.nombre,i.tipo,i.turno||'',i.esp||'',(i.horario||[]).length,i.impartidas,i.faltas,i.totalAsis,i.aforo+'%',est]);
   });
   XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(instRows), 'Instructores');
@@ -2809,7 +2880,7 @@ function exportarPDFCompleto() {
   });
 
   // Tabla de instructores en pág 1
-  const instRows=allS.map(i=>[i.nombre,i.tipo==='planta'?'Planta':'Honor.',(i.horario||[]).length,i.impartidas,i.faltas,i.totalAsis.toLocaleString(),i.aforo+'%',i.faltas===0?'✅ OK':i.faltas<=1?'⚠ Revisar':'❌ Incid.']);
+  const instRows=allS.map(i=>[i.nombre,i.tipo==='planta'?'Planta':'Honor.',(i.horario||[]).length,i.impartidas,i.faltas,i.totalAsis.toLocaleString(),i.aforo+'%',i.faltas===0?'<svg class="ico ico-ok" viewBox="0 0 20 20"><circle cx="10" cy="10" r="8" stroke="currentColor" stroke-width="1.5" fill="none"/><polyline points="6,10 9,13 14,7" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg> OK':i.faltas<=1?'<svg class="ico ico-warn" viewBox="0 0 20 20"><path d="M10 3 L18 17 H2 Z" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linejoin="round"/><line x1="10" y1="9" x2="10" y2="13" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><circle cx="10" cy="15.5" r="0.8" fill="currentColor"/></svg> Revisar':'<svg class="ico ico-err" viewBox="0 0 20 20"><circle cx="10" cy="10" r="8" stroke="currentColor" stroke-width="1.5" fill="none"/><line x1="7" y1="7" x2="13" y2="13" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><line x1="13" y1="7" x2="7" y2="13" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg> Incid.']);
   doc.autoTable({
     head:[['Instructor','Tipo','Cls/Sem','Impartidas','Faltas','Asistentes','Aforo','Estado']],
     body:instRows,
@@ -2914,10 +2985,10 @@ function renderHistorial(){
   const sups=lista.filter(r=>r.estado==='sub').length;
   document.getElementById('hist-resumen').innerHTML=
     `<span style="color:var(--neon)">${total} registros</span> &nbsp;·&nbsp; `+
-    `<span style="color:var(--v3)">✅ ${impartidas} impartidas</span> &nbsp;·&nbsp; `+
-    `<span style="color:var(--red2)">❌ ${faltas} faltas</span> &nbsp;·&nbsp; `+
-    `<span style="color:var(--blue)">🔄 ${sups} suplencias</span> &nbsp;·&nbsp; `+
-    `<span style="color:var(--gold2)">👥 ${totalAsis.toLocaleString()} asistentes totales</span>`;
+    `<span style="color:var(--v3)"><svg class="ico ico-ok" viewBox="0 0 20 20"><circle cx="10" cy="10" r="8" stroke="currentColor" stroke-width="1.5" fill="none"/><polyline points="6,10 9,13 14,7" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg> ${impartidas} impartidas</span> &nbsp;·&nbsp; `+
+    `<span style="color:var(--red2)"><svg class="ico ico-err" viewBox="0 0 20 20"><circle cx="10" cy="10" r="8" stroke="currentColor" stroke-width="1.5" fill="none"/><line x1="7" y1="7" x2="13" y2="13" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><line x1="13" y1="7" x2="7" y2="13" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg> ${faltas} faltas</span> &nbsp;·&nbsp; `+
+    `<span style="color:var(--blue)"><svg class="ico" viewBox="0 0 20 20"><path d="M4 10a6 6 0 0 1 6-6 6 6 0 0 1 5.2 3" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round"/><path d="M16 10a6 6 0 0 1-6 6 6 6 0 0 1-5.2-3" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round"/><polyline points="14.5,7 15.5,3.8 18.5,5" stroke="currentColor" stroke-width="1.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/><polyline points="5.5,13 4.5,16.2 1.5,15" stroke="currentColor" stroke-width="1.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg> ${sups} suplencias</span> &nbsp;·&nbsp; `+
+    `<span style="color:var(--gold2)"><svg class="ico" viewBox="0 0 20 20"><circle cx="8" cy="6" r="3" stroke="currentColor" stroke-width="1.4" fill="none"/><path d="M2 17 Q2 12 8 12 Q14 12 14 17" stroke="currentColor" stroke-width="1.4" fill="none" stroke-linecap="round"/><circle cx="14" cy="6" r="2.5" stroke="currentColor" stroke-width="1.3" fill="none"/><path d="M14 11 Q18 11 18 16" stroke="currentColor" stroke-width="1.3" fill="none" stroke-linecap="round"/></svg> ${totalAsis.toLocaleString()} asistentes totales</span>`;
 
   const inicio=histPagina*HIST_POR_PAG;
   const pagina=lista.slice(inicio,inicio+HIST_POR_PAG);
@@ -2933,9 +3004,9 @@ function renderHistorial(){
     const sup=r.suplente_id?instructores.find(i=>i.id===r.suplente_id):null;
     const afoP=r.cap>0?Math.round((r.asistentes||0)/r.cap*100):0;
     const fd=r.fecha?new Date(r.fecha+'T12:00:00').toLocaleDateString('es-MX',{day:'2-digit',month:'short',year:'numeric'}):'—';
-    const estChip=r.estado==='ok'?'<span class="chip cok">✅ Impartida</span>':
-                  r.estado==='sub'?'<span class="chip bb" style="font-size:.68rem">🔄 Suplente</span>':
-                  '<span class="chip cbd">❌ Falta</span>';
+    const estChip=r.estado==='ok'?'<span class="chip cok"><svg class="ico ico-ok" viewBox="0 0 20 20"><circle cx="10" cy="10" r="8" stroke="currentColor" stroke-width="1.5" fill="none"/><polyline points="6,10 9,13 14,7" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg> Impartida</span>':
+                  r.estado==='sub'?'<span class="chip bb" style="font-size:.68rem"><svg class="ico" viewBox="0 0 20 20"><path d="M4 10a6 6 0 0 1 6-6 6 6 0 0 1 5.2 3" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round"/><path d="M16 10a6 6 0 0 1-6 6 6 6 0 0 1-5.2-3" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round"/><polyline points="14.5,7 15.5,3.8 18.5,5" stroke="currentColor" stroke-width="1.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/><polyline points="5.5,13 4.5,16.2 1.5,15" stroke="currentColor" stroke-width="1.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg> Suplente</span>':
+                  '<span class="chip cbd"><svg class="ico ico-err" viewBox="0 0 20 20"><circle cx="10" cy="10" r="8" stroke="currentColor" stroke-width="1.5" fill="none"/><line x1="7" y1="7" x2="13" y2="13" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><line x1="13" y1="7" x2="7" y2="13" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg> Falta</span>';
     return `<tr>
       <td class="mono" style="font-size:.75rem">${fd}</td>
       <td style="font-size:.75rem;color:var(--txt2)">${r.dia||'—'}</td>
@@ -2952,8 +3023,8 @@ function renderHistorial(){
       </td>
       <td>${estChip}</td>
       <td style="font-size:.75rem;color:var(--blue)">${sup?sup.nombre:'—'}</td>
-      <td style="font-size:.7rem;color:var(--txt3)">${r.tipo==='recorrido'?'🚶 Recorrido':'📝 Manual'}</td>
-      <td><button class="abtn" onclick="abrirEditarRegistro(${r.id})" title="Editar aforo / estado">✏</button></td>
+      <td style="font-size:.7rem;color:var(--txt3)">${r.tipo==='recorrido'?'<svg class="ico" viewBox="0 0 20 20"><circle cx="10" cy="4" r="2" stroke="currentColor" stroke-width="1.4" fill="none"/><path d="M10 6 L9 11 L7 16 M10 6 L11 11 L13 16 M9 11 L12 11" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg> Recorrido':'<svg class="ico" viewBox="0 0 20 20"><path d="M5 3 H13 L16 6 V17 H5 Z" stroke="currentColor" stroke-width="1.4" fill="none" stroke-linejoin="round"/><polyline points="13,3 13,6 16,6" stroke="currentColor" stroke-width="1.3" fill="none" stroke-linejoin="round"/><line x1="8" y1="10" x2="13" y2="10" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/><line x1="8" y1="13" x2="11" y2="13" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/><line x1="8" y1="7" x2="10" y2="7" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg> Manual'}</td>
+      <td><button class="abtn" onclick="abrirEditarRegistro(${r.id})" title="Editar aforo / estado"><svg class="ico" viewBox="0 0 20 20"><path d="M13.5 3.5 L16.5 6.5 L8 15 L4 16 L5 12 Z" stroke="currentColor" stroke-width="1.4" fill="none" stroke-linejoin="round"/><line x1="12" y1="5" x2="15" y2="8" stroke="currentColor" stroke-width="1.3"/></svg></button></td>
     </tr>`;
   }).join('');
 
@@ -2995,7 +3066,7 @@ function abrirEditarRegistro(regId){
         <div style="color:var(--txt2);font-size:.8rem">${inst?inst.nombre:'—'} · ${r.hora||'—'} · ${fd}</div>
       </div>
       <div style="text-align:right">
-        <div style="font-size:.7rem;color:var(--txt3)">${r.tipo==='recorrido'?'🚶 Recorrido':'📝 Manual'}</div>
+        <div style="font-size:.7rem;color:var(--txt3)">${r.tipo==='recorrido'?'<svg class="ico" viewBox="0 0 20 20"><circle cx="10" cy="4" r="2" stroke="currentColor" stroke-width="1.4" fill="none"/><path d="M10 6 L9 11 L7 16 M10 6 L11 11 L13 16 M9 11 L12 11" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg> Recorrido':'<svg class="ico" viewBox="0 0 20 20"><path d="M5 3 H13 L16 6 V17 H5 Z" stroke="currentColor" stroke-width="1.4" fill="none" stroke-linejoin="round"/><polyline points="13,3 13,6 16,6" stroke="currentColor" stroke-width="1.3" fill="none" stroke-linejoin="round"/><line x1="8" y1="10" x2="13" y2="10" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/><line x1="8" y1="13" x2="11" y2="13" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/><line x1="8" y1="7" x2="10" y2="7" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg> Manual'}</div>
       </div>
     </div>`;
   document.getElementById('er-id').value=regId;
@@ -3030,7 +3101,7 @@ function guardarEdicionRegistro(){
   cerrarModal('m-edit-reg');
   renderAll();
   renderHistorial();
-  alert('✅ Registro actualizado');
+  alert('<svg class="ico ico-ok" viewBox="0 0 20 20"><circle cx="10" cy="10" r="8" stroke="currentColor" stroke-width="1.5" fill="none"/><polyline points="6,10 9,13 14,7" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg> Registro actualizado');
 }
 function eliminarRegistro(){
   const id=parseInt(document.getElementById('er-id').value);
@@ -3039,7 +3110,7 @@ function eliminarRegistro(){
   cerrarModal('m-edit-reg');
   renderAll();
   renderHistorial();
-  alert('🗑 Registro eliminado');
+  alert('<svg class="ico" viewBox="0 0 20 20"><polyline points="5,6 15,6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><path d="M8 6V4h4v2" stroke="currentColor" stroke-width="1.4" fill="none" stroke-linecap="round"/><rect x="6" y="6" width="8" height="10" rx="1.5" stroke="currentColor" stroke-width="1.4" fill="none"/><line x1="9" y1="9" x2="9" y2="14" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/><line x1="11" y1="9" x2="11" y2="14" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg> Registro eliminado');
 }
 
 // ═══ TABS ═══
@@ -3090,8 +3161,8 @@ function getCapClase(nombreClase) {
 }
 
 function getTipoIcon(tipo) {
-  const icons = {salon:'🏋️',spinning:'🚴',yoga:'🧘',funcional:'💪',cardio:'🏃',piscina:'🏊',exterior:'🌿',multiusos:'🔄'};
-  return icons[tipo] || '🏠';
+  const icons = {salon:'<svg class="ico" viewBox="0 0 20 20"><line x1="2" y1="10" x2="18" y2="10" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/><rect x="2" y="8" width="2.5" height="4" rx="0.8" stroke="currentColor" stroke-width="1.2" fill="none"/><rect x="5" y="7" width="2.5" height="6" rx="0.8" stroke="currentColor" stroke-width="1.2" fill="none"/><rect x="12.5" y="7" width="2.5" height="6" rx="0.8" stroke="currentColor" stroke-width="1.2" fill="none"/><rect x="15.5" y="8" width="2.5" height="4" rx="0.8" stroke="currentColor" stroke-width="1.2" fill="none"/><circle cx="10" cy="10" r="1.5" fill="currentColor"/></svg>️',spinning:'<svg class="ico" viewBox="0 0 20 20"><circle cx="5" cy="14" r="3.5" stroke="currentColor" stroke-width="1.3" fill="none"/><circle cx="15" cy="14" r="3.5" stroke="currentColor" stroke-width="1.3" fill="none"/><path d="M5 14 L8 8 L12 8 L15 14 M8 8 L10 5" stroke="currentColor" stroke-width="1.3" fill="none" stroke-linecap="round" stroke-linejoin="round"/><circle cx="10" cy="5" r="1" fill="currentColor"/></svg>',yoga:'<svg class="ico" viewBox="0 0 20 20"><circle cx="10" cy="4" r="1.8" stroke="currentColor" stroke-width="1.3" fill="none"/><path d="M10 6 L10 12 M10 8 L7 10 M10 8 L13 10 M10 12 L8 16 M10 12 L12 16" stroke="currentColor" stroke-width="1.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>',funcional:'<svg class="ico" viewBox="0 0 20 20"><path d="M12 4 Q16 5 15 9 L14 11 Q15 14 13 16 Q10 18 7 15 L5 12 Q3 9 6 7 L9 8 L11 5 Z" stroke="currentColor" stroke-width="1.3" fill="none" stroke-linejoin="round"/></svg>',cardio:'<svg class="ico" viewBox="0 0 20 20"><circle cx="12" cy="4" r="1.8" stroke="currentColor" stroke-width="1.3" fill="none"/><path d="M12 6 L10 10 L7 13 M10 10 L13 13 L15 17 M12 6 L14 9" stroke="currentColor" stroke-width="1.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>',piscina:'<svg class="ico" viewBox="0 0 20 20"><circle cx="13" cy="5" r="1.8" stroke="currentColor" stroke-width="1.3" fill="none"/><path d="M3 10 Q7 7 10 10 Q13 13 17 10" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round"/><path d="M3 14 Q7 11 10 14 Q13 17 17 14" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round"/><path d="M13 7 L10 9" stroke="currentColor" stroke-width="1.4" fill="none" stroke-linecap="round"/></svg>',exterior:'<svg class="ico" viewBox="0 0 20 20"><path d="M5 16 Q8 8 16 4 Q14 12 8 15 Z" stroke="currentColor" stroke-width="1.3" fill="none" stroke-linejoin="round"/><line x1="5" y1="16" x2="12" y2="9" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>',multiusos:'<svg class="ico" viewBox="0 0 20 20"><path d="M4 10a6 6 0 0 1 6-6 6 6 0 0 1 5.2 3" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round"/><path d="M16 10a6 6 0 0 1-6 6 6 6 0 0 1-5.2-3" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round"/><polyline points="14.5,7 15.5,3.8 18.5,5" stroke="currentColor" stroke-width="1.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/><polyline points="5.5,13 4.5,16.2 1.5,15" stroke="currentColor" stroke-width="1.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>'};
+  return icons[tipo] || '<svg class="ico" viewBox="0 0 20 20"><path d="M3 10 L10 3 L17 10 L17 17 L3 17 Z" stroke="currentColor" stroke-width="1.4" fill="none" stroke-linejoin="round"/><rect x="7.5" y="12" width="5" height="5" rx="0.5" stroke="currentColor" stroke-width="1.3" fill="none"/></svg>';
 }
 function getTipoLabel(tipo) {
   const labels = {salon:'Salón general',spinning:'Estudio Spinning',yoga:'Sala Yoga / Pilates',funcional:'Área Funcional',cardio:'Sala Cardio',piscina:'Piscina / Alberca',exterior:'Área exterior',multiusos:'Multiusos'};
@@ -3117,7 +3188,7 @@ function renderSalones() {
               ? clasesUso.slice(0,4).map(c=>`<span style="display:inline-block;background:var(--panel2);border:1px solid var(--border);border-radius:4px;padding:1px 5px;margin:1px;font-size:.63rem">${c}</span>`).join('')+(clasesUso.length>4?`<span style="color:var(--txt3);font-size:.63rem"> +${clasesUso.length-4} más</span>`:'')
               : 'Sin clases asignadas — clic para editar'}
           </div>
-          <div style="margin-top:.5rem;font-size:.62rem;color:var(--txt3);text-align:right">✏ Editar</div>
+          <div style="margin-top:.5rem;font-size:.62rem;color:var(--txt3);text-align:right"><svg class="ico" viewBox="0 0 20 20"><path d="M13.5 3.5 L16.5 6.5 L8 15 L4 16 L5 12 Z" stroke="currentColor" stroke-width="1.4" fill="none" stroke-linejoin="round"/><line x1="12" y1="5" x2="15" y2="8" stroke="currentColor" stroke-width="1.3"/></svg> Editar</div>
         </div>`;
       }).join('')}
     </div>`;
@@ -3183,7 +3254,7 @@ function abrirModalSalon(id) {
   const salon = id ? salones.find(s=>s.id===id) : null;
   msClasesExtra = []; // reset
 
-  document.getElementById('ms-ttl').textContent = salon ? '✏ Editar Salón' : '+ Nuevo Salón';
+  document.getElementById('ms-ttl').textContent = salon ? '<svg class="ico" viewBox="0 0 20 20"><path d="M13.5 3.5 L16.5 6.5 L8 15 L4 16 L5 12 Z" stroke="currentColor" stroke-width="1.4" fill="none" stroke-linejoin="round"/><line x1="12" y1="5" x2="15" y2="8" stroke="currentColor" stroke-width="1.3"/></svg> Editar Salón' : '+ Nuevo Salón';
   document.getElementById('ms-id').value = id||'';
   document.getElementById('ms-nombre').value = salon ? salon.nombre : '';
   document.getElementById('ms-cap').value = salon ? salon.cap : 20;
@@ -3280,7 +3351,7 @@ function hmPoblarInstructores(instIdActual) {
   const lista = instructores
     .filter(i => idsConDatos.has(i.id))
     .sort((a,b) => a.nombre.localeCompare(b.nombre));
-  sel.innerHTML = '<option value="">👤 Todos los instructores</option>' +
+  sel.innerHTML = '<option value=""><svg class="ico" viewBox="0 0 20 20"><circle cx="10" cy="7" r="3.5" stroke="currentColor" stroke-width="1.4" fill="none"/><path d="M3 18 Q3 12 10 12 Q17 12 17 18" stroke="currentColor" stroke-width="1.4" fill="none" stroke-linecap="round"/></svg> Todos los instructores</option>' +
     lista.map(i => `<option value="${i.id}" ${i.id===instIdActual?'selected':''}>${i.nombre}</option>`).join('');
 }
 
@@ -3291,7 +3362,7 @@ function hmPoblarClases(instId) {
   let regs = registros.filter(r => (r.estado==='ok'||r.estado==='sub') && parseInt(r.cap||0) > 0);
   if(instId) regs = regs.filter(r => r.inst_id === instId); // inst_id ya es número, instId también
   const clases = [...new Set(regs.map(r => r.clase))].filter(Boolean).sort();
-  sel.innerHTML = '<option value="">📋 Todas las clases</option>' +
+  sel.innerHTML = '<option value=""><svg class="ico" viewBox="0 0 20 20"><rect x="5" y="3" width="10" height="14" rx="2" stroke="currentColor" stroke-width="1.5" fill="none"/><rect x="8" y="2" width="4" height="2.5" rx="1" stroke="currentColor" stroke-width="1.2" fill="none"/><line x1="8" y1="9" x2="12" y2="9" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/><line x1="8" y1="12" x2="13" y2="12" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg> Todas las clases</option>' +
     clases.map(c => `<option value="${c}" ${c===cur?'selected':''}>${c}</option>`).join('');
 }
 
@@ -3319,8 +3390,8 @@ function renderHeatmap() {
   const bannerEl = document.getElementById('hmap-context-banner');
   if(hayFiltro) {
     let txt = '';
-    if(instObj) txt += `<span style="background:rgba(94,255,160,.1);color:var(--neon);border:1px solid rgba(94,255,160,.25);border-radius:6px;padding:2px 9px;font-size:.73rem">👤 ${instObj.nombre}</span>`;
-    if(claseFil) txt += `<span style="background:rgba(77,184,232,.1);color:var(--blue);border:1px solid rgba(77,184,232,.25);border-radius:6px;padding:2px 9px;font-size:.73rem">📋 ${claseFil}</span>`;
+    if(instObj) txt += `<span style="background:rgba(94,255,160,.1);color:var(--neon);border:1px solid rgba(94,255,160,.25);border-radius:6px;padding:2px 9px;font-size:.73rem"><svg class="ico" viewBox="0 0 20 20"><circle cx="10" cy="7" r="3.5" stroke="currentColor" stroke-width="1.4" fill="none"/><path d="M3 18 Q3 12 10 12 Q17 12 17 18" stroke="currentColor" stroke-width="1.4" fill="none" stroke-linecap="round"/></svg> ${instObj.nombre}</span>`;
+    if(claseFil) txt += `<span style="background:rgba(77,184,232,.1);color:var(--blue);border:1px solid rgba(77,184,232,.25);border-radius:6px;padding:2px 9px;font-size:.73rem"><svg class="ico" viewBox="0 0 20 20"><rect x="5" y="3" width="10" height="14" rx="2" stroke="currentColor" stroke-width="1.5" fill="none"/><rect x="8" y="2" width="4" height="2.5" rx="1" stroke="currentColor" stroke-width="1.2" fill="none"/><line x1="8" y1="9" x2="12" y2="9" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/><line x1="8" y1="12" x2="13" y2="12" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg> ${claseFil}</span>`;
     txt += `<span style="color:var(--txt3);font-size:.72rem"> — mostrando solo registros de esta selección</span>`;
     bannerEl.innerHTML = txt;
     bannerEl.style.display = 'flex';
@@ -3330,8 +3401,8 @@ function renderHeatmap() {
 
   // Filtrar registros — usar === con tipos correctos
   let regsValidos = registros.filter(r => (r.estado==='ok'||r.estado==='sub') && parseInt(r.cap||0) > 0);
-  if(instId)   regsValidos = regsValidos.filter(r => r.inst_id === instId);   // número === número ✓
-  if(claseFil) regsValidos = regsValidos.filter(r => r.clase   === claseFil); // string === string ✓
+  if(instId)   regsValidos = regsValidos.filter(r => r.inst_id === instId);   // número === número
+  if(claseFil) regsValidos = regsValidos.filter(r => r.clase   === claseFil); // string === string
 
   if(regsValidos.length === 0) {
     const msg = hayFiltro
@@ -3340,7 +3411,7 @@ function renderHeatmap() {
     document.getElementById('hmap-grid').innerHTML = `<div class="empty" style="padding:2rem">${msg}</div>`;
     document.getElementById('hm-top5').innerHTML   = '<div class="empty" style="font-size:.75rem">Sin datos</div>';
     document.getElementById('hm-bot5').innerHTML   = '<div class="empty" style="font-size:.75rem">Sin datos</div>';
-    document.getElementById('hmap-insight').innerHTML = '💡 Registra clases para ver insights de horarios.';
+    document.getElementById('hmap-insight').innerHTML = '<svg class="ico" viewBox="0 0 20 20"><path d="M10 3 Q14 3 14 8 Q14 11 12 12.5 L12 14.5 L8 14.5 L8 12.5 Q6 11 6 8 Q6 3 10 3" stroke="currentColor" stroke-width="1.3" fill="none" stroke-linejoin="round"/><line x1="8.2" y1="16" x2="11.8" y2="16" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg> Registra clases para ver insights de horarios.';
     document.getElementById('hmap-legend').innerHTML  = '';
     return;
   }
@@ -3376,11 +3447,11 @@ function renderHeatmap() {
     const pct = val/maxVal;
     const isDark = temaActual !== 'claro';
     if(isDark){
-      if(pct<0.25)return'#1a1a0a';
-      if(pct<0.45)return'#2a3a10';
-      if(pct<0.65)return'#1a5a20';
-      if(pct<0.80)return'#1a7a35';
-      return'#1aaa50';
+      if(pct<0.25)return'rgba(26,122,69,.12)';
+      if(pct<0.45)return'rgba(26,122,69,.30)';
+      if(pct<0.65)return'rgba(26,122,69,.55)';
+      if(pct<0.80)return'rgba(26,122,69,.80)';
+      return'#5effa0';
     } else {
       if(pct<0.25)return'#d4eedd';
       if(pct<0.45)return'#a8d8b8';
@@ -3391,7 +3462,13 @@ function renderHeatmap() {
   }
   function cellTextColor(val){
     if(val===0) return 'var(--txt3)';
-    return val/maxVal < 0.3 ? 'var(--txt3)' : '#fff';
+    const _dark = temaActual !== 'claro';
+    if(!_dark) return val/maxVal < 0.25 ? 'var(--txt3)' : '#0a1f12';
+    const pct = val/maxVal;
+    if(pct === 0) return 'var(--txt3)';
+    if(pct < 0.25) return 'var(--txt3)';
+    if(pct >= 0.80) return '#071a0f';   // dark text on bright neon green
+    return '#fff';
   }
 
   let html = `<table style="border-collapse:separate;border-spacing:3px;width:100%">
@@ -3423,11 +3500,11 @@ function renderHeatmap() {
   // Leyenda
   const isDarkLegend = temaActual !== 'claro';
   const legendColors = isDarkLegend
-    ? ['#1a1a0a','#2a3a10','#1a5a20','#1a7a35','#1aaa50']
+    ? ['rgba(26,122,69,.12)','rgba(26,122,69,.30)','rgba(26,122,69,.55)','rgba(26,122,69,.80)','#5effa0']
     : ['#d4eedd','#a8d8b8','#6db990','#3a9a68','#1a7a45'];
   document.getElementById('hmap-legend').innerHTML =
     `<span>Menor</span>
-    ${legendColors.map(c=>`<span class="hmap-sq" style="background:${c}"></span>`).join('')}
+    ${legendColors.map((c,i)=>`<span class="hmap-sq" style="background:${c};border:1px solid rgba(94,255,160,${0.1+i*0.15})"></span>`).join('')}
     <span>Mayor</span>
     &nbsp;&nbsp; <span style="opacity:.7">Clic en celda = diagnóstico de ese horario</span>`;
 
@@ -3464,23 +3541,23 @@ function renderHeatmap() {
     const nc  = clasesList.map(c=>c.clase).join(', ');
     const pfx = instObj ? `${instObj.nombre.split(' ')[0]} — ` : '';
     if(metric==='aforo'){
-      if(v.val>=80) return `✅ ${pfx}Horario estrella. Considera duplicar ${clasesList[0]?.clase||'esta clase'} o agregar instructor adicional.`;
+      if(v.val>=80) return `<svg class="ico ico-ok" viewBox="0 0 20 20"><circle cx="10" cy="10" r="8" stroke="currentColor" stroke-width="1.5" fill="none"/><polyline points="6,10 9,13 14,7" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg> ${pfx}Horario estrella. Considera duplicar ${clasesList[0]?.clase||'esta clase'} o agregar instructor adicional.`;
       if(v.val>=60) return `👍 ${pfx}Buen rendimiento. Mantén la programación actual de ${nc||'este horario'}.`;
-      return `💡 ${pfx}Horario en crecimiento. Potencial sin explotar en ${nc||'este horario'}.`;
+      return `<svg class="ico" viewBox="0 0 20 20"><path d="M10 3 Q14 3 14 8 Q14 11 12 12.5 L12 14.5 L8 14.5 L8 12.5 Q6 11 6 8 Q6 3 10 3" stroke="currentColor" stroke-width="1.3" fill="none" stroke-linejoin="round"/><line x1="8.2" y1="16" x2="11.8" y2="16" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg> ${pfx}Horario en crecimiento. Potencial sin explotar en ${nc||'este horario'}.`;
     }
-    if(metric==='asis') return `👥 ${pfx}Promedio de ${v.val} personas — asigna al instructor de mayor experiencia aquí.`;
-    return `📊 ${v.val} sesiones registradas. Horario consolidado.`;
+    if(metric==='asis') return `<svg class="ico" viewBox="0 0 20 20"><circle cx="8" cy="6" r="3" stroke="currentColor" stroke-width="1.4" fill="none"/><path d="M2 17 Q2 12 8 12 Q14 12 14 17" stroke="currentColor" stroke-width="1.4" fill="none" stroke-linecap="round"/><circle cx="14" cy="6" r="2.5" stroke="currentColor" stroke-width="1.3" fill="none"/><path d="M14 11 Q18 11 18 16" stroke="currentColor" stroke-width="1.3" fill="none" stroke-linecap="round"/></svg> ${pfx}Promedio de ${v.val} personas — asigna al instructor de mayor experiencia aquí.`;
+    return `<svg class="ico" viewBox="0 0 20 20"><rect x="3" y="12" width="3" height="5" rx="1" stroke="currentColor" stroke-width="1.4" fill="none"/><rect x="8.5" y="8" width="3" height="9" rx="1" stroke="currentColor" stroke-width="1.4" fill="none"/><rect x="14" y="4" width="3" height="13" rx="1" stroke="currentColor" stroke-width="1.4" fill="none"/></svg> ${v.val} sesiones registradas. Horario consolidado.`;
   }
 
   function sugerenciaCritica(v, clasesList) {
     const nc = clasesList.map(c=>c.clase).join(', ');
     if(metric==='aforo'){
-      if(v.val<=15) return `🔴 Aforo crítico (${v.val}%). Evalúa cancelar o fusionar ${nc||'esta clase'} con otro horario similar.`;
-      if(v.val<=30) return `🟡 Aforo bajo (${v.val}%). Considera cambiar horario o promocionar ${nc||'esta clase'}.`;
-      return `⚠️ Rendimiento mejorable (${v.val}%). Revisa si el horario compite con otra clase del mismo tipo.`;
+      if(v.val<=15) return `<svg class="ico" viewBox="0 0 20 20"><circle cx="10" cy="10" r="5" fill="var(--red2)"/></svg> Aforo crítico (${v.val}%). Evalúa cancelar o fusionar ${nc||'esta clase'} con otro horario similar.`;
+      if(v.val<=30) return `<svg class="ico" viewBox="0 0 20 20"><circle cx="10" cy="10" r="5" fill="var(--gold2)"/></svg> Aforo bajo (${v.val}%). Considera cambiar horario o promocionar ${nc||'esta clase'}.`;
+      return `<svg class="ico ico-warn" viewBox="0 0 20 20"><path d="M10 3 L18 17 H2 Z" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linejoin="round"/><line x1="10" y1="9" x2="10" y2="13" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><circle cx="10" cy="15.5" r="0.8" fill="currentColor"/></svg>️ Rendimiento mejorable (${v.val}%). Revisa si el horario compite con otra clase del mismo tipo.`;
     }
-    if(metric==='asis') return `📉 Solo ${v.val} personas en promedio. Considera reubicar ${nc||'esta clase'} a un horario con mayor demanda.`;
-    return `📋 Pocas sesiones. Verifica si el horario está activo.`;
+    if(metric==='asis') return `<svg class="ico" viewBox="0 0 20 20"><polyline points="3,5 7,12 11,9 17,15" stroke="currentColor" stroke-width="1.6" fill="none" stroke-linecap="round" stroke-linejoin="round"/><polyline points="13,15 17,15 17,11" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg> Solo ${v.val} personas en promedio. Considera reubicar ${nc||'esta clase'} a un horario con mayor demanda.`;
+    return `<svg class="ico" viewBox="0 0 20 20"><rect x="5" y="3" width="10" height="14" rx="2" stroke="currentColor" stroke-width="1.5" fill="none"/><rect x="8" y="2" width="4" height="2.5" rx="1" stroke="currentColor" stroke-width="1.2" fill="none"/><line x1="8" y1="9" x2="12" y2="9" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/><line x1="8" y1="12" x2="13" y2="12" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg> Pocas sesiones. Verifica si el horario está activo.`;
   }
 
   const mkChipVerde = c => `<span style="display:inline-block;background:rgba(94,255,160,.12);color:var(--neon);border-radius:4px;padding:1px 5px;font-size:.62rem;margin:1px">${c.clase}${instId?'':` <span style="opacity:.55">${c.inst}</span>`}</span>`;
@@ -3526,15 +3603,15 @@ function renderHeatmap() {
     const clasesPeor  = clasesEnHorario(peor.d,  peor.h);
     const metricNom   = metric==='aforo' ? 'aforo' : metric==='asis' ? 'asistentes' : 'sesiones';
     const titulo = instObj
-      ? `💡 Análisis individual — ${instObj.nombre}${claseFil?' · '+claseFil:''}`
-      : '💡 Análisis y recomendaciones';
+      ? `<svg class="ico" viewBox="0 0 20 20"><path d="M10 3 Q14 3 14 8 Q14 11 12 12.5 L12 14.5 L8 14.5 L8 12.5 Q6 11 6 8 Q6 3 10 3" stroke="currentColor" stroke-width="1.3" fill="none" stroke-linejoin="round"/><line x1="8.2" y1="16" x2="11.8" y2="16" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg> Análisis individual — ${instObj.nombre}${claseFil?' · '+claseFil:''}`
+      : '<svg class="ico" viewBox="0 0 20 20"><path d="M10 3 Q14 3 14 8 Q14 11 12 12.5 L12 14.5 L8 14.5 L8 12.5 Q6 11 6 8 Q6 3 10 3" stroke="currentColor" stroke-width="1.3" fill="none" stroke-linejoin="round"/><line x1="8.2" y1="16" x2="11.8" y2="16" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg> Análisis y recomendaciones';
     document.getElementById('hmap-insight').innerHTML =
       `<div style="background:var(--panel2);border-radius:10px;padding:.8rem 1rem;border-left:3px solid var(--neon)">
         <div style="font-size:.7rem;text-transform:uppercase;letter-spacing:1px;color:var(--neon);margin-bottom:.5rem">${titulo}</div>
         <div style="font-size:.78rem;line-height:1.6;color:var(--txt)">
-          <p style="margin:0 0 .4rem">📈 <strong>Mejor horario:</strong> ${mejor.d} ${mejor.h}${clasesMejor.length>0?` — <em>${clasesMejor.map(c=>c.clase).join(', ')}</em>`:''} con <strong style="color:var(--neon)">${mejor.val}${metric==='aforo'?'%':''}</strong> de ${metricNom}.</p>
-          <p style="margin:0 0 .4rem">📉 <strong>Horario crítico:</strong> ${peor.d} ${peor.h}${clasesPeor.length>0?` — <em>${clasesPeor.map(c=>c.clase).join(', ')}</em>`:''} con solo <strong style="color:var(--red2)">${peor.val}${metric==='aforo'?'%':''}</strong> de ${metricNom}.</p>
-          <p style="margin:0 0 .4rem">📅 <strong>Día más activo:</strong> ${diaMasActivo?.d||'—'}${diaMenosActivo?' · <strong>Día más flojo:</strong> '+diaMenosActivo.d:''}</p>
+          <p style="margin:0 0 .4rem"><svg class="ico" viewBox="0 0 20 20"><polyline points="3,15 7,8 11,11 17,5" stroke="currentColor" stroke-width="1.6" fill="none" stroke-linecap="round" stroke-linejoin="round"/><polyline points="13,5 17,5 17,9" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg> <strong>Mejor horario:</strong> ${mejor.d} ${mejor.h}${clasesMejor.length>0?` — <em>${clasesMejor.map(c=>c.clase).join(', ')}</em>`:''} con <strong style="color:var(--neon)">${mejor.val}${metric==='aforo'?'%':''}</strong> de ${metricNom}.</p>
+          <p style="margin:0 0 .4rem"><svg class="ico" viewBox="0 0 20 20"><polyline points="3,5 7,12 11,9 17,15" stroke="currentColor" stroke-width="1.6" fill="none" stroke-linecap="round" stroke-linejoin="round"/><polyline points="13,15 17,15 17,11" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg> <strong>Horario crítico:</strong> ${peor.d} ${peor.h}${clasesPeor.length>0?` — <em>${clasesPeor.map(c=>c.clase).join(', ')}</em>`:''} con solo <strong style="color:var(--red2)">${peor.val}${metric==='aforo'?'%':''}</strong> de ${metricNom}.</p>
+          <p style="margin:0 0 .4rem"><svg class="ico" viewBox="0 0 20 20"><rect x="3" y="4" width="14" height="13" rx="2" stroke="currentColor" stroke-width="1.4" fill="none"/><line x1="3" y1="9" x2="17" y2="9" stroke="currentColor" stroke-width="1.3"/><line x1="7" y1="2" x2="7" y2="6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><line x1="13" y1="2" x2="13" y2="6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><circle cx="7" cy="12.5" r="1" fill="currentColor"/><circle cx="10" cy="12.5" r="1" fill="currentColor"/><circle cx="13" cy="12.5" r="1" fill="currentColor"/></svg> <strong>Día más activo:</strong> ${diaMasActivo?.d||'—'}${diaMenosActivo?' · <strong>Día más flojo:</strong> '+diaMenosActivo.d:''}</p>
           <p style="margin:0;font-size:.7rem;color:var(--txt3)">${instObj?`Viendo solo las sesiones de <em>${instObj.nombre}</em>${claseFil?' en <em>'+claseFil+'</em>':''}. Quita el filtro para ver el comparativo general.`:'Selecciona un instructor para ver su mapa individual.'}</p>
         </div>
       </div>`;
@@ -3557,7 +3634,7 @@ function verDiagHorario(dia, hora) {
   if(recs.length>0){
     const totalAsis = recs.reduce((a,r)=>a+r.asistentes,0);
     const prom = Math.round(totalAsis/recs.length);
-    alert(`📊 ${dia} ${hora}\n\n${recs.length} sesiones · Promedio: ${prom} asistentes\n\nVer diagnóstico para más detalle.`);
+    alert(`${dia} ${hora}\n\n${recs.length} sesiones · Promedio: ${prom} asistentes\n\nVer diagnóstico para más detalle.`);
   }
 }
 
@@ -3585,7 +3662,7 @@ function calcularAlertas() {
       const bajos = recientes.slice(0,3).filter(r=>r.cap>0&&(r.asistentes/r.cap*100)<20);
       if(bajos.length>=3) {
         const inst = instructores.find(i=>i.id===g.inst_id);
-        alertas.push({tipo:'red',icon:'🔴',texto:`<strong>${g.clase}</strong> con ${inst?.nombre||'?'} a las ${g.hora} lleva 3+ sesiones consecutivas con aforo menor al 20%.`,accion:'Considera revisar o reasignar este horario.'});
+        alertas.push({tipo:'red',icon:'<svg class="ico" viewBox="0 0 20 20"><circle cx="10" cy="10" r="5" fill="var(--red2)"/></svg>',texto:`<strong>${g.clase}</strong> con ${inst?.nombre||'?'} a las ${g.hora} lleva 3+ sesiones consecutivas con aforo menor al 20%.`,accion:'Considera revisar o reasignar este horario.'});
       }
     }
   });
@@ -3594,7 +3671,7 @@ function calcularAlertas() {
   instructores.forEach(inst => {
     const faltas = registros.filter(r=>r.inst_id===inst.id&&r.estado==='falta'&&new Date(r.fecha)>=hoy30);
     if(faltas.length>=2) {
-      alertas.push({tipo:'gold',icon:'⚠️',texto:`<strong>${inst.nombre}</strong> tiene <strong>${faltas.length} faltas</strong> en los últimos 30 días.`,accion:'Requiere seguimiento de RRHH o coordinación.'});
+      alertas.push({tipo:'gold',icon:'<svg class="ico ico-warn" viewBox="0 0 20 20"><path d="M10 3 L18 17 H2 Z" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linejoin="round"/><line x1="10" y1="9" x2="10" y2="13" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><circle cx="10" cy="15.5" r="0.8" fill="currentColor"/></svg>️',texto:`<strong>${inst.nombre}</strong> tiene <strong>${faltas.length} faltas</strong> en los últimos 30 días.`,accion:'Requiere seguimiento de RRHH o coordinación.'});
     }
   });
 
@@ -3615,7 +3692,7 @@ function calcularAlertas() {
     });
   });
   if(sinRegistro.length>0){
-    alertas.push({tipo:'blue',icon:'📋',texto:`<strong>${sinRegistro.length} clase(s)</strong> de esta semana sin registro aún: ${sinRegistro.slice(0,3).join(', ')}${sinRegistro.length>3?` y ${sinRegistro.length-3} más`:''}`,accion:'Verifica si se impartieron y regístralas.'});
+    alertas.push({tipo:'blue',icon:'<svg class="ico" viewBox="0 0 20 20"><rect x="5" y="3" width="10" height="14" rx="2" stroke="currentColor" stroke-width="1.5" fill="none"/><rect x="8" y="2" width="4" height="2.5" rx="1" stroke="currentColor" stroke-width="1.2" fill="none"/><line x1="8" y1="9" x2="12" y2="9" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/><line x1="8" y1="12" x2="13" y2="12" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>',texto:`<strong>${sinRegistro.length} clase(s)</strong> de esta semana sin registro aún: ${sinRegistro.slice(0,3).join(', ')}${sinRegistro.length>3?` y ${sinRegistro.length-3} más`:''}`,accion:'Verifica si se impartieron y regístralas.'});
   }
 
   // 4. Semanas con tendencia negativa (aforo promedio bajando)
@@ -3632,9 +3709,9 @@ function calcularAlertas() {
   if(aforoSemanas.length>=3){
     const tendencia = aforoSemanas[aforoSemanas.length-1] - aforoSemanas[0];
     if(tendencia < -10){
-      alertas.push({tipo:'red',icon:'📉',texto:`El aforo promedio ha bajado <strong>${Math.abs(Math.round(tendencia))}%</strong> en las últimas semanas (${aforoSemanas[0]}% → ${aforoSemanas[aforoSemanas.length-1]}%).`,accion:'Analiza el mapa de calor para identificar horarios problemáticos.'});
+      alertas.push({tipo:'red',icon:'<svg class="ico" viewBox="0 0 20 20"><polyline points="3,5 7,12 11,9 17,15" stroke="currentColor" stroke-width="1.6" fill="none" stroke-linecap="round" stroke-linejoin="round"/><polyline points="13,15 17,15 17,11" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>',texto:`El aforo promedio ha bajado <strong>${Math.abs(Math.round(tendencia))}%</strong> en las últimas semanas (${aforoSemanas[0]}% → ${aforoSemanas[aforoSemanas.length-1]}%).`,accion:'Analiza el mapa de calor para identificar horarios problemáticos.'});
     } else if(tendencia > 5){
-      alertas.push({tipo:'green',icon:'📈',texto:`¡Buenas noticias! El aforo promedio ha subido <strong>${Math.round(tendencia)}%</strong> en las últimas semanas (${aforoSemanas[0]}% → ${aforoSemanas[aforoSemanas.length-1]}%).`,accion:'El programa va en buena dirección.'});
+      alertas.push({tipo:'green',icon:'<svg class="ico" viewBox="0 0 20 20"><polyline points="3,15 7,8 11,11 17,5" stroke="currentColor" stroke-width="1.6" fill="none" stroke-linecap="round" stroke-linejoin="round"/><polyline points="13,5 17,5 17,9" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>',texto:`¡Buenas noticias! El aforo promedio ha subido <strong>${Math.round(tendencia)}%</strong> en las últimas semanas (${aforoSemanas[0]}% → ${aforoSemanas[aforoSemanas.length-1]}%).`,accion:'El programa va en buena dirección.'});
     }
   }
 
@@ -3643,7 +3720,7 @@ function calcularAlertas() {
     const impTotal = registros.filter(r=>r.inst_id===inst.id&&(r.estado==='ok'||r.estado==='sub')&&new Date(r.fecha)>=hoy30).length;
     const sups = registros.filter(r=>r.inst_id===inst.id&&r.estado==='sub'&&new Date(r.fecha)>=hoy30).length;
     if(impTotal>=4 && sups/impTotal >= 0.5){
-      alertas.push({tipo:'gold',icon:'🔄',texto:`<strong>${inst.nombre}</strong> tiene suplentes en el <strong>${Math.round(sups/impTotal*100)}%</strong> de sus clases este mes (${sups} de ${impTotal}).`,accion:'Considera revisar disponibilidad o reasignación de clases.'});
+      alertas.push({tipo:'gold',icon:'<svg class="ico" viewBox="0 0 20 20"><path d="M4 10a6 6 0 0 1 6-6 6 6 0 0 1 5.2 3" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round"/><path d="M16 10a6 6 0 0 1-6 6 6 6 0 0 1-5.2-3" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round"/><polyline points="14.5,7 15.5,3.8 18.5,5" stroke="currentColor" stroke-width="1.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/><polyline points="5.5,13 4.5,16.2 1.5,15" stroke="currentColor" stroke-width="1.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>',texto:`<strong>${inst.nombre}</strong> tiene suplentes en el <strong>${Math.round(sups/impTotal*100)}%</strong> de sus clases este mes (${sups} de ${impTotal}).`,accion:'Considera revisar disponibilidad o reasignación de clases.'});
     }
   });
 
@@ -3653,7 +3730,7 @@ function calcularAlertas() {
     return recientes.length<3 && (instructores.find(i=>i.id===g.inst_id)?.horario||[]).length>0;
   });
   if(clasesConPocosDatos.length>2){
-    alertas.push({tipo:'blue',icon:'📊',texto:`<strong>${clasesConPocosDatos.length} combinaciones</strong> de clase/instructor tienen menos de 3 registros en el último mes.`,accion:'Más datos permiten mejores diagnósticos. Registra clases regularmente.'});
+    alertas.push({tipo:'blue',icon:'<svg class="ico" viewBox="0 0 20 20"><rect x="3" y="12" width="3" height="5" rx="1" stroke="currentColor" stroke-width="1.4" fill="none"/><rect x="8.5" y="8" width="3" height="9" rx="1" stroke="currentColor" stroke-width="1.4" fill="none"/><rect x="14" y="4" width="3" height="13" rx="1" stroke="currentColor" stroke-width="1.4" fill="none"/></svg>',texto:`<strong>${clasesConPocosDatos.length} combinaciones</strong> de clase/instructor tienen menos de 3 registros en el último mes.`,accion:'Más datos permiten mejores diagnósticos. Registra clases regularmente.'});
   }
 
   return alertas;
@@ -3664,7 +3741,7 @@ function renderAlertas() {
   const container = document.getElementById('alertas-body');
   if(alertas.length===0){
     container.innerHTML = `<div style="text-align:center;padding:2rem">
-      <div style="font-size:2rem;margin-bottom:.5rem">✅</div>
+      <div style="font-size:2rem;margin-bottom:.5rem"><svg class="ico ico-ok" viewBox="0 0 20 20"><circle cx="10" cy="10" r="8" stroke="currentColor" stroke-width="1.5" fill="none"/><polyline points="6,10 9,13 14,7" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
       <div style="font-size:.9rem;color:var(--neon);font-weight:600">Sin alertas activas</div>
       <div style="font-size:.75rem;color:var(--txt2);margin-top:.3rem">Todo marcha bien por ahora.</div>
     </div>`;
@@ -3673,10 +3750,10 @@ function renderAlertas() {
   const resumen = {red:alertas.filter(a=>a.tipo==='red').length,gold:alertas.filter(a=>a.tipo==='gold').length,blue:alertas.filter(a=>a.tipo==='blue').length,green:alertas.filter(a=>a.tipo==='green').length};
   container.innerHTML =
     `<div style="display:flex;gap:.5rem;flex-wrap:wrap;margin-bottom:1rem">
-      ${resumen.red>0?`<span style="background:rgba(224,80,80,.15);color:var(--red2);border:1px solid var(--red);border-radius:20px;padding:3px 10px;font-size:.72rem">🔴 ${resumen.red} crítica(s)</span>`:''}
-      ${resumen.gold>0?`<span style="background:rgba(232,184,75,.15);color:var(--gold2);border:1px solid var(--gold);border-radius:20px;padding:3px 10px;font-size:.72rem">⚠️ ${resumen.gold} advertencia(s)</span>`:''}
-      ${resumen.blue>0?`<span style="background:rgba(77,184,232,.12);color:var(--blue);border:1px solid var(--blue);border-radius:20px;padding:3px 10px;font-size:.72rem">📋 ${resumen.blue} info</span>`:''}
-      ${resumen.green>0?`<span style="background:rgba(94,255,160,.1);color:var(--neon);border:1px solid var(--verde);border-radius:20px;padding:3px 10px;font-size:.72rem">📈 ${resumen.green} positiva(s)</span>`:''}
+      ${resumen.red>0?`<span style="background:rgba(224,80,80,.15);color:var(--red2);border:1px solid var(--red);border-radius:20px;padding:3px 10px;font-size:.72rem"><svg class="ico" viewBox="0 0 20 20"><circle cx="10" cy="10" r="5" fill="var(--red2)"/></svg> ${resumen.red} crítica(s)</span>`:''}
+      ${resumen.gold>0?`<span style="background:rgba(232,184,75,.15);color:var(--gold2);border:1px solid var(--gold);border-radius:20px;padding:3px 10px;font-size:.72rem"><svg class="ico ico-warn" viewBox="0 0 20 20"><path d="M10 3 L18 17 H2 Z" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linejoin="round"/><line x1="10" y1="9" x2="10" y2="13" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><circle cx="10" cy="15.5" r="0.8" fill="currentColor"/></svg>️ ${resumen.gold} advertencia(s)</span>`:''}
+      ${resumen.blue>0?`<span style="background:rgba(77,184,232,.12);color:var(--blue);border:1px solid var(--blue);border-radius:20px;padding:3px 10px;font-size:.72rem"><svg class="ico" viewBox="0 0 20 20"><rect x="5" y="3" width="10" height="14" rx="2" stroke="currentColor" stroke-width="1.5" fill="none"/><rect x="8" y="2" width="4" height="2.5" rx="1" stroke="currentColor" stroke-width="1.2" fill="none"/><line x1="8" y1="9" x2="12" y2="9" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/><line x1="8" y1="12" x2="13" y2="12" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg> ${resumen.blue} info</span>`:''}
+      ${resumen.green>0?`<span style="background:rgba(94,255,160,.1);color:var(--neon);border:1px solid var(--verde);border-radius:20px;padding:3px 10px;font-size:.72rem"><svg class="ico" viewBox="0 0 20 20"><polyline points="3,15 7,8 11,11 17,5" stroke="currentColor" stroke-width="1.6" fill="none" stroke-linecap="round" stroke-linejoin="round"/><polyline points="13,5 17,5 17,9" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg> ${resumen.green} positiva(s)</span>`:''}
     </div>` +
     alertas.map(a=>`
       <div class="alert-card alrt-${a.tipo}">
@@ -3725,7 +3802,7 @@ function renderQuickAlerts() {
   }
   document.getElementById('quick-alerts').innerHTML =
     `<div style="background:rgba(224,80,80,.1);border:1px solid var(--red);border-radius:10px;padding:.75rem 1rem;display:flex;align-items:center;gap:.7rem;cursor:pointer" onclick="irAlertas()">
-      <span style="font-size:1.1rem">🔴</span>
+      <span style="font-size:1.1rem"><svg class="ico" viewBox="0 0 20 20"><circle cx="10" cy="10" r="5" fill="var(--red2)"/></svg></span>
       <div style="flex:1;font-size:.78rem"><strong style="color:var(--red2)">${alertas.length} alerta(s) crítica(s)</strong> — ${alertas[0].texto.replace(/<[^>]+>/g,'')}</div>
       <span style="font-size:.72rem;color:var(--red2)">Ver todas →</span>
     </div>`;
@@ -3832,9 +3909,9 @@ async function inicializarFirebase(){
     // Test de conexión
     fbDb.ref('.info/connected').on('value', snap => {
       if(snap.val()===true){
-        setIndicador('🟢 En línea · Sincronizando');
+        setIndicador('<svg class="ico" viewBox="0 0 20 20"><circle cx="10" cy="10" r="5" fill="var(--neon)"/></svg> En línea · Sincronizando');
       } else {
-        setIndicador('🟡 Sin conexión · Datos guardados localmente');
+        setIndicador('<svg class="ico" viewBox="0 0 20 20"><circle cx="10" cy="10" r="5" fill="var(--gold2)"/></svg> Sin conexión · Datos guardados localmente');
       }
     });
 
@@ -3850,19 +3927,19 @@ async function inicializarFirebase(){
       guardarLocal();
       _origRenderAll();
       if(document.getElementById('v-calendario').classList.contains('on')) renderCal();
-      console.log('🔄 Sincronizado desde Firebase:', new Date().toLocaleTimeString('es-MX'));
+      console.log('<svg class="ico" viewBox="0 0 20 20"><path d="M4 10a6 6 0 0 1 6-6 6 6 0 0 1 5.2 3" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round"/><path d="M16 10a6 6 0 0 1-6 6 6 6 0 0 1-5.2-3" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round"/><polyline points="14.5,7 15.5,3.8 18.5,5" stroke="currentColor" stroke-width="1.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/><polyline points="5.5,13 4.5,16.2 1.5,15" stroke="currentColor" stroke-width="1.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg> Sincronizado desde Firebase:', new Date().toLocaleTimeString('es-MX'));
     });
 
-    setIndicador('🟢 Firebase conectado');
+    setIndicador('<svg class="ico" viewBox="0 0 20 20"><circle cx="10" cy="10" r="5" fill="var(--neon)"/></svg> Firebase conectado');
   } catch(e){
     console.warn('Firebase error:', e.message);
-    setIndicador('🔴 Error Firebase · Solo modo local');
+    setIndicador('<svg class="ico" viewBox="0 0 20 20"><circle cx="10" cy="10" r="5" fill="var(--gold2)"/></svg> Sin conexión · Datos locales');
   }
 }
 
 // ═══ LIMPIAR TODOS LOS DATOS ═══
 async function confirmarLimpiezaTotal(){
-  const resp=prompt('⚠️ ATENCIÓN: Esto borrará TODOS los datos del sistema (instructores, clases, recorridos) de Firebase y este dispositivo.\n\nEscribe BORRAR para confirmar:');
+  const resp=prompt('⚠ ADVERTENCIA: Esta acción es irreversible.\nEscribe BORRAR para confirmar:');
   if(resp!=='BORRAR'){alert('Operación cancelada.');return;}
   // Limpiar memoria
   instructores=[];
@@ -3884,7 +3961,7 @@ async function confirmarLimpiezaTotal(){
   renderAll();
   renderRecorridos();
   renderCal();
-  alert('✅ Todos los datos han sido eliminados. El sistema está limpio.');
+  alert('<svg class="ico ico-ok" viewBox="0 0 20 20"><circle cx="10" cy="10" r="8" stroke="currentColor" stroke-width="1.5" fill="none"/><polyline points="6,10 9,13 14,7" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg> Todos los datos han sido eliminados. El sistema está limpio.');
 }
 
 async function sincronizarFirebase(){
@@ -3897,9 +3974,9 @@ async function sincronizarFirebase(){
       recorridos: recorridos.reduce((a,r)=>{a[r.id]=r;return a;},{}),
       ts: Date.now()
     });
-    setIndicador('🟢 Guardado en la nube ✓');
+    setIndicador('<svg class="ico" viewBox="0 0 20 20"><circle cx="10" cy="10" r="5" fill="var(--neon)"/></svg> Guardado en la nube <svg class="ico" viewBox="0 0 20 20"><polyline points="4,10 8,14 16,6" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>');
   } catch(e){
-    setIndicador('🔴 Sin conexión — guardado local');
+    setIndicador('<svg class="ico" viewBox="0 0 20 20"><circle cx="10" cy="10" r="5" fill="var(--red2)"/></svg> Sin conexión — guardado local');
   }
   setTimeout(()=>fbSyncing=false, 500);
 }
@@ -3915,7 +3992,7 @@ function cargarScript(src){
 
 function setIndicador(txt){
   const el=document.getElementById('sync-indicator');
-  if(el) el.textContent=txt;
+  if(el) el.innerHTML=txt;
 }
 
 // Indicador de estado en el header
@@ -3997,19 +4074,19 @@ function cambiarPass(tipo) {
     const nueva  = document.getElementById('cp-admin-nueva').value.trim();
     const conf   = document.getElementById('cp-admin-confirma').value.trim();
     const passActual = localStorage.getItem('fc_pass_admin') || PASS_ADMIN;
-    if(actual !== passActual){ alert('❌ La contraseña actual del Coordinador es incorrecta.'); return; }
-    if(!nueva || nueva.length < 4){ alert('❌ La nueva contraseña debe tener al menos 4 caracteres.'); return; }
-    if(nueva !== conf){ alert('❌ Las contraseñas nuevas no coinciden.'); return; }
+    if(actual !== passActual){ alert('<svg class="ico ico-err" viewBox="0 0 20 20"><circle cx="10" cy="10" r="8" stroke="currentColor" stroke-width="1.5" fill="none"/><line x1="7" y1="7" x2="13" y2="13" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><line x1="13" y1="7" x2="7" y2="13" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg> La contraseña actual del Coordinador es incorrecta.'); return; }
+    if(!nueva || nueva.length < 4){ alert('<svg class="ico ico-err" viewBox="0 0 20 20"><circle cx="10" cy="10" r="8" stroke="currentColor" stroke-width="1.5" fill="none"/><line x1="7" y1="7" x2="13" y2="13" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><line x1="13" y1="7" x2="7" y2="13" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg> La nueva contraseña debe tener al menos 4 caracteres.'); return; }
+    if(nueva !== conf){ alert('<svg class="ico ico-err" viewBox="0 0 20 20"><circle cx="10" cy="10" r="8" stroke="currentColor" stroke-width="1.5" fill="none"/><line x1="7" y1="7" x2="13" y2="13" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><line x1="13" y1="7" x2="7" y2="13" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg> Las contraseñas nuevas no coinciden.'); return; }
     localStorage.setItem('fc_pass_admin', nueva);
-    alert('✅ Contraseña de Coordinador actualizada.\nAnótala: ' + nueva);
+    alert('<svg class="ico ico-ok" viewBox="0 0 20 20"><circle cx="10" cy="10" r="8" stroke="currentColor" stroke-width="1.5" fill="none"/><polyline points="6,10 9,13 14,7" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg> Contraseña de Coordinador actualizada.\nAnótala: ' + nueva);
     cerrarModal('m-cambiar-pass');
   } else {
     const nueva = document.getElementById('cp-user-nueva').value.trim();
     const conf  = document.getElementById('cp-user-confirma').value.trim();
-    if(!nueva || nueva.length < 4){ alert('❌ La nueva contraseña debe tener al menos 4 caracteres.'); return; }
-    if(nueva !== conf){ alert('❌ Las contraseñas nuevas no coinciden.'); return; }
+    if(!nueva || nueva.length < 4){ alert('<svg class="ico ico-err" viewBox="0 0 20 20"><circle cx="10" cy="10" r="8" stroke="currentColor" stroke-width="1.5" fill="none"/><line x1="7" y1="7" x2="13" y2="13" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><line x1="13" y1="7" x2="7" y2="13" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg> La nueva contraseña debe tener al menos 4 caracteres.'); return; }
+    if(nueva !== conf){ alert('<svg class="ico ico-err" viewBox="0 0 20 20"><circle cx="10" cy="10" r="8" stroke="currentColor" stroke-width="1.5" fill="none"/><line x1="7" y1="7" x2="13" y2="13" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><line x1="13" y1="7" x2="7" y2="13" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg> Las contraseñas nuevas no coinciden.'); return; }
     localStorage.setItem('fc_pass_usuario', nueva);
-    alert('✅ Contraseña de Consulta actualizada.\nAnótala: ' + nueva);
+    alert('<svg class="ico ico-ok" viewBox="0 0 20 20"><circle cx="10" cy="10" r="8" stroke="currentColor" stroke-width="1.5" fill="none"/><polyline points="6,10 9,13 14,7" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg> Contraseña de Consulta actualizada.\nAnótala: ' + nueva);
     cerrarModal('m-cambiar-pass');
   }
 }
@@ -4038,7 +4115,7 @@ function cambiarPass(tipo) {
   if(hayLocal){
     _origRenderAll();
     renderCal();
-    console.log('✅ Datos restaurados desde almacenamiento local');
+    console.log('<svg class="ico ico-ok" viewBox="0 0 20 20"><circle cx="10" cy="10" r="8" stroke="currentColor" stroke-width="1.5" fill="none"/><polyline points="6,10 9,13 14,7" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg> Datos restaurados desde almacenamiento local');
   }
   inicializarFirebase();
   // Guardar antes de cerrar pestaña
@@ -4076,7 +4153,7 @@ window.addEventListener('beforeinstallprompt',e=>{
   const b=document.createElement('button');
   b.id='btn-instalar';b.className='btn no-print';
   b.style.cssText='background:#0d2218;color:var(--neon);border:1px solid var(--verde);font-size:.65rem;padding:5px 8px;white-space:nowrap;flex-shrink:0;';
-  b.innerHTML='📲 Instalar';b.title='Instalar en pantalla de inicio';
+  b.innerHTML='<svg class="ico" viewBox="0 0 20 20"><rect x="5" y="2" width="10" height="16" rx="2" stroke="currentColor" stroke-width="1.4" fill="none"/><circle cx="10" cy="15.5" r="1" fill="currentColor"/><polyline points="8,7 10,5 12,7" stroke="currentColor" stroke-width="1.3" fill="none" stroke-linecap="round" stroke-linejoin="round"/><line x1="10" y1="5" x2="10" y2="11" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg> Instalar';b.title='Instalar en pantalla de inicio';
   b.onclick=async()=>{
     if(!_pwaPrompt)return;
     _pwaPrompt.prompt();
