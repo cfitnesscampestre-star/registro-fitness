@@ -711,11 +711,16 @@ html.tema-claro .login-field input{background:#fff;border-color:#c2d8c2;color:#1
           <option value="asis">Asistentes promedio</option>
           <option value="sesiones">Nº de sesiones</option>
         </select>
-        <select class="ctrl" id="hm-clase-fil" onchange="renderHeatmap()" style="width:150px">
-          <option value="">Todas las clases</option>
+        <select class="ctrl" id="hm-inst-fil" onchange="hmInstChange()" style="width:190px">
+          <option value="">👤 Todos los instructores</option>
         </select>
+        <select class="ctrl" id="hm-clase-fil" onchange="renderHeatmap()" style="width:165px">
+          <option value="">📋 Todas las clases</option>
+        </select>
+        <button class="btn bo" id="hm-clear-btn" onclick="hmClearFiltros()" style="padding:5px 10px;font-size:.72rem;display:none">✕ Limpiar</button>
       </div>
     </div>
+    <div id="hmap-context-banner" style="display:none;padding:.55rem 1.2rem;border-bottom:1px solid var(--border);font-size:.75rem;color:var(--txt2);background:var(--panel2);align-items:center;gap:.5rem;flex-wrap:wrap"></div>
     <div class="pbody">
       <div class="hmap-wrap" id="hmap-grid"></div>
       <div class="hmap-legend" id="hmap-legend"></div>
@@ -3247,25 +3252,96 @@ function eliminarSalon() {
 // ═══════════════════════════════════════════
 // MAPA DE CALOR
 // ═══════════════════════════════════════════
+// ── Helpers filtros heatmap ──────────────────────────────────────
+function hmInstChange() {
+  // Al cambiar instructor repoblar clases de ese instructor y re-renderizar
+  const rawId = document.getElementById('hm-inst-fil').value;
+  const instId = rawId ? parseInt(rawId) : null;
+  hmPoblarClases(instId);
+  document.getElementById('hm-clase-fil').value = '';
+  renderHeatmap();
+}
+
+function hmClearFiltros() {
+  document.getElementById('hm-inst-fil').value = '';
+  document.getElementById('hm-clase-fil').value = '';
+  hmPoblarClases(null);
+  renderHeatmap();
+}
+
+function hmPoblarInstructores(instIdActual) {
+  const sel = document.getElementById('hm-inst-fil');
+  // Solo instructores que tienen al menos un registro válido
+  const idsConDatos = new Set(
+    registros
+      .filter(r => (r.estado==='ok'||r.estado==='sub') && parseInt(r.cap||0) > 0)
+      .map(r => r.inst_id)
+  );
+  const lista = instructores
+    .filter(i => idsConDatos.has(i.id))
+    .sort((a,b) => a.nombre.localeCompare(b.nombre));
+  sel.innerHTML = '<option value="">👤 Todos los instructores</option>' +
+    lista.map(i => `<option value="${i.id}" ${i.id===instIdActual?'selected':''}>${i.nombre}</option>`).join('');
+}
+
+function hmPoblarClases(instId) {
+  const sel = document.getElementById('hm-clase-fil');
+  const cur = sel.value;
+  // Filtrar registros válidos, y si hay instructor seleccionado solo los suyos
+  let regs = registros.filter(r => (r.estado==='ok'||r.estado==='sub') && parseInt(r.cap||0) > 0);
+  if(instId) regs = regs.filter(r => r.inst_id === instId); // inst_id ya es número, instId también
+  const clases = [...new Set(regs.map(r => r.clase))].filter(Boolean).sort();
+  sel.innerHTML = '<option value="">📋 Todas las clases</option>' +
+    clases.map(c => `<option value="${c}" ${c===cur?'selected':''}>${c}</option>`).join('');
+}
+
+// ── renderHeatmap principal ──────────────────────────────────────
 function renderHeatmap() {
-  const metric = document.getElementById('hm-metric').value;
+  const metric  = document.getElementById('hm-metric').value;
+  // *** CLAVE: convertir a número para que coincida con r.inst_id que es número ***
+  const rawInstVal = document.getElementById('hm-inst-fil').value;
+  const instId  = rawInstVal ? parseInt(rawInstVal) : null;
   const claseFil = document.getElementById('hm-clase-fil').value;
 
-  // Poblar filtro de clases SOLO con clases que tienen registros reales
-  const clasesConRegistros = [...new Set(registros.filter(r=>r.estado==='ok'||r.estado==='sub').map(r=>r.clase))].filter(Boolean).sort();
-  const selClase = document.getElementById('hm-clase-fil');
-  const curVal = selClase.value;
-  selClase.innerHTML = '<option value="">Todas las clases</option>' +
-    clasesConRegistros.map(c=>`<option value="${c}" ${c===curVal?'selected':''}>${c}</option>`).join('');
+  // Mantener selectores actualizados sin perder la selección actual
+  hmPoblarInstructores(instId);
+  hmPoblarClases(instId);
+  // Re-asignar tras repoblar (repoblar puede haber reseteado el valor)
+  if(instId)   document.getElementById('hm-inst-fil').value  = String(instId);
+  if(claseFil) document.getElementById('hm-clase-fil').value = claseFil;
 
-  // Si no hay ningún registro real, mostrar estado vacío
-  const regsValidos=registros.filter(r=>(r.estado==='ok'||r.estado==='sub')&&parseInt(r.cap||0)>0);
-  if(regsValidos.length===0){
-    document.getElementById('hmap-grid').innerHTML='<div class="empty" style="padding:2rem">Sin datos de aforo registrados aún. Registra clases con aforo para ver el mapa de calor.</div>';
-    document.getElementById('hm-top5').innerHTML='<div class="empty" style="font-size:.75rem">Sin datos</div>';
-    document.getElementById('hm-bot5').innerHTML='<div class="empty" style="font-size:.75rem">Sin datos</div>';
-    document.getElementById('hmap-insight').innerHTML='💡 Registra clases para ver insights de horarios.';
-    document.getElementById('hmap-legend').innerHTML='';
+  const hayFiltro = instId || claseFil;
+  document.getElementById('hm-clear-btn').style.display = hayFiltro ? '' : 'none';
+
+  const instObj = instId ? instructores.find(i => i.id === instId) : null;
+
+  // Banner contextual
+  const bannerEl = document.getElementById('hmap-context-banner');
+  if(hayFiltro) {
+    let txt = '';
+    if(instObj) txt += `<span style="background:rgba(94,255,160,.1);color:var(--neon);border:1px solid rgba(94,255,160,.25);border-radius:6px;padding:2px 9px;font-size:.73rem">👤 ${instObj.nombre}</span>`;
+    if(claseFil) txt += `<span style="background:rgba(77,184,232,.1);color:var(--blue);border:1px solid rgba(77,184,232,.25);border-radius:6px;padding:2px 9px;font-size:.73rem">📋 ${claseFil}</span>`;
+    txt += `<span style="color:var(--txt3);font-size:.72rem"> — mostrando solo registros de esta selección</span>`;
+    bannerEl.innerHTML = txt;
+    bannerEl.style.display = 'flex';
+  } else {
+    bannerEl.style.display = 'none';
+  }
+
+  // Filtrar registros — usar === con tipos correctos
+  let regsValidos = registros.filter(r => (r.estado==='ok'||r.estado==='sub') && parseInt(r.cap||0) > 0);
+  if(instId)   regsValidos = regsValidos.filter(r => r.inst_id === instId);   // número === número ✓
+  if(claseFil) regsValidos = regsValidos.filter(r => r.clase   === claseFil); // string === string ✓
+
+  if(regsValidos.length === 0) {
+    const msg = hayFiltro
+      ? `Sin registros de aforo para ${instObj ? instObj.nombre : 'este instructor'}${claseFil ? ' · ' + claseFil : ''}.`
+      : 'Sin datos de aforo registrados aún. Registra clases con aforo para ver el mapa de calor.';
+    document.getElementById('hmap-grid').innerHTML = `<div class="empty" style="padding:2rem">${msg}</div>`;
+    document.getElementById('hm-top5').innerHTML   = '<div class="empty" style="font-size:.75rem">Sin datos</div>';
+    document.getElementById('hm-bot5').innerHTML   = '<div class="empty" style="font-size:.75rem">Sin datos</div>';
+    document.getElementById('hmap-insight').innerHTML = '💡 Registra clases para ver insights de horarios.';
+    document.getElementById('hmap-legend').innerHTML  = '';
     return;
   }
 
@@ -3273,26 +3349,26 @@ function renderHeatmap() {
   const matriz = {};
   HORAS_CAL.forEach(h => { matriz[h]={}; DIAS.forEach(d=>{ matriz[h][d]={sum:0,cnt:0,sesiones:0}; }); });
 
-  regsValidos.filter(r=>!claseFil||r.clase===claseFil).forEach(r => {
-    const asisN=parseInt(r.asistentes)||0;
-    const capN=parseInt(r.cap)||getCapClase(r.clase)||20;
-    const hSlot = HORAS_CAL.reduce((best,h)=>{
+  regsValidos.forEach(r => {
+    const asisN = parseInt(r.asistentes) || 0;
+    const capN  = parseInt(r.cap) || getCapClase(r.clase) || 20;
+    const hSlot = HORAS_CAL.reduce((best,h) => {
       const diff = Math.abs(horaToMin(r.hora)-horaToMin(h));
       return diff < Math.abs(horaToMin(r.hora)-horaToMin(best)) ? h : best;
     }, HORAS_CAL[0]);
-    if(matriz[hSlot] && matriz[hSlot][r.dia]!==undefined){
+    if(matriz[hSlot] && matriz[hSlot][r.dia] !== undefined) {
       matriz[hSlot][r.dia].sum += metric==='asis' ? asisN : metric==='aforo' ? asisN/capN*100 : 1;
       matriz[hSlot][r.dia].cnt++;
       matriz[hSlot][r.dia].sesiones++;
     }
   });
 
-  // Encontrar max para escala de color
+  // Máximo para escala de color
   let maxVal = 1;
-  HORAS_CAL.forEach(h=>DIAS.forEach(d=>{
+  HORAS_CAL.forEach(h => DIAS.forEach(d => {
     const cell = matriz[h][d];
-    const val = cell.cnt>0 ? (metric==='sesiones'?cell.sesiones:cell.sum/cell.cnt) : 0;
-    if(val>maxVal)maxVal=val;
+    const val  = cell.cnt > 0 ? (metric==='sesiones' ? cell.sesiones : cell.sum/cell.cnt) : 0;
+    if(val > maxVal) maxVal = val;
   }));
 
   function cellColor(val) {
@@ -3314,9 +3390,8 @@ function renderHeatmap() {
     }
   }
   function cellTextColor(val){
-    if(val===0)return'var(--txt3)';
-    const pct=val/maxVal;
-    return pct<0.3?'var(--txt3)':'#fff';
+    if(val===0) return 'var(--txt3)';
+    return val/maxVal < 0.3 ? 'var(--txt3)' : '#fff';
   }
 
   let html = `<table style="border-collapse:separate;border-spacing:3px;width:100%">
@@ -3329,11 +3404,12 @@ function renderHeatmap() {
   HORAS_CAL.forEach(h => {
     html += `<tr><td style="font-family:'DM Mono',monospace;font-size:.65rem;color:var(--txt3);padding:2px 4px;white-space:nowrap">${h}</td>`;
     DIAS.forEach(d => {
-      const cell = matriz[h][d];
-      const val = cell.cnt > 0 ? (metric==='sesiones'?cell.sesiones:Math.round(cell.sum/cell.cnt)) : 0;
-      allVals.push({h,d,val,cnt:cell.cnt});
-      const label = val===0 ? '—' : (metric==='aforo'?val+'%':val);
-      const sublabel = cell.cnt>0&&metric!=='sesiones' ? `<br><span style="font-size:.55rem;opacity:.7">${cell.cnt}ses</span>` : '';
+      const cell  = matriz[h][d];
+      const val   = cell.cnt > 0 ? (metric==='sesiones' ? cell.sesiones : Math.round(cell.sum/cell.cnt)) : 0;
+      allVals.push({h, d, val, cnt:cell.cnt});
+      const label    = val===0 ? '—' : (metric==='aforo' ? val+'%' : val);
+      const sublabel = cell.cnt>0 && metric!=='sesiones'
+        ? `<br><span style="font-size:.55rem;opacity:.7">${cell.cnt}ses</span>` : '';
       html += `<td class="hmap-cell" style="background:${cellColor(val)};color:${cellTextColor(val)};height:38px;vertical-align:middle;"
         title="${d} ${h} · ${label}${metric==='aforo'?' aforo':''}${metric==='asis'?' asis.':''} · ${cell.cnt} sesiones"
         onclick="verDiagHorario('${d}','${h}')">
@@ -3355,24 +3431,27 @@ function renderHeatmap() {
     <span>Mayor</span>
     &nbsp;&nbsp; <span style="opacity:.7">Clic en celda = diagnóstico de ese horario</span>`;
 
-  // Top 5 y Bottom 5
-  const horarios = allVals.filter(v=>v.cnt>0).sort((a,b)=>b.val-a.val);
-  const metricLabel = metric==='aforo'?'% aforo':metric==='asis'?'asis. prom':'sesiones';
+  // Top / Bottom 5
+  const horarios   = allVals.filter(v => v.cnt > 0).sort((a,b) => b.val - a.val);
+  const metricLabel = metric==='aforo' ? '% aforo' : metric==='asis' ? 'asis. prom' : 'sesiones';
 
-  // ── Enriquecer con clases que ocurren en cada horario ──
+  // Clases por horario respetando filtro activo
   function clasesEnHorario(dia, hora) {
     const resultado = [];
-    instructores.forEach(inst => {
+    const instsFiltro = instId ? instructores.filter(i => i.id === instId) : instructores;
+    instsFiltro.forEach(inst => {
       (inst.horario||[]).forEach(h => {
-        if(h.dia === dia && Math.abs(horaToMin(h.hora) - horaToMin(hora)) <= 30) {
+        if(h.dia === dia && Math.abs(horaToMin(h.hora)-horaToMin(hora)) <= 30) {
+          if(claseFil && h.clase !== claseFil) return;
           const regsSlot = registros.filter(r =>
-            r.inst_id===inst.id && r.dia===dia &&
-            Math.abs(horaToMin(r.hora)-horaToMin(hora))<=30 &&
-            (r.estado==='ok'||r.estado==='sub') && r.cap>0
+            r.inst_id === inst.id && r.dia === dia &&
+            Math.abs(horaToMin(r.hora)-horaToMin(hora)) <= 30 &&
+            (r.estado==='ok'||r.estado==='sub') && r.cap > 0 &&
+            (!claseFil || r.clase === claseFil)
           );
           const promAsis = regsSlot.length > 0
             ? Math.round(regsSlot.reduce((a,r)=>a+(parseInt(r.asistentes)||0),0)/regsSlot.length) : null;
-          const promAfo = regsSlot.length > 0
+          const promAfo  = regsSlot.length > 0
             ? Math.round(regsSlot.reduce((a,r)=>a+(parseInt(r.asistentes)||0)/parseInt(r.cap)*100,0)/regsSlot.length) : null;
           resultado.push({clase:h.clase, inst:inst.nombre.split(' ')[0], promAsis, promAfo, sesiones:regsSlot.length});
         }
@@ -3382,99 +3461,81 @@ function renderHeatmap() {
   }
 
   function sugerenciaMejor(v, clasesList) {
-    const nombresClases = clasesList.map(c=>c.clase).join(', ');
-    if(metric==='aforo') {
-      if(v.val >= 80) return `✅ Horario estrella. Considera duplicar ${clasesList[0]?.clase||'esta clase'} o agregar instructor adicional.`;
-      if(v.val >= 60) return `👍 Buen rendimiento. Mantén la programación actual de ${nombresClases}.`;
-      return `💡 Horario en crecimiento. Potencial sin explotar en ${nombresClases}.`;
+    const nc  = clasesList.map(c=>c.clase).join(', ');
+    const pfx = instObj ? `${instObj.nombre.split(' ')[0]} — ` : '';
+    if(metric==='aforo'){
+      if(v.val>=80) return `✅ ${pfx}Horario estrella. Considera duplicar ${clasesList[0]?.clase||'esta clase'} o agregar instructor adicional.`;
+      if(v.val>=60) return `👍 ${pfx}Buen rendimiento. Mantén la programación actual de ${nc||'este horario'}.`;
+      return `💡 ${pfx}Horario en crecimiento. Potencial sin explotar en ${nc||'este horario'}.`;
     }
-    if(metric==='asis') return `👥 Promedio de ${v.val} personas — asigna al instructor de mayor experiencia aquí.`;
+    if(metric==='asis') return `👥 ${pfx}Promedio de ${v.val} personas — asigna al instructor de mayor experiencia aquí.`;
     return `📊 ${v.val} sesiones registradas. Horario consolidado.`;
   }
 
   function sugerenciaCritica(v, clasesList) {
-    const nombresClases = clasesList.map(c=>c.clase).join(', ');
-    if(metric==='aforo') {
-      if(v.val <= 15) return `🔴 Aforo crítico (${v.val}%). Evalúa cancelar o fusionar ${nombresClases} con otro horario similar.`;
-      if(v.val <= 30) return `🟡 Aforo bajo (${v.val}%). Considera cambiar de instructor, ajustar horario o promocionar ${nombresClases}.`;
+    const nc = clasesList.map(c=>c.clase).join(', ');
+    if(metric==='aforo'){
+      if(v.val<=15) return `🔴 Aforo crítico (${v.val}%). Evalúa cancelar o fusionar ${nc||'esta clase'} con otro horario similar.`;
+      if(v.val<=30) return `🟡 Aforo bajo (${v.val}%). Considera cambiar horario o promocionar ${nc||'esta clase'}.`;
       return `⚠️ Rendimiento mejorable (${v.val}%). Revisa si el horario compite con otra clase del mismo tipo.`;
     }
-    if(metric==='asis') return `📉 Solo ${v.val} personas en promedio. Considera reubicar ${nombresClases} a un horario con mayor demanda.`;
-    return `📋 Pocas sesiones registradas. Verifica si el horario está activo.`;
+    if(metric==='asis') return `📉 Solo ${v.val} personas en promedio. Considera reubicar ${nc||'esta clase'} a un horario con mayor demanda.`;
+    return `📋 Pocas sesiones. Verifica si el horario está activo.`;
   }
 
-  // Top 5 mejores
+  const mkChipVerde = c => `<span style="display:inline-block;background:rgba(94,255,160,.12);color:var(--neon);border-radius:4px;padding:1px 5px;font-size:.62rem;margin:1px">${c.clase}${instId?'':` <span style="opacity:.55">${c.inst}</span>`}</span>`;
+  const mkChipRojo  = c => `<span style="display:inline-block;background:rgba(224,80,80,.12);color:var(--red2);border-radius:4px;padding:1px 5px;font-size:.62rem;margin:1px">${c.clase}${instId?'':` <span style="opacity:.55">${c.inst}</span>`}</span>`;
+
   document.getElementById('hm-top5').innerHTML = horarios.slice(0,5).map((v,n) => {
     const clsList = clasesEnHorario(v.d, v.h);
     const clasesStr = clsList.length > 0
-      ? clsList.map(c => `<span style="display:inline-block;background:rgba(94,255,160,.12);color:var(--neon);border-radius:4px;padding:1px 5px;font-size:.62rem;margin:1px">${c.clase}</span>`).join('')
+      ? clsList.map(mkChipVerde).join('')
       : `<span style="font-size:.65rem;color:var(--txt3)">Sin clases asignadas</span>`;
-    const sug = sugerenciaMejor(v, clsList);
     return `<div style="padding:.6rem 0;border-bottom:1px solid var(--border)">
       <div style="display:flex;align-items:center;gap:.5rem;margin-bottom:3px">
         <span style="font-family:'Bebas Neue',sans-serif;font-size:1rem;color:var(--gold2);min-width:20px">${n+1}</span>
-        <div style="flex:1">
-          <div style="font-size:.82rem;font-weight:600">${v.d} ${v.h}</div>
-          <div style="margin-top:2px">${clasesStr}</div>
-        </div>
+        <div style="flex:1"><div style="font-size:.82rem;font-weight:600">${v.d} ${v.h}</div><div style="margin-top:2px">${clasesStr}</div></div>
         <span class="mono" style="color:var(--neon);font-size:.85rem;font-weight:700">${v.val}${metric==='aforo'?'%':''}</span>
       </div>
-      <div style="font-size:.68rem;color:var(--txt2);padding-left:24px;line-height:1.4">${sug}</div>
+      <div style="font-size:.68rem;color:var(--txt2);padding-left:24px;line-height:1.4">${sugerenciaMejor(v,clsList)}</div>
     </div>`;
   }).join('') || '<div class="empty" style="font-size:.75rem">Sin datos</div>';
 
-  // Top 5 críticos
   document.getElementById('hm-bot5').innerHTML = [...horarios].reverse().slice(0,5).map((v,n) => {
     const clsList = clasesEnHorario(v.d, v.h);
     const clasesStr = clsList.length > 0
-      ? clsList.map(c => `<span style="display:inline-block;background:rgba(224,80,80,.12);color:var(--red2);border-radius:4px;padding:1px 5px;font-size:.62rem;margin:1px">${c.clase}</span>`).join('')
+      ? clsList.map(mkChipRojo).join('')
       : `<span style="font-size:.65rem;color:var(--txt3)">Sin clases asignadas</span>`;
-    const sug = sugerenciaCritica(v, clsList);
     return `<div style="padding:.6rem 0;border-bottom:1px solid var(--border)">
       <div style="display:flex;align-items:center;gap:.5rem;margin-bottom:3px">
         <span style="font-family:'Bebas Neue',sans-serif;font-size:1rem;color:var(--red2);min-width:20px">${n+1}</span>
-        <div style="flex:1">
-          <div style="font-size:.82rem;font-weight:600">${v.d} ${v.h}</div>
-          <div style="margin-top:2px">${clasesStr}</div>
-        </div>
+        <div style="flex:1"><div style="font-size:.82rem;font-weight:600">${v.d} ${v.h}</div><div style="margin-top:2px">${clasesStr}</div></div>
         <span class="mono" style="color:var(--red2);font-size:.85rem;font-weight:700">${v.val}${metric==='aforo'?'%':''}</span>
       </div>
-      <div style="font-size:.68rem;color:var(--txt2);padding-left:24px;line-height:1.4">${sug}</div>
+      <div style="font-size:.68rem;color:var(--txt2);padding-left:24px;line-height:1.4">${sugerenciaCritica(v,clsList)}</div>
     </div>`;
   }).join('') || '<div class="empty" style="font-size:.75rem">Sin datos</div>';
 
-  // Insight detallado
-  if(horarios.length>0){
+  // Insight
+  if(horarios.length > 0) {
     const mejor = horarios[0];
-    const peor = horarios[horarios.length-1];
-    const diaMasActivo = DIAS.map(d=>({d,tot:HORAS_CAL.reduce((a,h)=>a+(matriz[h][d].sesiones||0),0)})).sort((a,b)=>b.tot-a.tot)[0];
+    const peor  = horarios[horarios.length-1];
+    const diaMasActivo   = DIAS.map(d=>({d,tot:HORAS_CAL.reduce((a,h)=>a+(matriz[h][d].sesiones||0),0)})).sort((a,b)=>b.tot-a.tot)[0];
     const diaMenosActivo = DIAS.map(d=>({d,tot:HORAS_CAL.reduce((a,h)=>a+(matriz[h][d].sesiones||0),0)})).filter(x=>x.tot>0).sort((a,b)=>a.tot-b.tot)[0];
     const clasesMejor = clasesEnHorario(mejor.d, mejor.h);
-    const clasesPeor = clasesEnHorario(peor.d, peor.h);
-    const metricNom = metric==='aforo'?'aforo':metric==='asis'?'asistentes':'sesiones';
+    const clasesPeor  = clasesEnHorario(peor.d,  peor.h);
+    const metricNom   = metric==='aforo' ? 'aforo' : metric==='asis' ? 'asistentes' : 'sesiones';
+    const titulo = instObj
+      ? `💡 Análisis individual — ${instObj.nombre}${claseFil?' · '+claseFil:''}`
+      : '💡 Análisis y recomendaciones';
     document.getElementById('hmap-insight').innerHTML =
       `<div style="background:var(--panel2);border-radius:10px;padding:.8rem 1rem;border-left:3px solid var(--neon)">
-        <div style="font-size:.7rem;text-transform:uppercase;letter-spacing:1px;color:var(--neon);margin-bottom:.5rem">💡 Análisis y recomendaciones</div>
+        <div style="font-size:.7rem;text-transform:uppercase;letter-spacing:1px;color:var(--neon);margin-bottom:.5rem">${titulo}</div>
         <div style="font-size:.78rem;line-height:1.6;color:var(--txt)">
-          <p style="margin:0 0 .4rem">
-            📈 <strong>Mejor horario:</strong> ${mejor.d} ${mejor.h}
-            ${clasesMejor.length>0?`— <em>${clasesMejor.map(c=>c.clase).join(', ')}</em>`:''}
-            con <strong style="color:var(--neon)">${mejor.val}${metric==='aforo'?'%':''}</strong> de ${metricNom}.
-            ${mejor.val>=70?'Considera poner a tu instructor estrella aquí de forma permanente.':'Tiene potencial de crecimiento, evalúa cambio de instructor o promoción.'}
-          </p>
-          <p style="margin:0 0 .4rem">
-            📉 <strong>Horario crítico:</strong> ${peor.d} ${peor.h}
-            ${clasesPeor.length>0?`— <em>${clasesPeor.map(c=>c.clase).join(', ')}</em>`:''}
-            con solo <strong style="color:var(--red2)">${peor.val}${metric==='aforo'?'%':''}</strong> de ${metricNom}.
-            ${clasesPeor.length>0?`Evalúa mover <em>${clasesPeor[0].clase}</em> a ${mejor.h} o fusionarla con una clase cercana.`:'Considera eliminar o reasignar este horario.'}
-          </p>
-          <p style="margin:0 0 .4rem">
-            📅 <strong>Día más activo:</strong> ${diaMasActivo?.d||'—'} — concentra aquí tus instructores de mayor aforo.
-            ${diaMenosActivo?`<strong>Día más flojo:</strong> ${diaMenosActivo.d} — revisa si justifica mantener toda la programación.`:''}
-          </p>
-          <p style="margin:0;font-size:.7rem;color:var(--txt3)">
-            Cambia la métrica a <em>Asistentes</em> o <em>Sesiones</em> para ver diferentes perspectivas de demanda.
-          </p>
+          <p style="margin:0 0 .4rem">📈 <strong>Mejor horario:</strong> ${mejor.d} ${mejor.h}${clasesMejor.length>0?` — <em>${clasesMejor.map(c=>c.clase).join(', ')}</em>`:''} con <strong style="color:var(--neon)">${mejor.val}${metric==='aforo'?'%':''}</strong> de ${metricNom}.</p>
+          <p style="margin:0 0 .4rem">📉 <strong>Horario crítico:</strong> ${peor.d} ${peor.h}${clasesPeor.length>0?` — <em>${clasesPeor.map(c=>c.clase).join(', ')}</em>`:''} con solo <strong style="color:var(--red2)">${peor.val}${metric==='aforo'?'%':''}</strong> de ${metricNom}.</p>
+          <p style="margin:0 0 .4rem">📅 <strong>Día más activo:</strong> ${diaMasActivo?.d||'—'}${diaMenosActivo?' · <strong>Día más flojo:</strong> '+diaMenosActivo.d:''}</p>
+          <p style="margin:0;font-size:.7rem;color:var(--txt3)">${instObj?`Viendo solo las sesiones de <em>${instObj.nombre}</em>${claseFil?' en <em>'+claseFil+'</em>':''}. Quita el filtro para ver el comparativo general.`:'Selecciona un instructor para ver su mapa individual.'}</p>
         </div>
       </div>`;
   } else {
