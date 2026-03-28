@@ -3638,8 +3638,9 @@ function renderHeatmap() {
 
 function verDiagHorario(dia, hora) {
   // Construir el diagnóstico completo del slot y mostrarlo en modal
-  const instId   = document.getElementById('hm-inst')?.value  || '';
-  const claseFil = document.getElementById('hm-clase')?.value || '';
+  const rawInst  = document.getElementById('hm-inst-fil')?.value || '';
+  const instId   = rawInst ? parseInt(rawInst) : null;
+  const claseFil = document.getElementById('hm-clase-fil')?.value || '';
   const metric   = document.getElementById('hm-metric')?.value || 'aforo';
 
   // Recopilar todas las clases programadas en ese slot (respetando filtros)
