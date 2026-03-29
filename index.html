@@ -1391,6 +1391,28 @@ let instructores=[];
 
 let registros=[];
 let recorridos=[];
+let eventos = JSON.parse(localStorage.getItem('fc_eventos') || '[]');
+let evFiltro = 'todos';
+
+const MESES_NOM = ['','Enero','Febrero','Marzo','Abril','Mayo','Junio',
+  'Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+
+const EV_TIPO_ICON = {
+  'especial':'⭐','maratón':'🏃','taller':'📚','outdoor':'🌿',
+  'exhibición':'🎤','social':'🎉','otro':'📌'
+};
+const EV_ESTADO_COL = {
+  'propuesto':'var(--gold2)','confirmado':'var(--neon)',
+  'realizado':'var(--blue)','cancelado':'var(--red2)'
+};
+const EV_ESTADO_BG = {
+  'propuesto':'rgba(255,208,107,.12)','confirmado':'rgba(94,255,160,.12)',
+  'realizado':'rgba(77,184,232,.12)','cancelado':'rgba(224,80,80,.12)'
+};
+const EV_ESTADO_LBL = {
+  'propuesto':'💡 Propuesto','confirmado':'✅ Confirmado',
+  'realizado':'🏆 Realizado','cancelado':'❌ Cancelado'
+};
 let tmpSlots=[];
 let recActual={fecha:'',hora:'',dia:'',items:[],clasesActivas:[]};
 let recIdx=0;
@@ -4069,16 +4091,76 @@ function semColorKpi(pct, meta=60) {
 
 function renderQuickAlerts() {
   const alertas = calcularAlertas().filter(a=>a.tipo==='red');
-  if(alertas.length===0){
-    document.getElementById('quick-alerts').innerHTML='';
-    return;
+
+  // ── Eventos próximos (30 días)
+  const hoy = new Date();
+  hoy.setHours(0,0,0,0);
+  const en30 = new Date(hoy); en30.setDate(en30.getDate()+30);
+  const anioHoy = hoy.getFullYear();
+  const mesHoy  = hoy.getMonth()+1; // 1-12
+
+  const proximos = eventos.filter(e => {
+    if(e.estado==='cancelado'||e.estado==='realizado') return false;
+    // Construir fecha aproximada: día 1 del mes del evento
+    const fechaEv = new Date(e.anio, e.mes-1, 1);
+    return fechaEv >= hoy && fechaEv <= en30;
+  }).sort((a,b)=> a.anio!==b.anio ? a.anio-b.anio : a.mes-b.mes);
+
+  let html = '';
+
+  // Banner eventos próximos
+  if(proximos.length > 0) {
+    const items = proximos.map(e => {
+      const diasFalta = Math.ceil((new Date(e.anio,e.mes-1,1)-hoy)/(1000*60*60*24));
+      const urgente = diasFalta <= 7;
+      return `<span style="display:inline-flex;align-items:center;gap:4px;background:rgba(255,255,255,.07);border-radius:20px;padding:2px 10px;font-size:.72rem;margin:2px">
+        <span>${EV_TIPO_ICON[e.tipo]||'📌'}</span>
+        <strong style="color:var(--w)">${e.nombre}</strong>
+        <span style="color:${urgente?'var(--gold2)':'var(--txt2)'}">· ${MESES_NOM[e.mes]}${urgente?` <strong style="color:var(--gold2)">(¡este mes!)</strong>`:''}</span>
+      </span>`;
+    }).join('');
+
+    html += `<div style="background:rgba(26,122,69,.18);border:1px solid var(--verde);border-radius:10px;padding:.75rem 1rem;display:flex;align-items:flex-start;gap:.75rem;cursor:pointer;margin-bottom:.5rem"
+      onclick="irEventos()">
+      <span style="flex-shrink:0;margin-top:1px">
+        <svg class="ico" viewBox="0 0 20 20" style="width:1.2rem;height:1.2rem;color:var(--neon)">
+          <rect x="3" y="4" width="14" height="13" rx="2" stroke="currentColor" stroke-width="1.4" fill="none"/>
+          <line x1="3" y1="9" x2="17" y2="9" stroke="currentColor" stroke-width="1.3"/>
+          <line x1="7" y1="2" x2="7" y2="6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+          <line x1="13" y1="2" x2="13" y2="6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+          <circle cx="7" cy="13" r="1" fill="currentColor"/>
+          <circle cx="10" cy="13" r="1" fill="currentColor"/>
+          <circle cx="13" cy="13" r="1" fill="currentColor"/>
+        </svg>
+      </span>
+      <div style="flex:1;min-width:0">
+        <div style="font-size:.78rem;font-weight:600;color:var(--neon);margin-bottom:.3rem">
+          ${proximos.length} evento${proximos.length>1?'s':''} próximo${proximos.length>1?'s':''} en los próximos 30 días
+        </div>
+        <div style="display:flex;flex-wrap:wrap;gap:2px">${items}</div>
+      </div>
+      <span style="font-size:.72rem;color:var(--neon);flex-shrink:0;margin-top:1px">Ver planeación →</span>
+    </div>`;
   }
-  document.getElementById('quick-alerts').innerHTML =
-    `<div style="background:rgba(224,80,80,.1);border:1px solid var(--red);border-radius:10px;padding:.75rem 1rem;display:flex;align-items:center;gap:.7rem;cursor:pointer" onclick="irAlertas()">
+
+  // Banner alertas críticas
+  if(alertas.length>0) {
+    html += `<div style="background:rgba(224,80,80,.1);border:1px solid var(--red);border-radius:10px;padding:.75rem 1rem;display:flex;align-items:center;gap:.7rem;cursor:pointer" onclick="irAlertas()">
       <span style="font-size:1.1rem"><svg class="ico" viewBox="0 0 20 20"><circle cx="10" cy="10" r="5" fill="var(--red2)"/></svg></span>
       <div style="flex:1;font-size:.78rem"><strong style="color:var(--red2)">${alertas.length} alerta(s) crítica(s)</strong> — ${alertas[0].texto.replace(/<[^>]+>/g,'')}</div>
       <span style="font-size:.72rem;color:var(--red2)">Ver todas →</span>
     </div>`;
+  }
+
+  document.getElementById('quick-alerts').innerHTML = html;
+}
+
+function irEventos() {
+  document.querySelectorAll('.tab').forEach(x=>x.classList.remove('on'));
+  document.querySelectorAll('.vista').forEach(x=>x.classList.remove('on'));
+  document.querySelector('[data-v="eventos"]').classList.add('on');
+  document.getElementById('v-eventos').classList.add('on');
+  renderEventos();
 }
 function irAlertas(){
   document.querySelectorAll('.tab').forEach(x=>x.classList.remove('on'));
@@ -4093,28 +4175,6 @@ function irAlertas(){
 // MÓDULO EVENTOS — Planeación Anual
 // ═══════════════════════════════════════════════════════════
 
-let eventos = JSON.parse(localStorage.getItem('fc_eventos') || '[]');
-let evFiltro = 'todos';
-
-const MESES_NOM = ['','Enero','Febrero','Marzo','Abril','Mayo','Junio',
-  'Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
-
-const EV_TIPO_ICON = {
-  'especial':'⭐','maratón':'🏃','taller':'📚','outdoor':'🌿',
-  'exhibición':'🎤','social':'🎉','otro':'📌'
-};
-const EV_ESTADO_COL = {
-  'propuesto':'var(--gold2)','confirmado':'var(--neon)',
-  'realizado':'var(--blue)','cancelado':'var(--red2)'
-};
-const EV_ESTADO_BG = {
-  'propuesto':'rgba(255,208,107,.12)','confirmado':'rgba(94,255,160,.12)',
-  'realizado':'rgba(77,184,232,.12)','cancelado':'rgba(224,80,80,.12)'
-};
-const EV_ESTADO_LBL = {
-  'propuesto':'💡 Propuesto','confirmado':'✅ Confirmado',
-  'realizado':'🏆 Realizado','cancelado':'❌ Cancelado'
-};
 
 function guardarEventos() {
   try { localStorage.setItem('fc_eventos', JSON.stringify(eventos)); } catch(e){}
