@@ -795,9 +795,9 @@ html.tema-claro .login-field input{background:#fff;border-color:#c2d8c2;color:#1
         </select>
         <select class="ctrl" id="hist-estado-fil" style="width:130px" onchange="renderHistorial()">
           <option value="">— Todos los estados —</option>
-          <option value="ok"><svg class="ico ico-ok" viewBox="0 0 20 20"><circle cx="10" cy="10" r="8" stroke="currentColor" stroke-width="1.5" fill="none"/><polyline points="6,10 9,13 14,7" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg> Impartidas</option>
-          <option value="sub"><svg class="ico" viewBox="0 0 20 20"><path d="M4 10a6 6 0 0 1 6-6 6 6 0 0 1 5.2 3" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round"/><path d="M16 10a6 6 0 0 1-6 6 6 6 0 0 1-5.2-3" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round"/><polyline points="14.5,7 15.5,3.8 18.5,5" stroke="currentColor" stroke-width="1.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/><polyline points="5.5,13 4.5,16.2 1.5,15" stroke="currentColor" stroke-width="1.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg> Con Suplente</option>
-          <option value="falta"><svg class="ico ico-err" viewBox="0 0 20 20"><circle cx="10" cy="10" r="8" stroke="currentColor" stroke-width="1.5" fill="none"/><line x1="7" y1="7" x2="13" y2="13" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><line x1="13" y1="7" x2="7" y2="13" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg> Faltas</option>
+          <option value="ok">✔ Impartidas</option>
+          <option value="sub">⇄ Con Suplente</option>
+          <option value="falta">✖ Faltas</option>
         </select>
         <button class="btn bo" onclick="limpiarFiltrosHistorial()"><svg class="ico" viewBox="0 0 20 20"><line x1="5" y1="5" x2="15" y2="15" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><line x1="15" y1="5" x2="5" y2="15" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg> Limpiar</button>
       </div>
@@ -940,15 +940,15 @@ html.tema-claro .login-field input{background:#fff;border-color:#c2d8c2;color:#1
   <div class="fg">
     <label>Tipo de espacio</label>
     <select id="ms-tipo" onchange="toggleTipoCustom()" style="margin-bottom:4px">
-      <option value="salon"><svg class="ico" viewBox="0 0 20 20"><line x1="2" y1="10" x2="18" y2="10" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/><rect x="2" y="8" width="2.5" height="4" rx="0.8" stroke="currentColor" stroke-width="1.2" fill="none"/><rect x="5" y="7" width="2.5" height="6" rx="0.8" stroke="currentColor" stroke-width="1.2" fill="none"/><rect x="12.5" y="7" width="2.5" height="6" rx="0.8" stroke="currentColor" stroke-width="1.2" fill="none"/><rect x="15.5" y="8" width="2.5" height="4" rx="0.8" stroke="currentColor" stroke-width="1.2" fill="none"/><circle cx="10" cy="10" r="1.5" fill="currentColor"/></svg>️ Salón general</option>
-      <option value="spinning"><svg class="ico" viewBox="0 0 20 20"><circle cx="5" cy="14" r="3.5" stroke="currentColor" stroke-width="1.3" fill="none"/><circle cx="15" cy="14" r="3.5" stroke="currentColor" stroke-width="1.3" fill="none"/><path d="M5 14 L8 8 L12 8 L15 14 M8 8 L10 5" stroke="currentColor" stroke-width="1.3" fill="none" stroke-linecap="round" stroke-linejoin="round"/><circle cx="10" cy="5" r="1" fill="currentColor"/></svg> Estudio Spinning</option>
-      <option value="yoga"><svg class="ico" viewBox="0 0 20 20"><circle cx="10" cy="4" r="1.8" stroke="currentColor" stroke-width="1.3" fill="none"/><path d="M10 6 L10 12 M10 8 L7 10 M10 8 L13 10 M10 12 L8 16 M10 12 L12 16" stroke="currentColor" stroke-width="1.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg> Sala Yoga / Pilates</option>
-      <option value="funcional"><svg class="ico" viewBox="0 0 20 20"><path d="M12 4 Q16 5 15 9 L14 11 Q15 14 13 16 Q10 18 7 15 L5 12 Q3 9 6 7 L9 8 L11 5 Z" stroke="currentColor" stroke-width="1.3" fill="none" stroke-linejoin="round"/></svg> Área Funcional / CrossFit</option>
-      <option value="cardio"><svg class="ico" viewBox="0 0 20 20"><circle cx="12" cy="4" r="1.8" stroke="currentColor" stroke-width="1.3" fill="none"/><path d="M12 6 L10 10 L7 13 M10 10 L13 13 L15 17 M12 6 L14 9" stroke="currentColor" stroke-width="1.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg> Sala Cardio</option>
-      <option value="piscina"><svg class="ico" viewBox="0 0 20 20"><circle cx="13" cy="5" r="1.8" stroke="currentColor" stroke-width="1.3" fill="none"/><path d="M3 10 Q7 7 10 10 Q13 13 17 10" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round"/><path d="M3 14 Q7 11 10 14 Q13 17 17 14" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round"/><path d="M13 7 L10 9" stroke="currentColor" stroke-width="1.4" fill="none" stroke-linecap="round"/></svg> Piscina / Alberca</option>
-      <option value="exterior"><svg class="ico" viewBox="0 0 20 20"><path d="M5 16 Q8 8 16 4 Q14 12 8 15 Z" stroke="currentColor" stroke-width="1.3" fill="none" stroke-linejoin="round"/><line x1="5" y1="16" x2="12" y2="9" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg> Área exterior</option>
-      <option value="multiusos"><svg class="ico" viewBox="0 0 20 20"><path d="M4 10a6 6 0 0 1 6-6 6 6 0 0 1 5.2 3" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round"/><path d="M16 10a6 6 0 0 1-6 6 6 6 0 0 1-5.2-3" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round"/><polyline points="14.5,7 15.5,3.8 18.5,5" stroke="currentColor" stroke-width="1.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/><polyline points="5.5,13 4.5,16.2 1.5,15" stroke="currentColor" stroke-width="1.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg> Multiusos</option>
-      <option value="otro"><svg class="ico" viewBox="0 0 20 20"><path d="M13.5 3.5 L16.5 6.5 L8 15 L4 16 L5 12 Z" stroke="currentColor" stroke-width="1.4" fill="none" stroke-linejoin="round"/><line x1="12" y1="5" x2="15" y2="8" stroke="currentColor" stroke-width="1.3"/></svg>️ Otro (escribir abajo)</option>
+      <option value="salon">🏠 Salón general</option>
+      <option value="spinning">🚴 Estudio Spinning</option>
+      <option value="yoga">🧘 Sala Yoga / Pilates</option>
+      <option value="funcional">💪 Área Funcional / CrossFit</option>
+      <option value="cardio">❤️ Sala Cardio</option>
+      <option value="piscina">🏊 Piscina / Alberca</option>
+      <option value="exterior">🌿 Área exterior</option>
+      <option value="multiusos">🔄 Multiusos</option>
+      <option value="otro">✏️ Otro (escribir abajo)</option>
     </select>
     <input type="text" id="ms-tipo-custom" placeholder="Escribe el tipo de espacio..." style="display:none">
   </div>
@@ -1161,9 +1161,9 @@ html.tema-claro .login-field input{background:#fff;border-color:#c2d8c2;color:#1
   <div class="fr">
     <div class="fg"><label>Instructor presente</label>
       <select id="rcc-pres" onchange="toggleSuplenteRec()">
-        <option value="si"><svg class="ico ico-ok" viewBox="0 0 20 20"><circle cx="10" cy="10" r="8" stroke="currentColor" stroke-width="1.5" fill="none"/><polyline points="6,10 9,13 14,7" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg> Sí presente</option>
-        <option value="no"><svg class="ico ico-err" viewBox="0 0 20 20"><circle cx="10" cy="10" r="8" stroke="currentColor" stroke-width="1.5" fill="none"/><line x1="7" y1="7" x2="13" y2="13" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><line x1="13" y1="7" x2="7" y2="13" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg> Ausente</option>
-        <option value="sub"><svg class="ico" viewBox="0 0 20 20"><path d="M4 10a6 6 0 0 1 6-6 6 6 0 0 1 5.2 3" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round"/><path d="M16 10a6 6 0 0 1-6 6 6 6 0 0 1-5.2-3" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round"/><polyline points="14.5,7 15.5,3.8 18.5,5" stroke="currentColor" stroke-width="1.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/><polyline points="5.5,13 4.5,16.2 1.5,15" stroke="currentColor" stroke-width="1.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg> Sustituto</option>
+        <option value="si">✔ Sí presente</option>
+        <option value="no">✖ Ausente</option>
+        <option value="sub">⇄ Sustituto</option>
       </select>
     </div>
     <div class="fg"><label>Observación</label>
@@ -1210,16 +1210,28 @@ html.tema-claro .login-field input{background:#fff;border-color:#c2d8c2;color:#1
       <option value="instructor">Reporte por Instructor</option>
     </select>
   </div>
-  <div id="rpt-dia-opt" class="fg" style="display:none"><label>Día</label>
-    <select id="rpt-dia"><option>Lunes</option><option>Martes</option><option>Miércoles</option><option>Jueves</option><option>Viernes</option><option>Sábado</option><option>Domingo</option></select>
+  <div id="rpt-dia-opt" style="display:none">
+    <div class="fg"><label>Fecha específica</label>
+      <input type="date" id="rpt-dia-fecha" onchange="autoRptDia()">
+    </div>
+    <div class="fg"><label>Día de la semana <span style="color:var(--txt3);font-size:.65rem">(se llena automáticamente)</span></label>
+      <select id="rpt-dia"><option>Lunes</option><option>Martes</option><option>Miércoles</option><option>Jueves</option><option>Viernes</option><option>Sábado</option><option>Domingo</option></select>
+    </div>
   </div>
-  <div id="rpt-mes-opt" class="fg" style="display:none"><label>Mes</label>
-    <select id="rpt-mes">
-      <option value="0">Enero</option><option value="1">Febrero</option><option value="2">Marzo</option>
-      <option value="3">Abril</option><option value="4">Mayo</option><option value="5">Junio</option>
-      <option value="6">Julio</option><option value="7">Agosto</option><option value="8">Septiembre</option>
-      <option value="9">Octubre</option><option value="10">Noviembre</option><option value="11">Diciembre</option>
-    </select>
+  <div id="rpt-mes-opt" style="display:none">
+    <div class="fr">
+      <div class="fg"><label>Mes</label>
+        <select id="rpt-mes">
+          <option value="0">Enero</option><option value="1">Febrero</option><option value="2">Marzo</option>
+          <option value="3">Abril</option><option value="4">Mayo</option><option value="5">Junio</option>
+          <option value="6">Julio</option><option value="7">Agosto</option><option value="8">Septiembre</option>
+          <option value="9">Octubre</option><option value="10">Noviembre</option><option value="11">Diciembre</option>
+        </select>
+      </div>
+      <div class="fg"><label>Año</label>
+        <select id="rpt-anio"></select>
+      </div>
+    </div>
   </div>
   <div id="rpt-inst-opt" class="fg" style="display:none">
     <label>Instructor</label>
@@ -1236,6 +1248,8 @@ html.tema-claro .login-field input{background:#fff;border-color:#c2d8c2;color:#1
       <option value="6">Julio</option><option value="7">Agosto</option><option value="8">Septiembre</option>
       <option value="9">Octubre</option><option value="10">Noviembre</option><option value="11">Diciembre</option>
     </select>
+    <label style="margin-top:.5rem">Año <span style="color:var(--txt3);font-size:.65rem">(para filtros por mes)</span></label>
+    <select id="rpt-inst-anio"></select>
   </div>
   <button class="bsave" onclick="genReporte()"><svg class="ico" viewBox="0 0 20 20"><rect x="4" y="7" width="12" height="8" rx="1.5" stroke="currentColor" stroke-width="1.4" fill="none"/><path d="M6 7 V4 H14 V7" stroke="currentColor" stroke-width="1.3" fill="none" stroke-linecap="round"/><rect x="6" y="12" width="8" height="4" rx="1" stroke="currentColor" stroke-width="1.3" fill="none"/><circle cx="13.5" cy="10" r="1" fill="currentColor"/></svg> Generar Reporte</button>
 </div>
@@ -1288,9 +1302,9 @@ html.tema-claro .login-field input{background:#fff;border-color:#c2d8c2;color:#1
   <div class="fg">
     <label>Estado</label>
     <select id="er-est" onchange="toggleErSuplente()">
-      <option value="ok"><svg class="ico ico-ok" viewBox="0 0 20 20"><circle cx="10" cy="10" r="8" stroke="currentColor" stroke-width="1.5" fill="none"/><polyline points="6,10 9,13 14,7" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg> Impartida</option>
-      <option value="sub"><svg class="ico" viewBox="0 0 20 20"><path d="M4 10a6 6 0 0 1 6-6 6 6 0 0 1 5.2 3" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round"/><path d="M16 10a6 6 0 0 1-6 6 6 6 0 0 1-5.2-3" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round"/><polyline points="14.5,7 15.5,3.8 18.5,5" stroke="currentColor" stroke-width="1.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/><polyline points="5.5,13 4.5,16.2 1.5,15" stroke="currentColor" stroke-width="1.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg> Con Suplente</option>
-      <option value="falta"><svg class="ico ico-err" viewBox="0 0 20 20"><circle cx="10" cy="10" r="8" stroke="currentColor" stroke-width="1.5" fill="none"/><line x1="7" y1="7" x2="13" y2="13" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><line x1="13" y1="7" x2="7" y2="13" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg> Falta</option>
+      <option value="ok">✔ Impartida</option>
+      <option value="sub">⇄ Con Suplente</option>
+      <option value="falta">✖ Falta</option>
     </select>
   </div>
   <div class="fg" id="er-suplente-row" style="display:none">
@@ -1410,7 +1424,7 @@ function getClaseSeleccionada(){
 }
 function actualizarSelectoresClase(){
   const todas=todosLosClasesUnicos();
-  const opts=todas.map(c=>`<option value="${c}">${c}</option>`).join('')+'<option value="__nueva__"><svg class="ico" viewBox="0 0 20 20"><path d="M13.5 3.5 L16.5 6.5 L8 15 L4 16 L5 12 Z" stroke="currentColor" stroke-width="1.4" fill="none" stroke-linejoin="round"/><line x1="12" y1="5" x2="15" y2="8" stroke="currentColor" stroke-width="1.3"/></svg> Nueva clase...</option>';
+  const opts=todas.map(c=>`<option value="${c}">${c}</option>`).join('')+'<option value="__nueva__">✚ Nueva clase...</option>';
   const sel=document.getElementById('s-clase');
   if(sel){const cur=sel.value;sel.innerHTML=opts;sel.value=cur||todas[0];}
 }
@@ -1809,7 +1823,7 @@ function renderDashboard(){
         tooltip:{callbacks:{
           label:c=>c.datasetIndex===0?`Aforo: ${c.raw}%`:`Asistentes prom: ${c.raw}`,
           afterBody:(items)=>{
-            if(items[0]&&items[0].datasetIndex===0)return['','<svg class="ico" viewBox="0 0 20 20"><path d="M10 2 Q13 2 13 6 Q13 8 11.5 9 L12 14 L8 14 L8.5 9 Q7 8 7 6 Q7 2 10 2" stroke="currentColor" stroke-width="1.3" fill="none" stroke-linejoin="round"/><line x1="10" y1="14" x2="10" y2="18" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg> Clic para ver diagnóstico'];
+            if(items[0]&&items[0].datasetIndex===0)return['','👆 Clic en la barra para ver diagnóstico'];
             return[];
           }
         }}
@@ -2881,15 +2895,60 @@ function exportarSuplenciasExcel(){
 }
 
 // ═══ REPORTES ═══
+function printStyles(){return`font-family:'Outfit',sans-serif;color:#111;`;}
+function pHdr(titulo,sub){
+  return`<div style="border-bottom:3px solid #1a7a45;padding-bottom:.7rem;margin-bottom:1rem;">
+    <h1 style="font-family:'Bebas Neue',sans-serif;font-size:1.6rem;letter-spacing:2px;color:#1a7a45;margin:0">${titulo}</h1>
+    <p style="color:#555;font-size:.8rem">${sub}</p></div>`;
+}
+function pFirma(){
+  return`<div style="margin-top:1rem;padding:.7rem;background:#f0f7f3;border-radius:7px;border-left:4px solid #1a7a45;font-size:.8rem">
+    <strong>Coordinador Fitness:</strong> Club Campestre Aguascalientes &nbsp;|&nbsp; Firma: ______________________ &nbsp;|&nbsp; Vo.Bo. RRHH: ______________________</div>`;
+}
+function initRptAnios(){
+  // Poblar selectores de año con años disponibles en registros
+  const anios = [...new Set(registros.map(r=>(r.fecha||'').slice(0,4)).filter(Boolean))].sort().reverse();
+  const anioActual = new Date().getFullYear();
+  if(!anios.includes(String(anioActual))) anios.unshift(String(anioActual));
+  ['rpt-anio','rpt-inst-anio'].forEach(id=>{
+    const sel = document.getElementById(id);
+    if(!sel) return;
+    const cur = sel.value || String(anioActual);
+    sel.innerHTML = anios.map(a=>`<option value="${a}" ${a===cur?'selected':''}>${a}</option>`).join('');
+  });
+}
+
+function autoRptDia(){
+  const fechaVal = document.getElementById('rpt-dia-fecha').value;
+  if(!fechaVal) return;
+  const d = new Date(fechaVal + 'T12:00:00');
+  const diasJS = ['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'];
+  const diaStr = diasJS[d.getDay()];
+  document.getElementById('rpt-dia').value = diaStr;
+}
+
 function toggleRpt(){
+  initRptAnios();
   const t=document.getElementById('rpt-tipo').value;
   document.getElementById('rpt-dia-opt').style.display=t==='diario'?'':'none';
   document.getElementById('rpt-mes-opt').style.display=t==='mensual'?'':'none';
   document.getElementById('rpt-inst-opt').style.display=t==='instructor'?'':'none';
+  if(t==='diario'){
+    // Poner fecha de hoy por defecto
+    if(!document.getElementById('rpt-dia-fecha').value){
+      document.getElementById('rpt-dia-fecha').value = new Date().toISOString().slice(0,10);
+      autoRptDia();
+    }
+  }
+  if(t==='mensual'){
+    // Mes actual por defecto
+    document.getElementById('rpt-mes').value = String(new Date().getMonth());
+  }
   if(t==='instructor'){
     const sel=document.getElementById('rpt-inst-sel');
     sel.innerHTML='<option value="todos">— Todos los instructores —</option>'+
-      instructores.map(i=>`<option value="${i.id}">${i.nombre}</option>`).join('');
+      [...instructores].sort((a,b)=>a.nombre.localeCompare(b.nombre))
+        .map(i=>`<option value="${i.id}">${i.nombre}</option>`).join('');
   }
 }
 function genReporte(){
@@ -2901,258 +2960,509 @@ function genReporte(){
   else genReporteInstructor();
 }
 
-function genReporteInstructor(){
-  const instId=document.getElementById('rpt-inst-sel').value;
-  const periodo=document.getElementById('rpt-inst-periodo').value;
-  const meses=['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
-  const mesNums=['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
-
-  function filtrarPeriodo(r){
-    const d=new Date(r.fecha);
-    const hoy=new Date();
-    const lun=new Date(hoy);lun.setDate(hoy.getDate()-((hoy.getDay()+6)%7));
-    if(periodo==='semana') return d>=lun&&d<new Date(lun.getTime()+7*86400000);
-    if(periodo==='mes') return d.getMonth()===hoy.getMonth()&&d.getFullYear()===hoy.getFullYear();
-    const mi=mesNums.indexOf(periodo);
-    if(mi>=0) return d.getMonth()===mi;
-    return true;
-  }
-
-  const listaInst = instId==='todos' ? instructores : instructores.filter(i=>i.id===parseInt(instId));
-  const periodoLabel = periodo==='todo'?'Historial completo':periodo==='semana'?'Semana actual':periodo==='mes'?'Mes actual':meses[mesNums.indexOf(periodo)]||'';
-
-  let rows='';
-  listaInst.forEach(inst=>{
-    const recs=registros.filter(r=>r.inst_id===inst.id&&(r.estado==='ok'||r.estado==='sub')&&filtrarPeriodo(r));
-    const faltas=registros.filter(r=>r.inst_id===inst.id&&r.estado==='falta'&&filtrarPeriodo(r)).length;
-    const totalAsis=recs.reduce((a,r)=>a+r.asistentes,0);
-    const afoRecs=recs.filter(r=>r.cap>0);
-    const aforoProm=afoRecs.length>0?Math.round(afoRecs.reduce((a,r)=>a+r.asistentes/r.cap*100,0)/afoRecs.length):0;
-    const promClase=recs.length>0?Math.round(totalAsis/recs.length):0;
-    // horario del instructor
-    const horStr=(inst.horario||[]).map(h=>`${h.dia.slice(0,3)} ${h.hora} — ${h.clase}`).join('<br>');
-    // clases con detalle
-    const detalle=recs.slice(0,8).map(r=>{
-      const pct=r.cap>0?Math.round(r.asistentes/r.cap*100):0;
-      const bg=pct>=80?'#d4edda':pct>=40?'#fff3cd':'#f8d7da';
-      const tc=pct>=80?'#155724':pct>=40?'#856404':'#842029';
-      return`<tr style="background:${bg}">
-        <td style="padding:4px 7px;border:1px solid #ddd;font-family:monospace;font-size:.75rem">${r.hora}</td>
-        <td style="padding:4px 7px;border:1px solid #ddd;font-size:.78rem">${r.dia}</td>
-        <td style="padding:4px 7px;border:1px solid #ddd;font-weight:600;font-size:.78rem">${r.clase}</td>
-        <td style="padding:4px 7px;border:1px solid #ddd;text-align:center;font-weight:700;color:${tc};font-size:.82rem">${r.asistentes}</td>
-        <td style="padding:4px 7px;border:1px solid #ddd;text-align:center;color:${tc};font-size:.78rem">${pct}%</td>
-        <td style="padding:4px 7px;border:1px solid #ddd;font-size:.72rem;color:#555">${r.fecha||''}</td>
-      </tr>`;
-    }).join('');
-
-    const estColor=faltas===0?'#155724':faltas<=2?'#856404':'#842029';
-    const estBg=faltas===0?'#d4edda':faltas<=2?'#fff3cd':'#f8d7da';
-
-    rows+=`
-    <div style="border:1px solid #ccc;border-radius:10px;padding:1rem;margin-bottom:1.2rem;page-break-inside:avoid">
-      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:.8rem;flex-wrap:wrap;gap:.5rem">
-        <div>
-          <div style="font-family:'Bebas Neue',sans-serif;font-size:1.4rem;letter-spacing:1px;color:#1a7a45">${inst.nombre}</div>
-          <div style="font-size:.78rem;color:#555;margin-top:2px">${inst.tipo==='planta'?'Instructor de Planta':'Honorarios / Freelance'} &nbsp;·&nbsp; ${inst.esp||''}</div>
-        </div>
-        <span style="background:${estBg};color:${estColor};padding:4px 12px;border-radius:20px;font-size:.75rem;font-weight:700">${faltas===0?'<svg class="ico ico-ok" viewBox="0 0 20 20"><circle cx="10" cy="10" r="8" stroke="currentColor" stroke-width="1.5" fill="none"/><polyline points="6,10 9,13 14,7" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg> Sin faltas':faltas+' falta(s)'}</span>
-      </div>
-      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:.7rem;margin-bottom:.9rem">
-        ${[['Clases',recs.length,'#1a7a45'],['Total Asistentes',totalAsis.toLocaleString(),'#0d6a9e'],['Prom. / Clase',promClase+' pers.','#b87a00'],['Aforo Prom.',aforoProm+'%',aforoProm>=70?'#155724':aforoProm>=45?'#856404':'#c00']].map(([l,v,c])=>
-          `<div style="border:1px solid #ddd;border-radius:7px;padding:.6rem;text-align:center;border-top:2px solid ${c}">
-            <div style="font-size:.65rem;text-transform:uppercase;color:#777;letter-spacing:1px">${l}</div>
-            <div style="font-family:'Bebas Neue',sans-serif;font-size:1.5rem;color:${c}">${v}</div>
-          </div>`).join('')}
-      </div>
-      ${recs.length>0?`
-      <div style="font-size:.7rem;text-transform:uppercase;letter-spacing:1px;color:#777;margin-bottom:.4rem">Últimas clases registradas</div>
-      <table style="width:100%;border-collapse:collapse;font-size:.78rem">
-        <thead><tr style="background:#f0f7f3">
-          <th style="padding:4px 7px;border:1px solid #ccc;color:#1a7a45;font-size:.67rem">Hora</th>
-          <th style="padding:4px 7px;border:1px solid #ccc;color:#1a7a45;font-size:.67rem">Día</th>
-          <th style="padding:4px 7px;border:1px solid #ccc;color:#1a7a45;font-size:.67rem">Clase</th>
-          <th style="padding:4px 7px;border:1px solid #ccc;color:#1a7a45;font-size:.67rem;text-align:center">Asist.</th>
-          <th style="padding:4px 7px;border:1px solid #ccc;color:#1a7a45;font-size:.67rem;text-align:center">Aforo</th>
-          <th style="padding:4px 7px;border:1px solid #ccc;color:#1a7a45;font-size:.67rem">Fecha</th>
-        </tr></thead>
-        <tbody>${detalle}</tbody>
-      </table>`:'<div style="color:#999;font-size:.8rem;text-align:center;padding:.5rem">Sin clases registradas en este periodo</div>'}
-    </div>`;
-  });
-
-  const titulo = instId==='todos'?'REPORTE DE INSTRUCTORES':`REPORTE: ${listaInst[0]?.nombre.toUpperCase()||''}`;
-  const html=`<div style="font-family:'Outfit',sans-serif;color:#111;">
-    <div style="border-bottom:3px solid #1a7a45;padding-bottom:.8rem;margin-bottom:1.2rem;display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:.5rem">
-      <div>
-        <h1 style="font-family:'Bebas Neue',sans-serif;font-size:1.6rem;letter-spacing:2px;color:#1a7a45;margin:0">${titulo}</h1>
-        <p style="color:#555;font-size:.8rem">Club Campestre Aguascalientes · Coordinación Fitness · ${periodoLabel}</p>
-      </div>
-      <div style="text-align:right;font-size:.78rem;color:#555">
-        <div>${listaInst.length} instructor${listaInst.length!==1?'es':''}</div>
-        <div>Generado: ${new Date().toLocaleDateString('es-MX',{day:'2-digit',month:'long',year:'numeric'})}</div>
-      </div>
-    </div>
-    ${rows}
-    <div style="margin-top:1rem;padding:.7rem;background:#f0f7f3;border-radius:7px;border-left:4px solid #1a7a45;font-size:.8rem">
-      <strong>Coordinador Fitness:</strong> ______________________ &nbsp;|&nbsp; Firma: ______________________ &nbsp;|&nbsp; Vo.Bo. RRHH: ______________________
-    </div>
-  </div>`;
-
-  const label=instId==='todos'?'Todos':listaInst[0]?.nombre||'';
-  document.getElementById('print-ttl').textContent=`Reporte Instructor — ${label}`;
-  document.getElementById('print-body').innerHTML=html;
-  document.getElementById('m-print').classList.add('on');
-}
-function printStyles(){return`font-family:'Outfit',sans-serif;color:#111;`;}
-function pHdr(titulo,sub){
-  return`<div style="border-bottom:3px solid #1a7a45;padding-bottom:.7rem;margin-bottom:1rem;">
-    <h1 style="font-family:'Bebas Neue',sans-serif;font-size:1.6rem;letter-spacing:2px;color:#1a7a45;margin:0">${titulo}</h1>
-    <p style="color:#555;font-size:.8rem">${sub}</p></div>`;
-}
-function pFirma(){
-  return`<div style="margin-top:1rem;padding:.7rem;background:#f0f7f3;border-radius:7px;border-left:4px solid #1a7a45;font-size:.8rem">
-    <strong>Coordinador Fitness:</strong> Club Campestre Aguascalientes &nbsp;|&nbsp; Firma: ______________________ &nbsp;|&nbsp; Vo.Bo. RRHH: ______________________</div>`;
-}
+// ── REPORTE DIARIO ────────────────────────────────────────────────────────────
 function genReporteDiario(){
-  const dia=document.getElementById('rpt-dia').value;
-  const horariosDelDia=[];
+  const fechaEsp = document.getElementById('rpt-dia-fecha').value; // YYYY-MM-DD
+  const dia      = document.getElementById('rpt-dia').value;
+  const fechaFmt = fechaEsp
+    ? new Date(fechaEsp+'T12:00:00').toLocaleDateString('es-MX',{weekday:'long',day:'2-digit',month:'long',year:'numeric'})
+    : dia;
+
+  // ── Construir lista de clases programadas ese día ──
+  const horariosDelDia = [];
   instructores.forEach(inst=>{
     (inst.horario||[]).filter(h=>h.dia===dia).forEach(h=>{
-      const rec=registros.find(r=>r.inst_id===inst.id&&r.dia===dia&&r.hora===h.hora&&r.clase===h.clase&&(r.estado==='ok'||r.estado==='sub'));
-      horariosDelDia.push({hora:h.hora,clase:h.clase,inst:inst.nombre,asis:rec?rec.asistentes:null,cap:rec?rec.cap:20,estado:rec?rec.estado:'—',suplente_id:rec?rec.suplente_id:null});
+      // Buscar registro de ESA FECHA EXACTA (o el más reciente de ese día si no hay fecha)
+      let rec = null;
+      if(fechaEsp){
+        rec = registros.find(r=>
+          r.inst_id===inst.id && r.dia===dia &&
+          r.hora===h.hora && r.clase===h.clase &&
+          r.fecha===fechaEsp
+        );
+      }
+      // Si no hay registro para esa fecha, mostrar como pendiente
+      // Pero también buscar promedio histórico para referencia
+      const histRecs = registros.filter(r=>
+        r.inst_id===inst.id && r.dia===dia &&
+        r.hora===h.hora && r.clase===h.clase &&
+        (r.estado==='ok'||r.estado==='sub') && parseInt(r.cap||0)>0
+      );
+      const capSalon = getCapClase(h.clase);
+      const histProm = histRecs.length>0
+        ? Math.round(histRecs.reduce((a,r)=>a+(parseInt(r.asistentes)||0),0)/histRecs.length) : null;
+      const histAfo  = histRecs.length>0
+        ? Math.round(histRecs.reduce((a,r)=>a+(parseInt(r.asistentes)||0)/parseInt(r.cap)*100,0)/histRecs.length) : null;
+
+      horariosDelDia.push({
+        hora:h.hora, clase:h.clase, inst:inst.nombre,
+        asis:rec ? rec.asistentes : null,
+        cap:rec ? rec.cap : capSalon,
+        estado:rec ? rec.estado : (fechaEsp ? 'pendiente' : '—'),
+        suplente_id: rec ? rec.suplente_id : null,
+        histProm, histAfo, histSesiones:histRecs.length
+      });
     });
   });
   horariosDelDia.sort((a,b)=>a.hora.localeCompare(b.hora));
-  const tImp=horariosDelDia.filter(h=>h.asis!=null).length;
-  const tAsis=horariosDelDia.reduce((a,h)=>a+(h.asis||0),0);
+
+  const tProg = horariosDelDia.length;
+  const tImp  = horariosDelDia.filter(h=>h.asis!==null&&h.estado!=='pendiente').length;
+  const tPend = horariosDelDia.filter(h=>h.estado==='pendiente').length;
+  const tAsis = horariosDelDia.reduce((a,h)=>a+(h.asis||0),0);
+  const tAfoRecs = horariosDelDia.filter(h=>h.asis!==null&&h.cap>0);
+  const tAfo  = tAfoRecs.length>0 ? Math.round(tAfoRecs.reduce((a,h)=>a+h.asis/h.cap*100,0)/tAfoRecs.length) : 0;
+
   const html=`<div style="${printStyles()}">
-    ${pHdr(`REPORTE DIARIO — ${dia.toUpperCase()}`,`Club Campestre Aguascalientes · ${new Date().toLocaleDateString('es-MX',{day:'2-digit',month:'long',year:'numeric'})}`)}
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1rem">
-      <div style="border:1px solid #ccc;border-radius:8px;padding:.8rem;border-top:3px solid #1a7a45;text-align:center">
-        <div style="font-size:.68rem;text-transform:uppercase;letter-spacing:1px;color:#777">Clases impartidas</div>
-        <div style="font-family:'Bebas Neue',sans-serif;font-size:2rem;color:#1a7a45">${tImp}</div>
-      </div>
-      <div style="border:1px solid #ccc;border-radius:8px;padding:.8rem;border-top:3px solid #1a7a45;text-align:center">
-        <div style="font-size:.68rem;text-transform:uppercase;letter-spacing:1px;color:#777">Total asistentes</div>
-        <div style="font-family:'Bebas Neue',sans-serif;font-size:2rem;color:#1a7a45">${tAsis}</div>
-      </div>
+    ${pHdr(`REPORTE DIARIO — ${dia.toUpperCase()}`,
+      `Club Campestre Aguascalientes · ${fechaFmt} · Generado: ${new Date().toLocaleDateString('es-MX',{day:'2-digit',month:'long',year:'numeric'})}`)}
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:.7rem;margin-bottom:1rem">
+      ${[
+        ['Clases programadas', tProg,'#1a7a45'],
+        ['Impartidas / con datos', tImp,'#0d6a9e'],
+        ['Total asistentes', tAsis,'#b87a00'],
+        ['Aforo prom.', tAfo+'%', tAfo>=60?'#1a7a45':tAfo>=35?'#b87a00':'#c00']
+      ].map(([l,v,c])=>`
+        <div style="border:1px solid #ccc;border-radius:8px;padding:.8rem;border-top:3px solid ${c};text-align:center">
+          <div style="font-size:.63rem;text-transform:uppercase;color:#777;letter-spacing:1px">${l}</div>
+          <div style="font-family:'Bebas Neue',sans-serif;font-size:1.9rem;color:${c}">${v}</div>
+        </div>`).join('')}
     </div>
-    <table style="width:100%;border-collapse:collapse;font-size:.8rem;margin-bottom:1rem">
+    ${tPend>0?`<div style="background:#fff3cd;border:1px solid #ffc107;border-radius:6px;padding:.5rem .8rem;margin-bottom:.8rem;font-size:.78rem">
+      ⚠ <strong>${tPend} clase(s) sin registro</strong> para esta fecha. Los datos de promedio histórico se muestran en itálica como referencia.
+    </div>`:''}
+    <table style="width:100%;border-collapse:collapse;font-size:.79rem;margin-bottom:1rem">
       <thead><tr style="background:#f0f7f3">
-        ${['Hora','Clase','Instructor','Asistentes','Aforo %','Estado','Suplente'].map(h=>`<th style="padding:6px 9px;border:1px solid #ccc;color:#1a7a45;font-size:.68rem;text-transform:uppercase">${h}</th>`).join('')}
+        ${['Hora','Clase','Instructor','Asistentes','Aforo%','Estado','Suplente','Prom.Hist.'].map(h=>
+          `<th style="padding:6px 8px;border:1px solid #ccc;color:#1a7a45;font-size:.66rem;text-transform:uppercase">${h}</th>`
+        ).join('')}
       </tr></thead>
       <tbody>
       ${horariosDelDia.map((h,n)=>{
-        const pct=h.asis!=null?Math.round(h.asis/h.cap*100):null;
-        const col=pct===null?'#555':pctColPrint(pct);
-        return `<tr style="background:${n%2?'#f9fdf9':'#fff'};border-bottom:1px solid #e0ede5">
-          <td style="padding:6px 9px;border:1px solid #e0ede5;font-family:monospace">${h.hora}</td>
-          <td style="padding:6px 9px;border:1px solid #e0ede5;font-weight:600">${h.clase}</td>
-          <td style="padding:6px 9px;border:1px solid #e0ede5">${h.inst}</td>
-          <td style="padding:6px 9px;border:1px solid #e0ede5;text-align:center;font-weight:600;color:${col}">${h.asis!=null?h.asis:'—'}</td>
-          <td style="padding:6px 9px;border:1px solid #e0ede5;text-align:center;color:${col};font-weight:600">${pct!=null?pct+'%':'—'}</td>
-          <td style="padding:6px 9px;border:1px solid #e0ede5;text-align:center">${h.estado==='sub'?'<svg class="ico" viewBox="0 0 20 20"><path d="M4 10a6 6 0 0 1 6-6 6 6 0 0 1 5.2 3" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round"/><path d="M16 10a6 6 0 0 1-6 6 6 6 0 0 1-5.2-3" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round"/><polyline points="14.5,7 15.5,3.8 18.5,5" stroke="currentColor" stroke-width="1.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/><polyline points="5.5,13 4.5,16.2 1.5,15" stroke="currentColor" stroke-width="1.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg> Suplente':h.asis!=null?'<svg class="ico ico-ok" viewBox="0 0 20 20"><circle cx="10" cy="10" r="8" stroke="currentColor" stroke-width="1.5" fill="none"/><polyline points="6,10 9,13 14,7" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg> Impartida':'—'}</td>
-          <td style="padding:6px 9px;border:1px solid #e0ede5;color:#1a5a8a">${h.estado==='sub'?nombreSuplente(h.suplente_id):'—'}</td>
+        const pct = h.asis!==null&&h.cap>0 ? Math.round(h.asis/h.cap*100) : null;
+        const col = pct===null?'#555':pctColPrint(pct);
+        const esPend = h.estado==='pendiente';
+        const estTxt = h.estado==='sub'?'⇄ Suplente':h.estado==='ok'?'✔ Impartida':h.estado==='falta'?'✖ Falta':esPend?'— Pendiente':'—';
+        const estCol = h.estado==='falta'?'#c00':h.estado==='ok'||h.estado==='sub'?'#155724':'#856404';
+        const histTxt = h.histProm!==null ? `${h.histProm}p · ${h.histAfo}%` : '—';
+        return `<tr style="background:${n%2?'#f9fdf9':'#fff'};${esPend?'opacity:.7':''}">
+          <td style="padding:5px 8px;border:1px solid #e0ede5;font-family:monospace;font-weight:600">${h.hora}</td>
+          <td style="padding:5px 8px;border:1px solid #e0ede5;font-weight:600">${h.clase}</td>
+          <td style="padding:5px 8px;border:1px solid #e0ede5">${h.inst}</td>
+          <td style="padding:5px 8px;border:1px solid #e0ede5;text-align:center;font-weight:700;color:${col};font-style:${esPend?'italic':'normal'}">
+            ${h.asis!==null?h.asis:'—'}</td>
+          <td style="padding:5px 8px;border:1px solid #e0ede5;text-align:center;color:${col};font-weight:600">
+            ${pct!==null?pct+'%':'—'}</td>
+          <td style="padding:5px 8px;border:1px solid #e0ede5;text-align:center;color:${estCol};font-weight:600">${estTxt}</td>
+          <td style="padding:5px 8px;border:1px solid #e0ede5;color:#1a5a8a;font-size:.75rem">
+            ${h.estado==='sub'?nombreSuplente(h.suplente_id):'—'}</td>
+          <td style="padding:5px 8px;border:1px solid #e0ede5;color:#777;font-size:.74rem;font-style:italic">
+            ${histTxt}${h.histSesiones>0?` (${h.histSesiones}ses)`:''}</td>
         </tr>`;
       }).join('')}
       </tbody>
     </table>
     ${pFirma()}
   </div>`;
-  document.getElementById('print-ttl').textContent=`Reporte Diario — ${dia}`;
+
+  document.getElementById('print-ttl').textContent=`Reporte Diario — ${dia} ${fechaEsp||''}`;
   document.getElementById('print-body').innerHTML=html;
-  currentReportData={type:'diario',dia,horariosDelDia};
   document.getElementById('m-print').classList.add('on');
 }
+
+// ── REPORTE SEMANAL ───────────────────────────────────────────────────────────
 function genReporteSemanal(){
+  const lunes   = getLunes(calOffset);
+  const lunStr  = lunes.toISOString().slice(0,10);
+  const domDate = new Date(lunes); domDate.setDate(lunes.getDate()+6);
+  const domStr  = domDate.toISOString().slice(0,10);
+
   const totalSem=instructores.reduce((a,i)=>a+(i.horario||[]).length,0);
+
+  // ── Filtrar registros sólo de esta semana ──
+  const regsSemanales = registros.filter(r=>{
+    const f=r.fecha||'';
+    return f>=lunStr && f<=domStr && (r.estado==='ok'||r.estado==='sub');
+  });
+
+  // ── Construir mapa con datos reales ──
   const mapa={};
   instructores.forEach(inst=>{
     (inst.horario||[]).forEach(h=>{
       const k=`${h.dia}||${h.hora}`;
       if(!mapa[k])mapa[k]=[];
-      const recs=registros.filter(r=>r.inst_id===inst.id&&r.dia===h.dia&&r.hora===h.hora&&(r.estado==='ok'||r.estado==='sub'));
-      const prom=recs.length>0?Math.round(recs.reduce((a,r)=>a+r.asistentes,0)/recs.length):null;
-      const cap=recs.length>0?recs[0].cap:20;
-      mapa[k].push({clase:h.clase,inst:inst.nombre.split(' ')[0],prom,cap});
+      // Registros de ESTA semana para este slot
+      const recsSlot=regsSemanales.filter(r=>
+        r.inst_id===inst.id && r.dia===h.dia && r.hora===h.hora && r.clase===h.clase
+      );
+      const asis = recsSlot.length>0 ? recsSlot[recsSlot.length-1].asistentes : null; // última sesión de la semana
+      const cap  = recsSlot.length>0 ? recsSlot[recsSlot.length-1].cap : getCapClase(h.clase);
+      const esSub = recsSlot.some(r=>r.estado==='sub');
+      mapa[k].push({clase:h.clase, inst:inst.nombre.split(' ')[0], asis, cap, esSub});
     });
   });
+
+  // Totales de la semana
+  const totAsis = regsSemanales.reduce((a,r)=>a+(parseInt(r.asistentes)||0),0);
+  const totSes  = regsSemanales.length;
+  const regsConCap = regsSemanales.filter(r=>parseInt(r.cap||0)>0);
+  const aforoProm = regsConCap.length>0
+    ? Math.round(regsConCap.reduce((a,r)=>a+(parseInt(r.asistentes)||0)/parseInt(r.cap)*100,0)/regsConCap.length) : 0;
+  const totSubs = regsSemanales.filter(r=>r.estado==='sub').length;
+  const sinDatos = totalSem - totSes; // programadas sin registro esta semana
+
   let calRows='';
   HORAS_CAL.forEach(h=>{
-    let row=`<tr><td style="padding:4px 7px;font-family:monospace;font-size:.7rem;color:#555;border-right:2px solid #ccc;white-space:nowrap">${h}</td>`;
+    let row=`<tr><td style="padding:4px 6px;font-family:monospace;font-size:.7rem;color:#555;border-right:2px solid #ccc;white-space:nowrap">${h}</td>`;
     DIAS.forEach(d=>{
       const clases=(mapa[`${d}||${h}`]||[]);
       if(clases.length>0){
         const c=clases.map(cl=>{
-          const pct=cl.prom!==null?Math.round(cl.prom/cl.cap*100):null;
-          const bg=pct===null?'#e8f5e9':pct<=15?'#f8d7da':pct<=40?'#fff3cd':'#d4edda';
-          const tc=pct===null?'#155724':pct<=15?'#842029':pct<=40?'#856404':'#155724';
-          return `<div style="background:${bg};color:${tc};font-size:.63rem;padding:2px 4px;border-radius:3px;margin-bottom:1px"><b>${cl.clase.slice(0,9)}</b> ${cl.prom!=null?cl.prom+'p ':''} ${pct!=null?pct+'%':''}</div>`;
+          const pct = cl.asis!==null && cl.cap>0 ? Math.round(cl.asis/cl.cap*100) : null;
+          const bg  = pct===null?'#e8f5e9':pct<=15?'#f8d7da':pct<=40?'#fff3cd':'#d4edda';
+          const tc  = pct===null?'#777'  :pct<=15?'#842029':pct<=40?'#856404':'#155724';
+          const val = pct!==null ? `${cl.asis}p · ${pct}%` : 'Sin registro';
+          const sub = cl.esSub ? ' ⇄' : '';
+          return `<div style="background:${bg};color:${tc};font-size:.62rem;padding:2px 4px;border-radius:3px;margin-bottom:1px">
+            <b>${cl.clase.slice(0,9)}</b>${sub} ${val}</div>`;
         }).join('');
         row+=`<td style="padding:2px;border:1px solid #e0ede5">${c}</td>`;
       } else row+=`<td style="border:1px solid #e0ede5"></td>`;
     });
     row+='</tr>';calRows+=row;
   });
+
   const html=`<div style="${printStyles()}">
-    ${pHdr('REPORTE SEMANAL — CALENDARIO',`Club Campestre Aguascalientes · ${semanaStr(getLunes(calOffset))} · ${totalSem} clases programadas`)}
-    <p style="font-size:.7rem;color:#777;margin-bottom:.5rem"><svg class="ico" viewBox="0 0 20 20"><circle cx="10" cy="10" r="5" fill="var(--neon)"/></svg> Buen aforo (≥40%) &nbsp; <svg class="ico" viewBox="0 0 20 20"><circle cx="10" cy="10" r="5" fill="var(--gold2)"/></svg> Aforo medio (16-40%) &nbsp; <svg class="ico" viewBox="0 0 20 20"><circle cx="10" cy="10" r="5" fill="var(--red2)"/></svg> Aforo bajo (≤15%)</p>
+    ${pHdr('REPORTE SEMANAL — CALENDARIO',
+      `Club Campestre Aguascalientes · ${semanaStr(lunes)} · ${totalSem} clases programadas`)}
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:.6rem;margin-bottom:.8rem">
+      ${[
+        ['Sesiones registradas',`${totSes} / ${totalSem}`,'#1a7a45'],
+        ['Total asistentes', totAsis, '#0d6a9e'],
+        ['Aforo promedio', aforoProm+'%', aforoProm>=60?'#1a7a45':aforoProm>=35?'#b87a00':'#c00'],
+        ['Suplencias', totSubs, totSubs>0?'#856404':'#1a7a45']
+      ].map(([l,v,c])=>`
+        <div style="border:1px solid #ccc;border-radius:7px;padding:.6rem;text-align:center;border-top:3px solid ${c}">
+          <div style="font-size:.6rem;text-transform:uppercase;color:#777;letter-spacing:1px">${l}</div>
+          <div style="font-family:'Bebas Neue',sans-serif;font-size:1.6rem;color:${c}">${v}</div>
+        </div>`).join('')}
+    </div>
+    ${sinDatos>0?`<div style="background:#fff3cd;border:1px solid #ffc107;border-radius:6px;padding:.4rem .7rem;margin-bottom:.6rem;font-size:.75rem">
+      ⚠ <strong>${sinDatos} clase(s)</strong> programadas esta semana sin registro de aforo aún.
+      Las celdas en <span style="background:#e8f5e9;padding:0 4px;border-radius:2px;color:#777">verde claro</span> no tienen datos de esta semana.
+    </div>`:''}
+    <p style="font-size:.7rem;color:#777;margin-bottom:.5rem">
+      ✅ Buen aforo (≥40%) &nbsp;·&nbsp; ⚠ Aforo medio (16-40%) &nbsp;·&nbsp; ❌ Aforo bajo (≤15%) &nbsp;·&nbsp; Sin registro = celdas verdes sin números
+    </p>
     <div style="overflow-x:auto">
     <table style="width:100%;border-collapse:collapse;font-size:.75rem;min-width:580px">
       <thead><tr style="background:#f0f7f3">
-        <th style="padding:5px 7px;border:1px solid #ccc;font-size:.68rem;text-transform:uppercase;color:#1a7a45;width:50px">Hora</th>
-        ${DIAS.map(d=>`<th style="padding:5px 7px;border:1px solid #ccc;font-size:.68rem;text-transform:uppercase;color:#1a7a45;text-align:center">${d}</th>`).join('')}
+        <th style="padding:5px 6px;border:1px solid #ccc;font-size:.66rem;text-transform:uppercase;color:#1a7a45;width:50px">Hora</th>
+        ${DIAS.map(d=>`<th style="padding:5px 6px;border:1px solid #ccc;font-size:.66rem;text-transform:uppercase;color:#1a7a45;text-align:center">${d}</th>`).join('')}
       </tr></thead>
       <tbody>${calRows}</tbody>
     </table></div>
     ${pFirma()}
   </div>`;
-  document.getElementById('print-ttl').textContent=`Reporte Semanal — ${semanaStr(getLunes(calOffset))}`;
+  document.getElementById('print-ttl').textContent=`Reporte Semanal — ${semanaStr(lunes)}`;
   document.getElementById('print-body').innerHTML=html;
   document.getElementById('m-print').classList.add('on');
 }
+
+// ── REPORTE MENSUAL ───────────────────────────────────────────────────────────
 function genReporteMensual(){
-  const mesIdx=parseInt(document.getElementById('rpt-mes').value);
-  const mesNom=['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'][mesIdx];
-  const allS=instructores.map(i=>{const s=statsInst(i);return{...i,impMes:s.impartidas*4,faltMes:s.faltas*4,horasMes:(s.horas*4).toFixed(1),aforoMes:s.aforo,asisMes:s.totalAsis*4};});
-  const tImp=allS.reduce((a,i)=>a+i.impMes,0);const tFalt=allS.reduce((a,i)=>a+i.faltMes,0);
-  const tAsis=allS.reduce((a,i)=>a+i.asisMes,0);const tAforo=allS.length>0?Math.round(allS.reduce((a,i)=>a+i.aforoMes,0)/allS.length):0;
+  const mesIdx = parseInt(document.getElementById('rpt-mes').value);
+  const anio   = parseInt(document.getElementById('rpt-anio').value) || new Date().getFullYear();
+  const mesNom = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'][mesIdx];
+
+  // ── Filtrar registros REALES del mes y año seleccionados ──
+  const regsDelMes = registros.filter(r=>{
+    if(!r.fecha) return false;
+    const d = new Date(r.fecha+'T12:00:00');
+    return d.getMonth()===mesIdx && d.getFullYear()===anio;
+  });
+
+  // ── Stats reales por instructor ──
+  const allS = instructores.map(inst=>{
+    const rInst = regsDelMes.filter(r=>r.inst_id===inst.id);
+    const imp   = rInst.filter(r=>r.estado==='ok'||r.estado==='sub');
+    const falt  = rInst.filter(r=>r.estado==='falta').length;
+    const sups  = rInst.filter(r=>r.estado==='sub').length;
+    const totalAsis = imp.reduce((a,r)=>a+(parseInt(r.asistentes)||0),0);
+    const afoRecs = imp.filter(r=>parseInt(r.cap||0)>0);
+    const afo = afoRecs.length>0
+      ? Math.round(afoRecs.reduce((a,r)=>a+(parseInt(r.asistentes)||0)/parseInt(r.cap)*100,0)/afoRecs.length) : 0;
+    const horas = imp.length; // 1 clase = ~1 hora (ajustable)
+    return {...inst, impMes:imp.length, faltMes:falt, supsMes:sups, horasMes:horas, asisMes:totalAsis, aforoMes:afo};
+  });
+
+  const tImp   = allS.reduce((a,i)=>a+i.impMes,0);
+  const tFalt  = allS.reduce((a,i)=>a+i.faltMes,0);
+  const tAsis  = allS.reduce((a,i)=>a+i.asisMes,0);
+  const tSups  = allS.reduce((a,i)=>a+i.supsMes,0);
+  const tAforo = allS.filter(i=>i.impMes>0).length>0
+    ? Math.round(allS.filter(i=>i.impMes>0).reduce((a,i)=>a+i.aforoMes,0)/allS.filter(i=>i.impMes>0).length) : 0;
+  const totalProg = instructores.reduce((a,i)=>a+(i.horario||[]).length,0);
+  // Semanas en el mes
+  const diasEnMes = new Date(anio,mesIdx+1,0).getDate();
+  const semsAprox = Math.round(diasEnMes/7);
+  const progMes = totalProg * semsAprox;
+  const cumplimiento = progMes>0?Math.round(tImp/progMes*100):0;
+
+  // Resumen de clases del mes
+  const clasesMes={};
+  regsDelMes.filter(r=>r.estado==='ok'||r.estado==='sub').forEach(r=>{
+    if(!r.clase)return;
+    if(!clasesMes[r.clase])clasesMes[r.clase]={total:0,asis:0,cap:0,cnt:0};
+    clasesMes[r.clase].total++;
+    clasesMes[r.clase].asis+=(parseInt(r.asistentes)||0);
+    if(parseInt(r.cap||0)>0){clasesMes[r.clase].cap+=parseInt(r.cap);clasesMes[r.clase].cnt++;}
+  });
+  const topClases = Object.entries(clasesMes)
+    .map(([k,v])=>({clase:k,sesiones:v.total,asis:v.asis,afo:v.cnt>0?Math.round(v.asis/v.cap*v.cnt*100/(v.cnt)):0}))
+    .sort((a,b)=>b.asis-a.asis).slice(0,8);
+
   const html=`<div style="${printStyles()}">
-    ${pHdr(`REPORTE MENSUAL — ${mesNom.toUpperCase()} ${new Date().getFullYear()}`,'Club Campestre Aguascalientes · Coordinación Fitness')}
-    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:.8rem;margin-bottom:1rem">
-      ${[['Clases',tImp,'#1a7a45'],['Faltas',tFalt,'#c00'],['Asistentes',tAsis.toLocaleString(),'#0d6a9e'],['Aforo Prom.',tAforo+'%','#b87a00']].map(([l,v,c])=>
-        `<div style="border:1px solid #ccc;border-radius:7px;padding:.7rem;text-align:center;border-top:3px solid ${c}">
-          <div style="font-size:.65rem;text-transform:uppercase;color:#777;letter-spacing:1px">${l}</div>
-          <div style="font-family:'Bebas Neue',sans-serif;font-size:1.8rem;color:${c}">${v}</div>
+    ${pHdr(`REPORTE MENSUAL — ${mesNom.toUpperCase()} ${anio}`,
+      `Club Campestre Aguascalientes · Coordinación Fitness · Total registros: ${regsDelMes.length}`)}
+
+    <!-- KPIs -->
+    <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:.6rem;margin-bottom:1rem">
+      ${[
+        ['Clases impartidas', tImp, '#1a7a45'],
+        [`Cumplimiento (${semsAprox} sem.)`, cumplimiento+'%', cumplimiento>=85?'#1a7a45':cumplimiento>=65?'#b87a00':'#c00'],
+        ['Faltas', tFalt, tFalt===0?'#1a7a45':tFalt<=3?'#b87a00':'#c00'],
+        ['Suplencias', tSups, tSups>0?'#b87a00':'#1a7a45'],
+        ['Asistentes totales', tAsis.toLocaleString(), '#0d6a9e'],
+      ].map(([l,v,c])=>`
+        <div style="border:1px solid #ccc;border-radius:7px;padding:.7rem;text-align:center;border-top:3px solid ${c}">
+          <div style="font-size:.6rem;text-transform:uppercase;color:#777;letter-spacing:1px">${l}</div>
+          <div style="font-family:'Bebas Neue',sans-serif;font-size:1.6rem;color:${c}">${v}</div>
         </div>`).join('')}
     </div>
-    <table style="width:100%;border-collapse:collapse;font-size:.79rem">
+
+    <!-- Tabla instructores -->
+    <div style="font-size:.7rem;text-transform:uppercase;letter-spacing:1px;color:#1a7a45;margin-bottom:.4rem;font-weight:600">
+      Desempeño por Instructor — ${mesNom} ${anio}
+    </div>
+    <table style="width:100%;border-collapse:collapse;font-size:.78rem;margin-bottom:1rem">
       <thead><tr style="background:#f0f7f3">
-        ${['#','Instructor','Tipo','Clases','Faltas','Horas','Asistentes','Aforo %','Estado'].map(h=>`<th style="padding:7px 9px;border:1px solid #ccc;color:#1a7a45;font-size:.67rem;text-transform:uppercase">${h}</th>`).join('')}
+        ${['#','Instructor','Tipo','Programadas*','Impartidas','Faltas','Suplencias','Asistentes','Aforo%','Estado'].map(h=>
+          `<th style="padding:6px 8px;border:1px solid #ccc;color:#1a7a45;font-size:.64rem;text-transform:uppercase">${h}</th>`
+        ).join('')}
       </tr></thead>
       <tbody>
       ${allS.map((i,n)=>{
-        const est=i.faltMes===0?'Cumple':i.faltMes<=2?'Revisar':'Incidencia';
-        const bg2=i.faltMes===0?'#d4edda':i.faltMes<=2?'#fff3cd':'#f8d7da';
-        const tc=i.faltMes===0?'#155724':i.faltMes<=2?'#856404':'#842029';
+        const cls_prog = (i.horario||[]).length * semsAprox;
+        const est = i.faltMes===0?'✔ Cumple':i.faltMes<=2?'⚠ Revisar':'✖ Incidencia';
+        const bg2 = i.faltMes===0?'#d4edda':i.faltMes<=2?'#fff3cd':'#f8d7da';
+        const tc  = i.faltMes===0?'#155724':i.faltMes<=2?'#856404':'#842029';
+        const afoCol = pctColPrint(i.aforoMes);
         return `<tr style="background:${n%2?'#f9fdf9':'#fff'};border-bottom:1px solid #e0ede5">
-          <td style="padding:6px 9px;border:1px solid #e0ede5;color:#999">${n+1}</td>
-          <td style="padding:6px 9px;border:1px solid #e0ede5;font-weight:600">${i.nombre}</td>
-          <td style="padding:6px 9px;border:1px solid #e0ede5;color:#555">${i.tipo==='planta'?'Planta':'Honorarios'}</td>
-          <td style="padding:6px 9px;border:1px solid #e0ede5;text-align:center">${i.impMes}</td>
-          <td style="padding:6px 9px;border:1px solid #e0ede5;text-align:center;color:${i.faltMes>0?'#c00':'#1a7a45'}">${i.faltMes}</td>
-          <td style="padding:6px 9px;border:1px solid #e0ede5;text-align:center;font-family:monospace">${i.horasMes}h</td>
-          <td style="padding:6px 9px;border:1px solid #e0ede5;text-align:center;font-weight:600">${i.asisMes.toLocaleString()}</td>
-          <td style="padding:6px 9px;border:1px solid #e0ede5;text-align:center;color:${pctColPrint(i.aforoMes)};font-weight:600">${i.aforoMes}%</td>
-          <td style="padding:6px 9px;border:1px solid #e0ede5;text-align:center"><span style="background:${bg2};color:${tc};padding:2px 7px;border-radius:10px;font-size:.7rem;font-weight:600">${est}</span></td>
+          <td style="padding:5px 8px;border:1px solid #e0ede5;color:#999;font-size:.75rem">${n+1}</td>
+          <td style="padding:5px 8px;border:1px solid #e0ede5;font-weight:600">${i.nombre}</td>
+          <td style="padding:5px 8px;border:1px solid #e0ede5;color:#555;font-size:.75rem">${i.tipo==='planta'?'Planta':'Honorarios'}</td>
+          <td style="padding:5px 8px;border:1px solid #e0ede5;text-align:center;color:#777">${cls_prog}</td>
+          <td style="padding:5px 8px;border:1px solid #e0ede5;text-align:center;font-weight:700;color:${i.impMes>0?'#1a7a45':'#999'}">${i.impMes}</td>
+          <td style="padding:5px 8px;border:1px solid #e0ede5;text-align:center;color:${i.faltMes>0?'#c00':'#1a7a45'};font-weight:${i.faltMes>0?'700':'400'}">${i.faltMes}</td>
+          <td style="padding:5px 8px;border:1px solid #e0ede5;text-align:center;color:${i.supsMes>0?'#856404':'#777'}">${i.supsMes}</td>
+          <td style="padding:5px 8px;border:1px solid #e0ede5;text-align:center;font-weight:600">${i.asisMes.toLocaleString()}</td>
+          <td style="padding:5px 8px;border:1px solid #e0ede5;text-align:center;color:${afoCol};font-weight:700">${i.impMes>0?i.aforoMes+'%':'—'}</td>
+          <td style="padding:5px 8px;border:1px solid #e0ede5;text-align:center">
+            <span style="background:${bg2};color:${tc};padding:2px 7px;border-radius:10px;font-size:.7rem;font-weight:600">${est}</span>
+          </td>
         </tr>`;
       }).join('')}
       </tbody>
     </table>
+
+    <!-- Top clases del mes -->
+    ${topClases.length>0?`
+    <div style="font-size:.7rem;text-transform:uppercase;letter-spacing:1px;color:#1a7a45;margin-bottom:.4rem;font-weight:600">
+      Clases Destacadas del Mes
+    </div>
+    <table style="width:100%;border-collapse:collapse;font-size:.77rem;margin-bottom:1rem">
+      <thead><tr style="background:#f0f7f3">
+        ${['Clase','Sesiones','Total Asis.','Aforo Prom.'].map(h=>
+          `<th style="padding:5px 8px;border:1px solid #ccc;color:#1a7a45;font-size:.64rem;text-transform:uppercase">${h}</th>`
+        ).join('')}
+      </tr></thead>
+      <tbody>
+      ${topClases.map((c,n)=>`
+        <tr style="background:${n%2?'#f9fdf9':'#fff'}">
+          <td style="padding:5px 8px;border:1px solid #e0ede5;font-weight:600">${n+1}. ${c.clase}</td>
+          <td style="padding:5px 8px;border:1px solid #e0ede5;text-align:center">${c.sesiones}</td>
+          <td style="padding:5px 8px;border:1px solid #e0ede5;text-align:center;font-weight:600">${c.asis}</td>
+          <td style="padding:5px 8px;border:1px solid #e0ede5;text-align:center;color:${pctColPrint(c.afo)};font-weight:700">${c.afo}%</td>
+        </tr>`).join('')}
+      </tbody>
+    </table>`:''}
+    <div style="font-size:.68rem;color:#999;margin-bottom:.6rem">* Programadas = clases/semana × ${semsAprox} semanas aprox. del mes</div>
     ${pFirma()}
   </div>`;
-  document.getElementById('print-ttl').textContent=`Reporte Mensual — ${mesNom} ${new Date().getFullYear()}`;
+
+  document.getElementById('print-ttl').textContent=`Reporte Mensual — ${mesNom} ${anio}`;
+  document.getElementById('print-body').innerHTML=html;
+  document.getElementById('m-print').classList.add('on');
+}
+
+// ── REPORTE POR INSTRUCTOR ────────────────────────────────────────────────────
+function genReporteInstructor(){
+  const instId  = document.getElementById('rpt-inst-sel').value;
+  const periodo = document.getElementById('rpt-inst-periodo').value;
+  const anioSel = parseInt(document.getElementById('rpt-inst-anio')?.value) || new Date().getFullYear();
+  const meses   = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+
+  function filtrarPeriodo(r){
+    if(!r.fecha) return periodo==='todo';
+    const d = new Date(r.fecha+'T12:00:00');
+    const hoyD = new Date();
+    const lun  = new Date(hoyD); lun.setDate(hoyD.getDate()-((hoyD.getDay()+6)%7));
+    if(periodo==='semana')  return d>=lun && d<new Date(lun.getTime()+7*86400000);
+    if(periodo==='mes')     return d.getMonth()===hoyD.getMonth() && d.getFullYear()===hoyD.getFullYear();
+    // Numérico = índice de mes
+    const mi = parseInt(periodo);
+    if(!isNaN(mi) && mi>=0 && mi<=11) return d.getMonth()===mi && d.getFullYear()===anioSel;
+    return true; // 'todo'
+  }
+
+  const periodoLabel = periodo==='todo'?'Historial completo'
+    :periodo==='semana'?'Semana actual'
+    :periodo==='mes'?'Mes actual'
+    :`${meses[parseInt(periodo)]||''} ${anioSel}`;
+
+  const listaInst = instId==='todos'
+    ? [...instructores].sort((a,b)=>a.nombre.localeCompare(b.nombre))
+    : instructores.filter(i=>i.id===parseInt(instId));
+
+  let rows='';
+  listaInst.forEach(inst=>{
+    // Registros filtrados y ordenados por fecha descendente
+    const recs = registros
+      .filter(r=>r.inst_id===inst.id && (r.estado==='ok'||r.estado==='sub') && filtrarPeriodo(r))
+      .sort((a,b)=>(b.fecha||'').localeCompare(a.fecha||''));
+    const faltasPeriodo = registros.filter(r=>r.inst_id===inst.id && r.estado==='falta' && filtrarPeriodo(r)).length;
+    const supsPeriodo   = recs.filter(r=>r.estado==='sub').length;
+    const totalAsis     = recs.reduce((a,r)=>a+(parseInt(r.asistentes)||0),0);
+    const afoRecs       = recs.filter(r=>parseInt(r.cap||0)>0);
+    const aforoProm     = afoRecs.length>0
+      ? Math.round(afoRecs.reduce((a,r)=>a+(parseInt(r.asistentes)||0)/parseInt(r.cap)*100,0)/afoRecs.length) : 0;
+    const promClase     = recs.length>0 ? Math.round(totalAsis/recs.length) : 0;
+    const afoCol        = pctColPrint(aforoProm);
+
+    // Resumen por clase
+    const porClase={};
+    recs.forEach(r=>{
+      if(!r.clase)return;
+      if(!porClase[r.clase])porClase[r.clase]={sesiones:0,asis:0,cap:0,cnt:0};
+      porClase[r.clase].sesiones++;
+      porClase[r.clase].asis+=(parseInt(r.asistentes)||0);
+      if(parseInt(r.cap||0)>0){porClase[r.clase].cap+=parseInt(r.cap);porClase[r.clase].cnt++;}
+    });
+    const resumenClases=Object.entries(porClase)
+      .map(([k,v])=>({clase:k,sesiones:v.sesiones,asis:v.asis,
+        afo:v.cnt>0?Math.round(v.asis/v.cap*v.cnt*100/v.cnt):0}))
+      .sort((a,b)=>b.asis-a.asis);
+
+    // Últimas 12 sesiones con detalle
+    const detalle=recs.slice(0,12).map(r=>{
+      const pct=parseInt(r.cap||0)>0?Math.round((parseInt(r.asistentes)||0)/parseInt(r.cap)*100):0;
+      const bg=pct>=70?'#d4edda':pct>=40?'#fff3cd':'#f8d7da';
+      const tc=pct>=70?'#155724':pct>=40?'#856404':'#842029';
+      const supNom=r.estado==='sub'?nombreSuplente(r.suplente_id):'—';
+      const fd=r.fecha?new Date(r.fecha+'T12:00:00').toLocaleDateString('es-MX',{day:'2-digit',month:'short'}):'—';
+      return`<tr style="background:${bg}">
+        <td style="padding:3px 7px;border:1px solid #ddd;font-family:monospace;font-size:.72rem">${fd}</td>
+        <td style="padding:3px 7px;border:1px solid #ddd;font-size:.73rem">${r.dia||'—'}</td>
+        <td style="padding:3px 7px;border:1px solid #ddd;font-family:monospace;font-size:.72rem">${r.hora||'—'}</td>
+        <td style="padding:3px 7px;border:1px solid #ddd;font-weight:600;font-size:.75rem">${r.clase||'—'}</td>
+        <td style="padding:3px 7px;border:1px solid #ddd;text-align:center;font-weight:700;color:${tc}">${parseInt(r.asistentes)||0}</td>
+        <td style="padding:3px 7px;border:1px solid #ddd;text-align:center;color:${tc};font-weight:600">${pct>0?pct+'%':'—'}</td>
+        <td style="padding:3px 7px;border:1px solid #ddd;color:#1a5a8a;font-size:.7rem">${supNom}</td>
+      </tr>`;
+    }).join('');
+
+    const estColor=faltasPeriodo===0?'#155724':faltasPeriodo<=2?'#856404':'#842029';
+    const estBg   =faltasPeriodo===0?'#d4edda':faltasPeriodo<=2?'#fff3cd':'#f8d7da';
+    const estLabel=faltasPeriodo===0?'✔ Sin faltas':faltasPeriodo+' falta(s)';
+
+    rows+=`
+    <div style="border:1px solid #ccc;border-radius:10px;padding:1rem;margin-bottom:1.2rem;page-break-inside:avoid">
+      <!-- Header instructor -->
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:.8rem;flex-wrap:wrap;gap:.5rem">
+        <div>
+          <div style="font-family:'Bebas Neue',sans-serif;font-size:1.5rem;letter-spacing:1px;color:#1a7a45">${inst.nombre}</div>
+          <div style="font-size:.76rem;color:#555;margin-top:1px">
+            ${inst.tipo==='planta'?'Instructor de Planta':'Honorarios'} · ${inst.esp||'—'}
+            · Horario: ${(inst.horario||[]).length} clase(s)/semana
+          </div>
+        </div>
+        <span style="background:${estBg};color:${estColor};padding:4px 12px;border-radius:20px;font-size:.75rem;font-weight:700">${estLabel}</span>
+      </div>
+
+      <!-- KPIs instructor -->
+      <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:.5rem;margin-bottom:.9rem">
+        ${[
+          ['Sesiones',recs.length,'#1a7a45'],
+          ['Asistentes',totalAsis.toLocaleString(),'#0d6a9e'],
+          ['Prom./Clase',promClase,'#b87a00'],
+          ['Aforo prom.',aforoProm+'%',afoCol],
+          ['Suplencias',supsPeriodo,supsPeriodo>0?'#856404':'#1a7a45'],
+        ].map(([l,v,c])=>`
+          <div style="border:1px solid #ddd;border-radius:6px;padding:.5rem;text-align:center;border-top:2px solid ${c}">
+            <div style="font-size:.58rem;text-transform:uppercase;color:#777;letter-spacing:.8px">${l}</div>
+            <div style="font-family:'Bebas Neue',sans-serif;font-size:1.3rem;color:${c}">${v}</div>
+          </div>`).join('')}
+      </div>
+
+      <!-- Resumen por clase -->
+      ${resumenClases.length>1?`
+      <div style="margin-bottom:.7rem">
+        <div style="font-size:.63rem;text-transform:uppercase;letter-spacing:1px;color:#777;margin-bottom:.3rem">Resumen por clase</div>
+        <div style="display:flex;flex-wrap:wrap;gap:.4rem">
+          ${resumenClases.map(c=>{
+            const afoC=pctColPrint(c.afo);
+            return `<span style="background:#f0f7f3;border:1px solid #ccc;border-radius:6px;padding:2px 8px;font-size:.72rem">
+              <b>${c.clase}</b> · ${c.sesiones}ses · ${c.asis}asis · <span style="color:${afoC}">${c.afo}%</span>
+            </span>`;
+          }).join('')}
+        </div>
+      </div>`:''}
+
+      <!-- Historial sesiones -->
+      ${recs.length>0?`
+      <div style="font-size:.63rem;text-transform:uppercase;letter-spacing:1px;color:#777;margin-bottom:.3rem">
+        Últimas ${Math.min(recs.length,12)} sesiones (de ${recs.length} en el periodo)
+      </div>
+      <table style="width:100%;border-collapse:collapse;font-size:.76rem">
+        <thead><tr style="background:#f0f7f3">
+          ${['Fecha','Día','Hora','Clase','Asist.','Aforo','Suplente'].map(h=>
+            `<th style="padding:3px 7px;border:1px solid #ccc;color:#1a7a45;font-size:.62rem;text-transform:uppercase">${h}</th>`
+          ).join('')}
+        </tr></thead>
+        <tbody>${detalle}</tbody>
+      </table>`
+      :`<div style="color:#999;font-size:.8rem;text-align:center;padding:.5rem">Sin sesiones registradas en este periodo</div>`}
+    </div>`;
+  });
+
+  const titulo = instId==='todos'?'REPORTE DE INSTRUCTORES':`REPORTE: ${listaInst[0]?.nombre.toUpperCase()||''}`;
+  const html=`<div style="${printStyles()}">
+    <div style="border-bottom:3px solid #1a7a45;padding-bottom:.8rem;margin-bottom:1.2rem;display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:.5rem">
+      <div>
+        <h1 style="font-family:'Bebas Neue',sans-serif;font-size:1.6rem;letter-spacing:2px;color:#1a7a45;margin:0">${titulo}</h1>
+        <p style="color:#555;font-size:.78rem">Club Campestre Aguascalientes · Coordinación Fitness · <strong>${periodoLabel}</strong></p>
+      </div>
+      <div style="text-align:right;font-size:.76rem;color:#555">
+        <div>${listaInst.length} instructor${listaInst.length!==1?'es':''}</div>
+        <div>Generado: ${new Date().toLocaleDateString('es-MX',{day:'2-digit',month:'long',year:'numeric'})}</div>
+      </div>
+    </div>
+    ${rows||'<div style="text-align:center;padding:2rem;color:#999">Sin instructores para mostrar</div>'}
+    ${pFirma()}
+  </div>`;
+
+  document.getElementById('print-ttl').textContent=`Reporte Instructor — ${instId==='todos'?'Todos':listaInst[0]?.nombre||''}`;
   document.getElementById('print-body').innerHTML=html;
   document.getElementById('m-print').classList.add('on');
 }
