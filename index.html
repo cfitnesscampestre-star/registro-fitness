@@ -1239,18 +1239,161 @@ body.rol-usuario #fab-clase { display: none !important; }
   <button class="mcls" onclick="cerrarModal('m-rec-init')"><svg class="ico" viewBox="0 0 20 20"><line x1="5" y1="5" x2="15" y2="15" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><line x1="15" y1="5" x2="5" y2="15" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></button>
   <div class="mttl"><svg class="ico" viewBox="0 0 20 20"><circle cx="10" cy="4" r="2" stroke="currentColor" stroke-width="1.4" fill="none"/><path d="M10 6 L9 11 L7 16 M10 6 L11 11 L13 16 M9 11 L12 11" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg> Iniciar Recorrido</div>
   <div class="fg"><label>Fecha</label><input type="date" id="ri-fecha"></div>
-  <div class="fg"><label>Hora del recorrido</label><input type="time" id="ri-hora" value="07:30" oninput="previewClasesActivas()">
-    <span style="font-size:.7rem;color:var(--txt2);margin-top:3px">Se mostrarán las clases activas en ese horario</span>
+  <div class="fr">
+    <div class="fg"><label>Hora</label><input type="time" id="ri-hora" value="07:30" oninput="previewClasesActivas()"></div>
+    <div class="fg"><label>Día</label>
+      <select id="ri-dia" onchange="previewClasesActivas()"><option>Lunes</option><option>Martes</option><option>Miércoles</option><option>Jueves</option><option>Viernes</option><option>Sábado</option><option>Domingo</option></select>
+    </div>
   </div>
-  <div class="fg"><label>Día de la semana</label>
-    <select id="ri-dia" onchange="previewClasesActivas()"><option>Lunes</option><option>Martes</option><option>Miércoles</option><option>Jueves</option><option>Viernes</option><option>Sábado</option><option>Domingo</option></select>
+  <!-- MODO DE CAPTURA -->
+  <div style="margin:.6rem 0 .8rem">
+    <div style="font-size:.68rem;text-transform:uppercase;letter-spacing:1px;color:var(--txt2);margin-bottom:.5rem">Modo de captura</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:.5rem">
+      <div id="ri-modo-turbo" onclick="selModoRec('turbo')"
+        style="border:2px solid var(--verde);background:rgba(26,122,69,.15);border-radius:10px;padding:.65rem .7rem;cursor:pointer;transition:all .2s">
+        <div style="font-size:1.1rem;margin-bottom:2px">⚡</div>
+        <div style="font-size:.78rem;font-weight:700;color:var(--neon)">Modo Turbo</div>
+        <div style="font-size:.63rem;color:var(--txt2);margin-top:2px;line-height:1.3">Tarjetas deslizables.<br>Ideal para muchas clases.</div>
+      </div>
+      <div id="ri-modo-clasico" onclick="selModoRec('clasico')"
+        style="border:2px solid var(--border);background:transparent;border-radius:10px;padding:.65rem .7rem;cursor:pointer;transition:all .2s">
+        <div style="font-size:1.1rem;margin-bottom:2px">📋</div>
+        <div style="font-size:.78rem;font-weight:700;color:var(--txt)">Modo Clásico</div>
+        <div style="font-size:.63rem;color:var(--txt2);margin-top:2px;line-height:1.3">Una clase a la vez.<br>Más detalle por clase.</div>
+      </div>
+    </div>
   </div>
   <div id="ri-preview"></div>
   <button class="bsave" onclick="comenzarRecorrido()">Comenzar →</button>
 </div>
 </div>
 
-<!-- RECORRIDO CAPTURA -->
+<!-- ══ RECORRIDO TURBO (pantalla completa) ══ -->
+<div id="turbo-screen" style="display:none;position:fixed;inset:0;z-index:500;background:var(--bg);flex-direction:column;overflow:hidden">
+
+  <!-- Barra superior -->
+  <div style="background:var(--panel);border-bottom:1px solid var(--border);padding:.6rem 1rem;display:flex;align-items:center;justify-content:space-between;flex-shrink:0">
+    <div style="display:flex;align-items:center;gap:.7rem">
+      <span style="font-family:'Bebas Neue',sans-serif;font-size:1rem;color:var(--neon);letter-spacing:1px">⚡ RECORRIDO TURBO</span>
+      <span id="turbo-fecha-lbl" style="font-size:.72rem;color:var(--txt2)"></span>
+    </div>
+    <div style="display:flex;align-items:center;gap:.7rem">
+      <span id="turbo-prog" style="font-family:'DM Mono',monospace;font-size:.78rem;color:var(--gold2)"></span>
+      <button onclick="terminarTurbo()" style="background:#3a1010;color:var(--red2);border:1px solid var(--red);border-radius:8px;padding:5px 12px;font-family:'Outfit',sans-serif;font-size:.72rem;cursor:pointer">Finalizar</button>
+    </div>
+  </div>
+
+  <!-- Barra de progreso -->
+  <div style="height:4px;background:var(--border);flex-shrink:0">
+    <div id="turbo-progbar" style="height:100%;background:var(--neon);transition:width .3s;width:0%"></div>
+  </div>
+
+  <!-- Área de tarjeta principal -->
+  <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:1rem;overflow:hidden;position:relative">
+
+    <!-- Indicadores de swipe -->
+    <div id="turbo-hint-left" style="position:absolute;left:8px;top:50%;transform:translateY(-50%);font-size:2rem;opacity:0;transition:opacity .15s;pointer-events:none">❌</div>
+    <div id="turbo-hint-right" style="position:absolute;right:8px;top:50%;transform:translateY(-50%);font-size:2rem;opacity:0;transition:opacity .15s;pointer-events:none">✅</div>
+
+    <!-- Tarjeta deslizable -->
+    <div id="turbo-card"
+      style="width:100%;max-width:420px;background:var(--panel);border:2px solid var(--border);border-radius:20px;
+             padding:1.2rem 1.4rem;touch-action:pan-y;user-select:none;
+             transition:transform .18s, opacity .18s, border-color .18s;
+             box-shadow:0 8px 32px rgba(0,0,0,.4)">
+
+      <!-- Cabecera clase -->
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:.9rem">
+        <div style="flex:1;min-width:0">
+          <div id="tc-clase" style="font-family:'Bebas Neue',sans-serif;font-size:1.8rem;color:var(--neon);letter-spacing:1px;line-height:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">—</div>
+          <div id="tc-inst" style="font-size:.82rem;color:var(--txt2);margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">—</div>
+        </div>
+        <div style="text-align:right;flex-shrink:0;margin-left:.8rem">
+          <div id="tc-hora" style="font-family:'DM Mono',monospace;font-size:1rem;color:var(--gold2)">—</div>
+          <div id="tc-salon" style="font-size:.68rem;color:var(--txt3);margin-top:2px">—</div>
+        </div>
+      </div>
+
+      <!-- Número de asistentes — grande y táctil -->
+      <div style="text-align:center;margin:.4rem 0 .9rem">
+        <div style="font-size:.65rem;text-transform:uppercase;letter-spacing:1.5px;color:var(--txt2);margin-bottom:.3rem">Asistentes</div>
+        <div style="display:flex;align-items:center;justify-content:center;gap:1rem">
+          <button onclick="turboAjustar(-5)" style="width:44px;height:44px;border-radius:50%;background:var(--panel2);border:1px solid var(--border);color:var(--txt2);font-size:1rem;cursor:pointer;transition:all .15s;flex-shrink:0" title="-5">−5</button>
+          <button onclick="turboAjustar(-1)" style="width:52px;height:52px;border-radius:50%;background:var(--panel2);border:2px solid var(--border);color:var(--txt);font-size:1.5rem;cursor:pointer;transition:all .15s;flex-shrink:0">−</button>
+          <input id="tc-asis" type="number" min="0" max="300" value="0"
+            style="width:90px;text-align:center;font-family:'Bebas Neue',sans-serif;font-size:3rem;
+                   background:var(--panel);border:2px solid var(--verde);border-radius:14px;
+                   color:var(--gold2);outline:none;padding:4px;"
+            oninput="turboActualizarColor()">
+          <button onclick="turboAjustar(1)" style="width:52px;height:52px;border-radius:50%;background:var(--panel2);border:2px solid var(--border);color:var(--txt);font-size:1.5rem;cursor:pointer;transition:all .15s;flex-shrink:0">+</button>
+          <button onclick="turboAjustar(5)" style="width:44px;height:44px;border-radius:50%;background:var(--panel2);border:1px solid var(--border);color:var(--txt2);font-size:1rem;cursor:pointer;transition:all .15s;flex-shrink:0" title="+5">+5</button>
+        </div>
+        <!-- Barra de aforo en tiempo real -->
+        <div style="margin-top:.6rem;height:8px;background:var(--border);border-radius:4px;overflow:hidden;max-width:260px;margin-inline:auto">
+          <div id="tc-afo-bar" style="height:100%;width:0%;border-radius:4px;transition:width .2s,background .2s;background:var(--neon)"></div>
+        </div>
+        <div id="tc-afo-lbl" style="font-size:.7rem;color:var(--txt2);margin-top:4px">0% aforo</div>
+      </div>
+
+      <!-- Estado instructor -->
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:.4rem;margin-bottom:.8rem">
+        <button id="tc-btn-si" onclick="turboSetPres('si')"
+          style="padding:.55rem .3rem;border-radius:10px;border:2px solid var(--verde);background:rgba(26,122,69,.25);
+                 color:var(--neon);font-family:'Outfit',sans-serif;font-size:.73rem;font-weight:700;cursor:pointer;transition:all .15s">
+          ✔ Presente
+        </button>
+        <button id="tc-btn-no" onclick="turboSetPres('no')"
+          style="padding:.55rem .3rem;border-radius:10px;border:2px solid var(--border);background:transparent;
+                 color:var(--txt2);font-family:'Outfit',sans-serif;font-size:.73rem;font-weight:700;cursor:pointer;transition:all .15s">
+          ✖ Ausente
+        </button>
+        <button id="tc-btn-sub" onclick="turboSetPres('sub')"
+          style="padding:.55rem .3rem;border-radius:10px;border:2px solid var(--border);background:transparent;
+                 color:var(--txt2);font-family:'Outfit',sans-serif;font-size:.73rem;font-weight:700;cursor:pointer;transition:all .15s">
+          ⇄ Suplente
+        </button>
+      </div>
+
+      <!-- Suplente (aparece si se elige) -->
+      <div id="tc-suplente-row" style="display:none;margin-bottom:.7rem">
+        <select id="tc-suplente" style="width:100%;background:var(--panel2);border:1px solid var(--border);border-radius:8px;padding:7px 10px;color:var(--txt);font-family:'Outfit',sans-serif;font-size:.82rem;outline:none">
+          <option value="">— Seleccionar suplente —</option>
+        </select>
+      </div>
+
+      <!-- Nota rápida -->
+      <input id="tc-obs" type="text" placeholder="💬 Nota rápida (opcional)..."
+        style="width:100%;background:var(--panel2);border:1px solid var(--border);border-radius:8px;
+               padding:7px 11px;color:var(--txt);font-family:'Outfit',sans-serif;font-size:.8rem;
+               outline:none;margin-bottom:.85rem"
+        onkeydown="if(event.key==='Enter'){event.preventDefault();turboGuardar();}">
+
+      <!-- Botones de acción principales -->
+      <div style="display:grid;grid-template-columns:1fr 2fr;gap:.5rem">
+        <button onclick="turboSaltar()"
+          style="padding:.75rem;border-radius:12px;border:1px solid var(--border);background:var(--panel2);
+                 color:var(--txt2);font-family:'Outfit',sans-serif;font-size:.8rem;font-weight:600;cursor:pointer;transition:all .15s">
+          ⏭ Saltar
+        </button>
+        <button onclick="turboGuardar()"
+          style="padding:.75rem;border-radius:12px;border:none;background:var(--v2);
+                 color:#fff;font-family:'Outfit',sans-serif;font-size:.88rem;font-weight:700;cursor:pointer;transition:all .15s">
+          Guardar → Siguiente
+        </button>
+      </div>
+    </div>
+
+    <!-- Instrucción de swipe (solo móvil) -->
+    <div style="margin-top:.7rem;font-size:.68rem;color:var(--txt3);text-align:center">
+      Desliza ← ausente &nbsp;·&nbsp; Desliza → presente &nbsp;·&nbsp; ↕ ingresa número
+    </div>
+  </div>
+
+  <!-- Miniaturas de clases pendientes / completadas -->
+  <div style="background:var(--panel);border-top:1px solid var(--border);padding:.5rem .8rem;flex-shrink:0;overflow-x:auto;display:flex;gap:.4rem;align-items:center;min-height:52px" id="turbo-chips"></div>
+</div>
+
+<!-- RECORRIDO CAPTURA (clásico) -->
 <div class="ov" id="m-rec-cap">
 <div class="modal">
   <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem">
@@ -1272,7 +1415,7 @@ body.rol-usuario #fab-clase { display: none !important; }
   <div class="num-ctrl">
     <button class="num-btn" onclick="ajustarAsis(-1)">−</button>
     <div>
-      <input class="num-inp" type="number" id="rcc-asis" value="0" min="0" max="80">
+      <input class="num-inp" type="number" id="rcc-asis" value="0" min="0" max="300">
       <div class="rec-num-lbl">asistentes</div>
     </div>
     <button class="num-btn" onclick="ajustarAsis(1)">+</button>
@@ -2641,12 +2784,30 @@ function rkSparkline(data, cap){
 }
 
 // ═══ RECORRIDO ═══
+let modoRecorrido = 'turbo'; // 'turbo' | 'clasico'
+let turboPresEstado = 'si';
+
+function selModoRec(modo){
+  modoRecorrido = modo;
+  const bt = document.getElementById('ri-modo-turbo');
+  const bc = document.getElementById('ri-modo-clasico');
+  if(!bt||!bc) return;
+  if(modo==='turbo'){
+    bt.style.border='2px solid var(--verde)';bt.style.background='rgba(26,122,69,.15)';
+    bc.style.border='2px solid var(--border)';bc.style.background='transparent';
+  } else {
+    bc.style.border='2px solid var(--verde)';bc.style.background='rgba(26,122,69,.15)';
+    bt.style.border='2px solid var(--border)';bt.style.background='transparent';
+  }
+}
+
 function iniciarRecorrido(){
   document.getElementById('ri-fecha').value=hoy.toISOString().slice(0,10);
   const ahora=new Date();
   document.getElementById('ri-hora').value=`${String(ahora.getHours()).padStart(2,'0')}:${String(ahora.getMinutes()).padStart(2,'0')}`;
   const diaActual=DIAS[(ahora.getDay()+6)%7];
   document.getElementById('ri-dia').value=diaActual;
+  selModoRec('turbo');
   previewClasesActivas();
   document.getElementById('m-rec-init').classList.add('on');
 }
@@ -2656,10 +2817,13 @@ function previewClasesActivas(){
   if(!hora||!dia)return;
   const clases=getClasesActivas(dia,hora);
   const prev=document.getElementById('ri-preview');
-  if(clases.length===0){prev.innerHTML=`<div style="font-size:.75rem;color:var(--txt2);padding:.5rem;background:var(--panel2);border-radius:8px">Sin clases activas en ${dia} ${hora}</div>`;}
-  else{prev.innerHTML=`<div style="font-size:.75rem;color:var(--neon);margin-bottom:.4rem">${clases.length} clases activas a las ${hora}</div>`+
-    clases.slice(0,4).map(c=>`<div style="font-size:.73rem;color:var(--txt2);padding:2px 0">• ${c.clase} — ${c.inst_nombre}</div>`).join('')+
-    (clases.length>4?`<div style="font-size:.72rem;color:var(--txt3)">...y ${clases.length-4} más</div>`:'');}
+  if(clases.length===0){
+    prev.innerHTML=`<div style="font-size:.75rem;color:var(--txt2);padding:.5rem;background:var(--panel2);border-radius:8px">Sin clases activas en ${dia} ${hora}</div>`;
+  } else {
+    prev.innerHTML=`<div style="font-size:.75rem;color:var(--neon);margin-bottom:.4rem">⚡ ${clases.length} clases activas a las ${hora}</div>`+
+      clases.slice(0,5).map(c=>`<div style="font-size:.73rem;color:var(--txt2);padding:2px 0">• ${c.clase} — ${c.inst_nombre}</div>`).join('')+
+      (clases.length>5?`<div style="font-size:.72rem;color:var(--txt3)">...y ${clases.length-5} más</div>`:'');
+  }
 }
 function getClasesActivas(dia,horaRec){
   const minRec=horaToMin(horaRec);const resultado=[];
@@ -2680,9 +2844,270 @@ function comenzarRecorrido(){
   const clases=getClasesActivas(dia,hora);
   if(clases.length===0){alert(`No hay clases activas el ${dia} a las ${hora}`);return;}
   recActual={fecha,hora,dia,items:[],clasesActivas:clases};
-  recIdx=0;cerrarModal('m-rec-init');mostrarClaseRec();
-  document.getElementById('m-rec-cap').classList.add('on');
+  recIdx=0;
+  cerrarModal('m-rec-init');
+  if(modoRecorrido==='turbo'){
+    iniciarTurbo();
+  } else {
+    mostrarClaseRec();
+    document.getElementById('m-rec-cap').classList.add('on');
+  }
 }
+
+// ─────────────────────────────────────────
+// MODO TURBO
+// ─────────────────────────────────────────
+let turboSwipeStartX=0, turboSwipeStartY=0, turboSwiping=false;
+
+function iniciarTurbo(){
+  const sc = document.getElementById('turbo-screen');
+  sc.style.display='flex';
+  const fd = new Date(recActual.fecha+'T12:00:00').toLocaleDateString('es-MX',{weekday:'short',day:'2-digit',month:'short'});
+  document.getElementById('turbo-fecha-lbl').textContent=`${fd} · ${recActual.dia} ${recActual.hora}`;
+  turboMostrar();
+  turboIniciarSwipe();
+}
+
+function turboMostrar(){
+  const total=recActual.clasesActivas.length;
+  const c=recActual.clasesActivas[recIdx];
+  if(!c){terminarTurbo();return;}
+
+  // Progreso
+  const pct=Math.round(recIdx/total*100);
+  document.getElementById('turbo-prog').textContent=`${recIdx+1} / ${total}`;
+  document.getElementById('turbo-progbar').style.width=pct+'%';
+
+  // Datos de la clase
+  document.getElementById('tc-clase').textContent=c.clase;
+  document.getElementById('tc-inst').textContent=c.inst_nombre;
+  document.getElementById('tc-hora').textContent=c.hora;
+  const salon=salones.find(s=>s.clases&&s.clases.some(cl=>cl.toLowerCase()===c.clase.toLowerCase()));
+  document.getElementById('tc-salon').textContent=salon?`📍 ${salon.nombre}`:'';
+
+  // Reset asistentes con último valor histórico como sugerencia
+  const histRecs=registros.filter(r=>r.inst_id===c.inst_id&&r.clase===c.clase&&r.dia===c.dia&&(r.estado==='ok'||r.estado==='sub')).sort((a,b)=>(b.fecha||'').localeCompare(a.fecha||''));
+  const sugerido=histRecs.length>0?histRecs[0].asistentes:0;
+  document.getElementById('tc-asis').value=sugerido;
+  turboActualizarColor();
+
+  // Reset estado
+  turboSetPres('si');
+  document.getElementById('tc-obs').value='';
+  document.getElementById('tc-suplente-row').style.display='none';
+
+  // Suplentes
+  const opts=instructores.filter(i=>i.id!==c.inst_id).map(i=>`<option value="${i.id}">${i.nombre}</option>`).join('');
+  document.getElementById('tc-suplente').innerHTML='<option value="">— Seleccionar suplente —</option>'+opts;
+
+  // Chips de progreso
+  turboActualizarChips();
+
+  // Reset posición tarjeta y hints
+  const card=document.getElementById('turbo-card');
+  card.style.transition='transform .18s,opacity .18s,border-color .18s';
+  card.style.transform='translateX(0) rotate(0deg)';
+  card.style.opacity='1';
+  card.style.borderColor='var(--border)';
+  document.getElementById('turbo-hint-left').style.opacity='0';
+  document.getElementById('turbo-hint-right').style.opacity='0';
+
+  // Focus al número
+  setTimeout(()=>document.getElementById('tc-asis').focus(),200);
+}
+
+function turboActualizarChips(){
+  const total=recActual.clasesActivas.length;
+  let html='';
+  recActual.clasesActivas.forEach((c,i)=>{
+    const item=recActual.items.find(it=>it.inst_id===c.inst_id&&it.hora===c.hora&&it.clase===c.clase);
+    let bg='var(--border)',col='var(--txt3)',icono='';
+    if(item&&!item.saltado){
+      const afo=item.asis>0&&item.cap>0?Math.round(item.asis/item.cap*100):0;
+      bg=item.presente==='no'?'var(--red)':item.asis>=1?pctCol(afo):'var(--txt3)';
+      icono=item.presente==='no'?'✖':item.presente==='sub'?'⇄':'✔';
+      col='#fff';
+    } else if(item&&item.saltado){
+      bg='var(--txt3)';icono='⏭';col='var(--bg)';
+    }
+    const isCur=i===recIdx;
+    html+=`<div onclick="turboIrA(${i})" title="${c.clase} — ${c.inst_nombre}"
+      style="flex-shrink:0;min-width:${isCur?'80px':'52px'};height:34px;border-radius:8px;
+             background:${isCur?'var(--verde)':bg};
+             border:${isCur?'2px solid var(--neon)':'1px solid transparent'};
+             display:flex;align-items:center;justify-content:center;gap:3px;
+             cursor:pointer;transition:all .15s;padding:0 6px">
+      <span style="font-size:.6rem;color:${isCur?'#fff':col};font-weight:${isCur?'700':'400'};white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:70px">
+        ${isCur?c.clase.slice(0,9):icono||'·'}
+      </span>
+    </div>`;
+  });
+  const cont=document.getElementById('turbo-chips');
+  cont.innerHTML=html;
+  // Scroll al chip activo
+  setTimeout(()=>{
+    const chips=cont.children;
+    if(chips[recIdx])chips[recIdx].scrollIntoView({behavior:'smooth',block:'nearest',inline:'center'});
+  },50);
+}
+
+function turboIrA(idx){
+  // Solo permite ir a clases ya registradas o la actual
+  recIdx=idx;
+  turboMostrar();
+}
+
+function turboAjustar(delta){
+  const inp=document.getElementById('tc-asis');
+  inp.value=Math.max(0,(parseInt(inp.value)||0)+delta);
+  turboActualizarColor();
+}
+
+function turboActualizarColor(){
+  const c=recActual.clasesActivas[recIdx];
+  if(!c)return;
+  const asis=parseInt(document.getElementById('tc-asis').value)||0;
+  const cap=getCapClase(c.clase)||20;
+  const pct=Math.min(Math.round(asis/cap*100),100);
+  const col=asis===0?'var(--txt3)':pct>=70?'var(--neon)':pct>=35?'var(--gold2)':'var(--red2)';
+  document.getElementById('tc-afo-bar').style.width=pct+'%';
+  document.getElementById('tc-afo-bar').style.background=col;
+  document.getElementById('tc-afo-lbl').textContent=asis===0?'Sin asistentes':`${pct}% aforo · cap. ${cap}`;
+  document.getElementById('tc-asis').style.color=col;
+}
+
+function turboSetPres(estado){
+  turboPresEstado=estado;
+  const btns={si:'tc-btn-si',no:'tc-btn-no',sub:'tc-btn-sub'};
+  const cols={si:'var(--verde)',no:'var(--red)',sub:'#1a5fa3'};
+  const bgs={si:'rgba(26,122,69,.25)',no:'rgba(224,80,80,.2)',sub:'rgba(26,95,163,.2)'};
+  const txts={si:'var(--neon)',no:'var(--red2)',sub:'var(--blue)'};
+  Object.keys(btns).forEach(k=>{
+    const b=document.getElementById(btns[k]);
+    if(k===estado){
+      b.style.border=`2px solid ${cols[k]}`;
+      b.style.background=bgs[k];
+      b.style.color=txts[k];
+    } else {
+      b.style.border='2px solid var(--border)';
+      b.style.background='transparent';
+      b.style.color='var(--txt2)';
+    }
+  });
+  document.getElementById('tc-suplente-row').style.display=estado==='sub'?'block':'none';
+  if(navigator.vibrate) navigator.vibrate(15);
+}
+
+function turboGuardar(){
+  const c=recActual.clasesActivas[recIdx];
+  const asis=parseInt(document.getElementById('tc-asis').value)||0;
+  const supId=turboPresEstado==='sub'?parseInt(document.getElementById('tc-suplente').value)||null:null;
+  const obs=document.getElementById('tc-obs').value.trim();
+  const cap=getCapClase(c.clase)||20;
+  // Reemplaza si ya existe registro para esta clase en este recorrido
+  const existeIdx=recActual.items.findIndex(it=>it.inst_id===c.inst_id&&it.hora===c.hora&&it.clase===c.clase);
+  const item={...c,asis,presente:turboPresEstado,suplente_id:supId,obs,saltado:false,cap};
+  if(existeIdx>=0)recActual.items[existeIdx]=item;
+  else recActual.items.push(item);
+  if(navigator.vibrate) navigator.vibrate([20,10,20]);
+  turboAvanzar();
+}
+
+function turboSaltar(){
+  const c=recActual.clasesActivas[recIdx];
+  const existeIdx=recActual.items.findIndex(it=>it.inst_id===c.inst_id&&it.hora===c.hora&&it.clase===c.clase);
+  const item={...c,asis:0,presente:'si',suplente_id:null,obs:'',saltado:true,cap:getCapClase(c.clase)||20};
+  if(existeIdx>=0)recActual.items[existeIdx]=item;
+  else recActual.items.push(item);
+  turboAvanzar();
+}
+
+function turboAvanzar(){
+  recIdx++;
+  if(recIdx>=recActual.clasesActivas.length){
+    // Fin del recorrido
+    document.getElementById('turbo-screen').style.display='none';
+    terminarRecorrido();
+  } else {
+    // Animación de salida suave
+    const card=document.getElementById('turbo-card');
+    card.style.transition='transform .12s,opacity .12s';
+    card.style.transform='translateX(-30px)';
+    card.style.opacity='0.3';
+    setTimeout(()=>{
+      card.style.transition='none';
+      card.style.transform='translateX(30px)';
+      card.style.opacity='0';
+      setTimeout(()=>turboMostrar(),30);
+    },120);
+  }
+}
+
+function terminarTurbo(){
+  if(!confirm('¿Terminar el recorrido? Las clases no visitadas quedarán sin registrar.'))return;
+  document.getElementById('turbo-screen').style.display='none';
+  // Completar con saltado las que no se registraron
+  recActual.clasesActivas.forEach(c=>{
+    const existe=recActual.items.find(it=>it.inst_id===c.inst_id&&it.hora===c.hora&&it.clase===c.clase);
+    if(!existe)recActual.items.push({...c,asis:0,presente:'si',suplente_id:null,obs:'',saltado:true,cap:getCapClase(c.clase)||20});
+  });
+  terminarRecorrido();
+}
+
+// ── Swipe con touch ──────────────────────────────────────────────
+function turboIniciarSwipe(){
+  const card=document.getElementById('turbo-card');
+  if(!card)return;
+  card.addEventListener('touchstart',e=>{
+    turboSwipeStartX=e.touches[0].clientX;
+    turboSwipeStartY=e.touches[0].clientY;
+    turboSwiping=true;
+    card.style.transition='none';
+  },{passive:true});
+  card.addEventListener('touchmove',e=>{
+    if(!turboSwiping)return;
+    const dx=e.touches[0].clientX-turboSwipeStartX;
+    const dy=e.touches[0].clientY-turboSwipeStartY;
+    if(Math.abs(dy)>Math.abs(dx)*1.5){turboSwiping=false;return;} // scroll vertical
+    const rot=dx*0.07;
+    card.style.transform=`translateX(${dx}px) rotate(${rot}deg)`;
+    // Hints
+    const pct=Math.min(Math.abs(dx)/120,1);
+    const hl=document.getElementById('turbo-hint-left');
+    const hr=document.getElementById('turbo-hint-right');
+    if(dx<0){hl.style.opacity=pct;hr.style.opacity=0;card.style.borderColor=`rgba(224,80,80,${pct})`;}
+    else{hr.style.opacity=pct;hl.style.opacity=0;card.style.borderColor=`rgba(94,255,160,${pct})`;}
+  },{passive:true});
+  card.addEventListener('touchend',e=>{
+    if(!turboSwiping)return;
+    turboSwiping=false;
+    const dx=e.changedTouches[0].clientX-turboSwipeStartX;
+    document.getElementById('turbo-hint-left').style.opacity='0';
+    document.getElementById('turbo-hint-right').style.opacity='0';
+    card.style.transition='transform .18s,opacity .18s,border-color .18s';
+    if(dx<-80){
+      // Swipe izquierda = ausente
+      card.style.transform='translateX(-120vw) rotate(-12deg)';
+      card.style.opacity='0';
+      turboSetPres('no');
+      setTimeout(()=>{turboGuardar();},180);
+    } else if(dx>80){
+      // Swipe derecha = presente + guardar con valor actual
+      card.style.transform='translateX(120vw) rotate(12deg)';
+      card.style.opacity='0';
+      turboSetPres('si');
+      setTimeout(()=>{turboGuardar();},180);
+    } else {
+      // Volver al centro
+      card.style.transform='translateX(0) rotate(0)';
+      card.style.borderColor='var(--border)';
+    }
+  },{passive:true});
+}
+
+// ─────────────────────────────────────────
+// MODO CLÁSICO (sin cambios funcionales)
+// ─────────────────────────────────────────
 function mostrarClaseRec(){
   const total=recActual.clasesActivas.length;
   const c=recActual.clasesActivas[recIdx];
@@ -2700,22 +3125,24 @@ function mostrarClaseRec(){
 }
 function ajustarAsis(delta){
   const inp=document.getElementById('rcc-asis');
-  inp.value=Math.max(0,Math.min(80,(parseInt(inp.value)||0)+delta));
+  inp.value=Math.max(0,Math.min(300,(parseInt(inp.value)||0)+delta));
 }
 function siguienteClaseRec(){
   const c=recActual.clasesActivas[recIdx];
   const pres=document.getElementById('rcc-pres').value;
   const supId=pres==='sub'?parseInt(document.getElementById('rcc-suplente').value)||null:null;
+  const cap=getCapClase(c.clase)||20;
   recActual.items.push({...c,asis:parseInt(document.getElementById('rcc-asis').value)||0,
-    presente:pres,suplente_id:supId,obs:document.getElementById('rcc-obs').value.trim(),saltado:false});
+    presente:pres,suplente_id:supId,obs:document.getElementById('rcc-obs').value.trim(),saltado:false,cap});
   avanzarRec();
 }
 function saltarClaseRec(){
   const c=recActual.clasesActivas[recIdx];
-  recActual.items.push({...c,asis:0,presente:'si',suplente_id:null,obs:'',saltado:true});
+  recActual.items.push({...c,asis:0,presente:'si',suplente_id:null,obs:'',saltado:true,cap:getCapClase(c.clase)||20});
   avanzarRec();
 }
 function avanzarRec(){recIdx++;if(recIdx>=recActual.clasesActivas.length)terminarRecorrido();else mostrarClaseRec();}
+
 function terminarRecorrido(){
   document.getElementById('m-rec-cap').classList.remove('on');
   const vis=recActual.items.filter(i=>!i.saltado);
@@ -2763,20 +3190,23 @@ function terminarRecorrido(){
 function guardarRecorrido(){
   const vis=recActual.items.filter(i=>!i.saltado);
   const totalAsis=vis.reduce((a,i)=>a+i.asis,0);
-  const aforoProm=vis.length>0?Math.round(vis.reduce((a,i)=>a+i.asis/20*100,0)/vis.length):0;
+  const recsConCap=vis.filter(i=>(i.cap||0)>0);
+  const aforoProm=recsConCap.length>0?Math.round(recsConCap.reduce((a,i)=>a+i.asis/(i.cap)*100,0)/recsConCap.length):0;
   const ausentes=recActual.items.filter(i=>i.presente==='no').length;
   const suplentes=recActual.items.filter(i=>i.presente==='sub').length;
   recorridos.push({id:recorridos.length+1,fecha:recActual.fecha,hora:recActual.hora,dia:recActual.dia,
     visitadas:vis.length,totalAsis,aforoProm,ausentes,suplentes,items:[...recActual.items]});
   vis.forEach(item=>{
-    const ex=registros.find(r=>r.inst_id===item.inst_id&&r.dia===item.dia&&r.hora===item.hora&&(r.estado==='ok'||r.estado==='sub'));
-    const nuevoEst=item.presente==='sub'?'sub':'ok';
-    if(ex){ex.asistentes=item.asis;ex.estado=nuevoEst;ex.suplente_id=item.suplente_id||null;ex.fecha=recActual.fecha;}
-    else registros.push({id:(registros.length>0?Math.max(...registros.map(r=>parseInt(r.id)||0)):0)+1,inst_id:item.inst_id,dia:item.dia,clase:item.clase,hora:item.hora,
-      asistentes:item.asis,cap:getCapClase(item.clase),dur:60,estado:nuevoEst,fecha:recActual.fecha,tipo:'recorrido',suplente_id:item.suplente_id||null});
+    const cap=item.cap||getCapClase(item.clase)||20;
+    const ex=registros.find(r=>r.inst_id===item.inst_id&&r.dia===item.dia&&r.hora===item.hora&&r.fecha===recActual.fecha);
+    const nuevoEst=item.presente==='no'?'falta':item.presente==='sub'?'sub':'ok';
+    if(ex){ex.asistentes=item.asis;ex.estado=nuevoEst;ex.suplente_id=item.suplente_id||null;ex.cap=cap;}
+    else registros.push({id:(registros.length>0?Math.max(...registros.map(r=>parseInt(r.id)||0)):0)+1,
+      inst_id:item.inst_id,dia:item.dia,clase:item.clase,hora:item.hora,
+      asistentes:item.asis,cap,dur:60,estado:nuevoEst,fecha:recActual.fecha,tipo:'recorrido',suplente_id:item.suplente_id||null});
   });
   cerrarModal('m-rec-res');renderAll();renderRecorridos();
-  alert(`Recorrido guardado — ${vis.length} clases, ${totalAsis} asistentes`);
+  alert(`✔ Recorrido guardado — ${vis.length} clases · ${totalAsis} asistentes · ${aforoProm}% aforo prom.`);
 }
 function imprimirRecorrido(){
   const vis=recActual.items.filter(i=>!i.saltado);
