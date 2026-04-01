@@ -722,6 +722,7 @@ body.rol-usuario #fab-clase { display: none !important; }
   <div class="tab" data-v="heatmap"><svg class="ico" viewBox="0 0 20 20"><rect x="8.5" y="3" width="3" height="10" rx="1.5" stroke="currentColor" stroke-width="1.3" fill="none"/><circle cx="10" cy="15" r="3" stroke="currentColor" stroke-width="1.3" fill="none"/><line x1="10" y1="11.5" x2="10" y2="12.5" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/></svg> Mapa de Calor</div>
   <div class="tab" data-v="alertas"><svg class="ico" viewBox="0 0 20 20"><path d="M10 2 Q14 2 15 7 L16 14 L4 14 L5 7 Q6 2 10 2" stroke="currentColor" stroke-width="1.4" fill="none" stroke-linejoin="round"/><path d="M7.5 14 Q7.5 17 10 17 Q12.5 17 12.5 14" stroke="currentColor" stroke-width="1.3" fill="none"/></svg> Alertas</div>
   <div class="tab" data-v="salones"><svg class="ico" viewBox="0 0 20 20"><path d="M3 10 L10 3 L17 10 L17 17 L3 17 Z" stroke="currentColor" stroke-width="1.4" fill="none" stroke-linejoin="round"/><rect x="7.5" y="12" width="5" height="5" rx="0.5" stroke="currentColor" stroke-width="1.3" fill="none"/></svg> Salones</div>
+  <div class="tab" data-v="sup-plan"><svg class="ico" viewBox="0 0 20 20"><rect x="3" y="4" width="14" height="13" rx="2" stroke="currentColor" stroke-width="1.4" fill="none"/><line x1="3" y1="9" x2="17" y2="9" stroke="currentColor" stroke-width="1.3"/><line x1="10" y1="6" x2="10" y2="7.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><line x1="10" y1="12" x2="10" y2="15" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><line x1="8.5" y1="13.5" x2="11.5" y2="13.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg> Suplencias Plan.</div>
 </div>
 
 <main>
@@ -1018,6 +1019,76 @@ body.rol-usuario #fab-clase { display: none !important; }
   <div class="panel">
     <div class="phdr"><span class="pttl"><svg class="ico" viewBox="0 0 20 20"><rect x="5" y="3" width="10" height="14" rx="2" stroke="currentColor" stroke-width="1.5" fill="none"/><rect x="8" y="2" width="4" height="2.5" rx="1" stroke="currentColor" stroke-width="1.2" fill="none"/><line x1="8" y1="9" x2="12" y2="9" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/><line x1="8" y1="12" x2="13" y2="12" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg> Asignación Clase → Salón</span></div>
     <div class="pbody" id="asignacion-body"></div>
+  </div>
+</div>
+
+<!-- ══ SUPLENCIAS PLANIFICADAS ══ -->
+<div class="vista" id="v-sup-plan">
+
+  <!-- Link al portal de instructores -->
+  <div style="background:linear-gradient(135deg,rgba(26,122,69,.15),rgba(77,184,232,.1));border:1px solid rgba(94,255,160,.2);border-radius:14px;padding:1rem 1.2rem;margin-bottom:1rem;display:flex;align-items:center;gap:1rem;flex-wrap:wrap">
+    <div style="font-size:1.5rem">📱</div>
+    <div style="flex:1">
+      <div style="font-size:.85rem;font-weight:700;color:var(--neon)">Portal del Instructor</div>
+      <div style="font-size:.73rem;color:var(--txt2);margin-top:2px">Comparte este enlace con tus instructores para que vean su horario, estadísticas y puedan solicitar permisos desde su celular.</div>
+    </div>
+    <div style="display:flex;gap:.5rem;flex-wrap:wrap">
+      <button class="btn bg" onclick="abrirPortalInstructor()" style="font-size:.75rem">
+        🔗 Abrir Portal
+      </button>
+      <button class="btn bo" onclick="copiarLinkPortal()" style="font-size:.75rem" id="btn-copiar-link">
+        📋 Copiar Link
+      </button>
+    </div>
+  </div>
+
+  <!-- Panel PINs de instructores -->
+  <div class="panel" style="margin-bottom:1rem">
+    <div class="phdr">
+      <span class="pttl">🔑 PINs de Acceso — Instructores</span>
+      <span style="font-size:.7rem;color:var(--txt2)">PIN por defecto: 1234 · Asigna uno único a cada instructor</span>
+    </div>
+    <div class="pbody" id="pines-body"></div>
+  </div>
+
+  <!-- Solicitudes pendientes de instructores -->
+  <div class="panel" style="margin-bottom:1rem">
+    <div class="phdr">
+      <span class="pttl">📬 Solicitudes Pendientes de Instructores</span>
+      <button class="btn bg" style="font-size:.72rem;padding:5px 11px" onclick="renderSupPlan()">↺ Actualizar</button>
+    </div>
+    <div class="pbody" id="solicitudes-pendientes"></div>
+  </div>
+
+  <!-- Suplencias planificadas aprobadas -->
+  <div class="panel">
+    <div class="phdr">
+      <span class="pttl">⇄ Suplencias Planificadas Aprobadas</span>
+      <button class="btn bg solo-admin" onclick="abrirModalNuevaSuplencia()" style="font-size:.72rem;padding:5px 11px">+ Nueva</button>
+    </div>
+    <div style="padding:.5rem 1.1rem;border-bottom:1px solid var(--border);display:flex;gap:.5rem;flex-wrap:wrap">
+      <select class="ctrl" id="sp-fil-estado" onchange="renderSupPlan()" style="width:160px">
+        <option value="">Todos los estados</option>
+        <option value="pendiente_aprobacion">⏳ Pendientes</option>
+        <option value="aprobado">✔ Aprobadas</option>
+        <option value="rechazado">✖ Rechazadas</option>
+      </select>
+      <select class="ctrl" id="sp-fil-inst" onchange="renderSupPlan()" style="width:175px">
+        <option value="">Todos los instructores</option>
+      </select>
+      <input type="date" class="ctrl" id="sp-fil-ini" onchange="renderSupPlan()" style="width:140px">
+      <input type="date" class="ctrl" id="sp-fil-fin" onchange="renderSupPlan()" style="width:140px">
+    </div>
+    <div class="twrap">
+      <table>
+        <thead><tr>
+          <th>Fecha</th><th>Clase</th><th>Horario</th>
+          <th>Instructor Original</th><th>Suplente Asignado</th>
+          <th>Motivo</th><th>Estado</th><th>Acciones</th>
+        </tr></thead>
+        <tbody id="tb-sup-plan"></tbody>
+      </table>
+    </div>
   </div>
 </div>
 
@@ -3000,13 +3071,15 @@ function turboSetPres(estado){
 
 function turboGuardar(){
   const c=recActual.clasesActivas[recIdx];
+  if(!c)return;
   const asis=parseInt(document.getElementById('tc-asis').value)||0;
-  const supId=turboPresEstado==='sub'?parseInt(document.getElementById('tc-suplente').value)||null:null;
+  const supId=turboPresEstado==='sub'?(parseInt(document.getElementById('tc-suplente').value)||null):null;
   const obs=document.getElementById('tc-obs').value.trim();
-  const cap=getCapClase(c.clase)||20;
-  // Reemplaza si ya existe registro para esta clase en este recorrido
-  const existeIdx=recActual.items.findIndex(it=>it.inst_id===c.inst_id&&it.hora===c.hora&&it.clase===c.clase);
-  const item={...c,asis,presente:turboPresEstado,suplente_id:supId,obs,saltado:false,cap};
+  const cap=parseInt(getCapClase(c.clase))||20;
+  // Normalizar inst_id a número para evitar mismatch con Firebase
+  const instIdNum=parseInt(c.inst_id)||c.inst_id;
+  const existeIdx=recActual.items.findIndex(it=>String(it.inst_id)===String(c.inst_id)&&it.hora===c.hora&&it.clase===c.clase);
+  const item={...c,inst_id:instIdNum,asis,presente:turboPresEstado,suplente_id:supId,obs,saltado:false,cap};
   if(existeIdx>=0)recActual.items[existeIdx]=item;
   else recActual.items.push(item);
   if(navigator.vibrate) navigator.vibrate([20,10,20]);
@@ -3189,24 +3262,55 @@ function terminarRecorrido(){
 }
 function guardarRecorrido(){
   const vis=recActual.items.filter(i=>!i.saltado);
-  const totalAsis=vis.reduce((a,i)=>a+i.asis,0);
+  if(vis.length===0&&!confirm('No se registraron clases con aforo. ¿Guardar el recorrido igualmente?'))return;
+  const totalAsis=vis.reduce((a,i)=>a+(parseInt(i.asis)||0),0);
   const recsConCap=vis.filter(i=>(i.cap||0)>0);
-  const aforoProm=recsConCap.length>0?Math.round(recsConCap.reduce((a,i)=>a+i.asis/(i.cap)*100,0)/recsConCap.length):0;
+  const aforoProm=recsConCap.length>0?Math.round(recsConCap.reduce((a,i)=>a+(parseInt(i.asis)||0)/(parseInt(i.cap)||20)*100,0)/recsConCap.length):0;
   const ausentes=recActual.items.filter(i=>i.presente==='no').length;
   const suplentes=recActual.items.filter(i=>i.presente==='sub').length;
-  recorridos.push({id:recorridos.length+1,fecha:recActual.fecha,hora:recActual.hora,dia:recActual.dia,
-    visitadas:vis.length,totalAsis,aforoProm,ausentes,suplentes,items:[...recActual.items]});
-  vis.forEach(item=>{
-    const cap=item.cap||getCapClase(item.clase)||20;
-    const ex=registros.find(r=>r.inst_id===item.inst_id&&r.dia===item.dia&&r.hora===item.hora&&r.fecha===recActual.fecha);
-    const nuevoEst=item.presente==='no'?'falta':item.presente==='sub'?'sub':'ok';
-    if(ex){ex.asistentes=item.asis;ex.estado=nuevoEst;ex.suplente_id=item.suplente_id||null;ex.cap=cap;}
-    else registros.push({id:(registros.length>0?Math.max(...registros.map(r=>parseInt(r.id)||0)):0)+1,
-      inst_id:item.inst_id,dia:item.dia,clase:item.clase,hora:item.hora,
-      asistentes:item.asis,cap,dur:60,estado:nuevoEst,fecha:recActual.fecha,tipo:'recorrido',suplente_id:item.suplente_id||null});
+  // Guardar resumen del recorrido
+  recorridos.push({
+    id:recorridos.length+1,fecha:recActual.fecha,hora:recActual.hora,dia:recActual.dia,
+    visitadas:vis.length,totalAsis,aforoProm,ausentes,suplentes,items:[...recActual.items]
   });
-  cerrarModal('m-rec-res');renderAll();renderRecorridos();
-  alert(`✔ Recorrido guardado — ${vis.length} clases · ${totalAsis} asistentes · ${aforoProm}% aforo prom.`);
+  // Guardar cada item como registro individual en el historial
+  vis.forEach(item=>{
+    const cap=parseInt(item.cap)||getCapClase(item.clase)||20;
+    const instIdNum=parseInt(item.inst_id)||item.inst_id;
+    // Comparación robusta: convierte ambos lados a string para evitar mismatch number/string de Firebase
+    const ex=registros.find(r=>
+      String(r.inst_id)===String(item.inst_id) &&
+      r.dia===item.dia &&
+      r.hora===item.hora &&
+      r.fecha===recActual.fecha
+    );
+    const nuevoEst=item.presente==='no'?'falta':item.presente==='sub'?'sub':'ok';
+    if(ex){
+      ex.asistentes=parseInt(item.asis)||0;
+      ex.estado=nuevoEst;
+      ex.suplente_id=item.suplente_id||null;
+      ex.cap=cap;
+    } else {
+      const maxId=registros.length>0?Math.max(...registros.map(r=>parseInt(r.id)||0)):0;
+      registros.push({
+        id:maxId+1,
+        inst_id:instIdNum,
+        dia:item.dia,clase:item.clase,hora:item.hora,
+        asistentes:parseInt(item.asis)||0,
+        cap,dur:60,
+        estado:nuevoEst,
+        fecha:recActual.fecha,
+        tipo:'recorrido',
+        suplente_id:item.suplente_id||null
+      });
+    }
+  });
+  // Persistir de inmediato antes de re-renderizar
+  guardarLocal();
+  cerrarModal('m-rec-res');
+  renderAll();
+  renderRecorridos();
+  alert(`✔ Recorrido guardado — ${vis.length} clase(s) · ${totalAsis} asistentes · ${aforoProm}% aforo prom.`);
 }
 function imprimirRecorrido(){
   const vis=recActual.items.filter(i=>!i.saltado);
@@ -4630,6 +4734,7 @@ document.querySelectorAll('.tab').forEach(t=>{
     if(t.dataset.v==='heatmap')renderHeatmap();
     if(t.dataset.v==='alertas')renderAlertas();
     if(t.dataset.v==='salones')renderSalones();
+    if(t.dataset.v==='sup-plan')renderSupPlan();
   });
 });
 
@@ -5729,6 +5834,406 @@ function cambiarPass(tipo) {
   document.head.appendChild(s);
 })();
 
+// ═══════════════════════════════════════════
+// SUPLENCIAS PLANIFICADAS
+// ═══════════════════════════════════════════
+let suplenciasPlan = JSON.parse(localStorage.getItem('fc_suplencias')||'[]');
+let solicitudesInst = JSON.parse(localStorage.getItem('fc_solicitudes')||'[]');
+
+// ── Tab handler para sup-plan ──────────────
+document.querySelector('[data-v="sup-plan"]')?.addEventListener('click',()=>{
+  renderSupPlan();
+});
+
+function renderSupPlan(){
+  renderPines();
+  renderSolicitudesPendientes();
+  renderTablaSuplencias();
+}
+
+// ── PINs de instructores ───────────────────
+function renderPines(){
+  const cont = document.getElementById('pines-body');
+  if(!cont)return;
+  if(!instructores.length){cont.innerHTML='<div class="empty">Sin instructores cargados.</div>';return;}
+  cont.innerHTML=`<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:.5rem">
+    ${instructores.map(inst=>{
+      const pinGuardado=inst.pin||localStorage.getItem(`fc_pin_${inst.id}`)||'1234';
+      return`<div style="background:var(--panel2);border:1px solid var(--border);border-radius:10px;padding:.65rem .85rem;display:flex;align-items:center;gap:.6rem">
+        <div style="flex:1;font-size:.82rem;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${inst.nombre.split(' ')[0]}</div>
+        <input type="text" maxlength="6" value="${pinGuardado}"
+          style="width:64px;background:var(--panel);border:1px solid var(--border);border-radius:6px;padding:4px 7px;color:var(--gold2);font-family:'DM Mono',monospace;font-size:.85rem;text-align:center;outline:none"
+          onchange="guardarPinInst(${inst.id},this.value)"
+          title="PIN de ${inst.nombre}">
+      </div>`;
+    }).join('')}
+  </div>
+  <div style="font-size:.65rem;color:var(--txt3);margin-top:.5rem">
+    ✏️ Haz clic en el PIN para editarlo · Los instructores usan este PIN para entrar al portal
+  </div>`;
+}
+
+function guardarPinInst(instId, pin){
+  if(!pin||pin.length<4){alert('El PIN debe tener al menos 4 caracteres');return;}
+  // Guardar en el objeto instructor
+  const idx=instructores.findIndex(i=>i.id===instId);
+  if(idx>=0){instructores[idx].pin=pin;guardarLocal();sincronizarFirebase();}
+  localStorage.setItem(`fc_pin_${instId}`,pin);
+}
+
+// ── Solicitudes de instructores ────────────
+function renderSolicitudesPendientes(){
+  const cont=document.getElementById('solicitudes-pendientes');
+  if(!cont)return;
+  // Cargar desde Firebase si está disponible
+  const pend=(solicitudesInst||[]).filter(s=>s.estado==='pendiente').sort((a,b)=>(b.ts||'').localeCompare(a.ts||''));
+  if(pend.length===0){
+    cont.innerHTML='<div class="empty">Sin solicitudes pendientes.</div>';
+    return;
+  }
+  cont.innerHTML=pend.map(s=>{
+    const inst=instructores.find(i=>i.id===s.inst_id);
+    const fd=s.fecha?new Date(s.fecha+'T12:00:00').toLocaleDateString('es-MX',{weekday:'short',day:'2-digit',month:'short',year:'numeric'}):'—';
+    const supSug=instructores.find(i=>i.id===s.suplente_id);
+    return`<div style="background:rgba(232,184,75,.06);border:1px solid rgba(232,184,75,.25);border-left:3px solid var(--gold2);border-radius:10px;padding:.85rem 1rem;margin-bottom:.5rem">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:.4rem;margin-bottom:.5rem">
+        <div>
+          <div style="font-weight:700;font-size:.9rem">${inst?inst.nombre:'?'} <span style="font-weight:400;color:var(--txt2);font-size:.78rem">solicita permiso</span></div>
+          <div style="font-size:.78rem;color:var(--txt2);margin-top:2px"><strong>${s.clase}</strong> · ${s.dia} ${s.hora} · ${fd}</div>
+          <div style="font-size:.72rem;color:var(--txt3);margin-top:2px">Motivo: ${s.motivo||'—'}${s.nota?' · '+s.nota:''}</div>
+          ${supSug?`<div style="font-size:.72rem;color:var(--blue);margin-top:2px">Suplente sugerido: <strong>${supSug.nombre}</strong> (${s.score||0}pts)</div>`:''}
+        </div>
+        <div style="display:flex;gap:.4rem;flex-wrap:wrap">
+          <button onclick="aprobarSolicitud(${s.id})" style="background:rgba(26,122,69,.2);color:var(--neon);border:1px solid var(--verde);border-radius:8px;padding:5px 12px;font-family:'Outfit',sans-serif;font-size:.73rem;font-weight:600;cursor:pointer;transition:all .2s" onmouseover="this.style.background='var(--verde)'" onmouseout="this.style.background='rgba(26,122,69,.2)'">✔ Aprobar</button>
+          <button onclick="rechazarSolicitud(${s.id})" style="background:rgba(224,80,80,.12);color:var(--red2);border:1px solid rgba(224,80,80,.3);border-radius:8px;padding:5px 12px;font-family:'Outfit',sans-serif;font-size:.73rem;font-weight:600;cursor:pointer;transition:all .2s">✖ Rechazar</button>
+          <button onclick="editarSolicitudComoSuplencia(${s.id})" style="background:rgba(77,184,232,.1);color:var(--blue);border:1px solid rgba(77,184,232,.3);border-radius:8px;padding:5px 12px;font-family:'Outfit',sans-serif;font-size:.73rem;cursor:pointer">✏️ Editar</button>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+async function aprobarSolicitud(id){
+  const idx=solicitudesInst.findIndex(s=>s.id===id);
+  if(idx<0)return;
+  const s=solicitudesInst[idx];
+  solicitudesInst[idx].estado='aprobado';
+  // Crear suplencia planificada aprobada
+  const nuevaSup={...s,estado:'aprobado',aprobado_ts:new Date().toISOString()};
+  const existeIdx=suplenciasPlan.findIndex(sp=>sp.id===id);
+  if(existeIdx>=0)suplenciasPlan[existeIdx]=nuevaSup;
+  else suplenciasPlan.push(nuevaSup);
+  guardarSupLocal();
+  if(fbDb){
+    try{
+      await fbDb.ref(`fitness/solicitudes/${id}`).update({estado:'aprobado'});
+      await fbDb.ref(`fitness/suplencias/${id}`).set(nuevaSup);
+    }catch(e){}
+  }
+  renderSupPlan();
+  alert(`✔ Suplencia aprobada.\n${s.clase} · ${s.fecha}\nSuplente: ${instructores.find(i=>i.id===s.suplente_id)?.nombre||'—'}`);
+}
+
+async function rechazarSolicitud(id){
+  if(!confirm('¿Rechazar esta solicitud?'))return;
+  const idx=solicitudesInst.findIndex(s=>s.id===id);
+  if(idx<0)return;
+  solicitudesInst[idx].estado='rechazado';
+  guardarSupLocal();
+  if(fbDb){
+    try{
+      await fbDb.ref(`fitness/solicitudes/${id}`).update({estado:'rechazado'});
+      await fbDb.ref(`fitness/suplencias/${id}`).update({estado:'rechazado'});
+    }catch(e){}
+  }
+  renderSupPlan();
+}
+
+function editarSolicitudComoSuplencia(id){
+  const s=solicitudesInst.find(x=>x.id===id);
+  if(!s)return;
+  abrirModalNuevaSuplencia();
+  setTimeout(()=>{
+    document.getElementById('nsup-inst').value=s.inst_id;
+    nsupCargarClases();
+    setTimeout(()=>{
+      document.getElementById('nsup-fecha').value=s.fecha;
+      const claveClase=`${s.dia}||${s.hora}||${s.clase}`;
+      document.getElementById('nsup-clase').value=claveClase;
+      document.getElementById('nsup-motivo').value=s.motivo||'permiso';
+      document.getElementById('nsup-nota').value=s.nota||'';
+      document.getElementById('nsup-suplente').value=s.suplente_id||'';
+      document.getElementById('nsup-id').value=id;
+      nsupBuscarSugeridos();
+    },100);
+  },100);
+}
+
+// ── Tabla de suplencias aprobadas ──────────
+function renderTablaSuplencias(){
+  // Llenar filtro de instructores
+  const selInst=document.getElementById('sp-fil-inst');
+  if(selInst){
+    const cur=selInst.value;
+    selInst.innerHTML='<option value="">Todos los instructores</option>'+
+      instructores.map(i=>`<option value="${i.id}">${i.nombre}</option>`).join('');
+    if(cur)selInst.value=cur;
+  }
+  const estFil=document.getElementById('sp-fil-estado')?.value||'';
+  const instFil=document.getElementById('sp-fil-inst')?.value||'';
+  const iniFil=document.getElementById('sp-fil-ini')?.value||'';
+  const finFil=document.getElementById('sp-fil-fin')?.value||'';
+
+  let lista=suplenciasPlan.filter(s=>{
+    if(estFil&&s.estado!==estFil)return false;
+    if(instFil&&String(s.inst_id)!==instFil)return false;
+    if(iniFil&&s.fecha<iniFil)return false;
+    if(finFil&&s.fecha>finFil)return false;
+    return true;
+  }).sort((a,b)=>a.fecha.localeCompare(b.fecha));
+
+  const tb=document.getElementById('tb-sup-plan');
+  if(!tb)return;
+  if(lista.length===0){
+    tb.innerHTML=`<tr><td colspan="8"><div class="empty">Sin suplencias planificadas en el periodo.</div></td></tr>`;
+    return;
+  }
+  const hoyStr=new Date().toISOString().slice(0,10);
+  tb.innerHTML=lista.map(s=>{
+    const instOrig=instructores.find(i=>i.id===s.inst_id);
+    const sup=instructores.find(i=>i.id===s.suplente_id);
+    const fd=s.fecha?new Date(s.fecha+'T12:00:00').toLocaleDateString('es-MX',{day:'2-digit',month:'short',year:'numeric'}):'—';
+    const esPasado=s.fecha<hoyStr;
+    const estCol=s.estado==='aprobado'?'cok':s.estado==='rechazado'?'cbd':'cwn';
+    const estTxt=s.estado==='aprobado'?'✔ Aprobada':s.estado==='rechazado'?'✖ Rechazada':s.estado==='pendiente_aprobacion'?'⏳ Pendiente':'—';
+    return`<tr style="${esPasado?'opacity:.6':''}">
+      <td class="mono" style="font-size:.74rem">${fd}</td>
+      <td><strong>${s.clase||'—'}</strong></td>
+      <td class="mono">${s.dia||'—'} ${s.hora||'—'}</td>
+      <td style="font-size:.8rem">${instOrig?instOrig.nombre:'—'}</td>
+      <td style="font-size:.8rem;color:var(--blue);font-weight:600">${sup?sup.nombre:'—'}</td>
+      <td style="font-size:.75rem;color:var(--txt2)">${s.motivo||'—'}${s.nota?`<br><em style="color:var(--txt3)">${s.nota}</em>`:''}</td>
+      <td><span class="chip ${estCol}">${estTxt}</span></td>
+      <td>
+        <div style="display:flex;gap:.3rem">
+          <button class="abtn" onclick="abrirEditarSuplencia(${s.id})" style="font-size:.68rem;padding:2px 7px">✏️</button>
+          <button class="abtn" onclick="eliminarSuplencia(${s.id})" style="color:var(--red2);font-size:.68rem;padding:2px 7px">🗑</button>
+        </div>
+      </td>
+    </tr>`;
+  }).join('');
+}
+
+// ── Modal nueva/editar suplencia ───────────
+function abrirModalNuevaSuplencia(id){
+  const opts=instructores.map(i=>`<option value="${i.id}">${i.nombre}</option>`).join('');
+  document.getElementById('nsup-inst').innerHTML='<option value="">— Instructor —</option>'+opts;
+  document.getElementById('nsup-suplente').innerHTML='<option value="">— Seleccionar suplente —</option>'+opts;
+  document.getElementById('nsup-clase').innerHTML='<option value="">— Selecciona instructor primero —</option>';
+  document.getElementById('nsup-fecha').value=new Date().toISOString().slice(0,10);
+  document.getElementById('nsup-nota').value='';
+  document.getElementById('nsup-id').value='';
+  document.getElementById('nsup-sug-wrap').style.display='none';
+  document.getElementById('nsup-del').style.display='none';
+  document.getElementById('nsup-ttl').textContent='⇄ Nueva Suplencia Planificada';
+  if(id) abrirEditarSuplencia(id);
+  document.getElementById('m-nueva-sup').classList.add('on');
+}
+
+function abrirEditarSuplencia(id){
+  const s=suplenciasPlan.find(x=>x.id===id);
+  if(!s)return;
+  document.getElementById('nsup-ttl').textContent='✏️ Editar Suplencia';
+  document.getElementById('nsup-id').value=id;
+  document.getElementById('nsup-inst').value=s.inst_id;
+  nsupCargarClases();
+  setTimeout(()=>{
+    const claveClase=`${s.dia}||${s.hora}||${s.clase}`;
+    document.getElementById('nsup-clase').value=claveClase;
+    document.getElementById('nsup-fecha').value=s.fecha;
+    document.getElementById('nsup-motivo').value=s.motivo||'permiso';
+    document.getElementById('nsup-nota').value=s.nota||'';
+    document.getElementById('nsup-suplente').value=s.suplente_id||'';
+    document.getElementById('nsup-del').style.display='block';
+    nsupBuscarSugeridos();
+  },80);
+  document.getElementById('m-nueva-sup').classList.add('on');
+}
+
+function nsupCargarClases(){
+  const instId=parseInt(document.getElementById('nsup-inst').value);
+  const inst=instructores.find(i=>i.id===instId);
+  const sel=document.getElementById('nsup-clase');
+  if(!inst||(inst.horario||[]).length===0){
+    sel.innerHTML='<option value="">— Sin horarios asignados —</option>';
+    return;
+  }
+  const slots=[...inst.horario].sort((a,b)=>DIAS.indexOf(a.dia)-DIAS.indexOf(b.dia)||a.hora.localeCompare(b.hora));
+  sel.innerHTML='<option value="">— Selecciona clase —</option>'+
+    slots.map(h=>`<option value="${h.dia}||${h.hora}||${h.clase}">${h.dia} ${h.hora} — ${h.clase}</option>`).join('');
+}
+
+function nsupBuscarSugeridos(){
+  const instId=parseInt(document.getElementById('nsup-inst').value);
+  const claseVal=document.getElementById('nsup-clase').value;
+  const fecha=document.getElementById('nsup-fecha').value;
+  if(!instId||!claseVal||!fecha){document.getElementById('nsup-sug-wrap').style.display='none';return;}
+  const[dia,hora,clase]=claseVal.split('||');
+  const sugs=calcularSugeridosAdmin(instId,dia,hora,clase,fecha);
+  const wrap=document.getElementById('nsup-sug-wrap');
+  wrap.style.display='';
+  document.getElementById('nsup-sug-lista').innerHTML=sugs.length===0
+    ?'<div style="font-size:.75rem;color:var(--txt2)">Sin candidatos automáticos disponibles.</div>'
+    :sugs.slice(0,4).map((s,i)=>{
+      const medal=i===0?'🥇':i===1?'🥈':i===2?'🥉':'';
+      return`<div onclick="nsupSelSug(${s.id})" style="cursor:pointer;background:var(--panel2);border:1px solid var(--border);border-radius:8px;padding:.55rem .8rem;margin-bottom:.35rem;display:flex;align-items:center;gap:.6rem;transition:border-color .15s" onmouseover="this.style.borderColor='var(--v3)'" onmouseout="this.style.borderColor='var(--border)'">
+        <span style="font-size:1rem;min-width:22px">${medal||'•'}</span>
+        <div style="flex:1"><div style="font-size:.83rem;font-weight:600">${s.nombre}</div>
+          <div style="font-size:.65rem;color:var(--txt2);margin-top:1px">${s.razon}</div></div>
+        <span style="font-family:'DM Mono',monospace;font-size:.75rem;color:var(--neon);font-weight:700">${s.score}pts</span>
+      </div>`;
+    }).join('');
+}
+
+function nsupSelSug(instId){
+  document.getElementById('nsup-suplente').value=instId;
+}
+
+function calcularSugeridosAdmin(excluirId, dia, hora, clase, fecha){
+  const minHora=horaToMin(hora);
+  const candidatos=[];
+  instructores.forEach(inst=>{
+    if(inst.id===excluirId)return;
+    const tieneClase=(inst.horario||[]).some(h=>{
+      if(h.dia!==dia)return false;
+      return Math.abs(horaToMin(h.hora)-minHora)<60;
+    });
+    if(tieneClase)return;
+    const tieneSup=suplenciasPlan.some(s=>s.suplente_id===inst.id&&s.fecha===fecha&&s.estado!=='rechazado');
+    if(tieneSup)return;
+    let score=50;
+    const tieneExp=(inst.horario||[]).some(h=>h.clase.toLowerCase()===clase.toLowerCase());
+    if(tieneExp)score+=30;
+    const esp=(inst.esp||'').toLowerCase();
+    if(esp.includes(clase.toLowerCase().split(' ')[0]))score+=15;
+    const hasCubierto=registros.some(r=>r.suplente_id===inst.id&&r.clase===clase&&r.estado==='sub');
+    if(hasCubierto)score+=10;
+    const hoy30=new Date();hoy30.setDate(hoy30.getDate()-30);
+    const faltasRec=registros.filter(r=>r.inst_id===inst.id&&r.estado==='falta'&&new Date(r.fecha)>=hoy30).length;
+    score-=faltasRec*10;
+    if((inst.horario||[]).length>=8)score-=5;
+    score=Math.max(0,Math.min(100,score));
+    const razones=[];
+    if(tieneExp)razones.push(`Imparte ${clase}`);
+    else if(esp)razones.push(inst.esp);
+    if(hasCubierto)razones.push('Ya cubrió antes');
+    if(faltasRec>0)razones.push(`${faltasRec} falta(s)`);
+    candidatos.push({id:inst.id,nombre:inst.nombre,score,razon:razones.join(' · ')||'Disponible'});
+  });
+  return candidatos.sort((a,b)=>b.score-a.score).slice(0,4);
+}
+
+async function guardarNuevaSuplencia(){
+  const idEdit=parseInt(document.getElementById('nsup-id').value)||0;
+  const instId=parseInt(document.getElementById('nsup-inst').value);
+  const claseVal=document.getElementById('nsup-clase').value;
+  const fecha=document.getElementById('nsup-fecha').value;
+  const supId=parseInt(document.getElementById('nsup-suplente').value)||null;
+  if(!instId||!claseVal||!fecha){alert('Completa todos los campos obligatorios');return;}
+  if(!supId){alert('Selecciona un instructor suplente');return;}
+  const[dia,hora,clase]=claseVal.split('||');
+  const datos={
+    id:idEdit||Date.now(),
+    inst_id:instId,
+    suplente_id:supId,
+    clase,dia,hora,fecha,
+    motivo:document.getElementById('nsup-motivo').value,
+    nota:document.getElementById('nsup-nota').value.trim(),
+    estado:'aprobado',
+    ts:new Date().toISOString()
+  };
+  const idx=suplenciasPlan.findIndex(s=>s.id===datos.id);
+  if(idx>=0)suplenciasPlan[idx]=datos;
+  else suplenciasPlan.push(datos);
+  guardarSupLocal();
+  if(fbDb){
+    try{await fbDb.ref(`fitness/suplencias/${datos.id}`).set(datos);}catch(e){}
+  }
+  cerrarModal('m-nueva-sup');
+  renderSupPlan();
+  const sup=instructores.find(i=>i.id===supId);
+  alert(`✔ Suplencia guardada.\n${clase} · ${fecha}\nSuplente: ${sup?sup.nombre:'—'}`);
+}
+
+async function eliminarSuplencia(id){
+  const idDel=id||parseInt(document.getElementById('nsup-id').value);
+  if(!confirm('¿Eliminar esta suplencia planificada?'))return;
+  suplenciasPlan=suplenciasPlan.filter(s=>s.id!==idDel);
+  guardarSupLocal();
+  if(fbDb){try{await fbDb.ref(`fitness/suplencias/${idDel}`).remove();}catch(e){}}
+  cerrarModal('m-nueva-sup');
+  renderSupPlan();
+}
+
+function guardarSupLocal(){
+  try{
+    localStorage.setItem('fc_suplencias',JSON.stringify(suplenciasPlan));
+    localStorage.setItem('fc_solicitudes',JSON.stringify(solicitudesInst));
+  }catch(e){}
+}
+
+// ── Portal de instructores ──────────────────
+function abrirPortalInstructor(){
+  window.open('instructor.html','_blank');
+}
+function copiarLinkPortal(){
+  const url=window.location.href.replace('index.html','instructor.html').replace(/\?.*$/,'');
+  const base=window.location.origin+window.location.pathname.replace('index.html','')+'instructor.html';
+  navigator.clipboard?.writeText(base).then(()=>{
+    const b=document.getElementById('btn-copiar-link');
+    if(b){b.textContent='✔ Copiado!';setTimeout(()=>b.textContent='📋 Copiar Link',2000);}
+  }).catch(()=>alert('Link: '+base));
+}
+
+// ── Sincronizar suplencias con Firebase ─────
+const _origSincronizarFirebase = sincronizarFirebase;
+sincronizarFirebase = async function(){
+  if(!FIREBASE_ACTIVO||!fbDb)return;
+  fbSyncing=true;
+  try{
+    await fbDb.ref('fitness').set({
+      instructores,
+      registros: registros.reduce((a,r)=>{a[r.id]=r;return a;},{}),
+      recorridos: recorridos.reduce((a,r)=>{a[r.id]=r;return a;},{}),
+      suplencias: suplenciasPlan.reduce((a,s)=>{a[s.id]=s;return a;},{}),
+      solicitudes: solicitudesInst.reduce((a,s)=>{a[s.id]=s;return a;},{}),
+      salones,
+      ts:Date.now()
+    });
+    setIndicador('<svg class="ico" viewBox="0 0 20 20"><circle cx="10" cy="10" r="5" fill="var(--neon)"/></svg> Guardado en la nube ✔');
+  }catch(e){
+    setIndicador('<svg class="ico" viewBox="0 0 20 20"><circle cx="10" cy="10" r="5" fill="var(--red2)"/></svg> Sin conexión — guardado local');
+  }
+  setTimeout(()=>fbSyncing=false,500);
+};
+
+// Leer suplencias y solicitudes de Firebase al sincronizar
+const _origInicializarFirebase = inicializarFirebase;
+inicializarFirebase = async function(){
+  await _origInicializarFirebase();
+  if(fbDb){
+    fbDb.ref('fitness').on('value',snap=>{
+      const d=snap.val();
+      if(!d)return;
+      if(d.suplencias) suplenciasPlan=Array.isArray(d.suplencias)?d.suplencias:Object.values(d.suplencias);
+      if(d.solicitudes) solicitudesInst=Array.isArray(d.solicitudes)?d.solicitudes:Object.values(d.solicitudes);
+      guardarSupLocal();
+      // Actualizar vista si está activa
+      if(document.getElementById('v-sup-plan')?.classList.contains('on')) renderSupPlan();
+    });
+  }
+};
+
 // ─── Arranque ───
 (function init(){
   // Aplicar tema guardado
@@ -5800,6 +6305,51 @@ window.addEventListener('appinstalled',()=>{
   if(b)b.remove();_pwaPrompt=null;
 });
 </script>
+
+<!-- MODAL NUEVA SUPLENCIA PLANIFICADA -->
+<div class="ov" id="m-nueva-sup">
+<div class="modal" style="width:560px">
+  <button class="mcls" onclick="cerrarModal('m-nueva-sup')"><svg class="ico" viewBox="0 0 20 20"><line x1="5" y1="5" x2="15" y2="15" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><line x1="15" y1="5" x2="5" y2="15" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></button>
+  <div class="mttl" id="nsup-ttl">⇄ Nueva Suplencia Planificada</div>
+  <div class="fr">
+    <div class="fg"><label>Instructor que faltará</label>
+      <select id="nsup-inst" onchange="nsupCargarClases()"></select>
+    </div>
+    <div class="fg"><label>Fecha</label>
+      <input type="date" id="nsup-fecha" onchange="nsupBuscarSugeridos()">
+    </div>
+  </div>
+  <div class="fg"><label>Clase a cubrir</label>
+    <select id="nsup-clase" onchange="nsupBuscarSugeridos()"></select>
+  </div>
+  <div class="fg"><label>Motivo</label>
+    <select id="nsup-motivo">
+      <option value="permiso">Permiso</option><option value="medico">Cita médica</option>
+      <option value="vacacion">Vacaciones</option><option value="capacitacion">Capacitación</option>
+      <option value="emergencia">Emergencia</option><option value="otro">Otro</option>
+    </select>
+  </div>
+  <div class="fg"><label>Nota (opcional)</label>
+    <input type="text" id="nsup-nota" placeholder="Descripción breve...">
+  </div>
+
+  <!-- Sugeridos automáticos -->
+  <div id="nsup-sug-wrap" style="display:none;margin:.6rem 0">
+    <div style="font-size:.68rem;text-transform:uppercase;letter-spacing:1px;color:var(--txt2);margin-bottom:.4rem">
+      🤖 Suplentes Sugeridos
+    </div>
+    <div id="nsup-sug-lista"></div>
+  </div>
+
+  <div class="fg" id="nsup-suplente-manual-row">
+    <label>Suplente asignado</label>
+    <select id="nsup-suplente"></select>
+  </div>
+  <input type="hidden" id="nsup-id">
+  <button class="bsave" onclick="guardarNuevaSuplencia()">✔ Guardar Suplencia Planificada</button>
+  <button class="bdel" id="nsup-del" style="display:none" onclick="eliminarSuplencia()">Eliminar</button>
+</div>
+</div>
 
 <!-- ═══ FAB — BOTÓN FLOTANTE MÓVIL/TABLET ═══ -->
 <div id="fab-overlay" onclick="cerrarFabMenu()"></div>
