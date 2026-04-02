@@ -3312,8 +3312,6 @@ function guardarRecorrido(){
       });
     }
   });
-  // Persistir de inmediato antes de re-renderizar
-  guardarLocal();
   cerrarModal('m-rec-res');
   renderAll();
   renderRecorridos();
@@ -5559,74 +5557,17 @@ function irAlertas(){
 }
 
 // ═══════════════════════════════════════════
-// PERSISTENCIA LOCAL (funciona sin internet)
+// PERSISTENCIA LOCAL + FIREBASE — versión unificada
 // ═══════════════════════════════════════════
-// Flag para saber si estamos guardando datos que vienen de Firebase
-let _guardandoDeFirebase = false;
 
-function guardarLocal(){
-  try{
-    const _ts = Date.now();
-    localStorage.setItem('fc_instructores', JSON.stringify(instructores));
-    localStorage.setItem('fc_registros', JSON.stringify(registros));
-    localStorage.setItem('fc_recorridos', JSON.stringify(recorridos));
-    localStorage.setItem('fc_ts', _ts);
-    // Solo actualizar el timestamp de cambio LOCAL si NO viene de Firebase
-    if(!_guardandoDeFirebase) localStorage.setItem('fc_local_ts', _ts);
-  } catch(e){ console.warn('localStorage lleno o no disponible'); }
-}
-
-function normalizarRegistros(){
-  // Garantiza que asistentes y cap sean siempre números, aunque vengan como strings de Firebase
-  registros=registros.map(r=>({
-    ...r,
-    id:parseInt(r.id)||r.id,
-    inst_id:parseInt(r.inst_id)||r.inst_id,
-    asistentes:parseInt(r.asistentes)||0,
-    cap:parseInt(r.cap)||20,
-    dur:parseInt(r.dur)||60,
-    suplente_id:r.suplente_id?parseInt(r.suplente_id)||r.suplente_id:null
-  }));
-}
-function cargarLocal(){
-  try{
-    const inst = localStorage.getItem('fc_instructores');
-    const regs = localStorage.getItem('fc_registros');
-    const recs = localStorage.getItem('fc_recorridos');
-    if(inst) instructores = JSON.parse(inst);
-    if(regs) registros   = JSON.parse(regs);
-    if(recs) recorridos  = JSON.parse(recs);
-    normalizarRegistros();
-    const ts = localStorage.getItem('fc_ts');
-    if(ts) console.log('Datos cargados:', new Date(parseInt(ts)).toLocaleString('es-MX'));
-    return !!(inst||regs);
-  } catch(e){ return false; }
-}
-
-// Auto-guardar cada vez que cambian los datos
-const _origRenderAll = renderAll;
-window.renderAll = function(){
-  _origRenderAll();
-  guardarLocal();
-  sincronizarFirebase();
-};
-
-// ═══════════════════════════════════════════
-// FIREBASE — SINCRONIZACIÓN EN TIEMPO REAL
-// ═══════════════════════════════════════════
-/*
-  INSTRUCCIONES PARA ACTIVAR FIREBASE:
-  ─────────────────────────────────────
-  1. Ve a https://console.firebase.google.com
-  2. Crea un proyecto nuevo (gratis) llamado "fitness-campestre"
-  3. Activa "Realtime Database" → modo test (30 días) o agrega reglas
-  4. En Configuración del proyecto → "Tu app web" → copia los datos
-  5. Reemplaza los valores FIREBASE_CONFIG abajo con los tuyos
-  6. Cambia FIREBASE_ACTIVO = true
-*/
+// ── Estado de sincronización ─────────────────
+let fbApp = null, fbDb = null;
+let fbSyncing   = false;   // true mientras estamos subiendo a Firebase
+let fbReceiving = false;   // true mientras procesamos datos que bajan de Firebase
+let fbListener  = null;    // referencia al listener activo (para evitar duplicados)
+let fbWasOffline = false;
 
 const FIREBASE_ACTIVO = true;
-
 const FIREBASE_CONFIG = {
   apiKey:            "AIzaSyC3_83rzlemRzDEr5rbQoYTzvLock5xkjE",
   authDomain:        "fitness-campestre-e218c.firebaseapp.com",
@@ -5637,134 +5578,244 @@ const FIREBASE_CONFIG = {
   appId:             "1:813526273487:web:3a3643ae3d95d44d4a16ba"
 };
 
-let fbApp=null, fbDb=null, fbSyncing=false;
+// ── Normalización de tipos ────────────────────
+function normalizarRegistros(){
+  registros = registros.map(r=>({
+    ...r,
+    id:         parseInt(r.id)         || r.id,
+    inst_id:    parseInt(r.inst_id)    || r.inst_id,
+    asistentes: parseInt(r.asistentes) || 0,
+    cap:        parseInt(r.cap)        || 20,
+    dur:        parseInt(r.dur)        || 60,
+    suplente_id: r.suplente_id ? (parseInt(r.suplente_id) || r.suplente_id) : null
+  }));
+}
 
+// ── Guardar en localStorage ───────────────────
+function guardarLocal(){
+  try{
+    const ts = Date.now();
+    localStorage.setItem('fc_instructores', JSON.stringify(instructores));
+    localStorage.setItem('fc_registros',    JSON.stringify(registros));
+    localStorage.setItem('fc_recorridos',   JSON.stringify(recorridos));
+    localStorage.setItem('fc_salones',      JSON.stringify(salones));
+    localStorage.setItem('fc_suplencias',   JSON.stringify(suplenciasPlan));
+    localStorage.setItem('fc_solicitudes',  JSON.stringify(solicitudesInst));
+    localStorage.setItem('fc_ts', ts);
+    // fc_local_ts solo se actualiza cuando el cambio viene de este dispositivo
+    if(!fbReceiving) localStorage.setItem('fc_local_ts', ts);
+  } catch(e){ console.warn('localStorage lleno o no disponible', e); }
+}
+
+// ── Cargar desde localStorage ─────────────────
+function cargarLocal(){
+  try{
+    const inst = localStorage.getItem('fc_instructores');
+    const regs = localStorage.getItem('fc_registros');
+    const recs = localStorage.getItem('fc_recorridos');
+    const sals = localStorage.getItem('fc_salones');
+    const sups = localStorage.getItem('fc_suplencias');
+    const sols = localStorage.getItem('fc_solicitudes');
+    if(inst) instructores    = JSON.parse(inst);
+    if(regs) registros       = JSON.parse(regs);
+    if(recs) recorridos      = JSON.parse(recs);
+    if(sals) salones         = JSON.parse(sals);
+    if(sups) suplenciasPlan  = JSON.parse(sups);
+    if(sols) solicitudesInst = JSON.parse(sols);
+    normalizarRegistros();
+    const ts = localStorage.getItem('fc_ts');
+    if(ts) console.log('💾 Local cargado:', new Date(parseInt(ts)).toLocaleString('es-MX'));
+    return !!(inst || regs);
+  } catch(e){
+    console.warn('Error cargando localStorage:', e);
+    return false;
+  }
+}
+
+// ── Subir TODOS los datos a Firebase ─────────
+async function sincronizarFirebase(){
+  if(!FIREBASE_ACTIVO || !fbDb || fbSyncing || fbReceiving) return;
+  fbSyncing = true;
+  try{
+    const payload = {
+      instructores,
+      registros:   registros.reduce((a,r)=>{ a[String(r.id)]=r; return a; },{}),
+      recorridos:  recorridos.reduce((a,r)=>{ a[String(r.id)]=r; return a; },{}),
+      salones,
+      suplencias:  suplenciasPlan.reduce((a,s)=>{ a[String(s.id)]=s; return a; },{}),
+      solicitudes: solicitudesInst.reduce((a,s)=>{ a[String(s.id)]=s; return a; },{}),
+      ts: Date.now()
+    };
+    await fbDb.ref('fitness').set(payload);
+    setIndicador('🟢 Guardado en la nube ✔');
+    console.log('☁️  Firebase ←', new Date().toLocaleTimeString('es-MX'),
+      `| ${registros.length} registros | ${recorridos.length} recorridos`);
+  } catch(e){
+    console.warn('Firebase sync error:', e.message);
+    setIndicador('🔴 Sin conexión — datos guardados localmente');
+  } finally{
+    setTimeout(()=>{ fbSyncing = false; }, 600);
+  }
+}
+
+// ── renderAll con auto-guardado ───────────────
+// IMPORTANTE: sobreescribimos renderAll UNA SOLA VEZ aquí
+const _renderAllBase = renderAll;
+renderAll = function(){
+  _renderAllBase();
+  guardarLocal();
+  // Subir a Firebase con un pequeño debounce para no saturar en ediciones rápidas
+  clearTimeout(renderAll._timer);
+  renderAll._timer = setTimeout(sincronizarFirebase, 800);
+};
+renderAll._timer = null;
+
+// ── Firebase: inicialización y listener ÚNICO ─
 async function inicializarFirebase(){
-  if(!FIREBASE_ACTIVO) return;
+  if(!FIREBASE_ACTIVO){ setIndicador('⚪ Modo offline'); return; }
   try{
     await Promise.all([
       cargarScript('https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js'),
       cargarScript('https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js')
     ]);
 
-    // Evitar doble inicialización
-    if(!firebase.apps.length){
-      fbApp = firebase.initializeApp(FIREBASE_CONFIG);
-    } else {
-      fbApp = firebase.apps[0];
-    }
-    fbDb = firebase.database();
+    // Evitar doble inicialización de la SDK
+    fbApp = firebase.apps.length ? firebase.apps[0] : firebase.initializeApp(FIREBASE_CONFIG);
+    fbDb  = firebase.database();
 
-    // Test de conexión
-    let _fbWasOffline = false;
+    // ── Monitor de conexión ──────────────────
     fbDb.ref('.info/connected').on('value', snap => {
-      const _online = snap.val() === true;
-      if(_online){
-        if(_fbWasOffline){
-          // Acaba de reconectarse — subir datos locales pendientes
-          _fbWasOffline = false;
-          setIndicador('<svg class="ico" viewBox="0 0 20 20"><circle cx="10" cy="10" r="5" fill="var(--gold2)"/></svg> Reconectado · Subiendo datos locales...');
-          setTimeout(()=>{ if(!fbSyncing) sincronizarFirebase(); }, 1500);
+      const online = snap.val() === true;
+      if(online){
+        if(fbWasOffline){
+          fbWasOffline = false;
+          setIndicador('🟡 Reconectado · Subiendo datos locales...');
+          // Subir lo que se acumuló offline
+          setTimeout(()=>{ if(!fbSyncing) sincronizarFirebase(); }, 1200);
         } else {
-          setIndicador('<svg class="ico" viewBox="0 0 20 20"><circle cx="10" cy="10" r="5" fill="var(--neon)"/></svg> En línea');
+          setIndicador('🟢 En línea');
         }
       } else {
-        _fbWasOffline = true;
-        setIndicador('<svg class="ico" viewBox="0 0 20 20"><circle cx="10" cy="10" r="5" fill="var(--red2)"/></svg> Sin conexión · Guardando localmente');
+        fbWasOffline = true;
+        setIndicador('🔴 Sin conexión · Guardando localmente');
       }
     });
 
-    // Escuchar cambios en tiempo real desde otros dispositivos
-    fbDb.ref('fitness').on('value', snap => {
-      if(fbSyncing) return;
-      const data = snap.val();
-      if(!data) return;
+    // ── Listener ÚNICO para recibir cambios de otros dispositivos ──
+    // Eliminamos el listener anterior si existía (evita duplicados en HMR/reload)
+    if(fbListener){ fbDb.ref('fitness').off('value', fbListener); }
 
-      // ─── Protección offline: si los datos locales son más nuevos no sobreescribir ───
-      const _locTs = parseInt(localStorage.getItem('fc_local_ts') || '0');
-      const _fbTs  = parseInt(data.ts || '0');
-      if(_locTs > _fbTs + 5000){
-        // Tenemos cambios locales más nuevos → subir a Firebase en lugar de recibir
-        console.log('📤 Datos locales más recientes, sincronizando a Firebase...');
-        if(!fbSyncing) setTimeout(()=>sincronizarFirebase(), 700);
+    fbListener = fbDb.ref('fitness').on('value', snap => {
+      // Si NOSOTROS estamos subiendo, ignorar el eco
+      if(fbSyncing) return;
+
+      const data = snap.val();
+      if(!data){ return; }
+
+      // ─── Comparar timestamps: solo procesar si Firebase tiene datos más nuevos ───
+      const localTs = parseInt(localStorage.getItem('fc_local_ts') || '0');
+      const fbTs    = parseInt(data.ts || '0');
+
+      if(localTs > fbTs + 3000){
+        // Nuestros datos locales son más recientes → subir, no recibir
+        console.log('📤 Local más reciente → subiendo a Firebase');
+        if(!fbSyncing) setTimeout(sincronizarFirebase, 500);
         return;
       }
 
-      if(data.instructores && Array.isArray(data.instructores)) instructores = data.instructores;
-      if(data.registros)  registros  = Object.values(data.registros);
-      if(data.recorridos) recorridos = Object.values(data.recorridos);
-      normalizarRegistros();
-      _guardandoDeFirebase = true;   // Marcar: este save viene de Firebase
-      guardarLocal();
-      _guardandoDeFirebase = false;
-      _origRenderAll();
-      if(document.getElementById('v-calendario').classList.contains('on')) renderCal();
-      console.log('<svg class="ico" viewBox="0 0 20 20"><path d="M4 10a6 6 0 0 1 6-6 6 6 0 0 1 5.2 3" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round"/><path d="M16 10a6 6 0 0 1-6 6 6 6 0 0 1-5.2-3" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round"/><polyline points="14.5,7 15.5,3.8 18.5,5" stroke="currentColor" stroke-width="1.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/><polyline points="5.5,13 4.5,16.2 1.5,15" stroke="currentColor" stroke-width="1.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg> Sincronizado desde Firebase:', new Date().toLocaleTimeString('es-MX'));
+      // ─── Aplicar datos de Firebase ────────────────────────────────────────────
+      fbReceiving = true;
+      try{
+        if(Array.isArray(data.instructores) && data.instructores.length >= 0)
+          instructores = data.instructores;
+
+        if(data.registros)
+          registros = Object.values(data.registros);
+
+        if(data.recorridos)
+          recorridos = Object.values(data.recorridos);
+
+        if(Array.isArray(data.salones) && data.salones.length >= 0)
+          salones = data.salones;
+
+        if(data.suplencias)
+          suplenciasPlan = Object.values(data.suplencias);
+
+        if(data.solicitudes)
+          solicitudesInst = Object.values(data.solicitudes);
+
+        normalizarRegistros();
+
+        // Persistir localmente sin actualizar fc_local_ts (fbReceiving=true lo evita)
+        guardarLocal();
+
+        // Re-renderizar sin volver a subir a Firebase
+        _renderAllBase();
+        renderRecorridos();
+        if(document.getElementById('v-calendario')?.classList.contains('on')) renderCal();
+        if(document.getElementById('v-historial')?.classList.contains('on'))  renderHistorial();
+        if(document.getElementById('v-sup-plan')?.classList.contains('on'))    renderSupPlan();
+
+        console.log('🔽 Firebase → local:',
+          new Date().toLocaleTimeString('es-MX'),
+          `| ${registros.length} registros | ${recorridos.length} recorridos`);
+      } finally{
+        fbReceiving = false;
+      }
     });
 
-    setIndicador('<svg class="ico" viewBox="0 0 20 20"><circle cx="10" cy="10" r="5" fill="var(--neon)"/></svg> Firebase conectado');
+    setIndicador('🟢 Firebase conectado');
+    console.log('✅ Firebase inicializado');
+
   } catch(e){
     console.warn('Firebase error:', e.message);
-    setIndicador('<svg class="ico" viewBox="0 0 20 20"><circle cx="10" cy="10" r="5" fill="var(--gold2)"/></svg> Sin conexión · Datos locales');
+    setIndicador('🟡 Sin Firebase · Solo datos locales');
   }
 }
 
-// ═══ LIMPIAR TODOS LOS DATOS ═══
+// ── Limpiar todos los datos ───────────────────
 async function confirmarLimpiezaTotal(){
-  const resp=prompt('⚠ ADVERTENCIA: Esta acción es irreversible.\nEscribe BORRAR para confirmar:');
-  if(resp!=='BORRAR'){alert('Operación cancelada.');return;}
-  // Limpiar memoria
-  instructores=[];
-  registros=[];
-  recorridos=[];
-  // Limpiar localStorage
-  try{
-    localStorage.removeItem('fc_instructores');
-    localStorage.removeItem('fc_registros');
-    localStorage.removeItem('fc_recorridos');
-    localStorage.removeItem('fc_ts');
-  }catch(e){}
-  // Limpiar Firebase
+  const resp = prompt('⚠ ADVERTENCIA: Esta acción es irreversible.\nEscribe BORRAR para confirmar:');
+  if(resp !== 'BORRAR'){ alert('Operación cancelada.'); return; }
+
+  instructores    = [];
+  registros       = [];
+  recorridos      = [];
+  suplenciasPlan  = [];
+  solicitudesInst = [];
+
+  const keys = ['fc_instructores','fc_registros','fc_recorridos','fc_salones',
+                 'fc_suplencias','fc_solicitudes','fc_ts','fc_local_ts'];
+  keys.forEach(k=>{ try{ localStorage.removeItem(k); }catch(e){} });
+
   if(fbDb){
     try{
-      await fbDb.ref('fitness').set({instructores:[],registros:{},recorridos:{},ts:Date.now()});
-    }catch(e){console.warn('Error borrando Firebase:',e);}
+      await fbDb.ref('fitness').set({
+        instructores:[], registros:{}, recorridos:{},
+        salones, suplencias:{}, solicitudes:{}, ts: Date.now()
+      });
+    } catch(e){ console.warn('Error borrando Firebase:', e); }
   }
+
   renderAll();
   renderRecorridos();
   renderCal();
   alert('✔ Todos los datos han sido eliminados. El sistema está limpio.');
 }
 
-async function sincronizarFirebase(){
-  if(!FIREBASE_ACTIVO || !fbDb) return;
-  fbSyncing = true;
-  try{
-    await fbDb.ref('fitness').set({
-      instructores,
-      registros: registros.reduce((a,r)=>{a[r.id]=r;return a;},{}),
-      recorridos: recorridos.reduce((a,r)=>{a[r.id]=r;return a;},{}),
-      ts: Date.now()
-    });
-    setIndicador('<svg class="ico" viewBox="0 0 20 20"><circle cx="10" cy="10" r="5" fill="var(--neon)"/></svg> Guardado en la nube <svg class="ico" viewBox="0 0 20 20"><polyline points="4,10 8,14 16,6" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>');
-  } catch(e){
-    setIndicador('<svg class="ico" viewBox="0 0 20 20"><circle cx="10" cy="10" r="5" fill="var(--red2)"/></svg> Sin conexión — guardado local');
-  }
-  setTimeout(()=>fbSyncing=false, 500);
-}
-
+// ── Helpers ───────────────────────────────────
 function cargarScript(src){
-  return new Promise((res,rej)=>{
-    if(document.querySelector(`script[src="${src}"]`)){res();return;}
-    const s=document.createElement('script');
-    s.src=src;s.onload=res;s.onerror=rej;
+  return new Promise((res, rej)=>{
+    if(document.querySelector(`script[src="${src}"]`)){ res(); return; }
+    const s = document.createElement('script');
+    s.src = src; s.onload = res; s.onerror = rej;
     document.head.appendChild(s);
   });
 }
 
 function setIndicador(txt){
-  const el=document.getElementById('sync-indicator');
-  if(el) el.innerHTML=txt;
+  const el = document.getElementById('sync-indicator');
+  if(el) el.innerHTML = txt;
 }
 
 // Indicador de estado en el header
@@ -5863,12 +5914,13 @@ function cambiarPass(tipo) {
   }
 }
 
-// Agregar animación shake al CSS dinámicamente
+// ── Animación shake para login ────────────────
 (function(){
   const s = document.createElement('style');
   s.textContent = '@keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-8px)}75%{transform:translateX(8px)}}';
   document.head.appendChild(s);
 })();
+
 
 // ═══════════════════════════════════════════
 // SUPLENCIAS PLANIFICADAS
@@ -6211,12 +6263,8 @@ async function eliminarSuplencia(id){
   renderSupPlan();
 }
 
-function guardarSupLocal(){
-  try{
-    localStorage.setItem('fc_suplencias',JSON.stringify(suplenciasPlan));
-    localStorage.setItem('fc_solicitudes',JSON.stringify(solicitudesInst));
-  }catch(e){}
-}
+// guardarSupLocal está definida arriba en la sección de Firebase unificada
+
 
 // ── Portal de instructores ──────────────────
 function abrirPortalInstructor(){
@@ -6231,57 +6279,27 @@ function copiarLinkPortal(){
   }).catch(()=>alert('Link: '+base));
 }
 
-// ── Sincronizar suplencias con Firebase ─────
-const _origSincronizarFirebase = sincronizarFirebase;
-sincronizarFirebase = async function(){
-  if(!FIREBASE_ACTIVO||!fbDb)return;
-  fbSyncing=true;
-  try{
-    await fbDb.ref('fitness').set({
-      instructores,
-      registros: registros.reduce((a,r)=>{a[r.id]=r;return a;},{}),
-      recorridos: recorridos.reduce((a,r)=>{a[r.id]=r;return a;},{}),
-      suplencias: suplenciasPlan.reduce((a,s)=>{a[s.id]=s;return a;},{}),
-      solicitudes: solicitudesInst.reduce((a,s)=>{a[s.id]=s;return a;},{}),
-      salones,
-      ts:Date.now()
-    });
-    setIndicador('<svg class="ico" viewBox="0 0 20 20"><circle cx="10" cy="10" r="5" fill="var(--neon)"/></svg> Guardado en la nube ✔');
-  }catch(e){
-    setIndicador('<svg class="ico" viewBox="0 0 20 20"><circle cx="10" cy="10" r="5" fill="var(--red2)"/></svg> Sin conexión — guardado local');
-  }
-  setTimeout(()=>fbSyncing=false,500);
-};
+// ── Guardar suplencias en local ────────────────
+function guardarSupLocal(){
+  guardarLocal(); // reutiliza guardarLocal que ya incluye suplencias y solicitudes
+}
 
-// Leer suplencias y solicitudes de Firebase al sincronizar
-const _origInicializarFirebase = inicializarFirebase;
-inicializarFirebase = async function(){
-  await _origInicializarFirebase();
-  if(fbDb){
-    fbDb.ref('fitness').on('value',snap=>{
-      const d=snap.val();
-      if(!d)return;
-      if(d.suplencias) suplenciasPlan=Array.isArray(d.suplencias)?d.suplencias:Object.values(d.suplencias);
-      if(d.solicitudes) solicitudesInst=Array.isArray(d.solicitudes)?d.solicitudes:Object.values(d.solicitudes);
-      guardarSupLocal();
-      // Actualizar vista si está activa
-      if(document.getElementById('v-sup-plan')?.classList.contains('on')) renderSupPlan();
-    });
-  }
-};
+// ── Sincronizar suplencias también al guardar ──
+// (guardarLocal y sincronizarFirebase ya incluyen suplencias — no se necesita override)
+
 
 // ─── Arranque ───
 (function init(){
   // Aplicar tema guardado
   aplicarTema(localStorage.getItem('fc_tema')||'oscuro');
 
-  // ── Respaldo: eventos de red del navegador para sincronización ──
+  // ── Respaldo: eventos de red del navegador ──
   window.addEventListener('online', ()=>{
-    setIndicador('<svg class="ico" viewBox="0 0 20 20"><circle cx="10" cy="10" r="5" fill="var(--gold2)"/></svg> Red recuperada · Sincronizando...');
-    setTimeout(()=>{ if(typeof sincronizarFirebase==='function' && !fbSyncing) sincronizarFirebase(); }, 900);
+    setIndicador('🟡 Red recuperada · Sincronizando...');
+    setTimeout(()=>{ if(!fbSyncing) sincronizarFirebase(); }, 900);
   });
   window.addEventListener('offline', ()=>{
-    setIndicador('<svg class="ico" viewBox="0 0 20 20"><circle cx="10" cy="10" r="5" fill="var(--red2)"/></svg> Sin conexión · Cambios guardados localmente');
+    setIndicador('🔴 Sin conexión · Cambios guardados localmente');
   });
 
   // Verificar sesión guardada en la pestaña actual
@@ -6290,15 +6308,17 @@ inicializarFirebase = async function(){
     aplicarRol(rolGuardado);
     document.getElementById('login-screen').classList.add('oculto');
   }
-  // Si no hay sesión, la pantalla de login ya está visible por defecto
 
   const hayLocal = cargarLocal();
   if(hayLocal){
-    _origRenderAll();
+    _renderAllBase();   // renderAll base — sin subir a Firebase todavía
     renderCal();
-    console.log('<svg class="ico ico-ok" viewBox="0 0 20 20"><circle cx="10" cy="10" r="8" stroke="currentColor" stroke-width="1.5" fill="none"/><polyline points="6,10 9,13 14,7" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg> Datos restaurados desde almacenamiento local');
+    console.log('💾 Datos restaurados desde almacenamiento local');
   }
+
+  // Inicializar Firebase (conecta, carga y escucha cambios en tiempo real)
   inicializarFirebase();
+
   // Guardar antes de cerrar pestaña
   window.addEventListener('beforeunload', guardarLocal);
 })();
