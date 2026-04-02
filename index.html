@@ -6451,6 +6451,924 @@ window.addEventListener('appinstalled',()=>{
   }
 })();
 </script>
+
+<!-- ═══════════════════════════════════════════════════════
+     ASISTENTE VIRTUAL — FITNESS INTELLIGENCE
+═══════════════════════════════════════════════════════ -->
+<style>
+/* ── Botón flotante del asistente ── */
+#ai-fab {
+  position: fixed;
+  bottom: 26px;
+  right: 90px; /* a la izquierda del FAB de clases */
+  z-index: 400;
+  width: 58px;
+  height: 58px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #1a3a6a 0%, #0d1f3a 100%);
+  border: 2px solid #4db8e8;
+  box-shadow: 0 4px 20px rgba(77,184,232,.45), 0 0 0 0 rgba(77,184,232,.3);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: 2px;
+  transition: transform .18s, box-shadow .18s;
+  animation: aiPulse 3s ease-in-out infinite;
+  -webkit-tap-highlight-color: transparent;
+}
+#ai-fab:hover, #ai-fab:active { transform: scale(1.08); box-shadow: 0 6px 28px rgba(77,184,232,.65); }
+#ai-fab .ai-fab-icon { font-size: 1.3rem; line-height: 1; }
+#ai-fab .ai-fab-lbl { font-family: 'Outfit', sans-serif; font-size: .48rem; font-weight: 700; letter-spacing: .8px; text-transform: uppercase; color: #88ccff; }
+#ai-fab .ai-badge {
+  position: absolute; top: -4px; right: -4px;
+  width: 16px; height: 16px; border-radius: 50%;
+  background: var(--neon); border: 2px solid var(--bg);
+  display: none;
+}
+#ai-fab.has-notif .ai-badge { display: block; }
+@keyframes aiPulse {
+  0%,100% { box-shadow: 0 4px 20px rgba(77,184,232,.45), 0 0 0 0 rgba(77,184,232,.25); }
+  50%      { box-shadow: 0 4px 28px rgba(77,184,232,.65), 0 0 0 8px rgba(77,184,232,.0); }
+}
+@media print { #ai-fab, #ai-chat-panel { display: none !important; } }
+@media (max-width: 768px) { #ai-fab { right: 78px; bottom: 22px; width: 52px; height: 52px; } }
+
+/* ── Panel del chat ── */
+#ai-chat-panel {
+  position: fixed;
+  bottom: 96px;
+  right: 18px;
+  z-index: 401;
+  width: 400px;
+  max-width: calc(100vw - 24px);
+  height: 580px;
+  max-height: calc(100vh - 120px);
+  background: rgba(10,18,14,0.97);
+  border: 1px solid #4db8e8;
+  border-radius: 20px;
+  box-shadow: 0 16px 60px rgba(0,0,0,.7), 0 0 0 1px rgba(77,184,232,.15);
+  display: none;
+  flex-direction: column;
+  overflow: hidden;
+  animation: aiPanelIn .22s cubic-bezier(.34,1.56,.64,1);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+}
+#ai-chat-panel.open { display: flex; }
+@keyframes aiPanelIn {
+  from { transform: scale(.88) translateY(20px); opacity: 0; }
+  to   { transform: scale(1) translateY(0); opacity: 1; }
+}
+html.tema-claro #ai-chat-panel {
+  background: rgba(245,250,248,.97);
+  border-color: #1a5fa3;
+  box-shadow: 0 16px 60px rgba(26,95,163,.2);
+}
+
+/* ── Header del chat ── */
+.ai-header {
+  background: linear-gradient(90deg, #0d2240 0%, #0a1a30 100%);
+  padding: .75rem 1rem;
+  display: flex;
+  align-items: center;
+  gap: .65rem;
+  border-bottom: 1px solid rgba(77,184,232,.25);
+  flex-shrink: 0;
+}
+html.tema-claro .ai-header { background: linear-gradient(90deg,#1a5fa3,#1a3a6a); }
+.ai-avatar {
+  width: 34px; height: 34px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #1a5fa3, #4db8e8);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1rem; flex-shrink: 0;
+  box-shadow: 0 0 12px rgba(77,184,232,.4);
+}
+.ai-header-txt { flex: 1; min-width: 0; }
+.ai-name { font-family: 'Bebas Neue', sans-serif; font-size: .95rem; letter-spacing: 2px; color: #88ccff; line-height: 1; }
+.ai-status { font-size: .6rem; color: rgba(136,204,255,.6); letter-spacing: .5px; margin-top: 2px; }
+.ai-status.thinking { color: var(--neon); }
+.ai-close-btn {
+  background: rgba(77,184,232,.1);
+  border: 1px solid rgba(77,184,232,.2);
+  border-radius: 8px;
+  color: #88ccff;
+  width: 28px; height: 28px;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer;
+  font-size: .9rem;
+  flex-shrink: 0;
+  transition: background .15s;
+}
+.ai-close-btn:hover { background: rgba(77,184,232,.25); }
+
+/* ── Mensajes ── */
+.ai-messages {
+  flex: 1;
+  overflow-y: auto;
+  padding: .85rem 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: .65rem;
+  scroll-behavior: smooth;
+}
+.ai-messages::-webkit-scrollbar { width: 4px; }
+.ai-messages::-webkit-scrollbar-thumb { background: rgba(77,184,232,.25); border-radius: 2px; }
+
+.ai-msg {
+  display: flex;
+  gap: .5rem;
+  max-width: 92%;
+  animation: msgIn .2s ease;
+}
+@keyframes msgIn { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:translateY(0); } }
+.ai-msg.user { align-self: flex-end; flex-direction: row-reverse; }
+.ai-msg.assistant { align-self: flex-start; }
+
+.ai-msg-bubble {
+  padding: .55rem .8rem;
+  border-radius: 14px;
+  font-size: .8rem;
+  line-height: 1.55;
+  max-width: 100%;
+}
+.ai-msg.user .ai-msg-bubble {
+  background: linear-gradient(135deg, #1a5fa3, #1a3a6a);
+  color: #e8f4ff;
+  border-radius: 14px 14px 4px 14px;
+}
+.ai-msg.assistant .ai-msg-bubble {
+  background: rgba(77,184,232,.08);
+  border: 1px solid rgba(77,184,232,.18);
+  color: var(--txt);
+  border-radius: 14px 14px 14px 4px;
+}
+html.tema-claro .ai-msg.user .ai-msg-bubble { background: linear-gradient(135deg,#1a5fa3,#2a7abf); color:#fff; }
+html.tema-claro .ai-msg.assistant .ai-msg-bubble { background: #e8f4fb; border-color: #a0c8e8; color: #1a2a1e; }
+
+.ai-msg-mini { width: 24px; height: 24px; border-radius: 50%; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: .75rem; margin-top: 2px; }
+.ai-msg.assistant .ai-msg-mini { background: linear-gradient(135deg,#1a5fa3,#4db8e8); }
+.ai-msg.user .ai-msg-mini { background: rgba(136,204,255,.15); font-size: .65rem; }
+
+/* Typing indicator */
+.ai-typing { display: flex; gap: 4px; align-items: center; padding: .5rem .7rem; }
+.ai-typing span {
+  width: 6px; height: 6px; border-radius: 50%;
+  background: #4db8e8;
+  animation: dotBounce 1.2s ease-in-out infinite;
+}
+.ai-typing span:nth-child(2) { animation-delay: .2s; }
+.ai-typing span:nth-child(3) { animation-delay: .4s; }
+@keyframes dotBounce {
+  0%,80%,100% { transform: translateY(0); opacity: .4; }
+  40%         { transform: translateY(-6px); opacity: 1; }
+}
+
+/* ── Chips de sugerencias ── */
+.ai-suggestions {
+  padding: .5rem .85rem;
+  display: flex;
+  gap: .35rem;
+  flex-wrap: wrap;
+  border-top: 1px solid rgba(77,184,232,.1);
+  flex-shrink: 0;
+  background: rgba(0,0,0,.15);
+}
+html.tema-claro .ai-suggestions { background: rgba(26,95,163,.04); }
+.ai-chip {
+  font-family: 'Outfit', sans-serif;
+  font-size: .67rem;
+  padding: 4px 10px;
+  border-radius: 20px;
+  border: 1px solid rgba(77,184,232,.25);
+  background: rgba(77,184,232,.08);
+  color: #88ccff;
+  cursor: pointer;
+  transition: all .15s;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 180px;
+}
+.ai-chip:hover { background: rgba(77,184,232,.2); border-color: #4db8e8; color: #fff; }
+html.tema-claro .ai-chip { color: #1a5fa3; border-color: #a0c8e8; background: #e8f4fb; }
+html.tema-claro .ai-chip:hover { background: #1a5fa3; color: #fff; }
+
+/* ── Input área ── */
+.ai-input-area {
+  padding: .65rem .85rem;
+  border-top: 1px solid rgba(77,184,232,.18);
+  display: flex;
+  gap: .5rem;
+  align-items: flex-end;
+  flex-shrink: 0;
+  background: rgba(0,0,0,.2);
+}
+html.tema-claro .ai-input-area { background: rgba(26,95,163,.04); }
+#ai-input {
+  flex: 1;
+  background: rgba(77,184,232,.07);
+  border: 1px solid rgba(77,184,232,.22);
+  border-radius: 12px;
+  padding: .55rem .8rem;
+  color: var(--txt);
+  font-family: 'Outfit', sans-serif;
+  font-size: .8rem;
+  outline: none;
+  resize: none;
+  min-height: 38px;
+  max-height: 100px;
+  line-height: 1.4;
+  transition: border-color .15s;
+  overflow-y: auto;
+}
+#ai-input:focus { border-color: #4db8e8; }
+#ai-input::placeholder { color: rgba(136,204,255,.4); }
+html.tema-claro #ai-input { background: #fff; border-color: #a0c8e8; color: #1a2a1e; }
+html.tema-claro #ai-input::placeholder { color: #8ab0c0; }
+#ai-send {
+  width: 38px; height: 38px; border-radius: 10px; flex-shrink: 0;
+  background: linear-gradient(135deg, #1a5fa3, #4db8e8);
+  border: none; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: transform .15s, opacity .15s;
+}
+#ai-send:hover { transform: scale(1.06); }
+#ai-send:disabled { opacity: .4; cursor: default; transform: none; }
+#ai-send svg { width: 16px; height: 16px; }
+
+/* Contenido markdown del asistente */
+.ai-msg-bubble table { border-collapse:collapse; margin:.4rem 0; font-size:.75rem; width:100%; }
+.ai-msg-bubble th { background:rgba(77,184,232,.15); padding:3px 7px; border:1px solid rgba(77,184,232,.25); text-align:left; font-size:.68rem; text-transform:uppercase; letter-spacing:.5px; }
+.ai-msg-bubble td { padding:3px 7px; border:1px solid rgba(77,184,232,.12); }
+.ai-msg-bubble tr:nth-child(even) td { background:rgba(77,184,232,.05); }
+.ai-msg-bubble strong { color: #88ccff; }
+html.tema-claro .ai-msg.assistant .ai-msg-bubble strong { color: #1a5fa3; }
+.ai-msg-bubble em { color: var(--gold2); font-style:normal; }
+.ai-msg-bubble .ai-kpi { display:inline-block; background:rgba(94,255,160,.1); border:1px solid rgba(94,255,160,.25); border-radius:6px; padding:1px 7px; font-family:'DM Mono',monospace; font-size:.76rem; color:var(--neon); margin:1px; }
+.ai-msg-bubble .ai-warn { color:var(--red2); }
+.ai-msg-bubble .ai-ok { color:var(--neon); }
+.ai-msg-bubble .ai-gold { color:var(--gold2); }
+.ai-msg-bubble ul { padding-left:1.1rem; margin:.3rem 0; }
+.ai-msg-bubble li { margin:.18rem 0; }
+.ai-msg-bubble h3 { font-family:'Bebas Neue',sans-serif; letter-spacing:1.5px; color:#88ccff; font-size:.9rem; margin:.5rem 0 .2rem; }
+
+/* Barra de herramientas del header */
+.ai-tools { display:flex; gap:.3rem; }
+.ai-tool-btn {
+  background: rgba(77,184,232,.1);
+  border: 1px solid rgba(77,184,232,.18);
+  border-radius: 7px;
+  color: #88ccff;
+  width: 26px; height: 26px;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer;
+  font-size: .72rem;
+  flex-shrink: 0;
+  transition: background .15s;
+}
+.ai-tool-btn:hover { background: rgba(77,184,232,.25); }
+
+/* Watermark sutil */
+.ai-watermark {
+  text-align: center;
+  font-size: .58rem;
+  color: rgba(77,184,232,.3);
+  padding: .25rem;
+  letter-spacing: .5px;
+  flex-shrink: 0;
+}
+</style>
+
+<!-- Botón flotante del asistente -->
+<button id="ai-fab" onclick="toggleAIChat()" title="Asistente Fitness Intelligence">
+  <div class="ai-badge"></div>
+  <div class="ai-fab-icon">🤖</div>
+  <div class="ai-fab-lbl">IA Fitness</div>
+</button>
+
+<!-- Panel del asistente -->
+<div id="ai-chat-panel">
+
+  <!-- Header -->
+  <div class="ai-header">
+    <div class="ai-avatar">🤖</div>
+    <div class="ai-header-txt">
+      <div class="ai-name">Fitness Intelligence</div>
+      <div class="ai-status" id="ai-status">Club Campestre · Asistente Analítico</div>
+    </div>
+    <div class="ai-tools">
+      <button class="ai-tool-btn" onclick="aiMostrarConfigKey()" title="Configurar API Key">
+        <svg viewBox="0 0 20 20" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="10" cy="10" r="3"/><path d="M10 2 L10 5 M10 15 L10 18 M2 10 L5 10 M15 10 L18 10 M4.2 4.2 L6.4 6.4 M13.6 13.6 L15.8 15.8 M15.8 4.2 L13.6 6.4 M6.4 13.6 L4.2 15.8" stroke-width="1.5"/></svg>
+      </button>
+        <svg viewBox="0 0 20 20" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M4 10a6 6 0 0 1 6-6 6 6 0 0 1 5.2 3"/><path d="M16 10a6 6 0 0 1-6 6 6 6 0 0 1-5.2-3"/><polyline points="14.5,7 15.5,3.8 18.5,5"/><polyline points="5.5,13 4.5,16.2 1.5,15"/></svg>
+      </button>
+      <button class="ai-close-btn" onclick="toggleAIChat()" title="Cerrar">
+        <svg viewBox="0 0 20 20" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="5" y1="5" x2="15" y2="15"/><line x1="15" y1="5" x2="5" y2="15"/></svg>
+      </button>
+    </div>
+  </div>
+
+  <!-- Mensajes -->
+  <div class="ai-messages" id="ai-messages"></div>
+
+  <!-- Chips de sugerencias rápidas -->
+  <div class="ai-suggestions" id="ai-suggestions"></div>
+
+  <!-- Input -->
+  <div class="ai-input-area">
+    <textarea id="ai-input" placeholder="Pregúntame sobre clases, instructores, aforo, tendencias..." rows="1"
+      onkeydown="aiHandleKey(event)" oninput="aiAutoResize(this)"></textarea>
+    <button id="ai-send" onclick="aiEnviar()" title="Enviar">
+      <svg viewBox="0 0 20 20" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="3" y1="10" x2="17" y2="10"/>
+        <polyline points="12,5 17,10 12,15"/>
+      </svg>
+    </button>
+  </div>
+
+  <div class="ai-watermark">Powered by Claude · Datos en tiempo real del sistema</div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════════
+// ASISTENTE VIRTUAL — FITNESS INTELLIGENCE
+// ═══════════════════════════════════════════════════════
+
+let aiHistorial = [];
+let aiThinking  = false;
+let aiPanelOpen = false;
+
+// ── API Key del Asistente (se guarda en localStorage) ───
+let AI_API_KEY = localStorage.getItem('fc_ai_key') || '';
+
+function aiGuardarKey() {
+  const inp = document.getElementById('ai-key-input');
+  const key = (inp?.value || '').trim();
+  if(!key || !key.startsWith('sk-ant-')) {
+    alert('❌ La API key debe comenzar con "sk-ant-"\nObtén tu key en: console.anthropic.com');
+    return;
+  }
+  AI_API_KEY = key;
+  localStorage.setItem('fc_ai_key', key);
+  document.getElementById('ai-key-modal').style.display = 'none';
+  inp.value = '';
+  // Mensaje de confirmación en el chat
+  const msgs = document.getElementById('ai-messages');
+  const ok = document.createElement('div');
+  ok.className = 'ai-msg assistant';
+  ok.innerHTML = `<div class="ai-msg-mini">🤖</div>
+    <div class="ai-msg-bubble" style="border-color:rgba(94,255,160,.35)">
+      ✅ <strong>API Key configurada correctamente.</strong> Ahora puedes hacerme preguntas sobre el sistema de fitness.
+    </div>`;
+  msgs.appendChild(ok);
+  msgs.scrollTop = msgs.scrollHeight;
+  aiRenderSugerencias();
+}
+
+function aiMostrarConfigKey() {
+  const modal = document.getElementById('ai-key-modal');
+  if(modal) modal.style.display = 'flex';
+}
+
+function aiOlvidarKey() {
+  if(!confirm('¿Eliminar la API Key guardada?')) return;
+  AI_API_KEY = '';
+  localStorage.removeItem('fc_ai_key');
+  alert('API Key eliminada. Configúrala de nuevo para usar el asistente.');
+}
+
+// ── Sugerencias contextuales dinámicas ──────────────────
+const AI_SUGERENCIAS_BASE = [
+  '¿Cuál clase tiene mejor aforo?',
+  '¿Qué instructores tienen faltas este mes?',
+  'Muéstrame el resumen de esta semana',
+  '¿Qué horarios tienen menor aforo?',
+  '¿Cuál es el instructor más productivo?',
+  'Analiza la tendencia de asistentes',
+  '¿Qué clases debo reforzar o cancelar?',
+  '¿Cuántas suplencias hubo este mes?',
+  'Dame alertas críticas del sistema',
+  '¿Qué día tiene más asistencia?',
+  'Compara el aforo de Spinning vs Yoga',
+  '¿Cuál horario es el más popular?',
+];
+
+function aiSugerenciasContextuales() {
+  // Generar sugerencias dinámicas basadas en datos reales
+  const sugs = [...AI_SUGERENCIAS_BASE];
+  // Agregar instructores reales
+  if(instructores.length > 0) {
+    const rand = instructores[Math.floor(Math.random()*instructores.length)];
+    sugs.push(`¿Cómo va ${rand.nombre.split(' ')[0]} este mes?`);
+  }
+  // Agregar clase real
+  const clases = [...new Set(registros.map(r=>r.clase))].filter(Boolean);
+  if(clases.length > 0) {
+    const cls = clases[Math.floor(Math.random()*clases.length)];
+    sugs.push(`Diagnóstico de ${cls}`);
+  }
+  // Shuffle y tomar 5
+  return sugs.sort(()=>Math.random()-.5).slice(0,5);
+}
+
+function aiRenderSugerencias() {
+  const c = document.getElementById('ai-suggestions');
+  if(!c) return;
+  const sugs = aiSugerenciasContextuales();
+  c.innerHTML = sugs.map(s =>
+    `<button class="ai-chip" onclick="aiPreguntaRapida('${s.replace(/'/g,"\\'")}')">
+      ${s.length > 38 ? s.slice(0,36)+'…' : s}
+    </button>`
+  ).join('');
+}
+
+function aiPreguntaRapida(txt) {
+  document.getElementById('ai-input').value = txt;
+  aiEnviar();
+}
+
+// ── Construcción del contexto del sistema ───────────────
+function aiBuildContext() {
+  const hoy = new Date().toISOString().slice(0,10);
+  const hoy30 = new Date(); hoy30.setDate(hoy30.getDate()-30);
+  const hoy30str = hoy30.toISOString().slice(0,10);
+
+  // ── Instructores + stats ──
+  const instStats = instructores.map(inst => {
+    const recs = registros.filter(r => r.inst_id === inst.id);
+    const imp  = recs.filter(r => r.estado==='ok'||r.estado==='sub');
+    const faltas = recs.filter(r => r.estado==='falta');
+    const sups = recs.filter(r => r.estado==='sub');
+    const afoRecs = imp.filter(r => r.cap>0);
+    const aforo = afoRecs.length>0 ? Math.round(afoRecs.reduce((a,r)=>a+r.asistentes/r.cap*100,0)/afoRecs.length) : 0;
+    const totalAsis = imp.reduce((a,r)=>a+(r.asistentes||0),0);
+    const faltasMes = faltas.filter(r=>(r.fecha||'')>=hoy30str).length;
+    return {
+      id: inst.id, nombre: inst.nombre, tipo: inst.tipo, turno: inst.turno||'',
+      especialidades: inst.esp||'',
+      clasesSemana: (inst.horario||[]).length,
+      horario: (inst.horario||[]).map(h=>`${h.dia} ${h.hora} ${h.clase}`).join(' | '),
+      totalImpartidas: imp.length, totalFaltas: faltas.length,
+      faltasMes30: faltasMes, suplencias: sups.length,
+      aforoProm: aforo, totalAsistentes: totalAsis,
+      promAsistentes: imp.length>0 ? Math.round(totalAsis/imp.length) : 0
+    };
+  });
+
+  // ── Resumen global ──
+  const totProg = instructores.reduce((a,i)=>a+(i.horario||[]).length,0);
+  const totImp = registros.filter(r=>r.estado==='ok'||r.estado==='sub').length;
+  const totFalt = registros.filter(r=>r.estado==='falta').length;
+  const totAsis = registros.reduce((a,r)=>a+(r.asistentes||0),0);
+  const afoGlobal = registros.filter(r=>r.cap>0&&(r.estado==='ok'||r.estado==='sub'));
+  const aforoProm = afoGlobal.length>0 ? Math.round(afoGlobal.reduce((a,r)=>a+r.asistentes/r.cap*100,0)/afoGlobal.length) : 0;
+
+  // ── Clases con métricas ──
+  const claseMap = {};
+  registros.filter(r=>(r.estado==='ok'||r.estado==='sub')).forEach(r=>{
+    if(!r.clase) return;
+    if(!claseMap[r.clase]) claseMap[r.clase]={sesiones:0,asis:0,cap:0,cnt:0,sups:0,dias:new Set(),inst:new Set()};
+    claseMap[r.clase].sesiones++;
+    claseMap[r.clase].asis += r.asistentes||0;
+    if(r.cap>0){claseMap[r.clase].cap+=r.cap;claseMap[r.clase].cnt++;}
+    if(r.estado==='sub') claseMap[r.clase].sups++;
+    if(r.dia) claseMap[r.clase].dias.add(r.dia);
+    if(r.inst_id) claseMap[r.clase].inst.add(r.inst_id);
+  });
+  const clasesStats = Object.entries(claseMap).map(([clase,v])=>({
+    clase,
+    sesiones: v.sesiones,
+    totalAsis: v.asis,
+    promAsis: v.sesiones>0 ? Math.round(v.asis/v.sesiones) : 0,
+    aforoProm: v.cnt>0 ? Math.round(v.asis/v.cap*v.cnt*100/v.cnt) : 0,
+    suplencias: v.sups,
+    dias: [...v.dias].join(', '),
+    instructores: v.inst.size
+  })).sort((a,b)=>b.aforoProm-a.aforoProm);
+
+  // ── Alertas actuales ──
+  const alertas = calcularAlertas ? calcularAlertas().map(a=>a.texto.replace(/<[^>]+>/g,'')).join('\n') : 'No disponibles';
+
+  // ── Recorridos recientes ──
+  const recsRecientes = recorridos.slice(-5).map(r=>
+    `${r.fecha} ${r.dia}: ${r.visitadas} clases, ${r.totalAsis} asis., aforo ${r.aforoProm}%`
+  ).join('\n');
+
+  // ── Mapa de calor (top/bottom horarios) ──
+  const horariosMap = {};
+  registros.filter(r=>(r.estado==='ok'||r.estado==='sub')&&r.cap>0).forEach(r=>{
+    const k=`${r.dia||'?'} ${r.hora||'?'}`;
+    if(!horariosMap[k]) horariosMap[k]={sum:0,cnt:0};
+    horariosMap[k].sum += r.asistentes/r.cap*100;
+    horariosMap[k].cnt++;
+  });
+  const horariosOrdenados = Object.entries(horariosMap)
+    .map(([k,v])=>({slot:k, aforo:Math.round(v.sum/v.cnt), cnt:v.cnt}))
+    .sort((a,b)=>b.aforo-a.aforo);
+  const top5Hora = horariosOrdenados.slice(0,5).map(h=>`${h.slot}: ${h.aforo}% (${h.cnt} ses.)`).join('\n');
+  const bot5Hora = horariosOrdenados.slice(-5).map(h=>`${h.slot}: ${h.aforo}% (${h.cnt} ses.)`).join('\n');
+
+  return `Eres "Fitness Intelligence", el asistente analítico del sistema de control de fitness del Club Campestre Aguascalientes.
+
+Tienes acceso completo y en tiempo real a todos los datos del sistema. Responde siempre en ESPAÑOL.
+Sé preciso, usa los datos exactos del sistema, y da recomendaciones accionables cuando sea relevante.
+Usa emojis de forma moderada para hacer las respuestas más claras. Formatea bien con listas y negritas cuando ayude.
+Cuando des métricas importantes, resáltalas. Sé conciso pero completo. Si no tienes datos suficientes, dilo.
+
+═══ DATOS DEL SISTEMA (${hoy}) ═══
+
+## RESUMEN GLOBAL
+- Instructores activos: ${instructores.length}
+- Clases programadas/semana: ${totProg}
+- Total sesiones registradas: ${registros.length}
+- Sesiones impartidas: ${totImp}
+- Faltas totales: ${totFalt}
+- Total asistentes acumulados: ${totAsis.toLocaleString()}
+- Aforo promedio global: ${aforoProm}%
+- Suplencias totales: ${registros.filter(r=>r.estado==='sub').length}
+- Recorridos realizados: ${recorridos.length}
+
+## INSTRUCTORES (detalle completo)
+${instStats.map(i=>`• ${i.nombre} [${i.tipo}/${i.turno}] | Esp: ${i.especialidades||'—'} | ${i.clasesSemana} cls/sem | Impartidas: ${i.totalImpartidas} | Faltas: ${i.totalFaltas} (${i.faltasMes30} en 30d) | Suplencias: ${i.suplencias} | Aforo prom: ${i.aforoProm}% | Asis prom/clase: ${i.promAsistentes} | Total asis: ${i.totalAsistentes}\n  Horario: ${i.horario||'Sin horario asignado'}`).join('\n')}
+
+## CLASES (por aforo descendente)
+${clasesStats.slice(0,20).map(c=>`• ${c.clase}: ${c.aforoProm}% aforo prom | ${c.sesiones} sesiones | ${c.promAsis} asis/clase | ${c.totalAsis} total | ${c.suplencias} suplencias | Días: ${c.dias} | ${c.instructores} instructor(es)`).join('\n')}
+
+## HORARIOS MÁS CONCURRIDOS
+${top5Hora}
+
+## HORARIOS CON MENOR AFORO
+${bot5Hora}
+
+## ALERTAS ACTIVAS DEL SISTEMA
+${alertas}
+
+## ÚLTIMOS RECORRIDOS REALIZADOS
+${recsRecientes || 'Sin recorridos registrados'}
+
+## SALONES CONFIGURADOS
+${salones.map(s=>`• ${s.nombre}: cap ${s.cap} | Tipo: ${s.tipo} | Clases: ${(s.clases||[]).join(', ')||'—'}`).join('\n')}
+
+═══ FIN DE DATOS ═══
+
+Responde preguntas sobre este sistema. Puedes analizar tendencias, comparar instructores, detectar problemas, sugerir mejoras, calcular métricas derivadas, y dar recomendaciones estratégicas basadas en los datos.`;
+}
+
+// ── Toggle panel ────────────────────────────────────────
+function toggleAIChat() {
+  const panel = document.getElementById('ai-chat-panel');
+  aiPanelOpen = !aiPanelOpen;
+  if(aiPanelOpen) {
+    panel.classList.add('open');
+    document.getElementById('ai-fab').classList.remove('has-notif');
+    if(aiHistorial.length === 0) aiMensajeBienvenida();
+    aiRenderSugerencias();
+    setTimeout(()=>document.getElementById('ai-input')?.focus(), 300);
+  } else {
+    panel.classList.remove('open');
+  }
+}
+
+function aiMensajeBienvenida() {
+  const totInst = instructores.length;
+  const totReg  = registros.length;
+  const afoRecs = registros.filter(r=>r.cap>0&&(r.estado==='ok'||r.estado==='sub'));
+  const aforo   = afoRecs.length>0 ? Math.round(afoRecs.reduce((a,r)=>a+r.asistentes/r.cap*100,0)/afoRecs.length) : 0;
+  const alertas = typeof calcularAlertas==='function' ? calcularAlertas().filter(a=>a.tipo==='red').length : 0;
+
+  const sinKey = !AI_API_KEY;
+
+  const bienvenida = `¡Hola! Soy **Fitness Intelligence**, tu asistente analítico del Club Campestre 🤖
+
+Tengo acceso completo a los datos del sistema:
+• **${totInst}** instructores activos · **${totReg}** registros
+• Aforo global: **${aforo}%** promedio
+${alertas>0?`• ⚠️ **${alertas} alerta(s) crítica(s)** requieren atención`:'• ✅ Sin alertas críticas actualmente'}
+
+${sinKey
+  ? `**⚙️ Configuración requerida:** Para usar el asistente necesitas una API Key de Anthropic.\n\nHaz clic en el botón **⚙️** del encabezado o en el botón de abajo para configurarla (es gratis para cuentas nuevas).`
+  : `¿En qué te ayudo? Puedo analizar tendencias, comparar clases e instructores, detectar problemas y darte recomendaciones.`
+}`;
+
+  const msgs = document.getElementById('ai-messages');
+  const div = document.createElement('div');
+  div.className = 'ai-msg assistant';
+  div.innerHTML = `<div class="ai-msg-mini">🤖</div><div class="ai-msg-bubble">${aiRenderMarkdown(bienvenida)}${sinKey?`<br><button onclick="aiMostrarConfigKey()" style="margin-top:.6rem;background:linear-gradient(135deg,#1a5fa3,#4db8e8);color:#fff;border:none;border-radius:8px;padding:6px 14px;font-family:'Outfit',sans-serif;font-size:.78rem;font-weight:600;cursor:pointer;width:100%">⚙️ Configurar API Key</button>`:''}</div>`;
+  msgs.appendChild(div);
+  msgs.scrollTop = msgs.scrollHeight;
+  aiHistorial.push({role:'assistant', content:bienvenida});
+}
+
+// ── Renderizado de mensajes ──────────────────────────────
+function aiAgregarMensaje(rol, texto) {
+  const contId = Date.now() + Math.random();
+  const div = document.createElement('div');
+  div.className = `ai-msg ${rol}`;
+  div.id = `aim-${contId}`;
+
+  const mini = document.createElement('div');
+  mini.className = 'ai-msg-mini';
+  mini.textContent = rol==='user' ? '👤' : '🤖';
+
+  const bubble = document.createElement('div');
+  bubble.className = 'ai-msg-bubble';
+  bubble.innerHTML = aiRenderMarkdown(texto);
+
+  div.appendChild(mini);
+  div.appendChild(bubble);
+
+  const msgs = document.getElementById('ai-messages');
+  // Quitar typing si existe
+  const typing = document.getElementById('ai-typing-el');
+  if(typing) typing.remove();
+
+  msgs.appendChild(div);
+  msgs.scrollTop = msgs.scrollHeight;
+
+  if(rol === 'assistant') {
+    aiHistorial.push({role:'assistant', content: texto});
+  } else {
+    aiHistorial.push({role:'user', content: texto});
+  }
+  return contId;
+}
+
+function aiMostrarTyping() {
+  const msgs = document.getElementById('ai-messages');
+  const typing = document.createElement('div');
+  typing.id = 'ai-typing-el';
+  typing.className = 'ai-msg assistant';
+  typing.innerHTML = `<div class="ai-msg-mini">🤖</div>
+    <div class="ai-msg-bubble"><div class="ai-typing"><span></span><span></span><span></span></div></div>`;
+  msgs.appendChild(typing);
+  msgs.scrollTop = msgs.scrollHeight;
+}
+
+function aiQuitarTyping() {
+  const t = document.getElementById('ai-typing-el');
+  if(t) t.remove();
+}
+
+// ── Markdown simple ──────────────────────────────────────
+function aiRenderMarkdown(txt) {
+  if(!txt) return '';
+  return txt
+    // Headers
+    .replace(/^### (.+)$/gm, '<h3>$1</h3>')
+    .replace(/^## (.+)$/gm, '<h3>$1</h3>')
+    // Bold
+    .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+    // Italic / colored
+    .replace(/\*(.+?)\*/g, '<em>$1</em>')
+    // Tablas simples (pipe-delimited)
+    .replace(/\|(.+)\|/g, (match) => {
+      const cells = match.split('|').filter((c,i,a)=>i>0&&i<a.length-1).map(c=>c.trim());
+      const isHeader = cells.every(c=>/^[-:]+$/.test(c));
+      if(isHeader) return '';
+      const tag = 'td';
+      return `<tr>${cells.map(c=>`<${tag}>${c}</${tag}>`).join('')}</tr>`;
+    })
+    // Listas
+    .replace(/^[•\-\*] (.+)$/gm, '<li>$1</li>')
+    .replace(/(<li>.*<\/li>)/s, '<ul>$1</ul>')
+    // Porcentajes y KPIs resaltados
+    .replace(/(\d+\.?\d*%)/g, '<span class="ai-kpi">$1</span>')
+    // Saltos de línea
+    .replace(/\n\n/g, '<br><br>')
+    .replace(/\n/g, '<br>');
+}
+
+// ── Envío de mensajes ────────────────────────────────────
+async function aiEnviar() {
+  if(aiThinking) return;
+  const input = document.getElementById('ai-input');
+  const txt = (input.value || '').trim();
+  if(!txt) return;
+
+  input.value = '';
+  aiAutoResize(input);
+  aiThinking = true;
+  document.getElementById('ai-send').disabled = true;
+  document.getElementById('ai-status').textContent = 'Analizando datos...';
+  document.getElementById('ai-status').className = 'ai-status thinking';
+
+  // Añadir mensaje del usuario al historial visual (pero no al historial de API todavía)
+  const msgs = document.getElementById('ai-messages');
+  const userDiv = document.createElement('div');
+  userDiv.className = 'ai-msg user';
+  userDiv.innerHTML = `<div class="ai-msg-mini">👤</div><div class="ai-msg-bubble">${txt.replace(/</g,'&lt;')}</div>`;
+  msgs.appendChild(userDiv);
+  msgs.scrollTop = msgs.scrollHeight;
+
+  // Ocultar sugerencias mientras piensa
+  document.getElementById('ai-suggestions').style.opacity = '0.3';
+  document.getElementById('ai-suggestions').style.pointerEvents = 'none';
+
+  aiMostrarTyping();
+
+  // Preparar historial para la API (sin el mensaje actual todavía)
+  const mensajesAPI = [
+    ...aiHistorial,
+    { role: 'user', content: txt }
+  ];
+
+  try {
+    // ── Verificar API Key ──────────────────────────────────
+    if(!AI_API_KEY) {
+      aiQuitarTyping();
+      aiMostrarConfigKey();
+      throw new Error('CONFIG_KEY');
+    }
+
+    const contexto = aiBuildContext();
+
+    const respuesta = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': AI_API_KEY,
+        'anthropic-version': '2023-06-01',
+        'anthropic-dangerous-direct-browser-access': 'true'
+      },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 1000,
+        system: contexto,
+        messages: mensajesAPI.slice(-14) // máximo 14 mensajes para no exceder el contexto
+      })
+    });
+
+    if(!respuesta.ok) {
+      const err = await respuesta.json().catch(()=>({error:{message:'Error de red'}}));
+      throw new Error(err?.error?.message || `HTTP ${respuesta.status}`);
+    }
+
+    const data = await respuesta.json();
+    const textoResp = data.content?.map(b=>b.text||'').join('') || '(Sin respuesta)';
+
+    aiQuitarTyping();
+
+    // Añadir al historial interno
+    aiHistorial.push({ role: 'user', content: txt });
+    aiHistorial.push({ role: 'assistant', content: textoResp });
+
+    // Render respuesta
+    const bubble = document.createElement('div');
+    bubble.className = 'ai-msg assistant';
+    bubble.innerHTML = `<div class="ai-msg-mini">🤖</div><div class="ai-msg-bubble">${aiRenderMarkdown(textoResp)}</div>`;
+    const msgsEl = document.getElementById('ai-messages');
+    msgsEl.appendChild(bubble);
+    msgsEl.scrollTop = msgsEl.scrollHeight;
+
+    // Nuevas sugerencias contextuales post-respuesta
+    aiRenderSugerencias();
+
+  } catch(e) {
+    aiQuitarTyping();
+    if(e.message === 'CONFIG_KEY') {
+      // No mostrar error — el modal de config ya se abrió
+    } else if(e.message?.includes('401') || e.message?.toLowerCase().includes('api_key') || e.message?.toLowerCase().includes('authentication')) {
+      // API Key inválida
+      const bubble = document.createElement('div');
+      bubble.className = 'ai-msg assistant';
+      bubble.innerHTML = `<div class="ai-msg-mini">🤖</div>
+        <div class="ai-msg-bubble" style="border-color:rgba(224,80,80,.35)">
+          🔑 <strong>API Key inválida o expirada.</strong><br>
+          <span style="font-size:.75rem;color:var(--txt2)">Configura una key válida con el botón ⚙️ del encabezado.</span><br>
+          <button onclick="aiMostrarConfigKey()" style="margin-top:.5rem;background:rgba(224,80,80,.2);color:var(--red2);border:1px solid var(--red);border-radius:7px;padding:4px 12px;font-size:.75rem;cursor:pointer;font-family:'Outfit',sans-serif">⚙️ Configurar API Key</button>
+        </div>`;
+      document.getElementById('ai-messages').appendChild(bubble);
+      document.getElementById('ai-messages').scrollTop = 99999;
+      AI_API_KEY = '';
+      localStorage.removeItem('fc_ai_key');
+    } else {
+      const errMsg = `Lo siento, hubo un error: **${e.message}**\n\nSi el problema persiste, verifica tu API Key con el botón ⚙️.`;
+      const bubble = document.createElement('div');
+      bubble.className = 'ai-msg assistant';
+      bubble.innerHTML = `<div class="ai-msg-mini">🤖</div><div class="ai-msg-bubble ai-warn">${aiRenderMarkdown(errMsg)}</div>`;
+      document.getElementById('ai-messages').appendChild(bubble);
+      document.getElementById('ai-messages').scrollTop = 99999;
+    }
+  } finally {
+    aiThinking = false;
+    document.getElementById('ai-send').disabled = false;
+    document.getElementById('ai-status').textContent = 'Club Campestre · Asistente Analítico';
+    document.getElementById('ai-status').className = 'ai-status';
+    document.getElementById('ai-suggestions').style.opacity = '';
+    document.getElementById('ai-suggestions').style.pointerEvents = '';
+  }
+}
+
+function aiHandleKey(e) {
+  if(e.key === 'Enter' && !e.shiftKey) {
+    e.preventDefault();
+    aiEnviar();
+  }
+}
+
+function aiAutoResize(el) {
+  el.style.height = 'auto';
+  el.style.height = Math.min(el.scrollHeight, 100) + 'px';
+}
+
+function aiLimpiarChat() {
+  aiHistorial = [];
+  document.getElementById('ai-messages').innerHTML = '';
+  aiMensajeBienvenida();
+  aiRenderSugerencias();
+}
+
+// ── Inicialización ───────────────────────────────────────
+// Mostrar notif si hay alertas críticas después de cargar datos
+setTimeout(()=>{
+  if(typeof calcularAlertas === 'function'){
+    const criticas = calcularAlertas().filter(a=>a.tipo==='red').length;
+    if(criticas > 0 && !aiPanelOpen){
+      document.getElementById('ai-fab').classList.add('has-notif');
+    }
+  }
+}, 4000);
+</script>
+
+<!-- ═══════════════════════════════════════════════════════
+     MODAL CONFIGURACIÓN API KEY DEL ASISTENTE
+═══════════════════════════════════════════════════════ -->
+<div id="ai-key-modal" style="display:none;position:fixed;inset:0;z-index:9000;align-items:center;justify-content:center;background:rgba(0,0,0,.82);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)">
+  <div style="background:var(--panel);border:1px solid #4db8e8;border-radius:18px;padding:1.8rem 2rem;width:440px;max-width:96vw;box-shadow:0 16px 60px rgba(77,184,232,.3);animation:fadeUp .22s ease;position:relative">
+
+    <!-- Header -->
+    <div style="display:flex;align-items:center;gap:.7rem;margin-bottom:1.2rem">
+      <div style="width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg,#1a5fa3,#4db8e8);display:flex;align-items:center;justify-content:center;font-size:1.2rem;flex-shrink:0;box-shadow:0 0 14px rgba(77,184,232,.4)">🤖</div>
+      <div style="flex:1">
+        <div style="font-family:'Bebas Neue',sans-serif;font-size:1.1rem;letter-spacing:2px;color:#88ccff">CONFIGURAR ASISTENTE IA</div>
+        <div style="font-size:.62rem;color:rgba(136,204,255,.55);letter-spacing:.5px;margin-top:1px">Fitness Intelligence · Club Campestre Aguascalientes</div>
+      </div>
+      <button onclick="document.getElementById('ai-key-modal').style.display='none'"
+        style="background:rgba(77,184,232,.1);border:1px solid rgba(77,184,232,.2);border-radius:8px;color:#88ccff;width:30px;height:30px;cursor:pointer;font-size:.9rem;display:flex;align-items:center;justify-content:center;transition:background .15s"
+        onmouseover="this.style.background='rgba(77,184,232,.25)'" onmouseout="this.style.background='rgba(77,184,232,.1)'">✕</button>
+    </div>
+
+    <!-- Instrucciones -->
+    <div style="background:rgba(77,184,232,.07);border:1px solid rgba(77,184,232,.18);border-radius:10px;padding:.85rem 1rem;margin-bottom:1rem;font-size:.78rem;color:var(--txt);line-height:1.6">
+      <div style="font-weight:700;color:#88ccff;margin-bottom:.4rem">🔑 ¿Cómo obtener tu API Key?</div>
+      <ol style="padding-left:1.2rem;margin:0;color:var(--txt2)">
+        <li>Ve a <a href="https://console.anthropic.com" target="_blank" rel="noopener" style="color:#4db8e8">console.anthropic.com</a></li>
+        <li>Inicia sesión o crea una cuenta gratuita</li>
+        <li>Ve a <strong style="color:var(--txt)">API Keys</strong> → <strong style="color:var(--txt)">Create Key</strong></li>
+        <li>Copia la key — comienza con <code style="background:rgba(77,184,232,.15);padding:1px 6px;border-radius:4px;font-family:'DM Mono',monospace;font-size:.75rem">sk-ant-</code></li>
+        <li>Pégala abajo y haz clic en Guardar</li>
+      </ol>
+      <div style="margin-top:.6rem;font-size:.67rem;color:rgba(136,204,255,.45);border-top:1px solid rgba(77,184,232,.12);padding-top:.5rem">
+        🔒 La key se guarda <strong style="color:rgba(136,204,255,.6)">solo en este dispositivo</strong> (localStorage). Anthropic ofrece $5 USD de crédito gratuito para cuentas nuevas. Costo estimado por consulta: ~$0.003.
+      </div>
+    </div>
+
+    <!-- Campo de API Key -->
+    <div style="margin-bottom:.85rem">
+      <label style="font-size:.64rem;text-transform:uppercase;letter-spacing:1px;color:rgba(136,204,255,.7);display:block;margin-bottom:.35rem">Tu API Key de Anthropic</label>
+      <div style="display:flex;gap:.4rem;align-items:center">
+        <input type="password" id="ai-key-input"
+          placeholder="sk-ant-api03-..."
+          autocomplete="off"
+          style="flex:1;background:rgba(77,184,232,.07);border:1px solid rgba(77,184,232,.22);border-radius:10px;padding:.65rem .9rem;color:var(--txt);font-family:'DM Mono',monospace;font-size:.8rem;outline:none;transition:border-color .15s"
+          onfocus="this.style.borderColor='#4db8e8'"
+          onblur="this.style.borderColor='rgba(77,184,232,.22)'"
+          onkeydown="if(event.key==='Enter')aiGuardarKey()">
+        <button
+          onclick="const i=document.getElementById('ai-key-input');i.type=i.type==='password'?'text':'password';this.textContent=i.type==='password'?'👁':'🔒'"
+          title="Mostrar/ocultar key"
+          style="background:rgba(77,184,232,.1);border:1px solid rgba(77,184,232,.2);border-radius:8px;color:#88ccff;padding:0 11px;height:40px;cursor:pointer;font-size:.82rem;flex-shrink:0;transition:background .15s"
+          onmouseover="this.style.background='rgba(77,184,232,.22)'" onmouseout="this.style.background='rgba(77,184,232,.1)'">👁</button>
+      </div>
+    </div>
+
+    <!-- Botones de acción -->
+    <div style="display:flex;gap:.5rem;margin-bottom:.6rem">
+      <button onclick="aiGuardarKey()"
+        style="flex:2;background:linear-gradient(135deg,#1a5fa3,#4db8e8);color:#fff;border:none;border-radius:10px;padding:.75rem;font-family:'Outfit',sans-serif;font-weight:700;font-size:.86rem;cursor:pointer;transition:opacity .15s;box-shadow:0 4px 16px rgba(77,184,232,.3)"
+        onmouseover="this.style.opacity='.88'" onmouseout="this.style.opacity='1'">
+        ✔ Guardar y activar asistente
+      </button>
+      <button onclick="document.getElementById('ai-key-modal').style.display='none'"
+        style="flex:1;background:rgba(255,255,255,.05);color:var(--txt2);border:1px solid var(--border);border-radius:10px;padding:.75rem;font-family:'Outfit',sans-serif;font-size:.82rem;cursor:pointer;transition:background .15s"
+        onmouseover="this.style.background='rgba(255,255,255,.08)'" onmouseout="this.style.background='rgba(255,255,255,.05)'">
+        Cancelar
+      </button>
+    </div>
+
+    <!-- Eliminar key existente -->
+    <div style="text-align:center">
+      <button onclick="aiOlvidarKey()" style="background:none;border:none;color:rgba(224,80,80,.5);font-size:.68rem;cursor:pointer;font-family:'Outfit',sans-serif;text-decoration:underline;transition:color .15s" onmouseover="this.style.color='var(--red2)'" onmouseout="this.style.color='rgba(224,80,80,.5)'">
+        🗑 Eliminar key guardada
+      </button>
+      &nbsp;·&nbsp;
+      <a href="https://docs.anthropic.com/en/api/getting-started" target="_blank" rel="noopener" style="color:rgba(77,184,232,.45);font-size:.68rem;text-decoration:none" onmouseover="this.style.color='#4db8e8'" onmouseout="this.style.color='rgba(77,184,232,.45)'">Ver documentación</a>
+    </div>
+  </div>
+</div>
 </body>
 </html>
 
