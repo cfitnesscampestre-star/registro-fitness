@@ -3312,6 +3312,10 @@ let recActual={fecha:'',hora:'',dia:'',items:[],clasesActivas:[]};
 let recIdx=0;
 
 const hoy=new Date();
+// ── Fecha en hora local (evita bug UTC que cambia el día a las 6 PM en México) ──
+function fechaLocalStr(d){
+  return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+}
 const lunesBase=new Date(hoy);lunesBase.setDate(hoy.getDate()-((hoy.getDay()+6)%7));
 let calOffset=0;
 
@@ -3388,7 +3392,7 @@ function abrirModal(id){
   const opts=instructores.map(i=>`<option value="${i.id}">${i.nombre}</option>`).join('');
   if(id==='m-clase'){
     document.getElementById('rc-inst').innerHTML=opts;
-    document.getElementById('rc-fecha').value=hoy.toISOString().slice(0,10);
+    document.getElementById('rc-fecha').value=fechaLocalStr(hoy);
     document.getElementById('rc-suplente').innerHTML='<option value="">— Sin suplente —</option>'+opts;
     cargarHorariosInst();
   }
@@ -3400,7 +3404,7 @@ function abrirModal(id){
     document.getElementById('sup-filtro-inst').innerHTML='<option value="">— Todos los suplentes —</option>'+opts;
     const ini=new Date(lunesBase);ini.setDate(ini.getDate()-28);
     document.getElementById('sup-fecha-ini').value=ini.toISOString().slice(0,10);
-    document.getElementById('sup-fecha-fin').value=hoy.toISOString().slice(0,10);
+    document.getElementById('sup-fecha-fin').value=fechaLocalStr(hoy);
     document.getElementById('sup-body').innerHTML='';
     document.getElementById('sup-export-btns').style.display='none';
   }
@@ -3907,7 +3911,7 @@ function renderCal(){
     const f = new Date(lunes); f.setDate(lunes.getDate()+i);
     fechasPorDia[d] = f.toISOString().slice(0,10);
   });
-  const hoyStr2 = hoy.toISOString().slice(0,10);
+  const hoyStr2 = fechaLocalStr(hoy);
 
   HORAS_CAL.forEach(hora=>{
     html+=`<div style="padding:5px 6px;color:var(--txt3);font-family:'DM Mono',monospace;font-size:.69rem;display:flex;align-items:flex-start;padding-top:8px">${hora}</div>`;
@@ -4557,7 +4561,7 @@ function selModoRec(modo){
 }
 
 function iniciarRecorrido(){
-  document.getElementById('ri-fecha').value=hoy.toISOString().slice(0,10);
+  document.getElementById('ri-fecha').value=fechaLocalStr(hoy);
   const ahora=new Date();
   document.getElementById('ri-hora').value=`${String(ahora.getHours()).padStart(2,'0')}:${String(ahora.getMinutes()).padStart(2,'0')}`;
   const diaActual=DIAS[(ahora.getDay()+6)%7];
@@ -5150,7 +5154,7 @@ function guardarFalta(){
   if(ok && inst){
     const yaTieneFalta=registros.find(r=>
       r.inst_id===instId && r.dia===diaVal && r.clase===claseVal &&
-      r.estado==='falta' && r.fecha===hoy.toISOString().slice(0,10)
+      r.estado==='falta' && r.fecha===fechaLocalStr(hoy)
     );
     if(yaTieneFalta) showToast(`${inst.nombre} ya tiene falta registrada para ${claseVal} este día`,'warn');
   }
@@ -5158,7 +5162,7 @@ function guardarFalta(){
   const nuevoIdFalta=(registros.length>0?Math.max(...registros.map(r=>parseInt(r.id)||0)):0)+1;
   registros.push({id:nuevoIdFalta,inst_id:instId,dia:diaVal,
     clase:claseVal,hora:'00:00',asistentes:0,cap:0,dur:0,estado:'falta',
-    fecha:hoy.toISOString().slice(0,10),tipo:'falta',
+    fecha:fechaLocalStr(hoy),tipo:'falta',
     tipo_falta:document.getElementById('rf-tipo').value,
     nota:document.getElementById('rf-nota').value,suplente_id:null});
   cerrarModal('m-falta');renderAll();
@@ -7853,7 +7857,7 @@ function limpiarLog() {
 // ═══ VISTA HOY ════════════════════════════════════════
 // ═══════════════════════════════════════════════════════
 function renderHoy() {
-  const hoyStr  = hoy.toISOString().slice(0, 10);
+  const hoyStr  = fechaLocalStr(hoy);
   const diaHoy  = DIAS[(hoy.getDay() + 6) % 7]; // Lunes=0…Domingo=6
   const fecLbl  = hoy.toLocaleDateString('es-MX', {weekday:'long', day:'numeric', month:'long', year:'numeric'});
 
@@ -7867,7 +7871,7 @@ function renderHoy() {
     (inst.horario || []).forEach(slot => {
       if(slot.dia !== diaHoy) return;
       const regs = registros.filter(r =>
-        r.inst_id === inst.id && r.fecha === hoyStr &&
+        String(r.inst_id)===String(inst.id) && r.fecha === hoyStr &&
         r.dia === slot.dia && r.hora === slot.hora
       );
       const reg = regs.length > 0 ? regs[regs.length - 1] : null;
@@ -7969,7 +7973,7 @@ function renderHoy() {
 // ═══ VERIFICAR CLASES SIN REGISTRAR ══════════════════
 // ═══════════════════════════════════════════════════════
 function verificarClasesSinRegistrar(silencioso = false) {
-  const hoyStr = hoy.toISOString().slice(0, 10);
+  const hoyStr = fechaLocalStr(hoy);
   const diaHoy = DIAS[(hoy.getDay() + 6) % 7];
 
   const pendientes = [];
@@ -7977,7 +7981,7 @@ function verificarClasesSinRegistrar(silencioso = false) {
     (inst.horario || []).forEach(slot => {
       if(slot.dia !== diaHoy) return;
       const tieneReg = registros.some(r =>
-        r.inst_id === inst.id && r.fecha === hoyStr &&
+        String(r.inst_id)===String(inst.id) && r.fecha === hoyStr &&
         r.dia === slot.dia && r.hora === slot.hora
       );
       if(!tieneReg) pendientes.push(`${slot.hora} ${slot.clase} (${inst.nombre.split(' ')[0]})`);
@@ -8196,7 +8200,7 @@ function _triggerRender(viewId) {
 let _compTipo='periodos', _compClasesSel=[], _compProfesSel=[];
 
 function renderComparar(){
-  const hoyS=hoy.toISOString().slice(0,10);
+  const hoyS=fechaLocalStr(hoy);
   const mesAnt=new Date(hoy);mesAnt.setDate(1);mesAnt.setMonth(mesAnt.getMonth()-1);
   const mesAntFin=new Date(hoy);mesAntFin.setDate(0);
   const mesActIni=new Date(hoy);mesActIni.setDate(1);
@@ -8648,7 +8652,7 @@ function renderMobRanking(){
 
 // ── Render de la home móvil ──────────────────────────
 function renderMobileHome() {
-  const hoyStr  = hoy.toISOString().slice(0,10);
+  const hoyStr  = fechaLocalStr(hoy);
   const diaHoy  = DIAS[(hoy.getDay()+6)%7];
 
   // KPIs
@@ -8657,7 +8661,7 @@ function renderMobileHome() {
     (inst.horario||[]).forEach(slot => {
       if(slot.dia !== diaHoy) return;
       const reg = registros.filter(r =>
-        r.inst_id===inst.id && r.fecha===hoyStr && r.dia===slot.dia && r.hora===slot.hora
+        String(r.inst_id)===String(inst.id) && r.fecha===hoyStr && r.dia===slot.dia && r.hora===slot.hora
       ).pop() || null;
       clasesHoy.push({ inst, slot, reg });
     });
@@ -8798,7 +8802,7 @@ function _procesarBusqueda(q) {
   const esModificar  = qLow.includes('modific')||qLow.includes('cambiar')||qLow.includes('ajustar')||qLow.includes('mover');
   const esReporte    = qLow.includes('reporte')||qLow.includes('imprimir')||qLow.includes('exportar');
 
-  const hoyS=hoy.toISOString().slice(0,10);
+  const hoyS=fechaLocalStr(hoy);
   let ini,fin,periodoLbl;
 
   if(esHoy){
@@ -8967,7 +8971,7 @@ function _busquedaVs(termA, termB, area){
   const iA=!cA?findInst(termA):null, iB=!cB?findInst(termB):null;
 
   const mesIni=new Date(hoy);mesIni.setDate(1);
-  const ini=mesIni.toISOString().slice(0,10),fin=hoy.toISOString().slice(0,10);
+  const ini=mesIni.toISOString().slice(0,10),fin=fechaLocalStr(hoy);
   const regs=registros.filter(r=>r.fecha>=ini&&r.fecha<=fin&&(r.estado==='ok'||r.estado==='sub'));
 
   function stats(regsF){
@@ -9502,7 +9506,7 @@ function toggleSidebar() {
 
 // ═══ COMPARADOR — utilidades ══════════════════════════
 function compAjustarFechas(iniId, finId, preset) {
-  const hoyS = hoy.toISOString().slice(0,10);
+  const hoyS = fechaLocalStr(hoy);
   let ini, fin;
   if(preset === 'mes') {
     const m = new Date(hoy); m.setDate(1);
@@ -9522,7 +9526,7 @@ function compAjustarFechas(iniId, finId, preset) {
 }
 
 function compAtajo(preset) {
-  const hoyS = hoy.toISOString().slice(0,10);
+  const hoyS = fechaLocalStr(hoy);
   let iA,fA,iB,fB;
   if(preset === 'este-mes-vs-ant') {
     const mA = new Date(hoy); mA.setDate(1); mA.setMonth(mA.getMonth()-1);
@@ -9722,14 +9726,14 @@ function rkToggleSugerencias(id) {
   setTimeout(() => {
     verificarClasesSinRegistrar(true); // silencioso: solo actualiza badge
     // También actualizar el badge del tab Hoy con el conteo de pendientes
-    const hoyStr = hoy.toISOString().slice(0, 10);
+    const hoyStr = fechaLocalStr(hoy);
     const diaHoy = DIAS[(hoy.getDay() + 6) % 7];
     let pend = 0;
     instructores.forEach(inst => {
       (inst.horario || []).forEach(slot => {
         if(slot.dia !== diaHoy) return;
         const tieneReg = registros.some(r =>
-          r.inst_id === inst.id && r.fecha === hoyStr &&
+          String(r.inst_id)===String(inst.id) && r.fecha === hoyStr &&
           r.dia === slot.dia && r.hora === slot.hora
         );
         if(!tieneReg) pend++;
