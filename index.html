@@ -3286,16 +3286,138 @@ html.tema-claro .toast-info{background:#e8f4fb;border-color:#1a5fa3;color:#0d3b6
       <label>Encabezado del documento</label>
       <input type="text" id="firmas-semana-txt" class="ctrl" placeholder="Ej: 09 al 15 de Marzo 2026" style="font-size:.8rem">
     </div>
-    <button class="btn bd" style="width:100%;padding:10px;font-size:.84rem;display:flex;align-items:center;justify-content:center;gap:7px;border-radius:10px" onclick="generarHojaFirmasPDF()">
-      <svg viewBox="0 0 20 20" width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 3H13L16 6V17H5Z"/><polyline points="13,3 13,6 16,6"/><line x1="8" y1="10" x2="13" y2="10"/><line x1="8" y1="13" x2="13" y2="13"/></svg>
-      Generar Hoja de Firmas PDF
-    </button>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:.5rem;">
+      <button class="btn bd" style="padding:10px;font-size:.8rem;display:flex;align-items:center;justify-content:center;gap:6px;border-radius:10px" onclick="generarHojaFirmasPDF()">
+        <svg viewBox="0 0 20 20" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 3H13L16 6V17H5Z"/><polyline points="13,3 13,6 16,6"/><line x1="8" y1="10" x2="13" y2="10"/><line x1="8" y1="13" x2="13" y2="13"/></svg>
+        PDF directo
+      </button>
+      <button class="btn bg" style="padding:10px;font-size:.8rem;display:flex;align-items:center;justify-content:center;gap:6px;border-radius:10px" onclick="abrirFirmasDigitales()">
+        <svg viewBox="0 0 20 20" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M4 16 Q6 10 10 8 Q14 6 16 4" stroke-linecap="round"/>
+          <path d="M13 3 L17 7 L16 4 L13 3Z" fill="currentColor" stroke="none"/>
+          <line x1="3" y1="17" x2="17" y2="17" stroke-linecap="round"/>
+        </svg>
+        ✍ Firmas digitales
+      </button>
+    </div>
     <div style="font-size:.6rem;color:var(--txt3);margin-top:.4rem;line-height:1.6;text-align:center">
-      Formato oficial · suplencias y faltas en rojo · listo para imprimir
+      PDF directo = descarga inmediata · Firmas digitales = cada profesor firma en tablet con stylus
     </div>
   </div>
 </div>
 </div>
+
+<!-- ═══ MODAL FIRMAS DIGITALES ═══════════════════════════════════════════ -->
+<div class="ov" id="m-firmas-digitales" style="align-items:stretch;padding:0;">
+<div style="width:100%;height:100%;display:flex;flex-direction:column;background:var(--bg);overflow:hidden;">
+
+  <!-- Header -->
+  <div style="background:var(--panel);border-bottom:1px solid var(--border);padding:.6rem 1rem;
+              display:flex;align-items:center;justify-content:space-between;flex-shrink:0;gap:.6rem;flex-wrap:wrap;">
+    <div style="display:flex;align-items:center;gap:.6rem;min-width:0;">
+      <div style="background:var(--verde);width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+        <svg viewBox="0 0 20 20" width="16" height="16" fill="none" stroke="#fff" stroke-width="1.6" stroke-linecap="round">
+          <path d="M4 16 Q6 10 10 8 Q14 6 16 4"/><path d="M13 3 L17 7 L16 4 L13 3Z" fill="#fff" stroke="none"/>
+          <line x1="3" y1="17" x2="17" y2="17"/>
+        </svg>
+      </div>
+      <div>
+        <div style="font-family:'Bebas Neue',sans-serif;font-size:.95rem;letter-spacing:1.5px;color:var(--neon);">FIRMAS DIGITALES</div>
+        <div id="fd-semana-lbl" style="font-size:.65rem;color:var(--txt2);"></div>
+      </div>
+    </div>
+    <div style="display:flex;align-items:center;gap:.5rem;flex-wrap:wrap;">
+      <!-- Progreso -->
+      <div style="background:var(--panel2);border:1px solid var(--border);border-radius:8px;padding:4px 10px;font-size:.72rem;">
+        <span id="fd-prog-firmados" style="color:var(--neon);font-weight:700;">0</span>
+        <span style="color:var(--txt3);"> / </span>
+        <span id="fd-prog-total" style="color:var(--txt2);font-weight:600;">0</span>
+        <span style="color:var(--txt3);"> firmados</span>
+      </div>
+      <button onclick="fd_exportarPDF()" style="background:var(--gold);color:#0a0a0a;border:none;border-radius:8px;
+        padding:6px 12px;font-family:'Outfit',sans-serif;font-size:.75rem;font-weight:700;cursor:pointer;
+        display:flex;align-items:center;gap:5px;transition:all .2s;">
+        <svg viewBox="0 0 20 20" width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M5 3H13L16 6V17H5Z"/><polyline points="13,3 13,6 16,6"/><line x1="8" y1="10" x2="13" y2="10"/><line x1="8" y1="13" x2="13" y2="13"/></svg>
+        Generar PDF
+      </button>
+      <button onclick="cerrarModal('m-firmas-digitales')" style="background:var(--panel2);color:var(--txt2);border:1px solid var(--border);
+        border-radius:8px;padding:6px 12px;font-family:'Outfit',sans-serif;font-size:.75rem;cursor:pointer;">
+        Cerrar
+      </button>
+    </div>
+  </div>
+
+  <!-- Layout: Lista izq + Panel firma der -->
+  <div style="flex:1;display:flex;min-height:0;overflow:hidden;">
+
+    <!-- Lista de profesores -->
+    <div id="fd-lista" style="width:220px;flex-shrink:0;border-right:1px solid var(--border);
+      overflow-y:auto;background:var(--panel);padding:.5rem;">
+      <div style="font-size:.6rem;text-transform:uppercase;letter-spacing:1.5px;color:var(--txt3);
+        padding:.3rem .4rem .4rem;font-weight:700;">Profesores</div>
+      <!-- se llena dinámicamente -->
+    </div>
+
+    <!-- Panel firma -->
+    <div style="flex:1;display:flex;flex-direction:column;min-width:0;overflow:hidden;">
+
+      <!-- Info del profesor activo -->
+      <div id="fd-prof-info" style="background:var(--panel2);border-bottom:1px solid var(--border);
+        padding:.7rem 1rem;flex-shrink:0;display:flex;align-items:center;gap:.8rem;flex-wrap:wrap;">
+        <div id="fd-prof-avatar" style="width:42px;height:42px;border-radius:50%;
+          display:flex;align-items:center;justify-content:center;font-size:.9rem;font-weight:700;
+          color:#fff;flex-shrink:0;background:var(--verde);">?</div>
+        <div style="flex:1;min-width:0;">
+          <div id="fd-prof-nombre" style="font-family:'Bebas Neue',sans-serif;font-size:1.15rem;
+            letter-spacing:1px;color:var(--neon);">Selecciona un profesor</div>
+          <div id="fd-prof-clases-lbl" style="font-size:.68rem;color:var(--txt2);"></div>
+        </div>
+        <div style="display:flex;gap:.4rem;">
+          <button onclick="fd_limpiarFirma()" style="background:var(--panel);border:1px solid var(--border);
+            color:var(--txt2);border-radius:7px;padding:5px 12px;font-size:.72rem;
+            font-family:'Outfit',sans-serif;cursor:pointer;transition:all .2s;"
+            title="Borrar trazo y volver a firmar">
+            ↺ Borrar
+          </button>
+          <button onclick="fd_guardarFirma()" id="fd-btn-guardar" style="background:var(--v2);color:#fff;border:none;
+            border-radius:7px;padding:5px 16px;font-size:.78rem;font-weight:700;
+            font-family:'Outfit',sans-serif;cursor:pointer;transition:all .2s;">
+            ✔ Guardar firma
+          </button>
+        </div>
+      </div>
+
+      <!-- Instrucción y área de firma -->
+      <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;
+        padding:1rem;gap:.8rem;background:var(--bg);">
+
+        <div id="fd-instruccion" style="font-size:.78rem;color:var(--txt2);text-align:center;
+          max-width:400px;line-height:1.5;">
+          Selecciona un profesor de la lista para que firme en el área de abajo
+        </div>
+
+        <!-- Canvas de firma -->
+        <div style="position:relative;border-radius:14px;overflow:hidden;box-shadow:0 4px 24px rgba(0,0,0,.4);">
+          <canvas id="fd-canvas"
+            style="display:block;background:#fff;touch-action:none;cursor:crosshair;border-radius:4px;"
+            width="600" height="200">
+          </canvas>
+          <!-- Línea guía de firma -->
+          <div style="position:absolute;bottom:40px;left:20px;right:20px;height:1px;background:rgba(26,122,69,.35);pointer-events:none;"></div>
+          <div style="position:absolute;bottom:28px;left:20px;font-size:10px;color:rgba(26,122,69,.5);pointer-events:none;font-family:serif;font-style:italic;">
+            Firma aquí
+          </div>
+        </div>
+
+        <!-- Mini clases del profesor -->
+        <div id="fd-clases-list" style="width:100%;max-width:640px;display:flex;gap:5px;flex-wrap:wrap;justify-content:center;"></div>
+      </div>
+    </div>
+  </div>
+
+</div>
+</div>
+<!-- FIN MODAL FIRMAS DIGITALES -->
 
 <!-- DIAGNÓSTICO HEATMAP -->
 <div class="ov" id="m-diag-horario">
@@ -3403,7 +3525,9 @@ html.tema-claro .toast-info{background:#e8f4fb;border-color:#1a5fa3;color:#0d3b6
   </div>
 
   <!-- Grid del calendario -->
-  <div id="calsup-cal-grid" style="flex-shrink:0;margin-bottom:.5rem;"></div>
+  <div id="mob-sup-cal-wrap" style="flex-shrink:0;margin-bottom:.5rem;">
+    <div id="calsup-cal-grid"></div>
+  </div>
 
   <!-- Leyenda -->
   <div style="display:flex;gap:14px;margin-bottom:.6rem;flex-shrink:0;flex-wrap:wrap;">
@@ -5249,6 +5373,7 @@ function guardarRecorrido(){
       ex.estado=nuevoEst;
       ex.suplente_id=item.suplente_id||null;
       ex.cap=cap;
+      ex.updatedAt=Date.now();
     } else {
       const maxId=registros.length>0?Math.max(...registros.map(r=>parseInt(r.id)||0)):0;
       registros.push({
@@ -5260,7 +5385,8 @@ function guardarRecorrido(){
         estado:nuevoEst,
         fecha:recActual.fecha,
         tipo:'recorrido',
-        suplente_id:item.suplente_id||null
+        suplente_id:item.suplente_id||null,
+        updatedAt:Date.now()
       });
     }
   });
@@ -5406,7 +5532,8 @@ function guardarClase(){
     dia:diaVal, clase:claseNombre, hora:horaVal,
     asistentes:asisVal, cap:capInput,
     dur:parseInt(document.getElementById('rc-dur').value)||60,
-    estado:est, fecha:fechaVal, tipo:'clase', suplente_id:supId});
+    estado:est, fecha:fechaVal, tipo:'clase', suplente_id:supId,
+    updatedAt:Date.now()});
   cerrarModal('m-clase');renderAll();
   registrarLog('clase', `${inst.nombre} · ${claseNombre} · ${diaVal} ${horaVal} · ${fechaVal} · ${est==='sub'?'Suplencia':'Ok'} · ${asisVal} asis.`);
   showToast(`Clase registrada para ${inst.nombre}`,'ok');
@@ -5435,7 +5562,8 @@ function guardarFalta(){
     clase:claseVal,hora:'00:00',asistentes:0,cap:0,dur:0,estado:'falta',
     fecha:fechaLocalStr(hoy),tipo:'falta',
     tipo_falta:document.getElementById('rf-tipo').value,
-    nota:document.getElementById('rf-nota').value,suplente_id:null});
+    nota:document.getElementById('rf-nota').value,suplente_id:null,
+    updatedAt:Date.now()});
   cerrarModal('m-falta');renderAll();
   registrarLog('falta', `${inst.nombre} · ${claseVal} · ${diaVal} · ${document.getElementById('rf-tipo').value}`);
   showToast(`Falta registrada para ${inst.nombre}`,'warn');
@@ -7967,7 +8095,7 @@ function renderHeatmap() {
 function verDiagHorario(dia, hora) {
   // Construir el diagnóstico completo del slot y mostrarlo en modal
   const instId   = document.getElementById('hm-inst-fil')?.value  || '';
-  const claseFil = document.getElementById('hm-clase')?.value || '';
+  const claseFil = document.getElementById('hm-clase-fil')?.value || '';
   const metric   = document.getElementById('hm-metric')?.value || 'aforo';
 
   // Recopilar todas las clases programadas en ese slot (respetando filtros)
@@ -8314,6 +8442,8 @@ let fbSyncing   = false;   // true mientras estamos subiendo a Firebase
 let fbReceiving = false;   // true mientras procesamos datos que bajan de Firebase
 let fbListener  = null;    // referencia al listener activo (para evitar duplicados)
 let fbWasOffline = false;
+let fbInicializado = false; // true SOLO después de recibir la primera respuesta de Firebase
+                             // NUNCA subir datos hasta que esto sea true
 
 const FIREBASE_ACTIVO = true;
 const FIREBASE_CONFIG = {
@@ -8372,7 +8502,7 @@ function cargarLocal(){
     if(sols) solicitudesInst = JSON.parse(sols);
     normalizarRegistros();
     const ts = localStorage.getItem('fc_ts');
-    if(ts) console.log('💾 Local cargado:', new Date(parseInt(ts)).toLocaleString('es-MX'));
+    
     return !!(inst || regs);
   } catch(e){
     console.warn('Error cargando localStorage:', e);
@@ -8383,8 +8513,28 @@ function cargarLocal(){
 // ── Subir TODOS los datos a Firebase ─────────
 async function sincronizarFirebase(){
   if(!FIREBASE_ACTIVO || !fbDb || fbSyncing || fbReceiving) return;
+
+  // ── GUARDIA CRÍTICA: nunca subir antes de recibir la primera respuesta de Firebase ──
+  // Esto evita que un dispositivo recién abierto (localStorage vacío) sobreescriba
+  // con datos vacíos antes de saber qué hay en la nube.
+  if(!fbInicializado){
+    console.warn('⏳ Firebase aún no inicializado — subida pospuesta');
+    return;
+  }
+
+  // ── GUARDIA: nunca subir si los datos locales están vacíos ───────────────────────
+  // Un dispositivo sin registros nunca debe borrar los datos de otros dispositivos.
+  if(registros.length === 0 && recorridos.length === 0){
+    const fbSnap = await fbDb.ref('fitness/registros').once('value');
+    if(fbSnap.val() && Object.keys(fbSnap.val()).length > 0){
+      console.warn('🚫 Local vacío pero Firebase tiene datos — subida cancelada');
+      return;
+    }
+  }
+
   fbSyncing = true;
   try{
+    const ts = Date.now();
     const payload = {
       instructores,
       registros:   registros.reduce((a,r)=>{ a[String(r.id)]=r; return a; },{}),
@@ -8392,12 +8542,12 @@ async function sincronizarFirebase(){
       salones,
       suplencias:  suplenciasPlan.reduce((a,s)=>{ a[String(s.id)]=s; return a; },{}),
       solicitudes: solicitudesInst.reduce((a,s)=>{ a[String(s.id)]=s; return a; },{}),
-      ts: Date.now()
+      ts
     };
     await fbDb.ref('fitness').set(payload);
+    // Actualizar fc_local_ts para que otros dispositivos sepan cuándo fue esto
+    localStorage.setItem('fc_local_ts', String(ts));
     setIndicador('🟢 Guardado en la nube ✔');
-    console.log('☁️  Firebase ←', new Date().toLocaleTimeString('es-MX'),
-      `| ${registros.length} registros | ${recorridos.length} recorridos`);
   } catch(e){
     console.warn('Firebase sync error:', e.message);
     setIndicador('🔴 Sin conexión — datos guardados localmente');
@@ -10790,6 +10940,617 @@ function calsupSelDia(key) {
   _calsupRender();
 }
 
+
+// ═══════════════════════════════════════════════════════════════════════
+// ═══ SISTEMA DE FIRMAS DIGITALES ══════════════════════════════════════
+// ═══════════════════════════════════════════════════════════════════════
+const _FD = {
+  profesores:   [],   // lista construida de los registros del periodo
+  profActivo:   null, // índice en _FD.profesores
+  firmas:       {},   // { profId: dataURL }
+  semana:       '',
+  fechaIni:     '',
+  fechaFin:     '',
+  canvas:       null,
+  ctx:          null,
+  dibujando:    false,
+  lastX:        0,
+  lastY:        0,
+  puntosActual: 0,    // para detectar si el canvas tiene algo
+};
+
+// ── Helpers ──────────────────────────────────────────────────────────
+function _fdInits(nombre) {
+  if(!nombre) return '??';
+  const p = nombre.trim().split(' ');
+  return ((p[0]||'?')[0] + ((p[1]||'')[0]||'')).toUpperCase();
+}
+function _fdColor(id) {
+  const C = ['#E85D04','#7209B7','#0077B6','#2D6A4F','#C1121F',
+             '#F59E0B','#0891B2','#BE185D','#15803D','#9333EA'];
+  return C[((parseInt(id)||1)-1) % C.length];
+}
+
+// ── Abrir el modal ────────────────────────────────────────────────────
+function abrirFirmasDigitales() {
+  const elI = document.getElementById('firmas-fecha-ini');
+  const elF = document.getElementById('firmas-fecha-fin');
+  const elT = document.getElementById('firmas-semana-txt');
+
+  const lun = new Date(lunesBase);
+  const dom = new Date(lun); dom.setDate(lun.getDate()+6);
+  const iso = d => d.toISOString().slice(0,10);
+  _FD.fechaIni = (elI && elI.value) ? elI.value : iso(lun);
+  _FD.fechaFin = (elF && elF.value) ? elF.value : iso(dom);
+
+  const fmt2 = s => new Date(s+'T12:00:00').toLocaleDateString('es-MX',{day:'2-digit',month:'long'});
+  _FD.semana = (elT && elT.value.trim())
+    ? elT.value.trim()
+    : `${fmt2(_FD.fechaIni)} al ${fmt2(_FD.fechaFin)} ${_FD.fechaIni.slice(0,4)}`;
+
+  // Construir lista de profesores del periodo (igual que generarHojaFirmasPDF)
+  const regs = registros.filter(r => r.fecha >= _FD.fechaIni && r.fecha <= _FD.fechaFin);
+  if(!regs.length) {
+    showToast('Sin registros en ese periodo', 'warn');
+    return;
+  }
+
+  const DIAS_ORD = ['Lunes','Martes','Miércoles','Jueves','Viernes','Sábado','Domingo'];
+  const porInst  = {};
+  regs.forEach(r => {
+    const inst = instructores.find(i => String(i.id) === String(r.inst_id));
+    if(!inst) return;
+    if(!porInst[inst.id]) porInst[inst.id] = { inst, clases: [] };
+    const h = r.hora || '';
+    let horaFmt = h, horaMin = 0;
+    if(h && !h.includes('a.') && !h.includes('p.')) {
+      const [hh, mm] = h.split(':').map(Number);
+      if(!isNaN(hh)) {
+        const s = hh >= 12 ? 'p. m.' : 'a. m.';
+        const h12 = hh === 0 ? 12 : hh > 12 ? hh - 12 : hh;
+        horaFmt = `${h12}:${String(mm||0).padStart(2,'0')} ${s}`;
+        horaMin = hh * 60 + (mm || 0);
+      }
+    }
+    porInst[inst.id].clases.push({
+      dia: r.dia || '', hora: horaFmt, horaMin,
+      clase: (r.clase || '').toUpperCase(),
+      alumnos: r.asistentes !== undefined ? parseInt(r.asistentes) : null,
+      estado: r.estado || 'ok'
+    });
+  });
+
+  _FD.profesores = Object.values(porInst)
+    .sort((a,b) => a.inst.nombre.localeCompare(b.inst.nombre))
+    .map(p => {
+      const mapa = {};
+      p.clases.forEach(c => {
+        const k = `${c.dia}|${c.hora}|${c.clase}`;
+        const pri = {falta:2,sub:1,ok:0}[c.estado]||0;
+        if(!mapa[k] || pri > ({falta:2,sub:1,ok:0}[mapa[k].estado]||0)) mapa[k] = c;
+      });
+      const clases = Object.values(mapa).sort((a,b) => {
+        const di = DIAS_ORD.indexOf(a.dia) - DIAS_ORD.indexOf(b.dia);
+        return di !== 0 ? di : (a.horaMin||0) - (b.horaMin||0);
+      });
+      return { inst: p.inst, clases, id: p.inst.id };
+    })
+    .filter(p => p.clases.length > 0);
+
+  _FD.profActivo = null;
+
+  // Abrir modal
+  document.getElementById('m-firmas-digitales').classList.add('on');
+
+  // Inicializar canvas
+  setTimeout(() => {
+    _fdInicializarCanvas();
+    _fdRenderLista();
+    _fdActualizarProgreso();
+    document.getElementById('fd-semana-lbl').textContent = _FD.semana;
+  }, 60);
+}
+
+// ── Canvas: inicializar y eventos ─────────────────────────────────────
+function _fdInicializarCanvas() {
+  const canvas = document.getElementById('fd-canvas');
+  if(!canvas) return;
+  _FD.canvas = canvas;
+  _FD.ctx    = canvas.getContext('2d');
+
+  // Canvas con proporciones de firma reales (3:1 aspect ratio)
+  // El canvas interno siempre es 600×200 para consistencia al exportar
+  const CANVAS_W = 600;
+  const CANVAS_H = 200;
+  canvas.width  = CANVAS_W;
+  canvas.height = CANVAS_H;
+  // Mostrar en pantalla ajustado al espacio disponible pero manteniendo 3:1
+  const dispW = Math.min(window.innerWidth - 260, 680);
+  const dispH = Math.round(dispW * (CANVAS_H / CANVAS_W));
+  canvas.style.width  = dispW + 'px';
+  canvas.style.height = dispH + 'px';
+  _FD._canvasAspect = CANVAS_W / CANVAS_H;
+
+  _fdLimpiarCanvas();
+
+  // ── Eventos touch (stylus + dedo) ──
+  canvas.addEventListener('touchstart', e => {
+    e.preventDefault();
+    const t = e.touches[0];
+    const r = canvas.getBoundingClientRect();
+    _FD.dibujando  = true;
+    _FD.lastX = (t.clientX - r.left) * (canvas.width  / r.width);
+    _FD.lastY = (t.clientY - r.top)  * (canvas.height / r.height);
+    _FD.ctx.beginPath();
+    _FD.ctx.moveTo(_FD.lastX, _FD.lastY);
+  }, { passive: false });
+
+  canvas.addEventListener('touchmove', e => {
+    e.preventDefault();
+    if(!_FD.dibujando) return;
+    const t = e.touches[0];
+    const r = canvas.getBoundingClientRect();
+    const x = (t.clientX - r.left) * (canvas.width  / r.width);
+    const y = (t.clientY - r.top)  * (canvas.height / r.height);
+    _fdDibujarLinea(x, y);
+    _FD.puntosActual++;
+  }, { passive: false });
+
+  canvas.addEventListener('touchend', e => {
+    e.preventDefault();
+    _FD.dibujando = false;
+    _FD.ctx.beginPath();
+  }, { passive: false });
+
+  // ── Eventos mouse (para probar en escritorio) ──
+  canvas.addEventListener('mousedown', e => {
+    const r = canvas.getBoundingClientRect();
+    _FD.dibujando = true;
+    _FD.lastX = (e.clientX - r.left) * (canvas.width  / r.width);
+    _FD.lastY = (e.clientY - r.top)  * (canvas.height / r.height);
+    _FD.ctx.beginPath();
+    _FD.ctx.moveTo(_FD.lastX, _FD.lastY);
+  });
+  canvas.addEventListener('mousemove', e => {
+    if(!_FD.dibujando) return;
+    const r = canvas.getBoundingClientRect();
+    const x = (e.clientX - r.left) * (canvas.width  / r.width);
+    const y = (e.clientY - r.top)  * (canvas.height / r.height);
+    _fdDibujarLinea(x, y);
+    _FD.puntosActual++;
+  });
+  canvas.addEventListener('mouseup',   () => { _FD.dibujando = false; _FD.ctx.beginPath(); });
+  canvas.addEventListener('mouseleave',() => { _FD.dibujando = false; _FD.ctx.beginPath(); });
+}
+
+function _fdDibujarLinea(x, y) {
+  const ctx = _FD.ctx;
+  ctx.strokeStyle = '#1a1a2e';
+  ctx.lineWidth   = 2.2;
+  ctx.lineCap     = 'round';
+  ctx.lineJoin    = 'round';
+  ctx.quadraticCurveTo(_FD.lastX, _FD.lastY, (x + _FD.lastX)/2, (y + _FD.lastY)/2);
+  ctx.stroke();
+  ctx.beginPath();
+  ctx.moveTo((x + _FD.lastX)/2, (y + _FD.lastY)/2);
+  _FD.lastX = x;
+  _FD.lastY = y;
+}
+
+function _fdLimpiarCanvas() {
+  if(!_FD.ctx || !_FD.canvas) return;
+  _FD.ctx.clearRect(0, 0, _FD.canvas.width, _FD.canvas.height);
+  _FD.ctx.fillStyle = '#ffffff';
+  _FD.ctx.fillRect(0, 0, _FD.canvas.width, _FD.canvas.height);
+  _FD.puntosActual = 0;
+  _FD.ctx.beginPath();
+}
+
+// ── Lista de profesores (sidebar) ──────────────────────────────────────
+function _fdRenderLista() {
+  const cont = document.getElementById('fd-lista');
+  if(!cont) return;
+
+  let html = '<div style="font-size:.6rem;text-transform:uppercase;letter-spacing:1.5px;color:var(--txt3);padding:.3rem .4rem .4rem;font-weight:700;">Profesores</div>';
+
+  _FD.profesores.forEach((p, idx) => {
+    const firmado   = !!_FD.firmas[p.id];
+    const activo    = _FD.profActivo === idx;
+    const color     = _fdColor(p.id);
+    const initials  = _fdInits(p.inst.nombre);
+    const clsCnt    = p.clases.length;
+
+    html += `<div onclick="fd_seleccionarProf(${idx})" style="
+      display:flex;align-items:center;gap:8px;padding:8px 8px;
+      border-radius:10px;cursor:pointer;margin-bottom:3px;
+      background:${activo ? 'rgba(26,122,69,.18)' : 'transparent'};
+      border:1px solid ${activo ? 'var(--verde)' : 'transparent'};
+      transition:all .15s;-webkit-tap-highlight-color:transparent;">
+      <div style="position:relative;flex-shrink:0;">
+        <div style="width:34px;height:34px;border-radius:50%;background:${color};
+          display:flex;align-items:center;justify-content:center;
+          font-size:.7rem;font-weight:700;color:#fff;">${initials}</div>
+        ${firmado ? `<div style="position:absolute;bottom:-1px;right:-1px;width:13px;height:13px;
+          border-radius:50%;background:var(--neon);border:2px solid var(--panel);
+          display:flex;align-items:center;justify-content:center;">
+          <svg viewBox="0 0 20 20" width="8" height="8" fill="none" stroke="#0a1f10" stroke-width="3" stroke-linecap="round">
+            <polyline points="4,10 8,14 16,6"/>
+          </svg></div>` : ''}
+      </div>
+      <div style="flex:1;min-width:0;">
+        <div style="font-size:.78rem;font-weight:600;color:${activo?'var(--neon)':'var(--txt)'};
+          white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">
+          ${p.inst.nombre.split(' ').slice(0,2).join(' ')}
+        </div>
+        <div style="font-size:.62rem;color:${firmado?'var(--neon)':'var(--txt3)'};">
+          ${firmado ? '✔ Firmado' : clsCnt + ' clase' + (clsCnt!==1?'s':'')}
+        </div>
+      </div>
+    </div>`;
+  });
+
+  cont.innerHTML = html;
+}
+
+// ── Seleccionar profesor activo ────────────────────────────────────────
+function fd_seleccionarProf(idx) {
+  // Si hay firma pendiente sin guardar, preguntar
+  if(_FD.profActivo !== null && _FD.profActivo !== idx && _FD.puntosActual > 10) {
+    if(!confirm('¿Descartar la firma actual sin guardar?')) return;
+  }
+
+  _FD.profActivo = idx;
+  const p = _FD.profesores[idx];
+  const color = _fdColor(p.id);
+
+  // Avatar e info
+  const av = document.getElementById('fd-prof-avatar');
+  if(av){ av.textContent = _fdInits(p.inst.nombre); av.style.background = color; }
+  const nm = document.getElementById('fd-prof-nombre');
+  if(nm) nm.textContent = p.inst.nombre.toUpperCase();
+  const cl = document.getElementById('fd-prof-clases-lbl');
+  if(cl) cl.textContent = `${p.clases.length} clase${p.clases.length!==1?'s':''} esta semana`;
+
+  // Instrucción
+  const ins = document.getElementById('fd-instruccion');
+  if(ins) ins.textContent = _FD.firmas[p.id]
+    ? 'Ya tienes una firma guardada. Puedes borrarla y volver a firmar.'
+    : 'Firma en el área de abajo con el stylus pen';
+
+  // Botón guardar
+  const btn = document.getElementById('fd-btn-guardar');
+  if(btn) btn.style.background = _FD.firmas[p.id] ? 'var(--gold)' : 'var(--v2)';
+
+  // Mini lista de clases
+  const CROJO = '#c0392b';
+  const clsList = document.getElementById('fd-clases-list');
+  if(clsList) {
+    clsList.innerHTML = p.clases.map(c => {
+      const esMal   = c.estado==='sub'||c.estado==='falta';
+      const capN    = typeof getCapClase === 'function' ? getCapClase(c.clase) : 20;
+      const asisN   = (c.alumnos !== null && c.alumnos !== undefined) ? parseInt(c.alumnos) : null;
+      const afoP    = (asisN !== null && capN > 0) ? Math.round(asisN / capN * 100) : null;
+      const afoColor= afoP !== null ? (afoP >= 70 ? '#1a7a45' : afoP >= 40 ? '#b87a00' : '#c0392b') : '#999';
+      const etiqEstado = esMal
+        ? `<span style="font-size:.52rem;font-weight:800;background:${esMal&&c.estado==='falta'?'rgba(192,57,43,.15)':'rgba(41,128,185,.15)'};
+            border-radius:3px;padding:0 4px;color:${c.estado==='falta'?CROJO:'#1a5fa3'};">
+            ${c.estado==='sub'?'SUP':'FALTA'}</span>` : '';
+      const afoChip = asisN !== null
+        ? `<span style="font-family:'DM Mono',monospace;font-size:.62rem;font-weight:700;
+            color:${afoColor};background:${afoP>=70?'rgba(26,122,69,.1)':afoP>=40?'rgba(184,122,0,.1)':'rgba(192,57,43,.1)'};
+            border-radius:4px;padding:1px 5px;margin-left:2px;">${asisN}p&nbsp;${afoP!==null?afoP+'%':''}</span>`
+        : '';
+      return `<span style="display:inline-flex;align-items:center;gap:4px;
+        background:var(--panel2);border:1px solid ${esMal?'rgba(192,57,43,.35)':'var(--border)'};
+        border-radius:7px;padding:4px 9px;font-size:.65rem;
+        color:${esMal?CROJO:'var(--txt2)'};">
+        <span style="font-family:'DM Mono',monospace;min-width:52px;">${c.hora}</span>
+        <span style="font-weight:700;color:var(--txt);">${c.clase}</span>
+        ${afoChip}
+        ${etiqEstado}
+      </span>`;
+    }).join('');
+  }
+
+  // Cargar firma guardada si existe, o limpiar canvas
+  _fdLimpiarCanvas();
+  if(_FD.firmas[p.id]) {
+    const img = new Image();
+    img.onload = () => { _FD.ctx.drawImage(img, 0, 0, _FD.canvas.width, _FD.canvas.height); };
+    img.src = _FD.firmas[p.id];
+  }
+
+  _fdRenderLista();
+}
+
+// ── Limpiar firma (borrar canvas) ──────────────────────────────────────
+function fd_limpiarFirma() {
+  _fdLimpiarCanvas();
+  const ins = document.getElementById('fd-instruccion');
+  if(ins && _FD.profActivo !== null)
+    ins.textContent = 'Firma en el área de abajo con el stylus pen';
+  const btn = document.getElementById('fd-btn-guardar');
+  if(btn) btn.style.background = 'var(--v2)';
+}
+
+// ── Guardar firma del profesor activo ──────────────────────────────────
+function fd_guardarFirma() {
+  if(_FD.profActivo === null) {
+    showToast('Selecciona primero un profesor', 'warn');
+    return;
+  }
+  if(_FD.puntosActual < 5) {
+    showToast('El área de firma está vacía. Firma con el stylus primero.', 'warn');
+    return;
+  }
+  const p   = _FD.profesores[_FD.profActivo];
+  const url = _FD.canvas.toDataURL('image/png');
+  _FD.firmas[p.id] = url;
+  _FD.puntosActual = 0;
+
+  _fdActualizarProgreso();
+  _fdRenderLista();
+
+  const ins = document.getElementById('fd-instruccion');
+  if(ins) ins.textContent = '✔ Firma guardada correctamente';
+  const btn = document.getElementById('fd-btn-guardar');
+  if(btn) btn.style.background = 'var(--gold)';
+
+  showToast(`Firma de ${p.inst.nombre.split(' ')[0]} guardada`, 'ok');
+
+  // Auto-avanzar al siguiente sin firma
+  setTimeout(() => {
+    const sig = _FD.profesores.findIndex((pr, i) => i > _FD.profActivo && !_FD.firmas[pr.id]);
+    if(sig >= 0) fd_seleccionarProf(sig);
+  }, 600);
+}
+
+// ── Progreso ───────────────────────────────────────────────────────────
+function _fdActualizarProgreso() {
+  const total    = _FD.profesores.length;
+  const firmados = _FD.profesores.filter(p => !!_FD.firmas[p.id]).length;
+  const el1 = document.getElementById('fd-prog-firmados');
+  const el2 = document.getElementById('fd-prog-total');
+  if(el1) el1.textContent = firmados;
+  if(el2) el2.textContent = total;
+}
+
+// ── Exportar PDF con firmas ────────────────────────────────────────────
+function fd_exportarPDF() {
+  if(!window.jspdf) { showToast('Librería PDF no disponible', 'warn'); return; }
+  const firmados = _FD.profesores.filter(p => !!_FD.firmas[p.id]).length;
+  if(firmados === 0) {
+    showToast('Aún no hay firmas guardadas', 'warn');
+    return;
+  }
+  const sinFirma = _FD.profesores.filter(p => !_FD.firmas[p.id]);
+  if(sinFirma.length > 0) {
+    const nombres = sinFirma.slice(0,3).map(p=>p.inst.nombre.split(' ')[0]).join(', ');
+    const resto   = sinFirma.length > 3 ? ` y ${sinFirma.length-3} más` : '';
+    if(!confirm(`Faltan firmas de: ${nombres}${resto}.\n¿Generar el PDF igualmente con los ${firmados} firmados?`))
+      return;
+  }
+
+  // Reutilizar la lógica de generarHojaFirmasPDF pero inyectando las firmas
+  _fd_generarPDFConFirmas();
+}
+
+function _fd_generarPDFConFirmas() {
+  const { jsPDF } = window.jspdf;
+
+  const fechaIni = _FD.fechaIni;
+  const fechaFin = _FD.fechaFin;
+  const semana   = _FD.semana;
+
+  const regs = registros.filter(r => r.fecha >= fechaIni && r.fecha <= fechaFin);
+  const DIAS_ORD = ['Lunes','Martes','Miércoles','Jueves','Viernes','Sábado','Domingo'];
+  const DIAS_HDR = {'Lunes':'LUNES','Martes':'MARTES','Miércoles':'MIÉRCOLES',
+                    'Jueves':'JUEVES','Viernes':'VIERNES','Sábado':'SÁBADO','Domingo':'DOMINGO'};
+
+  const doc  = new jsPDF({orientation:'landscape', unit:'mm', format:'letter'});
+  const PW=279.4, PH=215.9, ML=9, MR=9, MT=22, MB=8, CW=PW-ML-MR;
+
+  const CV=[26,92,53], CV2=[26,122,69], CGRIS=[190,190,190], CGALT=[248,248,248];
+  const CROJO=[176,0,0], CRJBG=[255,240,240], CNEG=[25,25,25], CBCO=[255,255,255];
+
+  let pNum = 0;
+  function nuevaPagina(){
+    if(pNum>0) doc.addPage(); pNum++;
+    doc.setFillColor(...CV); doc.rect(0,0,PW,13,'F');
+    doc.setFont('helvetica','bold'); doc.setFontSize(8); doc.setTextColor(...CBCO);
+    doc.text('CLUB CAMPESTRE AGUASCALIENTES  ·  COORDINACIÓN FITNESS', ML, 9);
+    doc.text(`SEMANA:  ${semana}`, PW-MR, 9, {align:'right'});
+    doc.setFillColor(238,238,238); doc.rect(0,13,PW,7,'F');
+    doc.setFont('helvetica','normal'); doc.setFontSize(6.5); doc.setTextColor(90,90,90);
+    doc.text('HOJA DE ASISTENCIA Y FIRMAS  ·  CONTROL INTERNO  ·  NO CIRCULAR', ML, 18);
+    doc.setFontSize(6); doc.setTextColor(...CROJO);
+    doc.text('■ Rojo = Suplencia o Falta', PW-MR, 18, {align:'right'});
+    doc.setFont('helvetica','normal'); doc.setFontSize(5.5); doc.setTextColor(160,160,160);
+    doc.text('Fitness Control — Club Campestre Aguascalientes', ML, PH-3);
+    doc.text(`Página ${pNum}`, PW-MR, PH-3, {align:'right'});
+  }
+
+  const drawText = (txt,x,y,opts={}) => {
+    if(opts.color) doc.setTextColor(...opts.color); else doc.setTextColor(...CNEG);
+    if(opts.bold)  doc.setFont('helvetica','bold');  else doc.setFont('helvetica','normal');
+    if(opts.size)  doc.setFontSize(opts.size);
+    doc.text(String(txt), x, y, opts.align?{align:opts.align}:{});
+  };
+
+  nuevaPagina();
+  let Y = MT;
+
+  _FD.profesores.forEach(prof => {
+    const diasProf = DIAS_ORD.filter(d => prof.clases.some(c=>c.dia===d));
+    if(!diasProf.length) return;
+    const porDia   = {};
+    diasProf.forEach(d => { porDia[d]=prof.clases.filter(c=>c.dia===d); });
+    const maxFilas = Math.max(...diasProf.map(d=>porDia[d].length));
+    const nDias    = diasProf.length;
+
+    const hCab=6.0, hSubh=5.2, hRow=5.8;
+    // Sin fila extra — la firma va dentro de la columna FIRMA existente
+    const hBloque = hCab + hSubh + maxFilas*hRow;
+
+    if(Y + hBloque > PH - MB - 4){ nuevaPagina(); Y = MT; }
+
+    const colNom = nDias<=3?42:nDias<=5?38:34;
+    const colFir = 28;
+    const colDat = CW - colNom - colFir;
+    const colDW  = colDat / nDias;
+    const cHr=colDW*0.30, cCl=colDW*0.45, cAl=colDW*0.25;
+    const Y0 = Y;
+
+    // X inicio de la columna FIRMA
+    const xFirCol = ML + colNom + colDat;
+
+    // ── Cabecera verde ──
+    doc.setFillColor(...CV); doc.rect(ML, Y, CW, hCab,'F');
+    const genNom = prof.inst.nombre||'';
+    const esF = /(ana|cristina|blanca|marisa|karina|consuelo|sara|jimena|valeria|hermelinda|socorro|ernestina|araceli|gabriela|esthela|alejandra|diana|laura|patricia|rosa|maria|ma\.)/i.test(genNom);
+    drawText(esF?'PROFESORA':'PROFESOR', ML+2, Y+4.2, {bold:true,size:7,color:CBCO});
+    let xD=ML+colNom;
+    diasProf.forEach(d=>{
+      drawText(DIAS_HDR[d]||d.toUpperCase(), xD+colDW/2, Y+4.2, {bold:true,size:7,color:CBCO,align:'center'});
+      xD+=colDW;
+    });
+    drawText('FIRMA', xFirCol+colFir/2, Y+4.2, {bold:true,size:7,color:CBCO,align:'center'});
+    Y+=hCab;
+
+    // ── Sub-header gris ──
+    doc.setFillColor(...CGRIS); doc.rect(ML, Y, colNom+colDat, hSubh,'F');
+    // Celda FIRMA del sub-header: fondo blanco para que resalte el espacio de firma
+    doc.setFillColor(252,252,252); doc.rect(xFirCol, Y, colFir, hSubh,'F');
+    const maxCar=Math.floor(colNom/1.85);
+    const nomCorto=genNom.length>maxCar?genNom.slice(0,maxCar-1)+'…':genNom;
+    drawText(nomCorto.toUpperCase(), ML+2, Y+3.7, {bold:true,size:7,color:CNEG});
+    xD=ML+colNom;
+    diasProf.forEach(()=>{
+      drawText('HR',      xD+cHr/2,         Y+3.6, {size:5.5,color:[60,60,60],align:'center'});
+      drawText('CLASE',   xD+cHr+cCl/2,     Y+3.6, {size:5.5,color:[60,60,60],align:'center'});
+      drawText('ALUM.',   xD+cHr+cCl+cAl/2, Y+3.6, {size:5,  color:[60,60,60],align:'center'});
+      xD+=colDW;
+    });
+    Y+=hSubh;
+
+    // ── Filas de datos (solo columnas de datos, sin tocar columna FIRMA) ──
+    for(let i=0;i<maxFilas;i++){
+      // Fondo alternado solo en zona de datos+nombre (no en firma)
+      doc.setFillColor(...(i%2===0?CBCO:CGALT));
+      doc.rect(ML, Y, colNom+colDat, hRow,'F');
+      // Columna firma: fondo blanco siempre
+      doc.setFillColor(255,255,255);
+      doc.rect(xFirCol, Y, colFir, hRow,'F');
+
+      xD=ML+colNom;
+      diasProf.forEach(d=>{
+        const cds=porDia[d]||[];
+        if(i<cds.length){
+          const c=cds[i];
+          const esMal=c.estado==='sub'||c.estado==='falta';
+          const txtCol=esMal?CROJO:CNEG;
+          if(esMal){ doc.setFillColor(...CRJBG); doc.rect(xD,Y,colDW,hRow,'F'); }
+          drawText(c.hora, xD+1.2, Y+3.9, {size:6,color:txtCol});
+          const cls=c.clase.length>14?c.clase.slice(0,13)+'.':c.clase;
+          drawText(cls, xD+cHr+0.8, Y+3.9, {size:6,color:txtCol,bold:esMal});
+          const aluX=xD+cHr+cCl+cAl/2;
+          if(esMal){
+            const etiq=c.estado==='sub'?'SUP':'FALTA';
+            if(c.alumnos!=null){ drawText(String(c.alumnos),aluX,Y+2.8,{size:6.2,bold:true,color:CROJO,align:'center'}); drawText(etiq,aluX,Y+5.0,{size:4.8,bold:true,color:CROJO,align:'center'}); }
+            else drawText(etiq,aluX,Y+3.9,{size:5.5,bold:true,color:CROJO,align:'center'});
+          } else {
+            if(c.alumnos!=null) drawText(String(c.alumnos),aluX,Y+3.9,{size:6.5,bold:true,color:CNEG,align:'center'});
+          }
+        }
+        xD+=colDW;
+      });
+      Y+=hRow;
+    }
+
+    // ── Firma dentro de la columna FIRMA (desde Y0+hCab hasta Y) ──
+    // La celda de firma ocupa toda la altura del bloque de datos (hSubh + maxFilas*hRow)
+    const yFirmaTop = Y0 + hCab;          // empieza justo debajo del banner verde
+    const hFirmaCell = hBloque - hCab;    // alto disponible en la celda
+    const xFirmaIni  = xFirCol + 2;
+    const wFirmaDisp = colFir - 4;
+
+    if(_FD.firmas[prof.id]) {
+      // Insertar firma manteniendo aspect ratio 3:1 (canvas 600×200)
+      try {
+        const RATIO  = 3.0;
+        let imgH = hFirmaCell - 4;
+        let imgW = imgH * RATIO;
+        // Si el ancho calculado excede la columna, ajustar
+        if(imgW > wFirmaDisp){ imgW = wFirmaDisp; imgH = imgW / RATIO; }
+        // Centrar en la celda
+        const imgX = xFirCol + (colFir - imgW) / 2;
+        const imgY = yFirmaTop + (hFirmaCell - imgH) / 2;
+        doc.addImage(_FD.firmas[prof.id], 'PNG', imgX, imgY, imgW, imgH);
+        // Pequeño badge al pie de la celda
+        doc.setFont('helvetica','italic'); doc.setFontSize(4.0); doc.setTextColor(...CV2);
+        doc.text('✓ digital', xFirCol + colFir/2, Y-1.5, {align:'center'});
+      } catch(e) {
+        // Fallback: línea
+        doc.setDrawColor(...CV2); doc.setLineWidth(0.4);
+        doc.line(xFirmaIni, Y-3, xFirmaIni+wFirmaDisp, Y-3);
+      }
+    } else {
+      // Sin firma: línea punteada centrada verticalmente en la celda
+      doc.setDrawColor(180,180,180); doc.setLineWidth(0.3);
+      const yLine = yFirmaTop + hFirmaCell/2;
+      doc.setLineDashPattern([1,1], 0);
+      doc.line(xFirmaIni+2, yLine, xFirmaIni+wFirmaDisp-2, yLine);
+      doc.setLineDashPattern([], 0);
+    }
+
+    // ── Bordes del bloque completo ──
+    doc.setDrawColor(...CV); doc.setLineWidth(0.6);
+    doc.rect(ML, Y0, CW, hBloque);
+
+    // Línea divisoria antes de columna FIRMA (verde, más gruesa)
+    doc.setLineWidth(0.8); doc.setDrawColor(...CV2);
+    doc.line(xFirCol, Y0, xFirCol, Y0+hBloque);
+
+    // Grid interno (solo en zona de datos, no cruza la columna firma)
+    doc.setLineWidth(0.18); doc.setDrawColor(175,175,175);
+    let xG=ML+colNom;
+    diasProf.forEach((d,idx)=>{
+      if(idx>0) doc.line(xG, Y0+hCab, xG, Y0+hBloque);
+      doc.line(xG+cHr,     Y0+hCab, xG+cHr,     Y0+hBloque);
+      doc.line(xG+cHr+cCl, Y0+hCab, xG+cHr+cCl, Y0+hBloque);
+      xG+=colDW;
+    });
+    // Líneas horizontales entre filas (no cruzan columna firma)
+    for(let i=1;i<maxFilas;i++){
+      const yL=Y0+hCab+hSubh+i*hRow;
+      doc.line(ML, yL, xFirCol, yL);
+    }
+    // Separador cabecera / datos
+    doc.setLineWidth(0.3); doc.setDrawColor(...CV);
+    doc.line(ML, Y0+hCab, ML+CW, Y0+hCab);
+
+    Y += 4;
+  });
+
+  // ── Totales ──
+  const totalClases = regs.filter(r=>r.estado==='ok'||r.estado==='sub').length;
+  const totalSup    = regs.filter(r=>r.estado==='sub').length;
+  const totalFaltas = regs.filter(r=>r.estado==='falta').length;
+  const firmadosCnt = _FD.profesores.filter(p=>!!_FD.firmas[p.id]).length;
+  if(Y+14 < PH-MB){
+    doc.setDrawColor(...CV); doc.setLineWidth(0.4); doc.line(ML, Y+1, ML+CW, Y+1);
+    doc.setFont('helvetica','normal'); doc.setFontSize(6); doc.setTextColor(80,80,80);
+    doc.text(`Clases: ${totalClases}  ·  Suplencias: ${totalSup}  ·  Faltas: ${totalFaltas}  ·  Profesores: ${_FD.profesores.length}  ·  Firmas digitales: ${firmadosCnt}`, ML, Y+6);
+    doc.text(`Generado: ${new Date().toLocaleDateString('es-MX',{weekday:'long',day:'2-digit',month:'long',year:'numeric'})}`, PW-MR, Y+6, {align:'right'});
+  }
+
+  const archivo = `HojaFirmas_Digital_${semana.replace(/[^\wáéíóúÁÉÍÓÚñÑ\s]/g,'').replace(/\s+/g,'_').slice(0,50)}.pdf`;
+  doc.save(archivo);
+  cerrarModal('m-firmas-digitales');
+  showToast(`PDF listo · ${firmadosCnt} firma${firmadosCnt!==1?'s':''} digital${firmadosCnt!==1?'es':''}`, 'ok');
+}
+
+
 // ═══ Verificación automática al cargar (discreta) ════
 (function() {
   // Esperar a que los datos carguen antes de verificar
@@ -10831,9 +11592,10 @@ async function inicializarFirebase(){
       if(online){
         if(fbWasOffline){
           fbWasOffline = false;
-          setIndicador('🟡 Reconectado · Subiendo datos locales...');
-          // Subir lo que se acumuló offline
-          setTimeout(()=>{ if(!fbSyncing) sincronizarFirebase(); }, 1200);
+          setIndicador('🟡 Reconectado · Sincronizando...');
+          // Solo subir si ya recibimos la primera respuesta de Firebase
+          // (el listener se re-activará solo al reconectar y manejará la lógica)
+          setTimeout(()=>{ if(!fbSyncing && fbInicializado) sincronizarFirebase(); }, 2000);
         } else {
           setIndicador('🟢 En línea');
         }
@@ -10852,32 +11614,63 @@ async function inicializarFirebase(){
       if(fbSyncing) return;
 
       const data = snap.val();
-      if(!data){ return; }
 
-      // ─── Comparar timestamps: solo procesar si Firebase tiene datos más nuevos ───
-      const localTs = parseInt(localStorage.getItem('fc_local_ts') || '0');
-      const fbTs    = parseInt(data.ts || '0');
+      // ── Primera respuesta de Firebase (aunque sea null) ──────────────────────
+      // Solo a partir de aquí sabemos el estado real de la nube.
+      const esPrimeraVez = !fbInicializado;
+      fbInicializado = true;
 
-      if(localTs > fbTs + 3000){
-        // Nuestros datos locales son más recientes → subir, no recibir
-        console.log('📤 Local más reciente → subiendo a Firebase');
-        if(!fbSyncing) setTimeout(sincronizarFirebase, 500);
+      if(!data){
+        // Firebase está vacío → somos la fuente de verdad, subir si tenemos datos
+        if(registros.length > 0 || recorridos.length > 0){
+          setTimeout(sincronizarFirebase, 500);
+        }
         return;
       }
 
-      // ─── Aplicar datos de Firebase ────────────────────────────────────────────
+      // ─── Comparar timestamps ────────────────────────────────────────────────
+      const localTs = parseInt(localStorage.getItem('fc_local_ts') || '0');
+      const fbTs    = parseInt(data.ts || '0');
+
+      // ── Helper: merge de colección por ID, gana el registro más reciente ────
+      function mergeColeccion(locales, fbObj){
+        if(!fbObj) return locales;
+        const fbArr = Object.values(fbObj);
+        // Construir mapa local por id
+        const mapa = {};
+        locales.forEach(r => { mapa[String(r.id)] = r; });
+        // Fusionar: si el registro de FB tiene updatedAt mayor, lo usamos
+        fbArr.forEach(r => {
+          const key = String(r.id);
+          if(!mapa[key]){
+            mapa[key] = r; // nuevo en Firebase, agregar
+          } else {
+            const tsLocal = parseInt(mapa[key].updatedAt || mapa[key].ts || 0);
+            const tsFb    = parseInt(r.updatedAt || r.ts || 0);
+            if(tsFb > tsLocal) mapa[key] = r; // Firebase más nuevo
+          }
+        });
+        return Object.values(mapa);
+      }
+
       fbReceiving = true;
       try{
-        if(Array.isArray(data.instructores) && data.instructores.length >= 0)
+        if(localTs > fbTs + 3000 && !esPrimeraVez){
+          // Datos locales más recientes → subir, no recibir
+          fbReceiving = false;
+          setTimeout(sincronizarFirebase, 500);
+          return;
+        }
+
+        // ─── Aplicar / Fusionar datos de Firebase ──────────────────────────
+        if(Array.isArray(data.instructores) && data.instructores.length > 0)
           instructores = data.instructores;
 
-        if(data.registros)
-          registros = Object.values(data.registros);
+        // Merge por ID para registros y recorridos
+        registros   = mergeColeccion(registros,   data.registros);
+        recorridos  = mergeColeccion(recorridos,  data.recorridos);
 
-        if(data.recorridos)
-          recorridos = Object.values(data.recorridos);
-
-        if(Array.isArray(data.salones) && data.salones.length >= 0)
+        if(Array.isArray(data.salones) && data.salones.length > 0)
           salones = data.salones;
 
         if(data.suplencias)
@@ -10888,8 +11681,15 @@ async function inicializarFirebase(){
 
         normalizarRegistros();
 
-        // Persistir localmente sin actualizar fc_local_ts (fbReceiving=true lo evita)
+        // Persistir localmente (fc_local_ts NO se toca porque fbReceiving=true)
         guardarLocal();
+
+        // Si en la primera carga tenemos datos locales MÁS RECIENTES que Firebase,
+        // subir el merge resultante para que todos los dispositivos lo vean
+        if(esPrimeraVez && localTs > fbTs + 3000){
+          // Pequeño delay para dejar que fbReceiving = false primero
+          setTimeout(()=>{ fbInicializado=true; sincronizarFirebase(); }, 800);
+        }
 
         // Re-renderizar sin volver a subir a Firebase
         _renderAllBase();
@@ -10899,16 +11699,12 @@ async function inicializarFirebase(){
         if(document.getElementById('v-sup-plan')?.classList.contains('on'))    renderSupPlan();
         if(document.getElementById('v-hoy')?.classList.contains('on'))         renderHoy();
 
-        console.log('🔽 Firebase → local:',
-          new Date().toLocaleTimeString('es-MX'),
-          `| ${registros.length} registros | ${recorridos.length} recorridos`);
       } finally{
         fbReceiving = false;
       }
     });
 
     setIndicador('🟢 Firebase conectado');
-    console.log('✅ Firebase inicializado');
 
   } catch(e){
     console.warn('Firebase error:', e.message);
@@ -11479,7 +12275,6 @@ function guardarSupLocal(){
   if(hayLocal){
     _renderAllBase();   // renderAll base — sin subir a Firebase todavía
     renderCal();
-    console.log('💾 Datos restaurados desde almacenamiento local');
   }
 
   // Inicializar Firebase (conecta, carga y escucha cambios en tiempo real)
