@@ -8444,6 +8444,10 @@ let fbListener  = null;    // referencia al listener activo (para evitar duplica
 let fbWasOffline = false;
 let fbInicializado = false; // true SOLO después de recibir la primera respuesta de Firebase
                              // NUNCA subir datos hasta que esto sea true
+let fbDataRecibida = false;  // true SOLO cuando Firebase devolvió datos reales (no null/vacío)
+                              // Dispositivo sin datos NUNCA sube hasta confirmar que Firebase también está vacío
+let _fbMaxRegistros  = 0;    // máximo de registros conocidos en Firebase — protege contra borrados accidentales
+let _fbMaxRecorridos = 0;    // igual para recorridos
 
 const FIREBASE_ACTIVO = true;
 const FIREBASE_CONFIG = {
@@ -8522,14 +8526,44 @@ async function sincronizarFirebase(){
     return;
   }
 
-  // ── GUARDIA: nunca subir si los datos locales están vacíos ───────────────────────
-  // Un dispositivo sin registros nunca debe borrar los datos de otros dispositivos.
-  if(registros.length === 0 && recorridos.length === 0){
-    const fbSnap = await fbDb.ref('fitness/registros').once('value');
-    if(fbSnap.val() && Object.keys(fbSnap.val()).length > 0){
-      console.warn('🚫 Local vacío pero Firebase tiene datos — subida cancelada');
+  // ── GUARDIA NIVEL 1: bloquear si nunca hemos recibido datos reales de Firebase ──
+  // Un dispositivo recién abierto (localStorage vacío) NUNCA puede subir datos
+  // hasta haber confirmado que Firebase también está vacío.
+  if(!fbDataRecibida){
+    // Firebase aún no nos confirmó su estado real — posponer subida
+    if(registros.length === 0 && recorridos.length === 0){
+      showToast('⏳ Esperando confirmación de Firebase antes de sincronizar…','info');
       return;
     }
+    // Tenemos datos locales y Firebase no respondió aún → OK subir (datos propios)
+  }
+
+  // ── GUARDIA NIVEL 2: nunca subir si los datos locales están vacíos ─────────────
+  // Un dispositivo con 0 registros nunca debe sobrescribir datos en Firebase.
+  if(registros.length === 0 && recorridos.length === 0){
+    try {
+      const fbSnap = await fbDb.ref('fitness/registros').once('value');
+      const fbVal  = fbSnap.val();
+      if(fbVal && Object.keys(fbVal).length > 0){
+        console.warn('🚫 Local vacío pero Firebase tiene datos — subida cancelada');
+        return;
+      }
+    } catch(e){
+      // Si la lectura de verificación falla, NO subir — es más seguro esperar
+      console.warn('🚫 No se pudo verificar Firebase — subida cancelada por seguridad:', e.message);
+      showToast('⚠ Sin conexión — sincronización pospuesta por seguridad','warn');
+      return;
+    }
+  }
+
+  // ── GUARDIA NIVEL 3: protección contra reducción drástica de datos ─────────────
+  // Si vamos a subir significativamente menos registros de los que conocemos,
+  // bloquear la subida para evitar borrados accidentales.
+  const _umbralSeguridad = Math.floor(_fbMaxRegistros * 0.6);
+  if(_fbMaxRegistros > 5 && registros.length < _umbralSeguridad){
+    console.warn(`🚫 Reducción drástica detectada: ${registros.length} vs ${_fbMaxRegistros} conocidos — subida cancelada`);
+    showToast(`⚠ Sincronización bloqueada: se detectaron ${registros.length} registros locales vs ${_fbMaxRegistros} en la nube. Recarga para resolver.`,'warn');
+    return;
   }
 
   fbSyncing = true;
@@ -8547,6 +8581,10 @@ async function sincronizarFirebase(){
     await fbDb.ref('fitness').set(payload);
     // Actualizar fc_local_ts para que otros dispositivos sepan cuándo fue esto
     localStorage.setItem('fc_local_ts', String(ts));
+    // Actualizar contadores máximos tras subida exitosa
+    if(registros.length  > _fbMaxRegistros)  _fbMaxRegistros  = registros.length;
+    if(recorridos.length > _fbMaxRecorridos) _fbMaxRecorridos = recorridos.length;
+    fbDataRecibida = true;
     setIndicador('🟢 Guardado en la nube ✔');
   } catch(e){
     console.warn('Firebase sync error:', e.message);
@@ -11621,12 +11659,23 @@ async function inicializarFirebase(){
       fbInicializado = true;
 
       if(!data){
-        // Firebase está vacío → somos la fuente de verdad, subir si tenemos datos
+        // Firebase está vacío → somos la fuente de verdad, subir si tenemos datos locales
+        // fbDataRecibida permanece false — indicamos que Firebase confirmó estar vacío
+        fbDataRecibida = false;
         if(registros.length > 0 || recorridos.length > 0){
+          // Tenemos datos locales y Firebase está vacío → somos la fuente autoritaria
+          fbDataRecibida = true; // nuestros datos son los únicos, está bien subir
           setTimeout(sincronizarFirebase, 500);
         }
         return;
       }
+
+      // Firebase tiene datos reales → marcar como recibidos y actualizar máximos
+      fbDataRecibida = true;
+      const _fbRegCount = data.registros ? Object.keys(data.registros).length : 0;
+      const _fbRecCount = data.recorridos ? Object.keys(data.recorridos).length : 0;
+      if(_fbRegCount > _fbMaxRegistros)  _fbMaxRegistros  = _fbRegCount;
+      if(_fbRecCount > _fbMaxRecorridos) _fbMaxRecorridos = _fbRecCount;
 
       // ─── Comparar timestamps ────────────────────────────────────────────────
       const localTs = parseInt(localStorage.getItem('fc_local_ts') || '0');
@@ -11680,6 +11729,10 @@ async function inicializarFirebase(){
           solicitudesInst = Object.values(data.solicitudes);
 
         normalizarRegistros();
+
+        // Actualizar contadores máximos tras recibir datos de Firebase
+        if(registros.length  > _fbMaxRegistros)  _fbMaxRegistros  = registros.length;
+        if(recorridos.length > _fbMaxRecorridos) _fbMaxRecorridos = recorridos.length;
 
         // Persistir localmente (fc_local_ts NO se toca porque fbReceiving=true)
         guardarLocal();
