@@ -47,6 +47,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/fflate/0.8.2/fflate.min.js"></script>
 <style>
 /* ═══ TEMA OSCURO (default) ═══ */
 :root{
@@ -1461,6 +1462,41 @@ html.tema-claro #sidebar {
   box-shadow: 2px 0 12px rgba(26,122,69,.06);
 }
 
+/* ═══ BARRA DE REGRESO MÓVIL ════════════════════════════════════════════════ */
+#mob-back-bar {
+  display: none;
+}
+@media (max-width: 640px) {
+  #mob-back-bar {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    position: sticky;
+    top: 0;
+    z-index: 85;
+    background: var(--bg);
+    border-bottom: 1px solid var(--border);
+    padding: 8px 13px 7px;
+    flex-shrink: 0;
+  }
+  #mob-back-bar .mob-back-btn {
+    display: flex; align-items: center; gap: 5px;
+    background: var(--panel2); border: 1px solid var(--border);
+    border-radius: 10px; padding: 6px 11px;
+    color: var(--neon); font-family: 'Outfit', sans-serif;
+    font-size: .72rem; font-weight: 600; cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+    transition: background .15s;
+  }
+  #mob-back-bar .mob-back-btn:active { background: var(--verde); }
+  #mob-back-bar .mob-back-section {
+    flex: 1; font-family: 'Bebas Neue', sans-serif;
+    font-size: .9rem; letter-spacing: 1.5px;
+    color: var(--txt2); text-align: right;
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  }
+}
+
 /* ═══ NAVEGACIÓN NUEVA ═══════════════════════════════════════════════════════ */
 
 /* Ocultar tabs viejos */
@@ -1918,6 +1954,117 @@ html.tema-claro .toast-info{background:#e8f4fb;border-color:#1a5fa3;color:#0d3b6
   }
 }
 
+/* ═══ FIRMAS DIGITALES — MÓVIL ═══════════════════════════════════════════ */
+@media(max-width:640px){
+  /* El modal ocupa toda la pantalla y se reorganiza en columna */
+  #m-firmas-digitales > div {
+    flex-direction: column !important;
+  }
+  /* Header del modal: compactar botones */
+  #m-firmas-digitales > div > div:first-child {
+    padding: .5rem .7rem !important;
+    gap: .4rem !important;
+  }
+  #m-firmas-digitales > div > div:first-child > div:last-child {
+    flex-wrap: nowrap !important;
+    gap: .35rem !important;
+  }
+  /* Layout principal: apilar lista + panel firma */
+  #m-firmas-digitales > div > div:last-child {
+    flex-direction: column !important;
+  }
+  /* Lista de profesores: horizontal scroll en la parte superior */
+  #fd-lista {
+    width: 100% !important;
+    height: auto !important;
+    max-height: 90px !important;
+    border-right: none !important;
+    border-bottom: 1px solid var(--border) !important;
+    display: flex !important;
+    flex-direction: row !important;
+    overflow-x: auto !important;
+    overflow-y: hidden !important;
+    padding: .4rem .5rem !important;
+    gap: .3rem !important;
+    align-items: center !important;
+    flex-shrink: 0 !important;
+    scrollbar-width: none;
+  }
+  #fd-lista::-webkit-scrollbar { display: none; }
+  /* El label "Profesores" se oculta en móvil para ahorrar espacio */
+  #fd-lista > div:first-child {
+    display: none !important;
+  }
+  /* Cada ítem de la lista de profesores como chip horizontal */
+  #fd-lista > div:not(:first-child) {
+    flex-shrink: 0 !important;
+    white-space: nowrap !important;
+    border-radius: 20px !important;
+    padding: 4px 8px !important;
+    font-size: .7rem !important;
+    margin-bottom: 0 !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    gap: 3px !important;
+    min-width: 56px !important;
+    text-align: center !important;
+  }
+  /* Nombre del instructor dentro del chip */
+  #fd-lista > div:not(:first-child) > div:last-child > div:first-child {
+    font-size: .65rem !important;
+    white-space: nowrap !important;
+    max-width: 70px !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+  }
+  /* Texto "X clases / Firmado" */
+  #fd-lista > div:not(:first-child) > div:last-child > div:last-child {
+    font-size: .55rem !important;
+  }
+  /* Info del profesor activo: más compacta */
+  #fd-prof-info {
+    padding: .5rem .7rem !important;
+    gap: .5rem !important;
+  }
+  #fd-prof-avatar {
+    width: 34px !important;
+    height: 34px !important;
+    font-size: .75rem !important;
+  }
+  #fd-prof-nombre {
+    font-size: .95rem !important;
+  }
+  /* Botones de borrar/guardar firma: más pequeños */
+  #fd-prof-info button {
+    padding: 4px 8px !important;
+    font-size: .68rem !important;
+  }
+  /* Panel de firma: centrado, canvas adaptado */
+  #fd-canvas {
+    max-width: calc(100vw - 2rem) !important;
+    width: calc(100vw - 2rem) !important;
+    height: auto !important;
+  }
+  /* Instrucción de firma */
+  #fd-instruccion {
+    font-size: .72rem !important;
+    padding: 0 .5rem !important;
+  }
+  /* El contenedor del canvas ocupa el espacio disponible */
+  #m-firmas-digitales [style*="flex:1"][style*="flex-direction:column"][style*="align-items:center"] {
+    padding: .6rem !important;
+    gap: .5rem !important;
+  }
+}
+
+/* ═══ REPORTE MODAL — botones firmas en móvil ════════════════════════════ */
+@media(max-width:420px){
+  /* Botones PDF/Firmas del modal reportes: apilar en columna */
+  #m-reports [style*="grid-template-columns:1fr 1fr"] {
+    grid-template-columns: 1fr !important;
+  }
+}
+
 /* ═══════════════════════════════════════════════════════
    MÓDULO: REPORTE DEPORTIVO SEMANAL
    ═══════════════════════════════════════════════════════ */
@@ -2234,6 +2381,15 @@ html.tema-claro .rep-card-hdr { color: #1a7a45; }
 
 <div id="sub-tabs"></div>
 
+<!-- Barra de regreso móvil — visible en todas las vistas excepto mobile-home -->
+<div id="mob-back-bar">
+  <button class="mob-back-btn" onclick="switchSection('hoy')">
+    <svg width="13" height="13" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><polyline points="12,4 6,10 12,16"/></svg>
+    Inicio
+  </button>
+  <span class="mob-back-section" id="mob-back-section-lbl"></span>
+</div>
+
 <!-- ═══ TABS (legacy — oculto, mantiene compatibilidad con JS interno) ═══ -->
 <div id="tabs">
   <div class="tab" data-v="hoy" id="tab-hoy"><svg class="ico" viewBox="0 0 20 20"><circle cx="10" cy="10" r="7" stroke="currentColor" stroke-width="1.4" fill="none"/><polyline points="10,6 10,10 13,12" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg> <span>Hoy</span><span id="hoy-tab-badge" style="display:none;background:var(--red2);color:#fff;font-size:.55rem;font-weight:700;border-radius:10px;padding:1px 5px;margin-left:4px;vertical-align:middle"></span></div>
@@ -2268,6 +2424,7 @@ html.tema-claro .rep-card-hdr { color: #1a7a45; }
       <button class="btn bo" onclick="repLimpiar()" style="font-size:.72rem;padding:6px 10px">🗑 Limpiar</button>
       <button class="btn" style="background:#0d2218;border:1px solid var(--verde);color:var(--neon);font-size:.72rem;padding:6px 10px" onclick="repGuardar()">💾 Guardar</button>
       <button class="btn bg" onclick="repImprimir()" style="font-size:.76rem;padding:6px 14px">🖨 Imprimir / PDF</button>
+      <button class="btn bd" onclick="repExportarWord()" style="font-size:.76rem;padding:6px 14px">📄 Exportar Word</button>
     </div>
   </div>
 
@@ -2407,7 +2564,8 @@ html.tema-claro .rep-card-hdr { color: #1a7a45; }
 <div id="mobile-home">
 
   <!-- BUSCADOR + SYNC — siempre visibles -->
-  <div style="padding:10px 13px 0;display:flex;flex-direction:column;gap:8px;flex-shrink:0;">
+  <div style="padding:10px 13px 0;display:flex;flex-direction:column;gap:6px;flex-shrink:0;">
+
     <div id="mob-search-bar" onclick="abrirBuscadorMob()">
       <svg width="16" height="16" viewBox="0 0 20 20" fill="none" stroke="var(--txt3)" stroke-width="1.5"><circle cx="8" cy="8" r="5"/><line x1="12" y1="12" x2="17" y2="17" stroke-linecap="round"/></svg>
       <input id="mob-search-input" placeholder="Buscar clase, profe, fecha..." autocomplete="off" oninput="ejecutarBuscadorMob()" onfocus="abrirBuscadorMob()">
@@ -2458,7 +2616,6 @@ html.tema-claro .rep-card-hdr { color: #1a7a45; }
           </div>
         </div>
 
-        <!-- Suplencia rápida -->
         <!-- Agenda -->
         <div class="mob-btn-agenda-row" onclick="abrirAgendaMob()">
           <div style="display:flex;align-items:center;gap:10px;flex:1;">
@@ -2552,8 +2709,8 @@ html.tema-claro .rep-card-hdr { color: #1a7a45; }
   <!-- Header fijo -->
   <div style="flex-shrink:0;padding:10px 12px 0;display:flex;flex-direction:column;gap:8px">
     <div style="display:flex;align-items:center;gap:8px">
-      <button class="mob-overlay-back" onclick="cerrarBuscadorMob()" style="background:none;border:none;color:var(--txt2);cursor:pointer;padding:4px 6px;border-radius:8px;display:flex;align-items:center;gap:5px;font-family:'Outfit',sans-serif;font-size:.78rem">
-        <svg width="16" height="16" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6"><polyline points="12,4 6,10 12,16" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      <button class="mob-overlay-back" onclick="cerrarBuscadorMob()" style="background:none;border:none;color:var(--txt2);cursor:pointer;padding:2px 4px;border-radius:6px;display:flex;align-items:center;gap:3px;font-family:'Outfit',sans-serif;font-size:.7rem;flex-shrink:0">
+        <svg width="13" height="13" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6"><polyline points="12,4 6,10 12,16" stroke-linecap="round" stroke-linejoin="round"/></svg>
       </button>
       <div id="mob-search-bar2" style="flex:1;display:flex;align-items:center;gap:8px;background:var(--panel2);border:1px solid rgba(94,255,160,.45);border-radius:14px;padding:9px 13px;">
         <svg width="15" height="15" viewBox="0 0 20 20" fill="none" stroke="var(--neon)" stroke-width="1.5"><circle cx="8" cy="8" r="5"/><line x1="12" y1="12" x2="17" y2="17" stroke-linecap="round"/></svg>
@@ -2565,6 +2722,20 @@ html.tema-claro .rep-card-hdr { color: #1a7a45; }
           <svg width="13" height="13" viewBox="0 0 20 20" fill="none" stroke="var(--neon)" stroke-width="1.6"><rect x="7" y="1" width="6" height="11" rx="3"/><path d="M3 10a7 7 0 0 0 14 0M10 17v2"/></svg>
         </div>
       </div>
+    </div>
+    <!-- Accesos rápidos dentro del buscador -->
+    <div style="display:flex;gap:4px;justify-content:flex-end;align-items:center;padding:0 2px 0;">
+      <button onclick="cerrarBuscadorMob();navegarA('reporte-dep')" style="display:flex;align-items:center;gap:3px;background:none;border:none;color:var(--txt3);font-family:'Outfit',sans-serif;font-size:.58rem;cursor:pointer;padding:1px 4px;border-radius:5px;-webkit-tap-highlight-color:transparent">
+        <svg width="10" height="10" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><rect x="5" y="3" width="10" height="14" rx="2"/><rect x="8" y="2" width="4" height="2.5" rx="1"/><line x1="8" y1="9" x2="12" y2="9"/><line x1="8" y1="12" x2="13" y2="12"/></svg>Reporte
+      </button>
+      <span style="color:var(--txt3);opacity:.35;font-size:.6rem">·</span>
+      <button onclick="cerrarBuscadorMob();abrirModal('m-reports')" style="display:flex;align-items:center;gap:3px;background:none;border:none;color:var(--txt3);font-family:'Outfit',sans-serif;font-size:.58rem;cursor:pointer;padding:1px 4px;border-radius:5px;-webkit-tap-highlight-color:transparent">
+        <svg width="10" height="10" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><rect x="4" y="7" width="12" height="8" rx="1.5"/><path d="M6 7V4H14V7"/><circle cx="13.5" cy="10" r="1" fill="currentColor"/></svg>Generar
+      </button>
+      <span style="color:var(--txt3);opacity:.35;font-size:.6rem">·</span>
+      <button onclick="cerrarBuscadorMob();cerrarSesion()" style="display:flex;align-items:center;gap:3px;background:none;border:none;color:var(--txt3);font-family:'Outfit',sans-serif;font-size:.58rem;cursor:pointer;padding:1px 4px;border-radius:5px;-webkit-tap-highlight-color:transparent">
+        <svg width="10" height="10" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M8 10h8M13 7l3 3-3 3"/><path d="M12 4H5a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h7"/></svg>Salir
+      </button>
     </div>
     <!-- Filtros rápidos -->
     <div id="mob-search-filters" style="display:flex;gap:5px;overflow-x:auto;scrollbar-width:none;padding-bottom:2px">
@@ -9496,16 +9667,34 @@ function _activateView(viewId, section) {
 
   // En móvil, sección 'hoy' = mobile-home (no usa .vista)
   const isMobile = window.innerWidth <= 640;
+  const backBar = document.getElementById('mob-back-bar');
+  const backLbl = document.getElementById('mob-back-section-lbl');
   if(isMobile && section === 'hoy') {
     document.querySelectorAll('.vista').forEach(v => v.classList.remove('on'));
     document.getElementById('mobile-home').classList.add('on');
     document.getElementById('mob-search-overlay').classList.remove('on');
     document.getElementById('mob-agenda-overlay').classList.remove('on');
+    if(backBar) backBar.style.display = 'none';
+    // Resetear scroll y volver al slide 0
+    const mh = document.getElementById('mobile-home');
+    if(mh) mh.scrollTop = 0;
+    const track = document.getElementById('mob-track');
+    if(track) { track.style.transition='none'; track.style.transform='translateX(0)'; }
+    document.querySelectorAll('.mob-dot').forEach((d,i)=>d.classList.toggle('on',i===0));
+    try{ _mobSlide=0; }catch(e){}
     renderMobileHome();
     _updateNavActive(section, null);
     return;
-  } else if(!isMobile) {
+  } else {
+    // En móvil navegando a otra sección, o en desktop: ocultar mobile-home siempre
     document.getElementById('mobile-home').classList.remove('on');
+    if(isMobile && backBar) {
+      backBar.style.display = 'flex';
+      const sectionNames = { programa:'Programa', equipo:'Equipo', analisis:'Análisis', mas:'Más' };
+      if(backLbl) backLbl.textContent = sectionNames[section] || '';
+    } else if(backBar) {
+      backBar.style.display = 'none';
+    }
   }
   // Vistas
   document.querySelectorAll('.vista').forEach(v => v.classList.remove('on'));
@@ -10154,6 +10343,15 @@ function cerrarBuscadorMob() {
   if(i1)i1.value=''; if(i2)i2.value='';
   const btn=document.getElementById('mob-search-clear');
   if(btn) btn.style.display='none';
+  // Solo restaurar mobile-home si la sección activa es 'hoy'
+  if(window.innerWidth <= 640 && _activeSection === 'hoy') {
+    const mh = document.getElementById('mobile-home');
+    if(mh) { mh.classList.add('on'); mh.scrollTop = 0; }
+    const track = document.getElementById('mob-track');
+    if(track) { track.style.transition='none'; track.style.transform='translateX(0)'; }
+    document.querySelectorAll('.mob-dot').forEach((d,i)=>d.classList.toggle('on',i===0));
+    try{ _mobSlide=0; }catch(e){}
+  }
 }
 function ejecutarBuscadorMob(){ if(window.innerWidth<=640) abrirBuscadorMob(); }
 function ejecutarBuscadorMob2(q){ _procesarBusqueda(q.trim()); }
@@ -11746,6 +11944,279 @@ td,th{border:1px solid #c0c0c0;padding:4px 7px;vertical-align:top;line-height:1.
 }
 
 
+// ─── Exportar Word (.docx) — formato idéntico al Reporte_semana1 ─────────
+function repExportarWord() {
+  _repLeerCampos();
+  repAutoguardar();
+
+  if(!window.fflate) { showToast('Librería ZIP no disponible aún, intenta en un momento','warn'); return; }
+
+  const x = s => (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+
+  // Nombres de instructores
+  const destInst  = instructores.find(i => String(i.id) === String(_repDep.profDestacadoId));
+  const menosInst = instructores.find(i => String(i.id) === String(_repDep.profMenosId));
+  const destNombre  = destInst  ? destInst.nombre  : '';
+  const menosNombre = menosInst ? menosInst.nombre : '';
+  const destText  = destNombre  ? destNombre  + (_repDep.profDestacadoRazon ? ', ' + _repDep.profDestacadoRazon : '') : '';
+  const menosText = menosNombre ? menosNombre + (_repDep.profMenosRazon     ? ', ' + _repDep.profMenosRazon     : '') : '';
+
+  // ── Helpers de XML ──────────────────────────────────────────────────────
+  const W = 'http://schemas.openxmlformats.org/wordprocessingml/2006/main';
+  const enc = s => x(String(s||''));
+
+  function par(text, opts={}) {
+    const {bold=false, size=20, color='000000', align='left', spBefore=0, spAfter=80, shade=null, italic=false} = opts;
+    const alignXml = align!=='left' ? `<w:jc w:val="${align}"/>` : '';
+    const shdXml   = shade ? `<w:shd w:val="clear" w:color="auto" w:fill="${shade}"/>` : '';
+    const boldXml  = bold  ? '<w:b/><w:bCs/>' : '';
+    const italXml  = italic? '<w:i/><w:iCs/>'  : '';
+    const colorXml = color !== '000000' ? `<w:color w:val="${color}"/>` : '';
+    return `<w:p>
+      <w:pPr>
+        <w:spacing w:before="${spBefore}" w:after="${spAfter}"/>
+        ${alignXml}
+        ${shdXml}
+        <w:rPr><w:rFonts w:ascii="Arial" w:hAnsi="Arial" w:cs="Arial"/>${boldXml}${italXml}<w:sz w:val="${size}"/><w:szCs w:val="${size}"/>${colorXml}</w:rPr>
+      </w:pPr>
+      <w:r>
+        <w:rPr><w:rFonts w:ascii="Arial" w:hAnsi="Arial" w:cs="Arial"/>${boldXml}${italXml}<w:sz w:val="${size}"/><w:szCs w:val="${size}"/>${colorXml}</w:rPr>
+        <w:t xml:space="preserve">${enc(text)}</w:t>
+      </w:r>
+    </w:p>`;
+  }
+
+  // Dimensiones: Letter, márgenes 1" = 1440 dxa  →  contenido = 12240-2880 = 9360
+  const TBL_W = 9360;
+  const COL1  = 3900; // etiqueta ~42%
+  const COL2  = TBL_W - COL1;
+
+  function cellShd(fill) {
+    return `<w:shd w:val="clear" w:color="auto" w:fill="${fill}"/>`;
+  }
+
+  function td(text, opts={}) {
+    const {w=COL2, bold=false, color='000000', shade='FFFFFF', size=20, span=0, align='left', italic=false} = opts;
+    const spn = span > 1 ? `<w:gridSpan w:val="${span}"/>` : '';
+    return `<w:tc>
+      <w:tcPr><w:tcW w:w="${w}" w:type="dxa"/>${spn}${cellShd(shade)}<w:tcMar><w:top w:w="80" w:type="dxa"/><w:left w:w="120" w:type="dxa"/><w:bottom w:w="80" w:type="dxa"/><w:right w:w="120" w:type="dxa"/></w:tcMar></w:tcPr>
+      ${par(text, {bold, color, size, spBefore:0, spAfter:0, align, italic})}
+    </w:tc>`;
+  }
+
+  function headerRow(label, span=2) {
+    return `<w:tr>
+      <w:trPr><w:trHeight w:val="320"/></w:trPr>
+      ${td(label, {w: TBL_W, bold:true, color:'FFFFFF', shade:'1A7A45', size:20, span})}
+    </w:tr>`;
+  }
+
+  function dataRow(label, value) {
+    return `<w:tr>
+      <w:trPr><w:trHeight w:val="280"/></w:trPr>
+      ${td(label,  {w:COL1, bold:true,  shade:'F6FAF7'})}
+      ${td(value,  {w:COL2, shade:'FFFFFF'})}
+    </w:tr>`;
+  }
+
+  function table(rows, colWidths=[COL1, COL2]) {
+    const grid = colWidths.map(w=>`<w:gridCol w:w="${w}"/>`).join('');
+    return `<w:tbl>
+      <w:tblPr>
+        <w:tblW w:w="${TBL_W}" w:type="dxa"/>
+        <w:tblBorders>
+          <w:top w:val="single" w:sz="4" w:space="0" w:color="C0C0C0"/>
+          <w:left w:val="single" w:sz="4" w:space="0" w:color="C0C0C0"/>
+          <w:bottom w:val="single" w:sz="4" w:space="0" w:color="C0C0C0"/>
+          <w:right w:val="single" w:sz="4" w:space="0" w:color="C0C0C0"/>
+          <w:insideH w:val="single" w:sz="4" w:space="0" w:color="C0C0C0"/>
+          <w:insideV w:val="single" w:sz="4" w:space="0" w:color="C0C0C0"/>
+        </w:tblBorders>
+        <w:tblCellMar><w:top w:w="0" w:type="dxa"/><w:left w:w="0" w:type="dxa"/><w:bottom w:w="0" w:type="dxa"/><w:right w:w="0" w:type="dxa"/></w:tblCellMar>
+      </w:tblPr>
+      <w:tblGrid>${grid}</w:tblGrid>
+      ${rows}
+    </w:tbl>
+    <w:p><w:pPr><w:spacing w:after="120"/></w:pPr></w:p>`;
+  }
+
+  // ── Competencias ────────────────────────────────────────────────────────
+  const comps = (_repDep.competencias||[]).filter(c=>c.trim());
+  const compRows = comps.length
+    ? comps.map(c=>`<w:tr><w:trPr><w:trHeight w:val="280"/></w:trPr>${td(c,{w:TBL_W,span:1})}</w:tr>`).join('')
+    : `<w:tr><w:trPr><w:trHeight w:val="280"/></w:trPr>${td('—',{w:TBL_W,span:1,italic:true,color:'888888'})}</w:tr>`;
+  // 2 filas vacías de relleno
+  const compEmpty = `<w:tr><w:trPr><w:trHeight w:val="320"/></w:trPr>${td('',{w:TBL_W,span:1})}</w:tr>`.repeat(2);
+
+  // ── Logros ──────────────────────────────────────────────────────────────
+  const COL_L1=2400, COL_L2=5320, COL_L3=1640;
+  const logros = (_repDep.logros||[]).filter(l=>l.logro||l.descripcion);
+  const logroHeader = `<w:tr>
+    <w:trPr><w:trHeight w:val="280"/></w:trPr>
+    ${td('Logro',          {w:COL_L1, bold:true, shade:'E8F5EC', size:19})}
+    ${td('Descripción',    {w:COL_L2, bold:true, shade:'E8F5EC', size:19})}
+    ${td('¿Publicar en redes? (Si/No)',{w:COL_L3, bold:true, shade:'E8F5EC', size:18, align:'center'})}
+  </w:tr>`;
+  const logroRows = logros.length
+    ? logros.map((l,i)=>`<w:tr>
+        <w:trPr><w:trHeight w:val="280"/></w:trPr>
+        ${td(`${i+1}. ${l.logro}`, {w:COL_L1, bold:true})}
+        ${td(l.descripcion||'',    {w:COL_L2})}
+        ${td(l.redes||'No',        {w:COL_L3, align:'center', bold: l.redes==='Si', color: l.redes==='Si'?'1A7A45':'000000'})}
+      </w:tr>`).join('')
+    : `<w:tr><w:trPr><w:trHeight w:val="280"/></w:trPr>${td('—',{w:COL_L1})}${td('',{w:COL_L2})}${td('',{w:COL_L3})}</w:tr>`;
+  const logroEmpty = `<w:tr>
+    <w:trPr><w:trHeight w:val="340"/></w:trPr>
+    ${td('',{w:COL_L1})}${td('',{w:COL_L2})}${td('',{w:COL_L3})}
+  </w:tr>`.repeat(3);
+  const notaLogro = par('En dado caso que consideres necesario publicarlo en redes, hay que anexar en el drive una carpeta con el número del logro y las imágenes correspondientes.',
+    {size:18, color:'555555', italic:true, spBefore:0, spAfter:160});
+
+  // ── Incidencias ─────────────────────────────────────────────────────────
+  const COL_I1=3900, COL_I2=5460;
+  const incids = (_repDep.incidencias||[]).filter(i=>i.incidencia||i.solucion);
+  const incHeader = `<w:tr>
+    <w:trPr><w:trHeight w:val="280"/></w:trPr>
+    ${td('Incidencia',{w:COL_I1, bold:true, shade:'E8F5EC', size:19})}
+    ${td('Solución',  {w:COL_I2, bold:true, shade:'E8F5EC', size:19})}
+  </w:tr>`;
+  const incRows = incids.length
+    ? incids.map(inc=>`<w:tr>
+        <w:trPr><w:trHeight w:val="320"/></w:trPr>
+        ${td(inc.incidencia||'', {w:COL_I1, bold:true})}
+        ${td(inc.solucion||'',   {w:COL_I2})}
+      </w:tr>`).join('')
+    : `<w:tr><w:trPr><w:trHeight w:val="320"/></w:trPr>${td('—',{w:COL_I1})}${td('',{w:COL_I2})}</w:tr>`;
+  const incEmpty = `<w:tr>
+    <w:trPr><w:trHeight w:val="400"/></w:trPr>
+    ${td('',{w:COL_I1})}${td('',{w:COL_I2})}
+  </w:tr>`.repeat(Math.max(0, 5 - incids.length));
+
+  // ── Tabla gerencia ───────────────────────────────────────────────────────
+  const gerenciaRow = `<w:tr>
+    <w:trPr><w:trHeight w:val="1800" w:hRule="atLeast"/></w:trPr>
+    ${td(_repDep.ayuda||'', {w:TBL_W, span:1})}
+  </w:tr>`;
+
+  // ── Título del documento ─────────────────────────────────────────────────
+  const titulo = par('Reporte semanal | Deportes',
+    {bold:true, size:28, spBefore:240, spAfter:240});
+
+  // ── Ensamblado del body ──────────────────────────────────────────────────
+  const body = [
+    titulo,
+
+    table([
+      headerRow('Datos generales'),
+      dataRow('Disciplina', _repDep.disciplina),
+      dataRow('Semana',     _repDep.semana),
+      dataRow('Director',   _repDep.director),
+    ]),
+
+    table([
+      headerRow('Objetivos'),
+      dataRow('Objetivo semanal anterior de dirección', _repDep.objAnterior),
+      dataRow('¿Se cumplió? Si/ No, ¿Por qué?',         _repDep.objCumplido),
+      dataRow('Objetivo semanal próximo de dirección',  _repDep.objProximo),
+    ]),
+
+    table([
+      headerRow('Alumnado'),
+      dataRow('Cantidad total de alumnado',    _repDep.alumTotal),
+      dataRow('Asistencia total semanal',      _repDep.alumAsistencia),
+      dataRow('Nuevos alumnos',                String(_repDep.alumNuevos||'')),
+      dataRow('Edades predominantes de alumnado', _repDep.alumEdades),
+    ]),
+
+    table([
+      headerRow('Profesores'),
+      dataRow('Cantidad total de profesores',  String(_repDep.profTotal||'')),
+      dataRow('Cantidad total de clases',      String(_repDep.profClases||'')),
+      dataRow('Inasistencias semanales',       String(_repDep.profInasistencias||'')),
+      dataRow('Profesor más destacado de la semana (explica la razón)',  destText),
+      dataRow('Profesor menos destacado de la semana (explica la razón)', menosText),
+    ]),
+
+    table([headerRow('Competencias activas', 1), compRows, compEmpty], [TBL_W]),
+
+    table([headerRow('Logros semanales', 3), logroHeader, logroRows, logroEmpty], [COL_L1, COL_L2, COL_L3]),
+    notaLogro,
+
+    table([headerRow('Incidencias generales semanales', 2), incHeader, incRows, incEmpty], [COL_I1, COL_I2]),
+
+    table([
+      `<w:tr><w:trPr><w:trHeight w:val="320"/></w:trPr>
+        ${td('¿En qué te puede ayudar la gerencia deportiva?',{w:TBL_W, bold:true, color:'FFFFFF', shade:'1A4A8A', size:20, span:1})}
+      </w:tr>`,
+      gerenciaRow,
+    ], [TBL_W]),
+
+  ].join('\n');
+
+  // ── Armar document.xml ───────────────────────────────────────────────────
+  const documentXml = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<w:document xmlns:wpc="http://schemas.microsoft.com/office/word/2010/wordprocessingCanvas"
+            xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+            xmlns:o="urn:schemas-microsoft-com:office:office"
+            xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships"
+            xmlns:m="http://schemas.openxmlformats.org/officeDocument/2006/math"
+            xmlns:v="urn:schemas-microsoft-com:vml"
+            xmlns:wp14="http://schemas.microsoft.com/office/word/2010/wordprocessingDrawing"
+            xmlns:wp="http://schemas.openxmlformats.org/drawingml/2006/wordprocessingDrawing"
+            xmlns:w10="urn:schemas-microsoft-com:office:word"
+            xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main"
+            xmlns:w14="http://schemas.microsoft.com/office/word/2010/wordml"
+            xmlns:wpg="http://schemas.microsoft.com/office/word/2010/wordprocessingGroup"
+            xmlns:wpi="http://schemas.microsoft.com/office/word/2010/wordprocessingInk"
+            xmlns:wne="http://schemas.microsoft.com/office/word/2006/wordml"
+            xmlns:wps="http://schemas.microsoft.com/office/word/2010/wordprocessingShape"
+            mc:Ignorable="w14 wp14">
+  <w:body>
+    ${body}
+    <w:sectPr>
+      <w:pgSz w:w="12240" w:h="15840"/>
+      <w:pgMar w:top="1440" w:right="1440" w:bottom="1440" w:left="1440" w:header="720" w:footer="720" w:gutter="0"/>
+    </w:sectPr>
+  </w:body>
+</w:document>`;
+
+  // ── Archivos del ZIP ─────────────────────────────────────────────────────
+  const contentTypes = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types">
+  <Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/>
+  <Default Extension="xml"  ContentType="application/xml"/>
+  <Override PartName="/word/document.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.document.main+xml"/>
+</Types>`;
+
+  const relsRoot = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">
+  <Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="word/document.xml"/>
+</Relationships>`;
+
+  const relsWord = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">
+</Relationships>`;
+
+  // ── Comprimir y descargar ────────────────────────────────────────────────
+  const te = new TextEncoder();
+  const zipped = fflate.zipSync({
+    '[Content_Types].xml':   te.encode(contentTypes),
+    '_rels/.rels':           te.encode(relsRoot),
+    'word/document.xml':     te.encode(documentXml),
+    'word/_rels/document.xml.rels': te.encode(relsWord),
+  }, { level: 6 });
+
+  const blob = new Blob([zipped], { type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' });
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement('a');
+  const nombre = `Reporte_${(_repDep.disciplina||'Fitness').replace(/\s+/g,'_')}_${(_repDep.semana||'semana').replace(/[^a-zA-Z0-9]/g,'_').slice(0,30)}.docx`;
+  a.href = url; a.download = nombre;
+  document.body.appendChild(a); a.click();
+  document.body.removeChild(a);
+  setTimeout(()=>URL.revokeObjectURL(url), 2000);
+  showToast(`Word descargado · ${nombre}`, 'ok');
+}
+
 // ── Sidebar: hover expand (tablet) + click-to-collapse (desktop) ──────────
 (function() {
   const sb = document.getElementById('sidebar');
@@ -12566,7 +13037,10 @@ function _fdInicializarCanvas() {
   canvas.width  = CANVAS_W;
   canvas.height = CANVAS_H;
   // Mostrar en pantalla ajustado al espacio disponible pero manteniendo 3:1
-  const dispW = Math.min(window.innerWidth - 260, 680);
+  // En móvil (<= 640px) no hay sidebar lateral, el canvas ocupa el ancho completo
+  const isMobile = window.innerWidth <= 640;
+  const sidebarW = isMobile ? 32 : 260; // móvil: solo padding; escritorio: sidebar 220px + gaps
+  const dispW = Math.min(window.innerWidth - sidebarW, 680);
   const dispH = Math.round(dispW * (CANVAS_H / CANVAS_W));
   canvas.style.width  = dispW + 'px';
   canvas.style.height = dispH + 'px';
