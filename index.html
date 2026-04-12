@@ -5719,7 +5719,7 @@ function turboMostrar(){
   // Capacidad desde salón (o del último registro histórico si existe)
   const capSalon=getCapClase(c.clase)||20;
   // Usar cap del último registro si existe, para no perder override manual
-  const histRecsAll=registros.filter(r=>r.inst_id===c.inst_id&&r.clase===c.clase&&r.dia===c.dia).sort((a,b)=>(b.fecha||'').localeCompare(a.fecha||''));
+  const histRecsAll=registros.filter(r=>String(r.inst_id)===String(c.inst_id)&&r.clase===c.clase&&r.dia===c.dia).sort((a,b)=>(b.fecha||'').localeCompare(a.fecha||''));
   const capPrev=histRecsAll.length>0&&parseInt(histRecsAll[0].cap)>0?parseInt(histRecsAll[0].cap):capSalon;
   document.getElementById('tc-cap').value=capPrev;
   // Reset asistentes con último valor histórico como sugerencia
@@ -5757,7 +5757,7 @@ function turboActualizarChips(){
   const total=recActual.clasesActivas.length;
   let html='';
   recActual.clasesActivas.forEach((c,i)=>{
-    const item=recActual.items.find(it=>it.inst_id===c.inst_id&&it.hora===c.hora&&it.clase===c.clase);
+    const item=recActual.items.find(it=>String(it.inst_id)===String(c.inst_id)&&it.hora===c.hora&&it.clase===c.clase);
     let bg='var(--border)',col='var(--txt3)',icono='';
     if(item&&!item.saltado){
       const afo=item.asis>0&&item.cap>0?Math.round(item.asis/item.cap*100):0;
@@ -5857,7 +5857,7 @@ function turboGuardar(){
 
 function turboSaltar(){
   const c=recActual.clasesActivas[recIdx];
-  const existeIdx=recActual.items.findIndex(it=>it.inst_id===c.inst_id&&it.hora===c.hora&&it.clase===c.clase);
+  const existeIdx=recActual.items.findIndex(it=>String(it.inst_id)===String(c.inst_id)&&it.hora===c.hora&&it.clase===c.clase);
   const item={...c,asis:0,presente:'si',suplente_id:null,obs:'',saltado:true,cap:getCapClase(c.clase)||20};
   if(existeIdx>=0)recActual.items[existeIdx]=item;
   else recActual.items.push(item);
@@ -5890,7 +5890,7 @@ function terminarTurbo(){
   document.getElementById('turbo-screen').style.display='none';
   // Completar con saltado las que no se registraron
   recActual.clasesActivas.forEach(c=>{
-    const existe=recActual.items.find(it=>it.inst_id===c.inst_id&&it.hora===c.hora&&it.clase===c.clase);
+    const existe=recActual.items.find(it=>String(it.inst_id)===String(c.inst_id)&&it.hora===c.hora&&it.clase===c.clase);
     if(!existe)recActual.items.push({...c,asis:0,presente:'si',suplente_id:null,obs:'',saltado:true,cap:getCapClase(c.clase)||20});
   });
   terminarRecorrido();
@@ -6053,6 +6053,7 @@ function guardarRecorrido(){
     // Comparación robusta: convierte ambos lados a string para evitar mismatch number/string de Firebase
     const ex=registros.find(r=>
       String(r.inst_id)===String(item.inst_id) &&
+      r.clase===item.clase &&
       r.dia===item.dia &&
       r.hora===item.hora &&
       r.fecha===recActual.fecha
