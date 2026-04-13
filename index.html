@@ -983,9 +983,10 @@ html.tema-claro .mob-btn-agenda-row {
   position: fixed; inset: 0; z-index: 800;
   background: var(--bg);
   flex-direction: column;
-  padding: 14px 14px 80px;
+  padding: 14px 14px 16px;
+  overflow: hidden;
 }
-#mob-agenda-overlay.on { display: flex; flex-direction: column; gap: 10px; }
+#mob-agenda-overlay.on { display: flex; flex-direction: column; gap: 8px; }
 .nota-card-mob {
   background: rgba(232,184,75,.07);
   border: 1px solid rgba(232,184,75,.28);
@@ -1175,6 +1176,11 @@ html.tema-claro .comp-card-b{background:#fef9e0;border-color:#d4b800;}
 }
 
 /* Agenda overlay — aspecto limpio */
+/* ── Sección eventos en agenda ── */
+#ag-evt-section { border-top: 1px solid var(--border); padding-top: 4px; }
+#ag-evt-toggle-btn { transition: color .2s; }
+#ag-evt-toggle-btn:hover { color: var(--neon) !important; }
+#ag-evt-toggle-ico { transition: transform .2s; }
 #mob-agenda-overlay {
   background: var(--bg);
 }
@@ -1803,12 +1809,21 @@ html.tema-claro .bnav-item.on { color: #1a7a45; }
 
 
 
-/* ═══ MINI-CALENDARIO AGENDA ═══════════════════════════════ */
+/* ═══ CALENDARIO UNIFICADO AGENDA + EVENTOS ═══════════════ */
 #ag-cal-wrap{
   background:var(--panel2);border:1px solid var(--border);
-  border-radius:14px;padding:10px 10px 8px;flex-shrink:0;
+  border-radius:16px;padding:12px 12px 10px;flex-shrink:0;
 }
-.ag-cal-nav{display:flex;align-items:center;justify-content:space-between;margin-bottom:7px;}
+/* Leyenda de colores */
+.ag-cal-leyenda{
+  display:flex;align-items:center;gap:10px;
+  font-size:.58rem;color:var(--txt3);
+  margin-bottom:8px;flex-wrap:wrap;
+}
+.ag-cal-leyenda-dot{
+  width:8px;height:8px;border-radius:50%;display:inline-block;flex-shrink:0;
+}
+.ag-cal-nav{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;}
 .ag-cal-mes{font-family:'Bebas Neue',sans-serif;font-size:.95rem;letter-spacing:1.5px;color:var(--neon);}
 html.tema-claro .ag-cal-mes{color:var(--verde);}
 .ag-cal-nav-btn{
@@ -1818,18 +1833,19 @@ html.tema-claro .ag-cal-mes{color:var(--verde);}
   cursor:pointer;font-size:1rem;transition:all .15s;flex-shrink:0;
 }
 .ag-cal-nav-btn:hover{border-color:var(--v3);color:var(--txt);}
-.ag-cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:2px;}
+.ag-cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:3px;}
 .ag-cal-dow{
   font-size:.55rem;text-transform:uppercase;letter-spacing:.5px;
-  color:var(--txt3);text-align:center;padding:2px 0 4px;font-weight:600;
+  color:var(--txt3);text-align:center;padding:2px 0 5px;font-weight:600;
 }
 .ag-cal-dow.fin{color:var(--gold2);}
 .ag-cal-day{
   aspect-ratio:1;display:flex;align-items:center;justify-content:center;
-  flex-direction:column;border-radius:7px;font-size:.72rem;font-weight:500;
+  flex-direction:column;border-radius:8px;font-size:.72rem;font-weight:500;
   color:var(--txt2);cursor:pointer;position:relative;
-  transition:all .15s;-webkit-tap-highlight-color:transparent;min-height:30px;
+  transition:all .15s;-webkit-tap-highlight-color:transparent;min-height:32px;
 }
+.ag-cal-day:active{transform:scale(.93);}
 .ag-cal-day:hover{background:var(--panel);color:var(--txt);}
 .ag-cal-day.vacio{cursor:default;pointer-events:none;}
 .ag-cal-day.hoy{background:var(--verde);color:#fff;font-weight:700;}
@@ -1841,11 +1857,40 @@ html.tema-claro .ag-cal-day.hoy{background:var(--verde);}
 html.tema-claro .ag-cal-day.selec{background:#e0f5ea;border-color:var(--verde);color:var(--verde);}
 .ag-cal-day.hoy.selec{background:var(--verde);border-color:var(--neon);color:#fff;box-shadow:0 0 0 2px var(--neon);}
 .ag-cal-day.fin:not(.hoy):not(.selec){color:var(--gold2);}
-.ag-cal-dot{
-  position:absolute;bottom:3px;width:4px;height:4px;
-  border-radius:50%;background:var(--gold2);
+/* Indicadores del día */
+.ag-cal-dots{
+  position:absolute;bottom:3px;
+  display:flex;gap:2px;align-items:center;justify-content:center;
 }
-.ag-cal-dot.alta{background:var(--red2);}
+.ag-cal-dot{
+  width:4px;height:4px;border-radius:50%;flex-shrink:0;
+}
+.ag-cal-dot.nota-alta{background:var(--red2);}
+.ag-cal-dot.nota-media{background:var(--gold2);}
+.ag-cal-dot.nota-baja{background:var(--blue);}
+.ag-cal-dot.evento{background:var(--neon);}
+/* Preview del día seleccionado */
+#ag-dia-preview{
+  background:var(--panel);border:1px solid var(--border);
+  border-radius:12px;padding:10px 12px;margin-top:6px;
+  flex-shrink:0;display:none;
+}
+#ag-dia-preview.on{display:block;}
+.ag-preview-fecha{
+  font-family:'Bebas Neue',sans-serif;font-size:.9rem;
+  letter-spacing:1.5px;color:var(--neon);margin-bottom:6px;
+}
+html.tema-claro .ag-preview-fecha{color:var(--verde);}
+.ag-preview-item{
+  display:flex;align-items:flex-start;gap:8px;
+  padding:5px 0;border-bottom:1px solid var(--border);
+  font-size:.72rem;
+}
+.ag-preview-item:last-child{border-bottom:none;}
+.ag-preview-dot{
+  width:7px;height:7px;border-radius:50%;
+  flex-shrink:0;margin-top:3px;
+}
 
 /* ═══ AGENDA MEJORADA ═════════════════════════════════ */
 .agenda-fil-btn {
@@ -3004,58 +3049,113 @@ html.tema-claro .rep-card-hdr { color: #1a7a45; }
 
 <!-- ═══ AGENDA OVERLAY (MÓVIL) ═══════════════════════════════════════════ -->
 <div id="mob-agenda-overlay">
-  <div class="mob-overlay-back" onclick="cerrarAgendaMob()">
-    <svg width="16" height="16" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6"><polyline points="12,4 6,10 12,16" stroke-linecap="round" stroke-linejoin="round"/></svg>
-    Volver
+
+  <!-- ── Header ── -->
+  <div style="display:flex;align-items:center;justify-content:space-between;flex-shrink:0;padding-bottom:6px;border-bottom:1px solid var(--border);">
+    <div style="display:flex;align-items:center;gap:10px;">
+      <button onclick="cerrarAgendaMob()" style="background:none;border:none;color:var(--txt2);cursor:pointer;padding:2px;display:flex;align-items:center;">
+        <svg width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7"><polyline points="12,4 6,10 12,16" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
+      <span style="font-size:1rem;font-weight:700;color:var(--txt);letter-spacing:.3px">Agenda</span>
+    </div>
+    <div style="display:flex;align-items:center;gap:6px;">
+      <span id="mob-agenda-pendientes-lbl" style="font-size:.68rem;"></span>
+      <button onclick="agAbrirNuevoEvento()" style="background:var(--verde);color:#fff;border:none;border-radius:9px;padding:5px 11px;font-family:'Outfit',sans-serif;font-size:.7rem;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:5px;">
+        <svg width="11" height="11" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2.2"><line x1="10" y1="3" x2="10" y2="17" stroke-linecap="round"/><line x1="3" y1="10" x2="17" y2="10" stroke-linecap="round"/></svg>
+        Evento
+      </button>
+    </div>
   </div>
-  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;">
-    <span style="font-size:1rem;font-weight:600;color:var(--txt)">Agenda</span>
-    <span id="mob-agenda-pendientes-lbl" style="font-size:.72rem;color:var(--gold2)"></span>
-  </div>
-  <!-- ═══ MINI-CALENDARIO FIJO ═══ -->
-  <div id="ag-cal-wrap">
+
+  <!-- ── Calendario unificado ── -->
+  <div id="ag-cal-wrap" style="flex-shrink:0;">
     <div class="ag-cal-nav">
       <button class="ag-cal-nav-btn" onclick="agCalCambiarMes(-1)">&#8249;</button>
       <span class="ag-cal-mes" id="ag-cal-mes-lbl">—</span>
       <button class="ag-cal-nav-btn" onclick="agCalCambiarMes(1)">&#8250;</button>
     </div>
+    <!-- Leyenda -->
+    <div class="ag-cal-leyenda">
+      <span><span class="ag-cal-leyenda-dot" style="background:var(--neon)"></span> Evento dep.</span>
+      <span><span class="ag-cal-leyenda-dot" style="background:var(--red2)"></span> Nota urgente</span>
+      <span><span class="ag-cal-leyenda-dot" style="background:var(--gold2)"></span> Nota media</span>
+    </div>
     <div class="ag-cal-grid" id="ag-cal-grid"></div>
+    <!-- Preview del día seleccionado -->
+    <div id="ag-dia-preview">
+      <div class="ag-preview-fecha" id="ag-preview-fecha-lbl">—</div>
+      <div id="ag-preview-items"></div>
+    </div>
   </div>
-  <!-- Filtros de prioridad -->
-  <div style="display:flex;gap:4px;flex-shrink:0;margin-bottom:2px;">
-    <button class="agenda-fil-btn on" id="agfil-todas" onclick="setAgendaFiltro('todas')">Todas</button>
-    <button class="agenda-fil-btn" id="agfil-alta" onclick="setAgendaFiltro('alta')">
-      <span style="width:8px;height:8px;border-radius:50%;background:var(--red2);display:inline-block;margin-right:3px;vertical-align:middle"></span>Alta
+
+  <!-- ── Tabs: Notas / Eventos ── -->
+  <div style="display:flex;gap:3px;flex-shrink:0;background:var(--panel2);border-radius:10px;padding:3px;">
+    <button id="agtab-notas" onclick="agTabCambiar('notas')" style="flex:1;background:var(--verde);color:#fff;border:none;border-radius:8px;padding:6px;font-family:'Outfit',sans-serif;font-size:.72rem;font-weight:700;cursor:pointer;transition:all .15s;">
+      📝 Notas
     </button>
-    <button class="agenda-fil-btn" id="agfil-media" onclick="setAgendaFiltro('media')">
-      <span style="width:8px;height:8px;border-radius:50%;background:var(--gold2);display:inline-block;margin-right:3px;vertical-align:middle"></span>Media
-    </button>
-    <button class="agenda-fil-btn" id="agfil-baja" onclick="setAgendaFiltro('baja')">
-      <span style="width:8px;height:8px;border-radius:50%;background:var(--blue);display:inline-block;margin-right:3px;vertical-align:middle"></span>Baja
+    <button id="agtab-eventos" onclick="agTabCambiar('eventos')" style="flex:1;background:none;color:var(--txt2);border:none;border-radius:8px;padding:6px;font-family:'Outfit',sans-serif;font-size:.72rem;font-weight:600;cursor:pointer;transition:all .15s;">
+      🏆 Eventos
     </button>
   </div>
-  <div id="mob-notas-lista" style="flex:1;overflow-y:auto;display:flex;flex-direction:column;gap:7px;"></div>
-  <!-- Input nueva nota con prioridad -->
-  <div style="background:var(--panel2);border:1px solid var(--border);border-radius:14px;padding:10px;margin-top:6px;flex-shrink:0;">
-    <div style="display:flex;gap:5px;margin-bottom:7px;">
-      <button class="agenda-pri-btn on" id="agpri-media" onclick="setAgendaPri('media')" style="flex:1;">
-        <span style="width:7px;height:7px;border-radius:50%;background:var(--gold2);display:inline-block;margin-right:3px"></span>Media
+
+  <!-- ── Panel NOTAS ── -->
+  <div id="ag-panel-notas" style="display:flex;flex-direction:column;gap:6px;flex:1;min-height:0;">
+    <!-- Filtros -->
+    <div style="display:flex;gap:4px;flex-shrink:0;">
+      <button class="agenda-fil-btn on" id="agfil-todas" onclick="setAgendaFiltro('todas')">Todas</button>
+      <button class="agenda-fil-btn" id="agfil-alta" onclick="setAgendaFiltro('alta')">
+        <span style="width:7px;height:7px;border-radius:50%;background:var(--red2);display:inline-block;margin-right:2px;vertical-align:middle"></span>Alta
       </button>
-      <button class="agenda-pri-btn" id="agpri-alta" onclick="setAgendaPri('alta')" style="flex:1;">
-        <span style="width:7px;height:7px;border-radius:50%;background:var(--red2);display:inline-block;margin-right:3px"></span>Alta
+      <button class="agenda-fil-btn" id="agfil-media" onclick="setAgendaFiltro('media')">
+        <span style="width:7px;height:7px;border-radius:50%;background:var(--gold2);display:inline-block;margin-right:2px;vertical-align:middle"></span>Media
       </button>
-      <button class="agenda-pri-btn" id="agpri-baja" onclick="setAgendaPri('baja')" style="flex:1;">
-        <span style="width:7px;height:7px;border-radius:50%;background:var(--blue);display:inline-block;margin-right:3px"></span>Baja
+      <button class="agenda-fil-btn" id="agfil-baja" onclick="setAgendaFiltro('baja')">
+        <span style="width:7px;height:7px;border-radius:50%;background:var(--blue);display:inline-block;margin-right:2px;vertical-align:middle"></span>Baja
       </button>
     </div>
-    <div class="nota-input-mob">
-      <textarea class="nota-field-mob" id="mob-nota-nueva" placeholder="Escribe una nota..." rows="2"></textarea>
-      <div class="nota-voz-btn" id="mob-voz-nota-btn" onclick="toggleVozNota()" title="Nota de voz">
-        <svg width="16" height="16" viewBox="0 0 20 20" fill="none" stroke="var(--gold2)" stroke-width="1.5"><rect x="7" y="1" width="6" height="11" rx="3"/><path d="M3 10a7 7 0 0 0 14 0M10 17v2"/></svg>
+    <!-- Lista notas -->
+    <div id="mob-notas-lista" style="flex:1;overflow-y:auto;display:flex;flex-direction:column;gap:7px;"></div>
+    <!-- Nueva nota -->
+    <div style="background:var(--panel2);border:1px solid var(--border);border-radius:14px;padding:10px;flex-shrink:0;">
+      <div style="display:flex;gap:4px;margin-bottom:7px;">
+        <button class="agenda-pri-btn on" id="agpri-media" onclick="setAgendaPri('media')" style="flex:1;font-size:.65rem;">
+          <span style="width:6px;height:6px;border-radius:50%;background:var(--gold2);display:inline-block;margin-right:3px"></span>Media
+        </button>
+        <button class="agenda-pri-btn" id="agpri-alta" onclick="setAgendaPri('alta')" style="flex:1;font-size:.65rem;">
+          <span style="width:6px;height:6px;border-radius:50%;background:var(--red2);display:inline-block;margin-right:3px"></span>Alta
+        </button>
+        <button class="agenda-pri-btn" id="agpri-baja" onclick="setAgendaPri('baja')" style="flex:1;font-size:.65rem;">
+          <span style="width:6px;height:6px;border-radius:50%;background:var(--blue);display:inline-block;margin-right:3px"></span>Baja
+        </button>
       </div>
+      <div class="nota-input-mob">
+        <textarea class="nota-field-mob" id="mob-nota-nueva" placeholder="Escribe una nota..." rows="2"></textarea>
+        <div class="nota-voz-btn" id="mob-voz-nota-btn" onclick="toggleVozNota()" title="Nota de voz">
+          <svg width="15" height="15" viewBox="0 0 20 20" fill="none" stroke="var(--gold2)" stroke-width="1.5"><rect x="7" y="1" width="6" height="11" rx="3"/><path d="M3 10a7 7 0 0 0 14 0M10 17v2"/></svg>
+        </div>
+      </div>
+      <button class="bsave" style="margin-top:7px;font-size:.8rem;" onclick="guardarNotaMob()">Guardar nota</button>
     </div>
-    <button class="bsave" style="margin-top:7px;font-size:.82rem;" onclick="guardarNotaMob()">Guardar nota</button>
   </div>
+
+  <!-- ── Panel EVENTOS ── -->
+  <div id="ag-panel-eventos" style="display:none;flex-direction:column;gap:6px;flex:1;min-height:0;">
+    <!-- Subtítulo -->
+    <div style="display:flex;align-items:center;justify-content:space-between;flex-shrink:0;">
+      <span style="font-size:.7rem;color:var(--txt2);" id="ag-evt-subtitulo">Próximos eventos</span>
+      <button onclick="cerrarAgendaMob();navegarA('eventos')" style="background:none;border:1px solid var(--border);color:var(--txt2);border-radius:8px;padding:4px 10px;font-family:'Outfit',sans-serif;font-size:.65rem;cursor:pointer;">
+        Ver módulo completo →
+      </button>
+    </div>
+    <!-- Lista eventos -->
+    <div id="ag-evt-lista" style="flex:1;overflow-y:auto;display:flex;flex-direction:column;gap:6px;"></div>
+    <!-- Botón nuevo -->
+    <button onclick="agAbrirNuevoEvento()" style="width:100%;background:linear-gradient(90deg,var(--verde),#0a3020);color:#fff;border:none;border-radius:12px;padding:11px;font-family:'Outfit',sans-serif;font-size:.8rem;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:7px;flex-shrink:0;">
+      <svg width="14" height="14" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2.2"><line x1="10" y1="3" x2="10" y2="17" stroke-linecap="round"/><line x1="3" y1="10" x2="17" y2="10" stroke-linecap="round"/></svg>
+      Registrar Nuevo Evento
+    </button>
+  </div>
+
 </div>
 
 <!-- ══ DASHBOARD ══ -->
@@ -11356,6 +11456,177 @@ function abrirAgendaMob() {
 function cerrarAgendaMob() {
   document.getElementById('mob-agenda-overlay').classList.remove('on');
 }
+
+// ══ AGENDA UNIFICADA: NOTAS + EVENTOS ══════════════════════════════════════
+let _agTabActual = 'notas'; // 'notas' | 'eventos'
+
+function agTabCambiar(tab) {
+  _agTabActual = tab;
+  const panelNotas   = document.getElementById('ag-panel-notas');
+  const panelEventos = document.getElementById('ag-panel-eventos');
+  const btnNotas     = document.getElementById('agtab-notas');
+  const btnEventos   = document.getElementById('agtab-eventos');
+  if(panelNotas)   panelNotas.style.display   = tab === 'notas'   ? 'flex' : 'none';
+  if(panelEventos) panelEventos.style.display = tab === 'eventos' ? 'flex' : 'none';
+  if(btnNotas){
+    btnNotas.style.background = tab === 'notas' ? 'var(--verde)' : 'none';
+    btnNotas.style.color      = tab === 'notas' ? '#fff' : 'var(--txt2)';
+    btnNotas.style.fontWeight = tab === 'notas' ? '700' : '600';
+  }
+  if(btnEventos){
+    btnEventos.style.background = tab === 'eventos' ? 'var(--verde)' : 'none';
+    btnEventos.style.color      = tab === 'eventos' ? '#fff' : 'var(--txt2)';
+    btnEventos.style.fontWeight = tab === 'eventos' ? '700' : '600';
+  }
+  if(tab === 'eventos') agEvtRenderLista();
+  // Re-render el calendario para mostrar los puntos correctos
+  renderAgendaCal();
+}
+
+// ── Render lista eventos en agenda ─────────────────────────────────────────
+function agEvtRenderLista() {
+  const cont = document.getElementById('ag-evt-lista');
+  const sub  = document.getElementById('ag-evt-subtitulo');
+  if(!cont) return;
+
+  const ev = evtCargarDatos();
+  const hoyStr = new Date().toISOString().slice(0,10);
+
+  // Si hay día seleccionado, mostrar eventos de ese día
+  let lista, subtitulo;
+  if(_agCalDiaSelec) {
+    lista = ev.filter(e => e.fecha === _agCalDiaSelec);
+    const [y,m,d] = _agCalDiaSelec.split('-');
+    const fmtFecha = new Date(+y,+m-1,+d).toLocaleDateString('es-MX',{weekday:'long',day:'numeric',month:'long'});
+    subtitulo = `Eventos del ${fmtFecha}`;
+  } else {
+    lista = ev.filter(e => e.fecha >= hoyStr && e.estado !== 'cancelado')
+              .sort((a,b) => a.fecha.localeCompare(b.fecha))
+              .slice(0, 10);
+    subtitulo = ev.length > 0 ? `Próximos eventos (${lista.length})` : 'Sin eventos registrados';
+  }
+  if(sub) sub.textContent = subtitulo;
+
+  if(!lista.length) {
+    cont.innerHTML = `<div style="text-align:center;padding:20px 0;color:var(--txt3);font-size:.78rem;">
+      ${_agCalDiaSelec ? 'Sin eventos para este día' : 'Sin eventos próximos'}<br>
+      <span style="font-size:.65rem;color:var(--txt3)">Toca "Registrar Nuevo Evento" para agregar uno</span>
+    </div>`;
+    return;
+  }
+
+  const MESES = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
+  const colEst = { planificado:'var(--blue)', realizado:'var(--neon)', cancelado:'var(--red2)', pospuesto:'var(--gold2)' };
+  const icoEst = { planificado:'📅', realizado:'✅', cancelado:'❌', pospuesto:'⏸' };
+
+  cont.innerHTML = lista.map(e => {
+    const d   = new Date(e.fecha + 'T00:00');
+    const dia = d.getDate();
+    const mes = MESES[d.getMonth()];
+    const diasDiff = Math.ceil((d - new Date()) / 86400000);
+    const diasLbl = diasDiff < 0 ? `hace ${Math.abs(diasDiff)}d` :
+                    diasDiff === 0 ? '¡Hoy!' :
+                    diasDiff === 1 ? 'Mañana' : `en ${diasDiff}d`;
+    const col = colEst[e.estado] || 'var(--v2)';
+    const ico = icoEst[e.estado] || '📅';
+    const partsInfo = [e.deporte, e.lugar, e.horaIni ? e.horaIni+' h' : null].filter(Boolean);
+    return `<div onclick="agAbrirEditarEvento('${e.id}')"
+      style="display:flex;align-items:stretch;gap:0;background:var(--panel2);border:1px solid var(--border);border-radius:12px;overflow:hidden;cursor:pointer;transition:all .15s;active:opacity:.7;">
+      <!-- Borde color estado -->
+      <div style="width:4px;background:${col};flex-shrink:0;"></div>
+      <!-- Fecha -->
+      <div style="min-width:42px;text-align:center;padding:10px 6px;border-right:1px solid var(--border);flex-shrink:0;display:flex;flex-direction:column;align-items:center;justify-content:center;">
+        <div style="font-family:'Bebas Neue',sans-serif;font-size:1.4rem;color:${col};line-height:1">${dia}</div>
+        <div style="font-size:.5rem;color:var(--txt3);text-transform:uppercase;letter-spacing:.5px;margin-top:1px">${mes}</div>
+      </div>
+      <!-- Contenido -->
+      <div style="flex:1;min-width:0;padding:8px 10px;">
+        <div style="font-size:.8rem;font-weight:700;color:var(--txt);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:2px;">${e.nombre || '—'}</div>
+        <div style="font-size:.63rem;color:var(--txt2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${partsInfo.join(' · ')}</div>
+        ${e.participantes ? `<div style="font-size:.6rem;color:var(--txt3);margin-top:2px;">👥 ${e.participantes} participantes</div>` : ''}
+      </div>
+      <!-- Estado + tiempo -->
+      <div style="flex-shrink:0;padding:8px 10px;text-align:right;display:flex;flex-direction:column;align-items:flex-end;justify-content:center;gap:3px;">
+        <div style="font-size:.58rem;font-weight:700;color:${col};">${diasLbl}</div>
+        <div style="font-size:.55rem;color:var(--txt3);">${ico} ${e.estado}</div>
+        ${e.calificacion ? `<div style="font-size:.55rem;">${'⭐'.repeat(e.calificacion)}</div>` : ''}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ── Preview del día en el calendario (notas + eventos) ─────────────────────
+function agActualizarPreviewDia() {
+  const preview = document.getElementById('ag-dia-preview');
+  const fechaLbl = document.getElementById('ag-preview-fecha-lbl');
+  const itemsCont = document.getElementById('ag-preview-items');
+  if(!preview || !fechaLbl || !itemsCont) return;
+
+  if(!_agCalDiaSelec) { preview.classList.remove('on'); return; }
+
+  const [y,m,d] = _agCalDiaSelec.split('-');
+  const fmtFecha = new Date(+y,+m-1,+d).toLocaleDateString('es-MX',{weekday:'short',day:'numeric',month:'short'});
+  fechaLbl.textContent = fmtFecha.charAt(0).toUpperCase() + fmtFecha.slice(1);
+
+  const colEst = { planificado:'var(--blue)', realizado:'var(--neon)', cancelado:'var(--red2)', pospuesto:'var(--gold2)' };
+  const items = [];
+
+  // Eventos del día
+  evtCargarDatos().filter(e => e.fecha === _agCalDiaSelec).forEach(e => {
+    items.push({
+      dot: colEst[e.estado] || 'var(--v2)',
+      texto: `🏆 ${e.nombre || e.deporte}${e.horaIni ? ' · ' + e.horaIni : ''}`,
+      tipo: 'evento',
+      accion: `agAbrirEditarEvento('${e.id}')`
+    });
+  });
+
+  // Notas del día
+  agendaNotas.filter(n => !n.resuelta && n.ts && n.ts.startsWith(_agCalDiaSelec)).forEach(n => {
+    const colPri = { alta:'var(--red2)', media:'var(--gold2)', baja:'var(--blue)' };
+    items.push({
+      dot: colPri[n.prioridad] || 'var(--gold2)',
+      texto: n.texto.length > 55 ? n.texto.slice(0,55) + '…' : n.texto,
+      tipo: 'nota'
+    });
+  });
+
+  if(!items.length) { preview.classList.remove('on'); return; }
+
+  preview.classList.add('on');
+  itemsCont.innerHTML = items.map(it => `
+    <div class="ag-preview-item" ${it.accion ? `onclick="${it.accion}" style="cursor:pointer;"` : ''}>
+      <div class="ag-preview-dot" style="background:${it.dot}"></div>
+      <div style="font-size:.71rem;color:var(--txt);line-height:1.4;flex:1;">${it.texto}</div>
+    </div>`).join('');
+}
+
+// ── Abrir/cerrar agenda ─────────────────────────────────────────────────────
+function agAbrirNuevoEvento() {
+  document.getElementById('mob-agenda-overlay').classList.remove('on');
+  setTimeout(() => { abrirModalEvento(null); }, 100);
+}
+
+function agAbrirEditarEvento(id) {
+  document.getElementById('mob-agenda-overlay').classList.remove('on');
+  setTimeout(() => { abrirModalEvento(id); }, 100);
+}
+
+// Patch abrirAgendaMob para resetear estado
+const _orig_abrirAgendaMob = abrirAgendaMob;
+abrirAgendaMob = function() {
+  _agTabActual = 'notas';
+  // Resetear tabs
+  const pN = document.getElementById('ag-panel-notas');
+  const pE = document.getElementById('ag-panel-eventos');
+  const bN = document.getElementById('agtab-notas');
+  const bE = document.getElementById('agtab-eventos');
+  if(pN) pN.style.display = 'flex';
+  if(pE) pE.style.display = 'none';
+  if(bN){ bN.style.background='var(--verde)'; bN.style.color='#fff'; bN.style.fontWeight='700'; }
+  if(bE){ bE.style.background='none'; bE.style.color='var(--txt2)'; bE.style.fontWeight='600'; }
+  _orig_abrirAgendaMob();
+};
 function renderAgendaMob() {
   _renderAgendaConFiltro();
 }
@@ -11432,8 +11703,10 @@ function agCalSelecDia(dia){
   _agCalDiaSelec = (_agCalDiaSelec===key) ? null : key; // toggle
   _agendaFiltroActual = 'todas';
   ['todas','alta','media','baja'].forEach(x=>document.getElementById('agfil-'+x)?.classList.toggle('on',x==='todas'));
-  renderAgendaCal();
+  renderAgendaCal(); // incluye agActualizarPreviewDia()
   _renderAgendaConFiltro();
+  // Si estamos en tab eventos, refrescar también
+  if(_agTabActual === 'eventos') agEvtRenderLista();
 }
 
 function renderAgendaCal(){
@@ -11443,38 +11716,47 @@ function renderAgendaCal(){
 
   mesLbl.textContent = `${_MESES_ES[_agCalMonth]} ${_agCalYear}`;
 
-  // Días que tienen notas en este mes
+  // ── Días con notas ──────────────────────────────────────────────
   const diasConNota = {};
   agendaNotas.forEach(n=>{
-    if(!n.ts) return;
+    if(!n.ts||n.resuelta) return;
     const d = new Date(n.ts);
     if(d.getFullYear()===_agCalYear && d.getMonth()===_agCalMonth){
       const dia = d.getDate();
-      if(!diasConNota[dia]) diasConNota[dia]={hay:true,alta:false};
-      if(n.prioridad==='alta'&&!n.resuelta) diasConNota[dia].alta=true;
+      if(!diasConNota[dia]) diasConNota[dia]={ alta:false, media:false, baja:false };
+      diasConNota[dia][n.prioridad||'media'] = true;
     }
   });
 
-  const primerDow  = new Date(_agCalYear, _agCalMonth, 1).getDay(); // 0=Dom
+  // ── Días con eventos ────────────────────────────────────────────
+  const diasConEvento = {};
+  try {
+    evtCargarDatos().forEach(e=>{
+      if(!e.fecha || e.estado==='cancelado') return;
+      const [ey,em,ed] = e.fecha.split('-').map(Number);
+      if(ey===_agCalYear && em-1===_agCalMonth) diasConEvento[ed] = true;
+    });
+  } catch(x){}
+
+  const primerDow  = new Date(_agCalYear, _agCalMonth, 1).getDay();
   const diasEnMes  = new Date(_agCalYear, _agCalMonth+1, 0).getDate();
-  const hoy        = new Date();
-  const esEsteMes  = hoy.getFullYear()===_agCalYear && hoy.getMonth()===_agCalMonth;
-  const diaHoy     = hoy.getDate();
+  const hoyDate    = new Date();
+  const esEsteMes  = hoyDate.getFullYear()===_agCalYear && hoyDate.getMonth()===_agCalMonth;
+  const diaHoy     = hoyDate.getDate();
 
   let html = '';
-  // Encabezado días semana
   _DOWS.forEach((d,i)=>{
     const esFin = i===0||i===6;
     html += `<div class="ag-cal-dow${esFin?' fin':''}">${d}</div>`;
   });
-  // Celdas vacías
   for(let i=0;i<primerDow;i++) html+=`<div class="ag-cal-day vacio"></div>`;
-  // Días
+
   for(let d=1;d<=diasEnMes;d++){
     const keyDia = `${_agCalYear}-${String(_agCalMonth+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
     const esHoy   = esEsteMes && d===diaHoy;
     const esSelec = _agCalDiaSelec===keyDia;
-    const dot     = diasConNota[d];
+    const nota    = diasConNota[d];
+    const evento  = diasConEvento[d];
     const dofW    = (primerDow+d-1)%7;
     const esFin   = dofW===0||dofW===6;
     const cls     = ['ag-cal-day',
@@ -11482,9 +11764,22 @@ function renderAgendaCal(){
       esHoy?'hoy':'',
       esSelec?'selec':''
     ].filter(Boolean).join(' ');
-    html+=`<div class="${cls}" onclick="agCalSelecDia(${d})">${d}${dot?`<div class="ag-cal-dot${dot.alta?' alta':''}"></div>`:''}</div>`;
+
+    // Construir indicadores (dots)
+    let dots = '';
+    if(nota||evento){
+      dots = '<div class="ag-cal-dots">';
+      if(evento)      dots += '<div class="ag-cal-dot evento"></div>';
+      if(nota?.alta)  dots += '<div class="ag-cal-dot nota-alta"></div>';
+      else if(nota?.media) dots += '<div class="ag-cal-dot nota-media"></div>';
+      else if(nota?.baja)  dots += '<div class="ag-cal-dot nota-baja"></div>';
+      dots += '</div>';
+    }
+    html+=`<div class="${cls}" onclick="agCalSelecDia(${d})">${d}${dots}</div>`;
   }
   grid.innerHTML = html;
+  // Actualizar preview si hay día seleccionado
+  agActualizarPreviewDia();
 }
 
 // Render de notas respetando el filtro de día del calendario
@@ -14718,6 +15013,12 @@ window.addEventListener('appinstalled',()=>{
       }
     }
   });
+
+})();
+
+// ═══════════════════════════════════════════════════════════════
+// ═══ MÓDULO EVENTOS DEPORTIVOS ════════════════════════════════
+// ═══════════════════════════════════════════════════════════════
 // ═══════════════════════════════════════════════════════════════
 // ═══ MÓDULO EVENTOS DEPORTIVOS ════════════════════════════════
 // ═══════════════════════════════════════════════════════════════
@@ -14778,7 +15079,8 @@ function evtVista(v){
   ['Cal','Lista','Stats'].forEach(b=>{
     const btn = document.getElementById('evtBtn'+b);
     if(!btn) return;
-    const match = b.toLowerCase() === v || (b==='Cal' && v==='calendario');
+    const bv = b === 'Cal' ? 'calendario' : b.toLowerCase();
+    const match = bv === v;
     btn.style.background = match ? 'var(--verde)' : '';
     btn.style.color = match ? '#fff' : '';
     btn.style.borderColor = match ? 'var(--verde)' : '';
@@ -14792,7 +15094,7 @@ function evtVista(v){
 function evtActualizarKPIs(){
   const ev = evtCargarDatos();
   const anio = new Date().getFullYear();
-  const esteAnio = ev.filter(e => e.fecha && e.fecha.startsWith(anio));
+  const esteAnio = ev.filter(e => e.fecha && e.fecha.startsWith(String(anio)));
   const deportes = [...new Set(ev.map(e=>e.deporte).filter(Boolean))].length;
   document.getElementById('evtK1').textContent = ev.length;
   document.getElementById('evtK2').textContent = esteAnio.length;
@@ -14984,7 +15286,7 @@ function evtRenderCharts(){
   const MESES = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
   const anioActual = new Date().getFullYear();
   const porMes = Array(12).fill(0);
-  ev.filter(e=>e.fecha&&e.fecha.startsWith(anioActual)).forEach(e=>{
+  ev.filter(e=>e.fecha&&e.fecha.startsWith(String(anioActual))).forEach(e=>{
     const m = parseInt(e.fecha.slice(5,7))-1;
     porMes[m]++;
   });
@@ -15030,7 +15332,7 @@ function evtGenerarRecomendaciones(){
     const mesConMas = mesesUsados.indexOf(Math.max(...mesesUsados));
     const MESES = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
     const anioActual = new Date().getFullYear();
-    const esteAnio = ev.filter(e=>e.fecha&&e.fecha.startsWith(anioActual)).length;
+    const esteAnio = ev.filter(e=>e.fecha&&e.fecha.startsWith(String(anioActual))).length;
     const avgAnio = ev.length / Math.max(1, [...new Set(ev.map(e=>e.fecha&&e.fecha.slice(0,4)))].filter(Boolean).length);
 
     const recomendaciones = [];
@@ -15267,7 +15569,7 @@ function guardarEvento(){
   if(_evtEditing){
     const idx = ev.findIndex(e=>e.id===_evtEditing);
     if(idx>=0){ evento.creadoEn = ev[idx].creadoEn; ev[idx] = evento; }
-    else ev.push(evento);
+    else { evento.creadoEn = new Date().toISOString(); ev.push(evento); }
   } else {
     ev.push(evento);
   }
@@ -15396,8 +15698,6 @@ document.addEventListener('DOMContentLoaded', ()=>{
 
 
 
-
-})();
 
 </script>
 </body>
