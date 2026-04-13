@@ -1,4 +1,3 @@
-// ═══ REPORTES — Fitness Control · Club Campestre ═══
 // ═══ REPORTES ═══
 function printStyles(){return`font-family:'Outfit',sans-serif;color:#111;`;}
 function pHdr(titulo,sub){
@@ -475,6 +474,7 @@ function genReporteInstructor(){
       const bg=pct>=70?'#d4edda':pct>=40?'#fff3cd':'#f8d7da';
       const tc=pct>=70?'#155724':pct>=40?'#856404':'#842029';
       const supNom=r.estado==='sub'?nombreSuplente(r.suplente_id):'—';
+      const motivoNom=r.estado==='sub'&&r.motivo_suplencia?({'permiso':'Permiso','vacaciones':'Vacaciones','falta':'Falta','incapacidad':'Incapacidad','otro':'Otro'}[r.motivo_suplencia]||r.motivo_suplencia):'—';
       const fd=r.fecha?new Date(r.fecha+'T12:00:00').toLocaleDateString('es-MX',{day:'2-digit',month:'short'}):'—';
       return`<tr style="background:${bg}">
         <td style="padding:3px 7px;border:1px solid #ddd;font-family:monospace;font-size:.72rem">${fd}</td>
@@ -484,6 +484,7 @@ function genReporteInstructor(){
         <td style="padding:3px 7px;border:1px solid #ddd;text-align:center;font-weight:700;color:${tc}">${parseInt(r.asistentes)||0}</td>
         <td style="padding:3px 7px;border:1px solid #ddd;text-align:center;color:${tc};font-weight:600">${pct>0?pct+'%':'—'}</td>
         <td style="padding:3px 7px;border:1px solid #ddd;color:#1a5a8a;font-size:.7rem">${supNom}</td>
+        <td style="padding:3px 7px;border:1px solid #ddd;color:#555;font-size:.7rem">${motivoNom}</td>
       </tr>`;
     }).join('');
 
@@ -541,7 +542,7 @@ function genReporteInstructor(){
       </div>
       <table style="width:100%;border-collapse:collapse;font-size:.76rem">
         <thead><tr style="background:#f0f7f3">
-          ${['Fecha','Día','Hora','Clase','Asist.','Aforo','Suplente'].map(h=>
+          ${['Fecha','Día','Hora','Clase','Asist.','Aforo','Suplente','Motivo'].map(h=>
             `<th style="padding:3px 7px;border:1px solid #ccc;color:#1a7a45;font-size:.62rem;text-transform:uppercase">${h}</th>`
           ).join('')}
         </tr></thead>
@@ -576,17 +577,26 @@ function genReporteInstructor(){
 // TEMA — OSCURO / CLARO
 // ═══════════════════════════════════════════
 let temaActual = localStorage.getItem('fc_tema') || 'oscuro';
+
+// En móvil siempre tema claro — sin opción de cambio
+function _esMobil() { return window.innerWidth <= 640; }
+
 function aplicarTema(t) {
-  temaActual = t;
+  // Forzar tema claro en móvil independientemente de la preferencia
+  const temaEfectivo = _esMobil() ? 'claro' : t;
+  temaActual = t; // Guardar preferencia real (para tablet/desktop)
   const iconEl = document.getElementById('coord-tema-icon');
-  if(t === 'claro') {
+  const btnTema = document.getElementById('coord-tema-btn');
+  if(temaEfectivo === 'claro') {
     document.documentElement.classList.add('tema-claro');
     if(iconEl) iconEl.innerHTML = '<svg class="ico" viewBox="0 0 20 20"><circle cx="10" cy="10" r="3.5" stroke="currentColor" stroke-width="1.4" fill="none"/><line x1="10" y1="2" x2="10" y2="4.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><line x1="10" y1="15.5" x2="10" y2="18" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><line x1="2" y1="10" x2="4.5" y2="10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><line x1="15.5" y1="10" x2="18" y2="10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>';
   } else {
     document.documentElement.classList.remove('tema-claro');
     if(iconEl) iconEl.innerHTML = '<svg class="ico" viewBox="0 0 20 20"><path d="M14 4 Q10 4 8 7 Q6 10 8 13 Q10 16 14 16 Q11 14 11 10 Q11 6 14 4" stroke="currentColor" stroke-width="1.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>';
   }
-  localStorage.setItem('fc_tema', t);
+  // Ocultar botón "Cambiar apariencia" en móvil
+  if(btnTema) btnTema.style.display = _esMobil() ? 'none' : '';
+  if(!_esMobil()) localStorage.setItem('fc_tema', t);
   setTimeout(()=>{if(typeof renderDashboard==='function')renderDashboard();},80);
 }
 function toggleCoordMenu(){
@@ -610,10 +620,16 @@ function toggleCoordMenu(){
 }
 
 function toggleTema() {
+  if(_esMobil()) return; // No permitir cambio en móvil
   aplicarTema(temaActual === 'oscuro' ? 'claro' : 'oscuro');
 }
 // Aplicar tema guardado al cargar
 aplicarTema(temaActual);
+
+// Re-aplicar tema al cambiar tamaño de ventana (rotación, resize)
+window.addEventListener('resize', () => {
+  aplicarTema(temaActual);
+});
 
 // ═══════════════════════════════════════════
 // IMPRIMIR DESDE MODAL
@@ -639,7 +655,33 @@ function imprimirDesdeModal() {
       h1{font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:2px;color:#1a7a45;}
       .no-print{display:none!important;}
     </style>
-  </head><body>${cuerpo}<script>window.onload=()=>{window.print();}<\/script></body></html>`);
+  </head><body>${cuerpo}<script>window.onload=()=>{window.print();}<\/script>
+<!-- ═══ BOTTOM NAV (móvil/tablet) ═══ -->
+<nav id="bottom-nav">
+  <div class="bnav-item on" data-s="hoy" onclick="switchSection('hoy')">
+    <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="10" cy="10" r="7"/><polyline points="10,6 10,10 13,12" stroke-width="1.7"/></svg>
+    <span>Hoy</span>
+    <span class="bnav-dot" id="bnav-hoy-dot"></span>
+  </div>
+  <div class="bnav-item" data-s="programa" onclick="switchSection('programa')">
+    <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><rect x="3" y="4" width="14" height="13" rx="2"/><line x1="3" y1="9" x2="17" y2="9"/><line x1="7" y1="2" x2="7" y2="6"/><line x1="13" y1="2" x2="13" y2="6"/></svg>
+    <span>Programa</span>
+  </div>
+  <div class="bnav-item" data-s="equipo" onclick="switchSection('equipo')">
+    <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="8" cy="6" r="3"/><path d="M2 17 Q2 12 8 12 Q14 12 14 17"/><circle cx="14" cy="6" r="2.5"/><path d="M14 11 Q18 11 18 16"/></svg>
+    <span>Equipo</span>
+  </div>
+  <div class="bnav-item" data-s="analisis" onclick="switchSection('analisis')">
+    <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><rect x="3" y="12" width="3" height="5" rx="1"/><rect x="8.5" y="8" width="3" height="9" rx="1"/><rect x="14" y="4" width="3" height="13" rx="1"/></svg>
+    <span>Análisis</span>
+  </div>
+  <div class="bnav-item" data-s="mas" onclick="switchSection('mas')">
+    <svg viewBox="0 0 20 20" fill="currentColor"><circle cx="5" cy="10" r="1.4"/><circle cx="10" cy="10" r="1.4"/><circle cx="15" cy="10" r="1.4"/></svg>
+    <span>Más</span>
+  </div>
+</nav>
+
+</body></html>`);
   w.document.close();
 }
 
@@ -651,7 +693,7 @@ function exportarPDF() {
   const body = document.getElementById('print-body');
   const tabla = body.querySelector('table');
 
-  if(!window.jspdf){toast('Librería PDF no disponible — usa Imprimir → Guardar como PDF','warn');return;}
+  if(!window.jspdf){showToast('Librería PDF no disponible. Usa Imprimir → Guardar como PDF.','warn');return;}
   const {jsPDF} = window.jspdf;
   const doc = new jsPDF({orientation:'landscape',unit:'mm',format:'a4'});
 
@@ -731,6 +773,430 @@ function exportarPDF() {
   doc.save(`${titulo.replace(/[^a-zA-Z0-9áéíóúÁÉÍÓÚñÑ\s]/g,'_')}_FitnessControl.pdf`);
 }
 
+
+// ═══════════════════════════════════════════════════════════════════════
+// HOJA OFICIAL DE FIRMAS — Club Campestre Aguascalientes
+// Formato profesional para impresión · suplencias y faltas en rojo
+// ═══════════════════════════════════════════════════════════════════════
+
+function firmasActualizarLabel(){
+  const elI = document.getElementById('firmas-fecha-ini');
+  const elF = document.getElementById('firmas-fecha-fin');
+  const elT = document.getElementById('firmas-semana-txt');
+  if(!elI||!elF||!elT) return;
+  if(elI.value && elF.value){
+    const fmt = s => new Date(s+'T12:00:00').toLocaleDateString('es-MX',{day:'2-digit',month:'long'});
+    elT.value = `${fmt(elI.value)} al ${fmt(elF.value)} ${elI.value.slice(0,4)}`;
+  }
+}
+
+// ── Función compartida — genera la hoja de firmas con o sin imágenes de firma ──
+// firmasDigitales: objeto { profId: dataURL } o null para PDF sin firmas
+function _generarHojaFirmasCore(fechaIni, fechaFin, semana, firmasDigitales){
+  if(!window.jspdf){ showToast('Librería PDF no disponible.','warn'); return false; }
+  const {jsPDF} = window.jspdf;
+
+  // ── Filtrar y agrupar registros ──────────────────────────────────────
+  const regs = registros.filter(r => r.fecha >= fechaIni && r.fecha <= fechaFin);
+  if(!regs.length){
+    showToast(`Sin registros entre ${fechaIni} y ${fechaFin}.`,'warn'); return false;
+  }
+
+  const DIAS_ORD  = ['Lunes','Martes','Miércoles','Jueves','Viernes','Sábado','Domingo'];
+  const DIAS_ABR  = {'Lunes':'LUN','Martes':'MAR','Miércoles':'MIÉ',
+                     'Jueves':'JUE','Viernes':'VIE','Sábado':'SÁB','Domingo':'DOM'};
+
+  const porInst = {};
+  regs.forEach(r => {
+    const inst = instructores.find(i => String(i.id)===String(r.inst_id));
+    if(!inst) return;
+    if(!porInst[inst.id]) porInst[inst.id] = {inst, clases:[]};
+    const h = r.hora||'';
+    let horaFmt = h, horaMin = 0;
+    if(h && !h.includes('a.')&&!h.includes('p.')){
+      const [hh,mm] = h.split(':').map(Number);
+      if(!isNaN(hh)){
+        const s = hh>=12?'p.m.':'a.m.';
+        const h12 = hh===0?12:hh>12?hh-12:hh;
+        horaFmt = `${h12}:${String(mm||0).padStart(2,'0')} ${s}`;
+        horaMin = hh*60+(mm||0);
+      }
+    } else if(h){
+      const pm = h.toLowerCase().includes('p. m.')||h.toLowerCase().includes('pm');
+      const numMatch = h.match(/(\d+):(\d+)/);
+      if(numMatch){
+        let hh=parseInt(numMatch[1]), mm=parseInt(numMatch[2]);
+        if(pm && hh!==12) hh+=12;
+        if(!pm && hh===12) hh=0;
+        horaMin = hh*60+mm;
+        // Normalizar a formato compacto
+        const s = pm ? 'p.m.' : 'a.m.';
+        const h12 = pm && parseInt(numMatch[1])!==12 ? parseInt(numMatch[1]) : (!pm && parseInt(numMatch[1])===12 ? 12 : parseInt(numMatch[1]));
+        horaFmt = `${h12}:${String(mm).padStart(2,'0')} ${s}`;
+      }
+    }
+    porInst[inst.id].clases.push({
+      dia: r.dia||'', hora: horaFmt, horaMin,
+      clase: (r.clase||'').toUpperCase(),
+      alumnos: (r.asistentes!==undefined&&r.asistentes!==null&&r.asistentes!=='') ? parseInt(r.asistentes) : null,
+      estado: r.estado||'ok',
+      suplente_id: r.suplente_id||null,
+    });
+  });
+
+  const profesores = Object.values(porInst)
+    .sort((a,b)=>a.inst.nombre.localeCompare(b.inst.nombre))
+    .map(p=>{
+      const mapa = {};
+      p.clases.forEach(c=>{
+        const k = `${c.dia}|${c.hora}|${c.clase}`;
+        const pri = {falta:2,sub:1,ok:0}[c.estado]||0;
+        if(!mapa[k]||pri>(({falta:2,sub:1,ok:0}[mapa[k].estado]||0))) mapa[k]=c;
+      });
+      const clases = Object.values(mapa);
+      clases.sort((a,b)=>{
+        const da=DIAS_ORD.indexOf(a.dia), db=DIAS_ORD.indexOf(b.dia);
+        return da!==db ? da-db : (a.horaMin||0)-(b.horaMin||0);
+      });
+      return {nombre:(p.inst.nombre||'').toUpperCase(), inst:p.inst, clases};
+    })
+    .filter(p=>p.clases.length>0);
+
+  if(!profesores.length){
+    showToast('No hay registros de profesores en ese período.','warn'); return false;
+  }
+
+  // ── Configuración de página: carta horizontal ────────────────────────
+  const doc = new jsPDF({orientation:'landscape', unit:'mm', format:'letter'});
+  const PW=279.4, PH=215.9;
+  const ML=10, MR=10, MB=10;
+  const CW = PW-ML-MR;
+
+  // ── Paleta institucional ─────────────────────────────────────────────
+  const CV     = [15, 80, 40];     // verde oscuro institucional
+  const CV2    = [26,122,69];      // verde medio (acentos)
+  const CV3    = [220,242,228];    // verde muy claro (fondo encabezado instructor)
+  const CGRIS  = [240,240,240];    // gris claro alternado
+  const CGRIS2 = [210,218,212];    // gris medio (líneas)
+  const CROJO  = [160, 20, 20];    // rojo oscuro imprimible
+  const CRJBG  = [254,243,243];    // rojo fondo muy suave
+  const CNEG   = [30, 30, 30];
+  const CBCO   = [255,255,255];
+  const CORO   = [140, 100, 0];    // dorado para badge firma digital
+  const COROBG = [255,248,225];    // fondo badge firma digital
+
+  // ── Altura de encabezado de página ──────────────────────────────────
+  const HDR_H = 24;  // mm — encabezado más alto y elegante
+  const MT    = HDR_H + 3;
+
+  let pNum = 0;
+
+  function nuevaPagina(){
+    if(pNum>0) doc.addPage();
+    pNum++;
+
+    // ▌ Barra verde superior (más alta)
+    doc.setFillColor(...CV);
+    doc.rect(0, 0, PW, HDR_H, 'F');
+
+    // Línea decorativa dorada/verde claro bajo la barra
+    doc.setFillColor(...CV2);
+    doc.rect(0, HDR_H, PW, 0.8, 'F');
+
+    // Logo / inicial "F" dentro de caja
+    doc.setFillColor(255,255,255,0.15);
+    doc.setDrawColor(255,255,255);
+    doc.setLineWidth(0.5);
+    doc.roundedRect(ML, 3.5, 17, 17, 2, 2, 'FD');
+    doc.setFont('helvetica','bold');
+    doc.setFontSize(11);
+    doc.setTextColor(...CV2);
+    doc.text('FC', ML+8.5, 14, {align:'center'});
+
+    // Institución
+    doc.setFont('helvetica','bold');
+    doc.setFontSize(9.5);
+    doc.setTextColor(...CBCO);
+    doc.text('CLUB CAMPESTRE AGUASCALIENTES', ML+21, 10);
+    doc.setFont('helvetica','normal');
+    doc.setFontSize(6.5);
+    doc.setTextColor(180,230,200);
+    doc.text('COORDINACIÓN FITNESS  ·  CONTROL INTERNO  ·  NO CIRCULAR', ML+21, 15.5);
+
+    // Semana — alineada a la derecha
+    doc.setFont('helvetica','bold');
+    doc.setFontSize(7);
+    doc.setTextColor(...CBCO);
+    doc.text('SEMANA:', PW-MR, 9, {align:'right'});
+    doc.setFont('helvetica','normal');
+    doc.setFontSize(8.5);
+    doc.setTextColor(200,255,220);
+    doc.text(semana, PW-MR, 16, {align:'right'});
+
+    // Leyenda: rectángulo rojo dibujado + texto (sin símbolo ■)
+    const leyX = PW/2;
+    doc.setFillColor(...CROJO);
+    doc.rect(leyX - 28, 9.5, 3.5, 3.5, 'F');
+    doc.setFont('helvetica','normal');
+    doc.setFontSize(6);
+    doc.setTextColor(255,200,200);
+    doc.text('Rojo = Suplencia o Falta', leyX - 23, 12.5);
+
+    // Número de página — pie
+    doc.setFont('helvetica','normal');
+    doc.setFontSize(5.5);
+    doc.setTextColor(160,160,160);
+    doc.text('Fitness Control — Club Campestre Aguascalientes', ML, PH-4);
+    doc.text(`Pág. ${pNum}`, PW-MR, PH-4, {align:'right'});
+  }
+
+  nuevaPagina();
+  let Y = MT;
+
+  // ── Helper drawText ──────────────────────────────────────────────────
+  const drawText = (txt,x,y,opts={}) => {
+    if(opts.color) doc.setTextColor(...opts.color); else doc.setTextColor(...CNEG);
+    if(opts.bold)  doc.setFont('helvetica','bold');  else doc.setFont('helvetica','normal');
+    if(opts.size)  doc.setFontSize(opts.size);
+    doc.text(String(txt), x, y, opts.align?{align:opts.align}:{});
+  };
+
+  // ── Constantes de fila ───────────────────────────────────────────────
+  const hCab  = 6.5;   // banner PROFESORA / días
+  const hSubh = 5.0;   // sub-header HR | CLASE | ALUM.
+  const hRow  = 6.0;   // fila de datos (ligeramente más alta)
+
+  // ── Dibujar cada profesor ────────────────────────────────────────────
+  profesores.forEach((prof, profIdx) => {
+    const diasProf = DIAS_ORD.filter(d => prof.clases.some(c=>c.dia===d));
+    if(!diasProf.length) return;
+
+    const porDia = {};
+    diasProf.forEach(d => { porDia[d]=prof.clases.filter(c=>c.dia===d); });
+    const maxFilas = Math.max(...diasProf.map(d=>porDia[d].length));
+    const nDias    = diasProf.length;
+
+    // Columna FIRMA: más ancha cuando hay pocos días, más estrecha con muchos
+    const colFir = nDias <= 3 ? 34 : nDias <= 5 ? 30 : 26;
+    const colNom = nDias <= 3 ? 44 : nDias <= 5 ? 40 : 36;
+    const colDat = CW - colNom - colFir;
+    const colDW  = colDat / nDias;
+    const cHr  = colDW * 0.31;
+    const cCl  = colDW * 0.44;
+    const cAl  = colDW * 0.25;
+
+    const hBloque = hCab + hSubh + maxFilas * hRow;
+
+    // Salto de página si no cabe
+    if(Y + hBloque > PH - MB - 5){ nuevaPagina(); Y = MT; }
+
+    const Y0 = Y;
+    const xFirCol = ML + colNom + colDat;
+
+    // ── FRANJA nombre del instructor (fondo verde claro degradado) ──
+    // Fondo verde muy claro para toda la fila de cabecera
+    doc.setFillColor(...CV);
+    doc.rect(ML, Y, CW, hCab, 'F');
+
+    // Género
+    const genNom = prof.inst.nombre||'';
+    const esF = /\b(ana|cristina|blanca|marisa|karina|consuelo|sara|jimena|valeria|hermelinda|socorro|ernestina|araceli|gabriela|esthela|alejandra|diana|laura|patricia|rosa|maria|ma\.)\b/i.test(genNom);
+
+    // Etiqueta PROF/A — pequeña, izquierda
+    drawText(esF?'PROFESORA':'PROFESOR', ML+2.5, Y+4.4, {bold:true, size:6.5, color:[160,220,185]});
+
+    // Días en la cabecera
+    let xD = ML+colNom;
+    diasProf.forEach(d=>{
+      drawText(DIAS_ABR[d]||d.slice(0,3).toUpperCase(), xD+colDW/2, Y+4.4, {bold:true, size:7, color:CBCO, align:'center'});
+      xD+=colDW;
+    });
+    drawText('FIRMA', xFirCol+colFir/2, Y+4.4, {bold:true, size:7, color:CBCO, align:'center'});
+    Y += hCab;
+
+    // ── SUB-HEADER: nombre + columnas HR/CLASE/ALUM ──────────────────
+    doc.setFillColor(...CV3);
+    doc.rect(ML, Y, colNom+colDat, hSubh, 'F');
+    // Celda firma: blanco
+    doc.setFillColor(...CBCO);
+    doc.rect(xFirCol, Y, colFir, hSubh, 'F');
+
+    const maxCar = Math.floor(colNom / 1.7);
+    const nomCorto = genNom.length>maxCar ? genNom.slice(0,maxCar-1)+'…' : genNom;
+    drawText(nomCorto.toUpperCase(), ML+2.5, Y+3.6, {bold:true, size:7.5, color:CV});
+
+    xD = ML+colNom;
+    diasProf.forEach(()=>{
+      drawText('HR',      xD+cHr/2,           Y+3.5, {size:5.2, color:[80,100,88], align:'center'});
+      drawText('CLASE',   xD+cHr+cCl/2,       Y+3.5, {size:5.2, color:[80,100,88], align:'center'});
+      drawText('ALUM.',   xD+cHr+cCl+cAl/2,   Y+3.5, {size:4.8, color:[80,100,88], align:'center'});
+      xD += colDW;
+    });
+    Y += hSubh;
+
+    // ── FILAS DE DATOS ───────────────────────────────────────────────
+    for(let i=0; i<maxFilas; i++){
+      const bgFila = i%2===0 ? CBCO : CGRIS;
+      doc.setFillColor(...bgFila);
+      doc.rect(ML, Y, colNom+colDat, hRow, 'F');
+      // Columna firma siempre blanca
+      doc.setFillColor(...CBCO);
+      doc.rect(xFirCol, Y, colFir, hRow, 'F');
+
+      xD = ML+colNom;
+      diasProf.forEach(d=>{
+        const cds = porDia[d]||[];
+        if(i < cds.length){
+          const c = cds[i];
+          const esMal = c.estado==='sub'||c.estado==='falta';
+          const txtCol = esMal ? CROJO : CNEG;
+
+          if(esMal){
+            doc.setFillColor(...CRJBG);
+            doc.rect(xD, Y, colDW, hRow, 'F');
+          }
+
+          // Hora — compacta
+          drawText(c.hora, xD+1.0, Y+4.0, {size:5.8, color:txtCol});
+
+          // Clase
+          const maxClase = Math.floor(cCl / 1.55);
+          const claseStr = c.clase.length > maxClase ? c.clase.slice(0,maxClase-1)+'.' : c.clase;
+          drawText(claseStr, xD+cHr+0.8, Y+4.0, {size:5.8, color:txtCol, bold:esMal});
+
+          // Alumnos / estado
+          const aluX = xD + cHr + cCl + cAl/2;
+          if(esMal){
+            const etiq = c.estado==='sub' ? 'SUP' : 'FALTA';
+            if(c.alumnos!==null && c.alumnos!==undefined){
+              // Número arriba, etiqueta debajo — separados claramente
+              drawText(String(c.alumnos), aluX, Y+2.6, {size:6.0, bold:true, color:CROJO, align:'center'});
+              drawText(etiq,              aluX, Y+5.2, {size:4.5, bold:true, color:CROJO, align:'center'});
+            } else {
+              drawText(etiq, aluX, Y+4.0, {size:5.0, bold:true, color:CROJO, align:'center'});
+            }
+          } else {
+            const aluStr = (c.alumnos!==null && c.alumnos!==undefined) ? String(c.alumnos) : '';
+            drawText(aluStr, aluX, Y+4.0, {size:6.5, bold:true, color:CNEG, align:'center'});
+          }
+        }
+        xD += colDW;
+      });
+      Y += hRow;
+    }
+
+    // ── FIRMA insertada o línea punteada ─────────────────────────────
+    const yFirmaTop  = Y0 + hCab;
+    const hFirmaCell = hBloque - hCab;
+    const wFirmaDisp = colFir - 5;
+    const xFirmaIni  = xFirCol + 2.5;
+
+    if(firmasDigitales && firmasDigitales[prof.inst.id]) {
+      try {
+        const RATIO = 3.0;
+        let imgH = hFirmaCell - 5;
+        let imgW = imgH * RATIO;
+        if(imgW > wFirmaDisp){ imgW = wFirmaDisp; imgH = imgW / RATIO; }
+        const imgX = xFirCol + (colFir - imgW) / 2;
+        const imgY = yFirmaTop + (hFirmaCell - imgH) / 2;
+        doc.addImage(firmasDigitales[prof.inst.id], 'PNG', imgX, imgY, imgW, imgH);
+        // Badge "✓ digital" en la parte inferior de la celda
+        doc.setFillColor(...COROBG);
+        doc.roundedRect(xFirCol+1.5, Y-5.5, colFir-3, 4.5, 1, 1, 'F');
+        doc.setFont('helvetica','bold'); doc.setFontSize(4.2); doc.setTextColor(...CORO);
+        doc.text('firma digital', xFirCol+colFir/2, Y-2.8, {align:'center'});
+      } catch(e) {
+        // Fallback línea
+        doc.setDrawColor(...CV2); doc.setLineWidth(0.5);
+        doc.line(xFirmaIni, Y-4, xFirmaIni+wFirmaDisp, Y-4);
+      }
+    } else {
+      // Sin firma: línea punteada centrada + texto "Firma"
+      const yLinea = yFirmaTop + hFirmaCell * 0.65;
+      doc.setDrawColor(...CGRIS2); doc.setLineWidth(0.4);
+      doc.setLineDashPattern([1.2, 0.8], 0);
+      doc.line(xFirmaIni+2, yLinea, xFirmaIni+wFirmaDisp-2, yLinea);
+      doc.setLineDashPattern([], 0);
+      doc.setFont('helvetica','italic'); doc.setFontSize(4.5); doc.setTextColor(180,180,180);
+      doc.text('Firma', xFirCol+colFir/2, yLinea+3.5, {align:'center'});
+    }
+
+    // ── BORDES del bloque ────────────────────────────────────────────
+    // Sombra / separación inferior entre bloques (espacio en blanco)
+    // Marco exterior verde institucional
+    doc.setDrawColor(...CV);
+    doc.setLineWidth(0.7);
+    doc.rect(ML, Y0, CW, hBloque);
+
+    // Línea divisoria columna FIRMA (verde más claro)
+    doc.setLineWidth(0.9); doc.setDrawColor(...CV2);
+    doc.line(xFirCol, Y0, xFirCol, Y0+hBloque);
+
+    // Grid interno — solo en zona de datos
+    doc.setLineWidth(0.15); doc.setDrawColor(...CGRIS2);
+    let xG = ML+colNom;
+    diasProf.forEach((d,idx)=>{
+      if(idx>0) doc.line(xG, Y0+hCab, xG, Y0+hBloque);
+      doc.line(xG+cHr,     Y0+hCab, xG+cHr,     Y0+hBloque);
+      doc.line(xG+cHr+cCl, Y0+hCab, xG+cHr+cCl, Y0+hBloque);
+      xG += colDW;
+    });
+    // Líneas horizontales entre filas (no cruzan columna firma)
+    for(let i=1; i<maxFilas; i++){
+      const yL = Y0+hCab+hSubh+i*hRow;
+      doc.setLineWidth(0.12); doc.setDrawColor(...CGRIS2);
+      doc.line(ML, yL, xFirCol, yL);
+    }
+    // Separador cabecera verde / sub-header
+    doc.setLineWidth(0.25); doc.setDrawColor(...CV);
+    doc.line(ML, Y0+hCab, ML+CW, Y0+hCab);
+
+    // Espacio entre bloques
+    Y += 4.5;
+  });
+
+  // ── TOTALES al pie de última página ─────────────────────────────────
+  const totalClases = regs.filter(r=>r.estado==='ok'||r.estado==='sub').length;
+  const totalSup    = regs.filter(r=>r.estado==='sub').length;
+  const totalFaltas = regs.filter(r=>r.estado==='falta').length;
+  const firmCnt     = firmasDigitales ? Object.keys(firmasDigitales).length : 0;
+
+  if(Y+14 < PH-MB){
+    doc.setFillColor(245,250,246);
+    doc.rect(ML, Y+1, CW, 10, 'F');
+    doc.setDrawColor(...CV2); doc.setLineWidth(0.3);
+    doc.rect(ML, Y+1, CW, 10);
+    doc.setFont('helvetica','bold'); doc.setFontSize(6.5); doc.setTextColor(...CV);
+    const resumen = `Clases impartidas: ${totalClases}   ·   Suplencias: ${totalSup}   ·   Faltas: ${totalFaltas}   ·   Profesores: ${profesores.length}` +
+                    (firmCnt > 0 ? `   ·   Firmas digitales: ${firmCnt}` : '');
+    doc.text(resumen, ML+4, Y+7);
+    doc.setFont('helvetica','normal'); doc.setFontSize(6); doc.setTextColor(120,140,128);
+    doc.text(`Generado: ${new Date().toLocaleDateString('es-MX',{weekday:'long',day:'2-digit',month:'long',year:'numeric'})}`, PW-MR-2, Y+7, {align:'right'});
+  }
+
+  // ── Nombre de archivo y descarga ─────────────────────────────────────
+  const sufijo = firmasDigitales ? '_Digital' : '';
+  const archivo = `HojaFirmas${sufijo}_${semana.replace(/[^\wáéíóúÁÉÍÓÚñÑ\s]/g,'').replace(/\s+/g,'_').slice(0,50)}.pdf`;
+  doc.save(archivo);
+  return { profesores: profesores.length, totalSup, totalFaltas, firmCnt };
+}
+
+function generarHojaFirmasPDF(){
+  const elI = document.getElementById('firmas-fecha-ini');
+  const elF = document.getElementById('firmas-fecha-fin');
+  const elT = document.getElementById('firmas-semana-txt');
+  const lun = new Date(lunesBase);
+  const dom = new Date(lun); dom.setDate(lun.getDate()+6);
+  const iso = d => d.toISOString().slice(0,10);
+  const fechaIni = (elI&&elI.value) ? elI.value : iso(lun);
+  const fechaFin = (elF&&elF.value) ? elF.value : iso(dom);
+  const fmt2 = s => new Date(s+'T12:00:00').toLocaleDateString('es-MX',{day:'2-digit',month:'long'});
+  const semana = (elT&&elT.value.trim()) ? elT.value.trim()
+               : `${fmt2(fechaIni)} al ${fmt2(fechaFin)} ${fechaIni.slice(0,4)}`;
+  const r = _generarHojaFirmasCore(fechaIni, fechaFin, semana, null);
+  if(r){ cerrarModal('m-reports'); showToast(`Hoja de firmas lista · ${r.profesores} profesores · ${r.totalSup} suplencias · ${r.totalFaltas} faltas`,'ok'); }
+}
+
 // ═══════════════════════════════════════════
 // EXPORTAR EXCEL (mejorado con estilos)
 // ═══════════════════════════════════════════
@@ -738,7 +1204,7 @@ function exportarPrintExcel() {
   const titulo = document.getElementById('print-ttl').textContent;
   const body = document.getElementById('print-body');
   const tabla = body.querySelector('table');
-  if(!tabla){toast('No hay tabla para exportar en este reporte — usa Imprimir para PDF','warn');return;}
+  if(!tabla){showToast('No hay tabla para exportar en este reporte. Usa Imprimir para exportar como PDF.','warn');return;}
 
   const wb = XLSX.utils.book_new();
 
@@ -781,7 +1247,7 @@ function exportarPrintExcel() {
 function exportarPrintCSV() {
   const titulo = document.getElementById('print-ttl').textContent;
   const tabla = document.querySelector('#print-body table');
-  if(!tabla){toast('No hay tabla para exportar como CSV','warn');return;}
+  if(!tabla){showToast('No hay tabla para exportar como CSV.','warn');return;}
   const rows = [];
   tabla.querySelectorAll('tr').forEach(tr=>{
     const celdas = [...tr.querySelectorAll('th,td')].map(c=>
@@ -830,23 +1296,25 @@ function exportarExcelCompleto() {
   XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(instRows), 'Instructores');
 
   // ── Hoja 3: Historial de clases
-  const histRows = [['Fecha','Día','Clase','Instructor','Hora','Asistentes','Capacidad','Aforo %','Estado','Suplente','Fuente']];
+  const histRows = [['Fecha','Día','Clase','Instructor','Hora','Asistentes','Capacidad','Aforo %','Estado','Suplente','Motivo Suplencia','Fuente']];
   [...registros].sort((a,b)=>b.fecha?.localeCompare(a.fecha||'')||0).forEach(r=>{
     const inst=instructores.find(i=>i.id===r.inst_id);
     const sup=r.suplente_id?instructores.find(i=>i.id===r.suplente_id):null;
     const afoP=r.cap>0?Math.round((r.asistentes||0)/r.cap*100):0;
     const est=r.estado==='ok'?'Impartida':r.estado==='sub'?'Con Suplente':'Falta';
-    histRows.push([r.fecha||'',r.dia||'',r.clase||'',inst?inst.nombre:'?',r.hora||'',r.asistentes||0,r.cap||0,afoP+'%',est,sup?sup.nombre:'—',r.tipo==='recorrido'?'Recorrido':'Manual']);
+    const motivoLabel=r.estado==='sub'&&r.motivo_suplencia?({'permiso':'Permiso','vacaciones':'Vacaciones','falta':'Falta','incapacidad':'Incapacidad','otro':'Otro'}[r.motivo_suplencia]||r.motivo_suplencia):'—';
+    histRows.push([r.fecha||'',r.dia||'',r.clase||'',inst?inst.nombre:'?',r.hora||'',r.asistentes||0,r.cap||0,afoP+'%',est,sup?sup.nombre:'—',motivoLabel,r.tipo==='recorrido'?'Recorrido':'Manual']);
   });
   XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(histRows), 'Historial Clases');
 
   // ── Hoja 4: Suplencias
-  const supRows = [['Fecha','Clase','Horario','Día','Instructor Original','Suplente','Asistentes','Aforo %']];
+  const supRows = [['Fecha','Clase','Horario','Día','Instructor Original','Suplente','Motivo','Asistentes','Aforo %']];
   registros.filter(r=>r.estado==='sub').sort((a,b)=>b.fecha?.localeCompare(a.fecha||'')||0).forEach(r=>{
     const inst=instructores.find(i=>i.id===r.inst_id);
     const sup=instructores.find(i=>i.id===r.suplente_id);
     const afoP=r.cap>0?Math.round(r.asistentes/r.cap*100):0;
-    supRows.push([r.fecha||'',r.clase||'',r.hora||'',r.dia||'',inst?inst.nombre:'?',sup?sup.nombre:'?',r.asistentes||0,afoP+'%']);
+    const motivoLabel=r.motivo_suplencia?({'permiso':'Permiso','vacaciones':'Vacaciones','falta':'Falta','incapacidad':'Incapacidad','otro':'Otro'}[r.motivo_suplencia]||r.motivo_suplencia):'—';
+    supRows.push([r.fecha||'',r.clase||'',r.hora||'',r.dia||'',inst?inst.nombre:'?',sup?sup.nombre:'?',motivoLabel,r.asistentes||0,afoP+'%']);
   });
   XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(supRows), 'Suplencias');
 
@@ -869,7 +1337,7 @@ function exportarExcelCompleto() {
 // EXPORTAR PDF COMPLETO DEL SISTEMA
 // ═══════════════════════════════════════════
 function exportarPDFCompleto() {
-  if(!window.jspdf){toast('Librería PDF no disponible','warn');return;}
+  if(!window.jspdf){showToast('Librería PDF no disponible.','warn');return;}
   const {jsPDF} = window.jspdf;
   const doc = new jsPDF({orientation:'landscape',unit:'mm',format:'a4'});
   const allS = instructores.map(i=>({...i,...statsInst(i)}));
@@ -986,4 +1454,3 @@ function exportarPDFCompleto() {
 // EXPORTAR EXCEL COMPLETO (función legacy renombrada)
 // ═══════════════════════════════════════════
 
-// ═══ HISTORIAL DE CLASES ═══

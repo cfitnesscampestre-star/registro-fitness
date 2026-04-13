@@ -1,4 +1,3 @@
-// ═══ HISTORIAL — Fitness Control · Club Campestre ═══
 // ═══ HISTORIAL DE CLASES ═══
 let histPagina=0;
 const HIST_POR_PAG=25;
@@ -94,6 +93,7 @@ function renderHistorial(){
       </td>
       <td>${estChip}</td>
       <td style="font-size:.75rem;color:var(--blue)">${sup?sup.nombre:'—'}</td>
+      <td style="font-size:.72rem;color:var(--txt2)">${r.estado==='sub'&&r.motivo_suplencia?({'permiso':'Permiso','vacaciones':'Vacaciones','falta':'Falta','incapacidad':'Incapacidad','otro':'Otro'}[r.motivo_suplencia]||r.motivo_suplencia):'—'}</td>
       <td style="font-size:.7rem;color:var(--txt3)">${r.tipo==='recorrido'?'<svg class="ico" viewBox="0 0 20 20"><circle cx="10" cy="4" r="2" stroke="currentColor" stroke-width="1.4" fill="none"/><path d="M10 6 L9 11 L7 16 M10 6 L11 11 L13 16 M9 11 L12 11" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg> Recorrido':'<svg class="ico" viewBox="0 0 20 20"><path d="M5 3 H13 L16 6 V17 H5 Z" stroke="currentColor" stroke-width="1.4" fill="none" stroke-linejoin="round"/><polyline points="13,3 13,6 16,6" stroke="currentColor" stroke-width="1.3" fill="none" stroke-linejoin="round"/><line x1="8" y1="10" x2="13" y2="10" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/><line x1="8" y1="13" x2="11" y2="13" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/><line x1="8" y1="7" x2="10" y2="7" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg> Manual'}</td>
       <td><button class="abtn" onclick="abrirEditarRegistro(${r.id})" title="Editar aforo / estado"><svg class="ico" viewBox="0 0 20 20"><path d="M13.5 3.5 L16.5 6.5 L8 15 L4 16 L5 12 Z" stroke="currentColor" stroke-width="1.4" fill="none" stroke-linejoin="round"/><line x1="12" y1="5" x2="15" y2="8" stroke="currentColor" stroke-width="1.3"/></svg></button></td>
     </tr>`;
@@ -149,30 +149,36 @@ function abrirEditarRegistro(regId){
   const opts=instructores.filter(i=>i.id!==r.inst_id).map(i=>`<option value="${i.id}">${i.nombre}</option>`).join('');
   document.getElementById('er-suplente').innerHTML='<option value="">— Sin suplente —</option>'+opts;
   if(r.suplente_id)document.getElementById('er-suplente').value=r.suplente_id;
+  if(r.motivo_suplencia)document.getElementById('er-motivo').value=r.motivo_suplencia;
   toggleErSuplente();
   document.getElementById('m-edit-reg').classList.add('on');
 }
 function toggleErSuplente(){
   const v=document.getElementById('er-est').value;
-  document.getElementById('er-suplente-row').style.display=(v==='sub')?'flex':'none';
+  const isSub=(v==='sub');
+  document.getElementById('er-suplente-row').style.display=isSub?'flex':'none';
+  document.getElementById('er-motivo-row').style.display=isSub?'flex':'none';
 }
 function guardarEdicionRegistro(){
   const id=parseInt(document.getElementById('er-id').value);
   const idx=registros.findIndex(r=>r.id===id);
   if(idx<0)return;
   const est=document.getElementById('er-est').value;
+  const isSub=(est==='sub');
   registros[idx]={
     ...registros[idx],
     asistentes:parseInt(document.getElementById('er-asis').value)||0,
     cap:parseInt(document.getElementById('er-cap').value)||20,
     estado:est,
     obs:document.getElementById('er-obs').value.trim(),
-    suplente_id:est==='sub'?(parseInt(document.getElementById('er-suplente').value)||null):null
+    suplente_id:isSub?(parseInt(document.getElementById('er-suplente').value)||null):null,
+    motivo_suplencia:isSub?(document.getElementById('er-motivo').value||'permiso'):null
   };
   cerrarModal('m-edit-reg');
   renderAll();
   renderHistorial();
-  toast('Registro actualizado correctamente','ok');
+  registrarLog('clase', `Registro editado ID:${document.getElementById('er-id').value}`);
+  showToast('Registro actualizado correctamente.','ok');
 }
 function eliminarRegistro(){
   const id=parseInt(document.getElementById('er-id').value);
@@ -181,7 +187,8 @@ function eliminarRegistro(){
   cerrarModal('m-edit-reg');
   renderAll();
   renderHistorial();
-  toast('Registro eliminado','ok');
+  registrarLog('clase', `Registro eliminado ID:${id}`);
+  showToast('Registro eliminado correctamente.','ok');
 }
 
 // ═══ TABS ═══
@@ -200,6 +207,8 @@ document.querySelectorAll('.tab').forEach(t=>{
     if(t.dataset.v==='alertas')renderAlertas();
     if(t.dataset.v==='salones')renderSalones();
     if(t.dataset.v==='sup-plan')renderSupPlan();
+    if(t.dataset.v==='hoy')renderHoy();
+    if(t.dataset.v==='log')renderLog();
   });
 });
 
@@ -209,13 +218,7 @@ function renderAll(){
   renderInst();
   renderRanking();
   if(document.getElementById('v-calendario').classList.contains('on'))renderCal();
+  if(document.getElementById('v-hoy')?.classList.contains('on'))renderHoy();
+  if(document.getElementById('v-salones')?.classList.contains('on'))renderSalones();
 }
 
-// ═══ INIT ═══
-toggleRpt();
-actualizarSelectoresClase();
-initDiagClases();
-renderAll();
-renderCal();
-
-// ═══════════════════════════════════════════

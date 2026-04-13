@@ -1,4 +1,3 @@
-// ═══ RECORRIDO — Fitness Control · Club Campestre ═══
 // ═══ RECORRIDO ═══
 let modoRecorrido = 'turbo'; // 'turbo' | 'clasico'
 let turboPresEstado = 'si';
@@ -18,7 +17,7 @@ function selModoRec(modo){
 }
 
 function iniciarRecorrido(){
-  document.getElementById('ri-fecha').value=hoy.toISOString().slice(0,10);
+  document.getElementById('ri-fecha').value=fechaLocalStr(hoy);
   const ahora=new Date();
   document.getElementById('ri-hora').value=`${String(ahora.getHours()).padStart(2,'0')}:${String(ahora.getMinutes()).padStart(2,'0')}`;
   const diaActual=DIAS[(ahora.getDay()+6)%7];
@@ -56,9 +55,9 @@ function comenzarRecorrido(){
   const fecha=document.getElementById('ri-fecha').value;
   const hora=document.getElementById('ri-hora').value;
   const dia=document.getElementById('ri-dia').value;
-  if(!fecha){toast('Selecciona la fecha del recorrido','err');document.getElementById('ri-fecha').classList.add('input-error');return;}
+  if(!fecha){showToast('Selecciona la fecha','err');return;}
   const clases=getClasesActivas(dia,hora);
-  if(clases.length===0){toast(`Sin clases activas el ${dia} a las ${hora} — revisa los horarios`,'warn');return;}
+  if(clases.length===0){showToast(`No hay clases activas el ${dia} a las ${hora}`,'warn');return;}
   recActual={fecha,hora,dia,items:[],clasesActivas:clases};
   recIdx=0;
   cerrarModal('m-rec-init');
@@ -99,10 +98,16 @@ function turboMostrar(){
   document.getElementById('tc-inst').textContent=c.inst_nombre;
   document.getElementById('tc-hora').textContent=c.hora;
   const salon=salones.find(s=>s.clases&&s.clases.some(cl=>cl.toLowerCase()===c.clase.toLowerCase()));
-  document.getElementById('tc-salon').textContent=salon?`📍 ${salon.nombre}`:'';
+  document.getElementById('tc-salon').textContent=salon?`📍 ${salon.nombre} · ${salon.cap}p`:'';
 
+  // Capacidad desde salón (o del último registro histórico si existe)
+  const capSalon=getCapClase(c.clase)||20;
+  // Usar cap del último registro si existe, para no perder override manual
+  const histRecsAll=registros.filter(r=>String(r.inst_id)===String(c.inst_id)&&r.clase===c.clase&&r.dia===c.dia).sort((a,b)=>(b.fecha||'').localeCompare(a.fecha||''));
+  const capPrev=histRecsAll.length>0&&parseInt(histRecsAll[0].cap)>0?parseInt(histRecsAll[0].cap):capSalon;
+  document.getElementById('tc-cap').value=capPrev;
   // Reset asistentes con último valor histórico como sugerencia
-  const histRecs=registros.filter(r=>r.inst_id===c.inst_id&&r.clase===c.clase&&r.dia===c.dia&&(r.estado==='ok'||r.estado==='sub')).sort((a,b)=>(b.fecha||'').localeCompare(a.fecha||''));
+  const histRecs=histRecsAll.filter(r=>r.estado==='ok'||r.estado==='sub');
   const sugerido=histRecs.length>0?histRecs[0].asistentes:0;
   document.getElementById('tc-asis').value=sugerido;
   turboActualizarColor();
@@ -136,7 +141,7 @@ function turboActualizarChips(){
   const total=recActual.clasesActivas.length;
   let html='';
   recActual.clasesActivas.forEach((c,i)=>{
-    const item=recActual.items.find(it=>it.inst_id===c.inst_id&&it.hora===c.hora&&it.clase===c.clase);
+    const item=recActual.items.find(it=>String(it.inst_id)===String(c.inst_id)&&it.hora===c.hora&&it.clase===c.clase);
     let bg='var(--border)',col='var(--txt3)',icono='';
     if(item&&!item.saltado){
       const afo=item.asis>0&&item.cap>0?Math.round(item.asis/item.cap*100):0;
@@ -183,13 +188,15 @@ function turboActualizarColor(){
   const c=recActual.clasesActivas[recIdx];
   if(!c)return;
   const asis=parseInt(document.getElementById('tc-asis').value)||0;
-  const cap=getCapClase(c.clase)||20;
+  const capInput=document.getElementById('tc-cap');
+  const cap=capInput?parseInt(capInput.value)||getCapClase(c.clase)||20:getCapClase(c.clase)||20;
   const pct=Math.min(Math.round(asis/cap*100),100);
   const col=asis===0?'var(--txt3)':pct>=70?'var(--neon)':pct>=35?'var(--gold2)':'var(--red2)';
   document.getElementById('tc-afo-bar').style.width=pct+'%';
   document.getElementById('tc-afo-bar').style.background=col;
-  document.getElementById('tc-afo-lbl').textContent=asis===0?'Sin asistentes':`${pct}% aforo · cap. ${cap}`;
+  document.getElementById('tc-afo-lbl').textContent=asis===0?'Sin asistentes':`${pct}% aforo · ${cap} cap.`;
   document.getElementById('tc-asis').style.color=col;
+  if(capInput){capInput.style.borderColor=col;}
 }
 
 function turboSetPres(estado){
@@ -219,12 +226,13 @@ function turboGuardar(){
   if(!c)return;
   const asis=parseInt(document.getElementById('tc-asis').value)||0;
   const supId=turboPresEstado==='sub'?(parseInt(document.getElementById('tc-suplente').value)||null):null;
+  const motivoSup=turboPresEstado==='sub'?(document.getElementById('tc-motivo').value||'permiso'):null;
   const obs=document.getElementById('tc-obs').value.trim();
-  const cap=parseInt(getCapClase(c.clase))||20;
+  const cap=parseInt(document.getElementById('tc-cap').value)||parseInt(getCapClase(c.clase))||20;
   // Normalizar inst_id a número para evitar mismatch con Firebase
   const instIdNum=parseInt(c.inst_id)||c.inst_id;
   const existeIdx=recActual.items.findIndex(it=>String(it.inst_id)===String(c.inst_id)&&it.hora===c.hora&&it.clase===c.clase);
-  const item={...c,inst_id:instIdNum,asis,presente:turboPresEstado,suplente_id:supId,obs,saltado:false,cap};
+  const item={...c,inst_id:instIdNum,asis,presente:turboPresEstado,suplente_id:supId,motivo_suplencia:motivoSup,obs,saltado:false,cap};
   if(existeIdx>=0)recActual.items[existeIdx]=item;
   else recActual.items.push(item);
   if(navigator.vibrate) navigator.vibrate([20,10,20]);
@@ -233,7 +241,7 @@ function turboGuardar(){
 
 function turboSaltar(){
   const c=recActual.clasesActivas[recIdx];
-  const existeIdx=recActual.items.findIndex(it=>it.inst_id===c.inst_id&&it.hora===c.hora&&it.clase===c.clase);
+  const existeIdx=recActual.items.findIndex(it=>String(it.inst_id)===String(c.inst_id)&&it.hora===c.hora&&it.clase===c.clase);
   const item={...c,asis:0,presente:'si',suplente_id:null,obs:'',saltado:true,cap:getCapClase(c.clase)||20};
   if(existeIdx>=0)recActual.items[existeIdx]=item;
   else recActual.items.push(item);
@@ -266,7 +274,7 @@ function terminarTurbo(){
   document.getElementById('turbo-screen').style.display='none';
   // Completar con saltado las que no se registraron
   recActual.clasesActivas.forEach(c=>{
-    const existe=recActual.items.find(it=>it.inst_id===c.inst_id&&it.hora===c.hora&&it.clase===c.clase);
+    const existe=recActual.items.find(it=>String(it.inst_id)===String(c.inst_id)&&it.hora===c.hora&&it.clase===c.clase);
     if(!existe)recActual.items.push({...c,asis:0,presente:'si',suplente_id:null,obs:'',saltado:true,cap:getCapClase(c.clase)||20});
   });
   terminarRecorrido();
@@ -339,6 +347,10 @@ function mostrarClaseRec(){
   document.getElementById('rcc-pres').value='si';
   document.getElementById('rcc-obs').value='';
   document.getElementById('rcc-suplente-row').style.display='none';
+  // Inicializar capacidad: del último registro histórico si existe, si no del salón
+  const histCap=registros.filter(r=>r.inst_id===c.inst_id&&r.clase===c.clase&&r.dia===c.dia&&parseInt(r.cap)>0).sort((a,b)=>(b.fecha||'').localeCompare(a.fecha||''));
+  const capDefault=histCap.length>0?parseInt(histCap[0].cap):getCapClase(c.clase)||20;
+  document.getElementById('rcc-cap').value=capDefault;
   document.getElementById('rcc-asis').focus();
 }
 function ajustarAsis(delta){
@@ -349,9 +361,10 @@ function siguienteClaseRec(){
   const c=recActual.clasesActivas[recIdx];
   const pres=document.getElementById('rcc-pres').value;
   const supId=pres==='sub'?parseInt(document.getElementById('rcc-suplente').value)||null:null;
-  const cap=getCapClase(c.clase)||20;
+  const motivoSup=pres==='sub'?(document.getElementById('rcc-motivo').value||'permiso'):null;
+  const cap=parseInt(document.getElementById('rcc-cap').value)||getCapClase(c.clase)||20;
   recActual.items.push({...c,asis:parseInt(document.getElementById('rcc-asis').value)||0,
-    presente:pres,suplente_id:supId,obs:document.getElementById('rcc-obs').value.trim(),saltado:false,cap});
+    presente:pres,suplente_id:supId,motivo_suplencia:motivoSup,obs:document.getElementById('rcc-obs').value.trim(),saltado:false,cap});
   avanzarRec();
 }
 function saltarClaseRec(){
@@ -365,8 +378,7 @@ function terminarRecorrido(){
   document.getElementById('m-rec-cap').classList.remove('on');
   const vis=recActual.items.filter(i=>!i.saltado);
   const totalAsis=vis.reduce((a,i)=>a+i.asis,0);
-  const cap=20;
-  const aforoProm=vis.length>0?Math.round(vis.reduce((a,i)=>a+i.asis/cap*100,0)/vis.length):0;
+  const aforoProm=vis.length>0?Math.round(vis.reduce((a,i)=>a+(i.cap>0?i.asis/i.cap*100:0),0)/vis.length):0;
   const ausentes=recActual.items.filter(i=>i.presente==='no');
   const suplentes=recActual.items.filter(i=>i.presente==='sub');
   const bajo3=vis.filter(i=>i.asis<=3);
@@ -388,7 +400,7 @@ function terminarRecorrido(){
       ${vis.map((i,n)=>{
         const col=i.asis<=3?'var(--red2)':i.asis<=8?'var(--gold2)':'var(--v3)';
         const pres=i.presente==='si'?'<svg class="ico ico-ok" viewBox="0 0 20 20"><circle cx="10" cy="10" r="8" stroke="currentColor" stroke-width="1.5" fill="none"/><polyline points="6,10 9,13 14,7" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>':i.presente==='no'?'<svg class="ico ico-err" viewBox="0 0 20 20"><circle cx="10" cy="10" r="8" stroke="currentColor" stroke-width="1.5" fill="none"/><line x1="7" y1="7" x2="13" y2="13" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><line x1="13" y1="7" x2="7" y2="13" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>':'<svg class="ico" viewBox="0 0 20 20"><path d="M4 10a6 6 0 0 1 6-6 6 6 0 0 1 5.2 3" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round"/><path d="M16 10a6 6 0 0 1-6 6 6 6 0 0 1-5.2-3" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round"/><polyline points="14.5,7 15.5,3.8 18.5,5" stroke="currentColor" stroke-width="1.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/><polyline points="5.5,13 4.5,16.2 1.5,15" stroke="currentColor" stroke-width="1.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>';
-        const afoP=Math.round(i.asis/cap*100);
+        const afoP=i.cap>0?Math.round(i.asis/i.cap*100):0;
         return `<tr style="background:${n%2?'var(--panel2)':'transparent'};border-bottom:1px solid var(--border)">
           <td style="padding:4px 8px;font-weight:600">${i.clase}</td>
           <td style="padding:4px 8px;color:var(--txt2)">${i.inst_nombre.split(' ')[0]}</td>
@@ -425,6 +437,7 @@ function guardarRecorrido(){
     // Comparación robusta: convierte ambos lados a string para evitar mismatch number/string de Firebase
     const ex=registros.find(r=>
       String(r.inst_id)===String(item.inst_id) &&
+      r.clase===item.clase &&
       r.dia===item.dia &&
       r.hora===item.hora &&
       r.fecha===recActual.fecha
@@ -435,6 +448,7 @@ function guardarRecorrido(){
       ex.estado=nuevoEst;
       ex.suplente_id=item.suplente_id||null;
       ex.cap=cap;
+      ex.updatedAt=Date.now();
     } else {
       const maxId=registros.length>0?Math.max(...registros.map(r=>parseInt(r.id)||0)):0;
       registros.push({
@@ -446,14 +460,17 @@ function guardarRecorrido(){
         estado:nuevoEst,
         fecha:recActual.fecha,
         tipo:'recorrido',
-        suplente_id:item.suplente_id||null
+        suplente_id:item.suplente_id||null,
+        motivo_suplencia:(nuevoEst==='sub'?(item.motivo_suplencia||'permiso'):null),
+        updatedAt:Date.now()
       });
     }
   });
   cerrarModal('m-rec-res');
   renderAll();
   renderRecorridos();
-  toast(`Recorrido guardado — ${vis.length} clase(s) · ${totalAsis} asistentes · ${aforoProm}% aforo prom.`,'ok',4000);
+  registrarLog('recorrido', `Guardado: ${recActual.fecha} ${recActual.dia} ${recActual.hora} · ${vis.length} clase(s) · ${totalAsis} asistentes`);
+  showToast(`Recorrido guardado — ${vis.length} clase(s) · ${totalAsis} asistentes · ${aforoProm}% aforo prom.`,'ok');
 }
 function imprimirRecorrido(){
   const vis=recActual.items.filter(i=>!i.saltado);
@@ -527,7 +544,7 @@ function eliminarRecorrido(id){
   recorridos=recorridos.filter(r=>r.id!==id);
   renderRecorridos();
   renderAll();
-  toast('Recorrido eliminado','ok');
+  showToast('Recorrido eliminado correctamente.','ok');
 }
 function verRec(id){
   const r=recorridos.find(x=>x.id===id);if(!r)return;
@@ -536,3 +553,99 @@ function verRec(id){
 }
 
 // ═══ GUARDAR CLASE ═══
+function guardarClase(){
+  _vClearAll(['rc-inst','rc-horario','rc-asis','rc-cap','rc-fecha','rc-suplente']);
+
+  const instId=parseInt(document.getElementById('rc-inst').value);
+  const inst=instructores.find(i=>i.id===instId);
+  const claseNombre=document.getElementById('rc-clase').value;
+  const diaVal=document.getElementById('rc-dia').value;
+  const horaVal=document.getElementById('rc-hora').value;
+  const fechaVal=document.getElementById('rc-fecha').value;
+  const asisVal=parseInt(document.getElementById('rc-asis').value)||0;
+  const capDefault=getCapClase(claseNombre);
+  const capInput=parseInt(document.getElementById('rc-cap').value)||capDefault;
+  const est=document.getElementById('rc-est').value;
+  const supId=est==='sub'?parseInt(document.getElementById('rc-suplente').value)||null:null;
+  const motivoSup=est==='sub'?(document.getElementById('rc-motivo').value||'permiso'):null;
+
+  // Validaciones
+  let ok=true;
+  if(!inst){ _vErr('rc-inst','Selecciona un instructor'); showToast('Selecciona un instructor','err'); ok=false; }
+  if(!claseNombre||!diaVal||!horaVal){ _vErr('rc-horario','Selecciona un horario'); showToast('Selecciona un horario del instructor','err'); ok=false; }
+  if(!fechaVal){ _vErr('rc-fecha','La fecha es requerida'); showToast('Indica la fecha de la clase','err'); ok=false; }
+  if(ok && fechaVal > new Date().toISOString().slice(0,10)){
+    _vErr('rc-fecha','No puede ser fecha futura');
+    showToast('La fecha no puede ser futura','warn'); ok=false;
+  }
+  if(asisVal < 0){ _vErr('rc-asis','Asistentes no puede ser negativo'); showToast('Asistentes no puede ser negativo','err'); ok=false; }
+  if(capInput > 0 && asisVal > capInput * 1.5){
+    _vErr('rc-asis',`${asisVal} supera el 150% de la capacidad (${capInput}). ¿Es correcto?`);
+    showToast(`⚠ Asistentes (${asisVal}) supera 150% de la capacidad (${capInput}). Verifica el dato.`,'warn');
+    // Advertencia pero no bloquea
+  }
+  if(est==='sub' && !supId){
+    _vErr('rc-suplente','Selecciona un suplente');
+    showToast('Selecciona el instructor suplente','err'); ok=false;
+  }
+  if(est==='sub' && supId && supId===instId){
+    _vErr('rc-suplente','El suplente no puede ser el mismo instructor');
+    showToast('El suplente no puede ser el mismo instructor','err'); ok=false;
+  }
+  // Detectar duplicado exacto en el mismo día/hora/fecha
+  const duplicado=registros.find(r=>
+    r.inst_id===instId && r.clase===claseNombre &&
+    r.dia===diaVal && r.hora===horaVal && r.fecha===fechaVal &&
+    (r.estado==='ok'||r.estado==='sub')
+  );
+  if(duplicado){
+    showToast(`Ya existe un registro de ${claseNombre} para ${inst?.nombre} el ${fechaVal}. ¿Duplicado?`,'warn');
+    // Advertencia pero no bloquea — puede ser legítimo
+  }
+  if(!ok) return;
+
+  const nuevoIdClase=(registros.length>0?Math.max(...registros.map(r=>parseInt(r.id)||0)):0)+1;
+  registros.push({id:nuevoIdClase,inst_id:instId,
+    dia:diaVal, clase:claseNombre, hora:horaVal,
+    asistentes:asisVal, cap:capInput,
+    dur:parseInt(document.getElementById('rc-dur').value)||60,
+    estado:est, fecha:fechaVal, tipo:'clase', suplente_id:supId,
+    motivo_suplencia:motivoSup,
+    updatedAt:Date.now()});
+  cerrarModal('m-clase');renderAll();
+  registrarLog('clase', `${inst.nombre} · ${claseNombre} · ${diaVal} ${horaVal} · ${fechaVal} · ${est==='sub'?'Suplencia':'Ok'} · ${asisVal} asis.`);
+  showToast(`Clase registrada para ${inst.nombre}`,'ok');
+}
+function guardarFalta(){
+  _vClearAll(['rf-inst','rf-dia','rf-clase']);
+  const instId=parseInt(document.getElementById('rf-inst').value);
+  const inst=instructores.find(i=>i.id===instId);
+  const diaVal=document.getElementById('rf-dia').value;
+  const claseVal=document.getElementById('rf-clase').value;
+  let ok=true;
+  if(!inst){ showToast('Selecciona un instructor','err'); ok=false; }
+  if(!diaVal){ _vErr('rf-dia','Selecciona el día'); showToast('Indica el día de la falta','err'); ok=false; }
+  if(!claseVal){ _vErr('rf-clase','Selecciona la clase'); showToast('Indica la clase afectada','err'); ok=false; }
+  // Detectar falta duplicada
+  if(ok && inst){
+    const yaTieneFalta=registros.find(r=>
+      r.inst_id===instId && r.dia===diaVal && r.clase===claseVal &&
+      r.estado==='falta' && r.fecha===fechaLocalStr(hoy)
+    );
+    if(yaTieneFalta) showToast(`${inst.nombre} ya tiene falta registrada para ${claseVal} este día`,'warn');
+  }
+  if(!ok) return;
+  const nuevoIdFalta=(registros.length>0?Math.max(...registros.map(r=>parseInt(r.id)||0)):0)+1;
+  registros.push({id:nuevoIdFalta,inst_id:instId,dia:diaVal,
+    clase:claseVal,hora:'00:00',asistentes:0,cap:0,dur:0,estado:'falta',
+    fecha:fechaLocalStr(hoy),tipo:'falta',
+    tipo_falta:document.getElementById('rf-tipo').value,
+    nota:document.getElementById('rf-nota').value,suplente_id:null,
+    updatedAt:Date.now()});
+  cerrarModal('m-falta');renderAll();
+  registrarLog('falta', `${inst.nombre} · ${claseVal} · ${diaVal} · ${document.getElementById('rf-tipo').value}`);
+  showToast(`Falta registrada para ${inst.nombre}`,'warn');
+}
+
+
+// ═══════════════════════════════════════════════════════
