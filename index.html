@@ -2344,6 +2344,10 @@ html.tema-claro .rep-card-hdr { color: #1a7a45; }
       <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><rect x="4" y="2" width="12" height="16" rx="2"/><rect x="7" y="1" width="6" height="3" rx="1"/><line x1="7" y1="8" x2="13" y2="8"/><line x1="7" y1="11" x2="13" y2="11"/><line x1="7" y1="14" x2="10.5" y2="14"/><circle cx="13" cy="14" r="2.5" fill="currentColor" stroke="none" opacity=".35"/><line x1="12" y1="14" x2="14" y2="14" stroke="white" stroke-width="1.3"/><line x1="13" y1="13" x2="13" y2="15" stroke="white" stroke-width="1.3"/></svg>
       <span class="sb-item-lbl">Reporte Dep.</span>
     </div>
+    <div class="sb-item" data-s="mas" data-tip="Eventos" onclick="navegarA('eventos')" id="sb-eventos">
+      <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><rect x="3" y="4" width="14" height="13" rx="2"/><line x1="3" y1="9" x2="17" y2="9" stroke-width="1.3"/><line x1="7" y1="2" x2="7" y2="6" stroke-width="1.5"/><line x1="13" y1="2" x2="13" y2="6" stroke-width="1.5"/><path d="M7 13 L9 15 L13 11" stroke-width="1.6" stroke-linejoin="round"/></svg>
+      <span class="sb-item-lbl">Eventos</span>
+    </div>
   </div>
 
   <!-- Collapse button (solo en PC >900px) -->
@@ -2405,15 +2409,258 @@ html.tema-claro .rep-card-hdr { color: #1a7a45; }
   <div class="tab" data-v="salones"><svg class="ico" viewBox="0 0 20 20"><path d="M3 10 L10 3 L17 10 L17 17 L3 17 Z" stroke="currentColor" stroke-width="1.4" fill="none" stroke-linejoin="round"/><rect x="7.5" y="12" width="5" height="5" rx="0.5" stroke="currentColor" stroke-width="1.3" fill="none"/></svg> Salones</div>
   <div class="tab" data-v="sup-plan"><svg class="ico" viewBox="0 0 20 20"><rect x="3" y="4" width="14" height="13" rx="2" stroke="currentColor" stroke-width="1.4" fill="none"/><line x1="3" y1="9" x2="17" y2="9" stroke="currentColor" stroke-width="1.3"/><line x1="10" y1="6" x2="10" y2="7.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><line x1="10" y1="12" x2="10" y2="15" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><line x1="8.5" y1="13.5" x2="11.5" y2="13.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg> Suplencias Plan.</div>
   <div class="tab" data-v="log"><svg class="ico" viewBox="0 0 20 20"><rect x="4" y="3" width="12" height="14" rx="2" stroke="currentColor" stroke-width="1.4" fill="none"/><line x1="7" y1="7" x2="13" y2="7" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/><line x1="7" y1="10" x2="13" y2="10" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/><line x1="7" y1="13" x2="10" y2="13" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg> Log</div>
+  <div class="tab" data-v="eventos"><svg class="ico" viewBox="0 0 20 20"><rect x="3" y="4" width="14" height="13" rx="2" stroke="currentColor" stroke-width="1.4" fill="none"/><line x1="3" y1="9" x2="17" y2="9" stroke="currentColor" stroke-width="1.3"/><line x1="7" y1="2" x2="7" y2="6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><line x1="13" y1="2" x2="13" y2="6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><path d="M7 13 L9 15 L13 11" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg> Eventos</div>
 </div>
 
 
 
+<!-- ═══════════════════════════════════════════════════════ -->
+<!-- ═══ MÓDULO EVENTOS DEPORTIVOS ════════════════════════ -->
+<!-- ═══════════════════════════════════════════════════════ -->
+<div class="vista" id="v-eventos">
+<main style="max-width:1100px">
+
+  <div style="display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:.8rem;margin-bottom:1.2rem">
+    <div>
+      <div style="font-family:'Bebas Neue',sans-serif;font-size:1.55rem;letter-spacing:3px;color:var(--neon)">🏆 Eventos Deportivos</div>
+      <div style="font-size:.67rem;color:var(--txt2);letter-spacing:.8px;margin-top:2px">Club Campestre Aguascalientes · Registro, calendario y análisis de eventos</div>
+    </div>
+    <div style="display:flex;gap:.4rem;flex-wrap:wrap;align-items:center">
+      <button class="btn bg" onclick="abrirModalEvento(null)" style="font-size:.76rem;padding:6px 14px">+ Nuevo Evento</button>
+      <button class="btn bb" onclick="evtVista('calendario')" id="evtBtnCal" style="font-size:.74rem;padding:6px 11px">📅 Calendario</button>
+      <button class="btn bo" onclick="evtVista('lista')" id="evtBtnLista" style="font-size:.74rem;padding:6px 11px">📋 Lista</button>
+      <button class="btn bo" onclick="evtVista('stats')" id="evtBtnStats" style="font-size:.74rem;padding:6px 11px">📊 Estadísticas</button>
+    </div>
+  </div>
+
+  <div class="krow">
+    <div class="kpi nn"><div class="klbl">Total Eventos</div><div class="kval" id="evtK1">0</div><div class="ksub">registrados</div></div>
+    <div class="kpi gd"><div class="klbl">Este Año</div><div class="kval" id="evtK2">0</div><div class="ksub" id="evtK2sub">eventos en <span id="evtAnioActual"></span></div></div>
+    <div class="kpi bl"><div class="klbl">Deportes</div><div class="kval" id="evtK3">0</div><div class="ksub">disciplinas distintas</div></div>
+    <div class="kpi"><div class="klbl">Próximo Evento</div><div style="font-size:.88rem;font-weight:600;color:var(--gold2);margin-top:4px" id="evtKProx">—</div><div class="ksub" id="evtKProxDias"></div></div>
+  </div>
+
+  <!-- VISTA CALENDARIO -->
+  <div id="evt-panel-calendario">
+    <div class="panel">
+      <div class="phdr">
+        <span class="pttl">📅 Calendario de Eventos</span>
+        <div style="display:flex;gap:.5rem;align-items:center">
+          <button class="abtn" onclick="evtCalMes(-1)">◀</button>
+          <span style="font-family:'Bebas Neue',sans-serif;font-size:1rem;letter-spacing:2px;color:var(--neon);min-width:150px;text-align:center" id="evtCalLbl"></span>
+          <button class="abtn" onclick="evtCalMes(1)">▶</button>
+          <button class="abtn" onclick="evtCalHoy()">Hoy</button>
+        </div>
+      </div>
+      <div class="pbody">
+        <!-- Cabecera días -->
+        <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:3px;margin-bottom:3px">
+          <div style="text-align:center;font-size:.62rem;font-weight:600;color:var(--txt2);padding:4px">LUN</div>
+          <div style="text-align:center;font-size:.62rem;font-weight:600;color:var(--txt2);padding:4px">MAR</div>
+          <div style="text-align:center;font-size:.62rem;font-weight:600;color:var(--txt2);padding:4px">MIÉ</div>
+          <div style="text-align:center;font-size:.62rem;font-weight:600;color:var(--txt2);padding:4px">JUE</div>
+          <div style="text-align:center;font-size:.62rem;font-weight:600;color:var(--txt2);padding:4px">VIE</div>
+          <div style="text-align:center;font-size:.62rem;font-weight:600;color:var(--txt2);padding:4px">SÁB</div>
+          <div style="text-align:center;font-size:.62rem;font-weight:600;color:var(--txt2);padding:4px">DOM</div>
+        </div>
+        <div id="evtCalGrid" style="display:grid;grid-template-columns:repeat(7,1fr);gap:3px;"></div>
+      </div>
+    </div>
+    <div class="panel">
+      <div class="phdr"><span class="pttl">⏭ Próximos Eventos</span></div>
+      <div class="pbody" id="evtProxLista"><div class="empty">No hay eventos próximos registrados.</div></div>
+    </div>
+  </div>
+
+  <!-- VISTA LISTA -->
+  <div id="evt-panel-lista" style="display:none">
+    <div class="panel">
+      <div class="phdr">
+        <span class="pttl">📋 Historial de Eventos</span>
+        <div style="display:flex;gap:.4rem;flex-wrap:wrap;align-items:center">
+          <select class="ctrl" id="evtFiltroDeporte" onchange="renderEvtLista()" style="font-size:.74rem;padding:5px 8px"><option value="">— Todos los deportes —</option></select>
+          <select class="ctrl" id="evtFiltroAnio" onchange="renderEvtLista()" style="font-size:.74rem;padding:5px 8px"><option value="">— Todos los años —</option></select>
+        </div>
+      </div>
+      <div class="pbody">
+        <div class="twrap">
+          <table>
+            <thead><tr>
+              <th>Deporte</th><th>Evento</th><th>Fecha</th><th>Lugar</th>
+              <th>Participantes</th><th>Calif.</th><th>Estado</th><th>Acciones</th>
+            </tr></thead>
+            <tbody id="evtTablaBody"><tr><td colspan="8" class="empty">Sin eventos registrados.</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- VISTA ESTADÍSTICAS -->
+  <div id="evt-panel-stats" style="display:none">
+    <div class="g2">
+      <div class="panel">
+        <div class="phdr"><span class="pttl">🏅 Eventos por Deporte</span></div>
+        <div class="pbody"><div style="position:relative;height:220px"><canvas id="evtChartDeporte"></canvas></div></div>
+      </div>
+      <div class="panel">
+        <div class="phdr"><span class="pttl">📈 Eventos por Mes</span></div>
+        <div class="pbody"><div style="position:relative;height:220px"><canvas id="evtChartMes"></canvas></div></div>
+      </div>
+    </div>
+    <div class="panel">
+      <div class="phdr">
+        <span class="pttl">🤖 Recomendaciones — Eventos a Planificar</span>
+        <button class="abtn" onclick="evtGenerarRecomendaciones()">↺ Actualizar</button>
+      </div>
+      <div class="pbody" id="evtIARec">
+        <div class="empty">Registra al menos un evento para recibir recomendaciones.</div>
+      </div>
+    </div>
+  </div>
+
+</main>
+</div>
+
+<!-- MODAL NUEVO/EDITAR EVENTO -->
+<div class="ov" id="ov-evento">
+<div class="modal wide" style="max-width:680px">
+  <button class="mcls" onclick="cerrarOv('ov-evento')">✕</button>
+  <div class="mttl" id="evtModalTitulo">🏆 Nuevo Evento Deportivo</div>
+
+  <div style="display:flex;gap:2px;border-bottom:1px solid var(--border);margin-bottom:1rem;overflow-x:auto;padding-bottom:0">
+    <button class="abtn" id="evtMTab1" onclick="evtModalTab(1)" style="border-radius:6px 6px 0 0;font-size:.72rem">📋 Datos</button>
+    <button class="abtn" id="evtMTab2" onclick="evtModalTab(2)" style="border-radius:6px 6px 0 0;font-size:.72rem">👥 Participantes</button>
+    <button class="abtn" id="evtMTab3" onclick="evtModalTab(3)" style="border-radius:6px 6px 0 0;font-size:.72rem">🏅 Resultados</button>
+    <button class="abtn" id="evtMTab4" onclick="evtModalTab(4)" style="border-radius:6px 6px 0 0;font-size:.72rem">🛒 Logística</button>
+    <button class="abtn" id="evtMTab5" onclick="evtModalTab(5)" style="border-radius:6px 6px 0 0;font-size:.72rem">📝 Observaciones</button>
+  </div>
+
+  <!-- TAB 1 DATOS GENERALES -->
+  <div id="evtMPanel1">
+    <div class="fr">
+      <div class="fg"><label>Deporte *</label>
+        <input type="text" id="evtDeporte" class="ctrl" placeholder="ej. Triatlón, Natación..." list="evtDeporteList">
+        <datalist id="evtDeporteList">
+          <option value="Triatlón"><option value="Natación"><option value="Atletismo">
+          <option value="Ciclismo"><option value="Tenis"><option value="Pádel">
+          <option value="Futbol"><option value="Basquetbol"><option value="Voleibol">
+          <option value="Golf"><option value="Squash"><option value="Yoga / Pilates">
+          <option value="Spinning"><option value="CrossFit"><option value="Multideporte">
+        </datalist>
+      </div>
+      <div class="fg"><label>Nombre del Evento *</label><input type="text" id="evtNombre" class="ctrl" placeholder="ej. Mundial de Triatlón Infantil"></div>
+    </div>
+    <div class="fr">
+      <div class="fg"><label>Fecha del Evento *</label><input type="date" id="evtFecha" class="ctrl"></div>
+      <div class="fg"><label>Lugar del Evento</label><input type="text" id="evtLugar" class="ctrl" placeholder="ej. Club Campestre, Ags."></div>
+    </div>
+    <div class="fr">
+      <div class="fg"><label>Hora de Inicio</label><input type="time" id="evtHoraIni" class="ctrl"></div>
+      <div class="fg"><label>Hora de Término</label><input type="time" id="evtHoraFin" class="ctrl"></div>
+    </div>
+    <div class="fr">
+      <div class="fg"><label>Categoría / Nivel</label>
+        <select id="evtCategoria" class="ctrl">
+          <option value="">— Seleccionar —</option>
+          <option>Infantil</option><option>Juvenil</option><option>Adulto</option>
+          <option>Master</option><option>Abierto</option><option>Interno</option><option>Externo</option>
+        </select>
+      </div>
+      <div class="fg"><label>Estado</label>
+        <select id="evtEstado" class="ctrl">
+          <option value="planificado">📅 Planificado</option>
+          <option value="realizado">✅ Realizado</option>
+          <option value="cancelado">❌ Cancelado</option>
+          <option value="pospuesto">⏸ Pospuesto</option>
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <!-- TAB 2 PARTICIPANTES -->
+  <div id="evtMPanel2" style="display:none">
+    <div class="fr3">
+      <div class="fg"><label>Total Participantes</label><input type="number" id="evtPartTotal" class="ctrl" min="0" placeholder="0" oninput="evtActualizarTotales()"></div>
+      <div class="fg"><label>Club Masculino</label><input type="number" id="evtClubM" class="ctrl" min="0" placeholder="0" oninput="evtActualizarTotales()"></div>
+      <div class="fg"><label>Club Femenino</label><input type="number" id="evtClubF" class="ctrl" min="0" placeholder="0" oninput="evtActualizarTotales()"></div>
+    </div>
+    <div class="fr3">
+      <div class="fg"><label>Foráneos Masculino</label><input type="number" id="evtForM" class="ctrl" min="0" placeholder="0" oninput="evtActualizarTotales()"></div>
+      <div class="fg"><label>Foráneos Femenino</label><input type="number" id="evtForF" class="ctrl" min="0" placeholder="0" oninput="evtActualizarTotales()"></div>
+      <div class="fg"><label>Total del Club</label><input type="number" id="evtClubTotal" class="ctrl" placeholder="0" readonly style="opacity:.6;cursor:not-allowed"></div>
+    </div>
+    <div style="background:var(--panel2);border:1px solid var(--border);border-radius:8px;padding:.7rem;font-size:.74rem;color:var(--txt2);margin-top:.3rem">
+      💡 El total del club se calcula automáticamente sumando masculino + femenino del club.
+    </div>
+  </div>
+
+  <!-- TAB 3 RESULTADOS -->
+  <div id="evtMPanel3" style="display:none">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.6rem">
+      <span style="font-size:.75rem;color:var(--txt2)">Resultados obtenidos en el evento</span>
+      <button class="abtn" onclick="evtAddResultado()">+ Agregar resultado</button>
+    </div>
+    <div id="evtResultadosWrap">
+      <div style="font-size:.75rem;color:var(--txt3);text-align:center;padding:1.2rem">Presiona "+ Agregar resultado" para capturar resultados.</div>
+    </div>
+  </div>
+
+  <!-- TAB 4 LOGÍSTICA -->
+  <div id="evtMPanel4" style="display:none">
+    <div style="font-size:.73rem;color:var(--txt2);margin-bottom:.6rem;font-weight:600">✅ Recursos necesarios para el evento:</div>
+    <div id="evtLogisticaWrap" style="display:grid;grid-template-columns:1fr 1fr;gap:.35rem;margin-bottom:.8rem"></div>
+    <div class="divider"></div>
+    <div class="fr">
+      <div class="fg"><label>Presupuesto Estimado ($)</label><input type="number" id="evtPresupuesto" class="ctrl" placeholder="0.00" min="0" step="0.01"></div>
+      <div class="fg"><label>Costo Real ($)</label><input type="number" id="evtCostoReal" class="ctrl" placeholder="0.00" min="0" step="0.01"></div>
+    </div>
+    <div class="fg"><label>Notas de Logística</label><textarea id="evtNotasLog" class="ctrl" rows="2" placeholder="Mobiliario, proveedores, pendientes..."></textarea></div>
+  </div>
+
+  <!-- TAB 5 OBSERVACIONES -->
+  <div id="evtMPanel5" style="display:none">
+    <div class="fg"><label>Descripción / Desarrollo del Evento</label>
+      <textarea id="evtObservaciones" class="ctrl" rows="4" placeholder="Describe el desarrollo del evento, incidencias, puntos de mejora, etc."></textarea>
+    </div>
+    <div class="fg"><label>Puntos de Mejora para la Próxima Edición</label>
+      <textarea id="evtMejoras" class="ctrl" rows="3" placeholder="¿Qué mejorarías para la siguiente vez?"></textarea>
+    </div>
+    <div class="fg"><label>Calificación General del Evento</label>
+      <div style="display:flex;gap:.4rem;align-items:center;margin-top:5px" id="evtEstrellas">
+        <span style="font-size:1.6rem;cursor:pointer;transition:transform .1s" onclick="evtSetStar(1)" data-s="1">☆</span>
+        <span style="font-size:1.6rem;cursor:pointer;transition:transform .1s" onclick="evtSetStar(2)" data-s="2">☆</span>
+        <span style="font-size:1.6rem;cursor:pointer;transition:transform .1s" onclick="evtSetStar(3)" data-s="3">☆</span>
+        <span style="font-size:1.6rem;cursor:pointer;transition:transform .1s" onclick="evtSetStar(4)" data-s="4">☆</span>
+        <span style="font-size:1.6rem;cursor:pointer;transition:transform .1s" onclick="evtSetStar(5)" data-s="5">☆</span>
+        <span style="font-size:.75rem;color:var(--txt2);margin-left:.3rem" id="evtStarLbl"></span>
+      </div>
+      <input type="hidden" id="evtCalif" value="0">
+    </div>
+  </div>
+
+  <div style="display:flex;gap:.5rem;margin-top:1rem">
+    <button class="bsave" onclick="guardarEvento()">💾 Guardar Evento</button>
+    <button class="bdel" id="evtBtnEliminar" onclick="eliminarEvento()" style="display:none;width:auto;padding:10px 18px;flex-shrink:0">🗑 Eliminar</button>
+  </div>
+</div>
+</div>
+
+<!-- MODAL REPORTE EVENTO -->
+<div class="ov" id="ov-evt-reporte">
+<div class="modal wide" style="max-width:700px">
+  <button class="mcls" onclick="cerrarOv('ov-evt-reporte')">✕</button>
+  <div class="mttl">📄 Reporte del Evento</div>
+  <div id="evtReporteContenido" style="font-size:.83rem;line-height:1.6"></div>
+  <div style="display:flex;gap:.5rem;margin-top:1rem">
+    <button class="bsave" onclick="evtImprimirReporte()">🖨 Imprimir / PDF</button>
+    <button class="btn bo" onclick="cerrarOv('ov-evt-reporte')">Cerrar</button>
+  </div>
+</div>
+</div>
+
 <!-- ═══ REPORTE DEPORTIVO SEMANAL ═══ -->
 <div class="vista" id="v-reporte-dep">
-<main style="max-width:940px">
-
-  <!-- Encabezado módulo -->
   <div style="display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:.8rem;margin-bottom:1.2rem">
     <div>
       <div style="font-family:'Bebas Neue',sans-serif;font-size:1.55rem;letter-spacing:3px;color:var(--neon)">📋 Reporte Semanal Deportes</div>
@@ -3971,6 +4218,12 @@ html.tema-claro .rep-card-hdr { color: #1a7a45; }
         display:flex;align-items:center;gap:5px;transition:all .2s;">
         <svg viewBox="0 0 20 20" width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M5 3H13L16 6V17H5Z"/><polyline points="13,3 13,6 16,6"/><line x1="8" y1="10" x2="13" y2="10"/><line x1="8" y1="13" x2="13" y2="13"/></svg>
         Generar PDF
+      </button>
+      <button onclick="fd_borrarFirmasPeriodo()" title="Borrar todas las firmas guardadas de este periodo"
+        style="background:var(--panel2);color:var(--red2);border:1px solid rgba(224,80,80,.3);
+        border-radius:8px;padding:6px 10px;font-family:'Outfit',sans-serif;font-size:.72rem;cursor:pointer;
+        transition:all .2s;" title="Borrar todas las firmas del periodo del dispositivo">
+        🗑 Firmas
       </button>
       <button onclick="cerrarModal('m-firmas-digitales')" style="background:var(--panel2);color:var(--txt2);border:1px solid var(--border);
         border-radius:8px;padding:6px 12px;font-family:'Outfit',sans-serif;font-size:.75rem;cursor:pointer;">
@@ -7519,55 +7772,38 @@ function firmasActualizarLabel(){
   }
 }
 
-function generarHojaFirmasPDF(){
-  if(!window.jspdf){ showToast('Librería PDF no disponible.','warn'); return; }
+// ── Función compartida — genera la hoja de firmas con o sin imágenes de firma ──
+// firmasDigitales: objeto { profId: dataURL } o null para PDF sin firmas
+function _generarHojaFirmasCore(fechaIni, fechaFin, semana, firmasDigitales){
+  if(!window.jspdf){ showToast('Librería PDF no disponible.','warn'); return false; }
   const {jsPDF} = window.jspdf;
 
-  // ── Rango de fechas ────────────────────────────────────────────
-  const elI = document.getElementById('firmas-fecha-ini');
-  const elF = document.getElementById('firmas-fecha-fin');
-  const elT = document.getElementById('firmas-semana-txt');
-  const lun = new Date(lunesBase);
-  const dom = new Date(lun); dom.setDate(lun.getDate()+6);
-  const iso = d => d.toISOString().slice(0,10);
-  const fechaIni = (elI&&elI.value) ? elI.value : iso(lun);
-  const fechaFin = (elF&&elF.value) ? elF.value : iso(dom);
-  const fmt2 = s => new Date(s+'T12:00:00').toLocaleDateString('es-MX',{day:'2-digit',month:'long'});
-  const semana = (elT&&elT.value.trim()) ? elT.value.trim()
-               : `${fmt2(fechaIni)} al ${fmt2(fechaFin)} ${fechaIni.slice(0,4)}`;
-
-  // ── Filtrar registros (incluye faltas para marcarlas en rojo) ─
+  // ── Filtrar y agrupar registros ──────────────────────────────────────
   const regs = registros.filter(r => r.fecha >= fechaIni && r.fecha <= fechaFin);
   if(!regs.length){
-    showToast(`Sin registros entre ${fechaIni} y ${fechaFin}.`,'warn'); return;
+    showToast(`Sin registros entre ${fechaIni} y ${fechaFin}.`,'warn'); return false;
   }
 
-  // ── Orden canónico de días ─────────────────────────────────────
   const DIAS_ORD  = ['Lunes','Martes','Miércoles','Jueves','Viernes','Sábado','Domingo'];
-  const DIAS_HDR  = {'Lunes':'LUNES','Martes':'MARTES','Miércoles':'MIÉRCOLES',
-                     'Jueves':'JUEVES','Viernes':'VIERNES','Sábado':'SÁBADO','Domingo':'DOMINGO'};
+  const DIAS_ABR  = {'Lunes':'LUN','Martes':'MAR','Miércoles':'MIÉ',
+                     'Jueves':'JUE','Viernes':'VIE','Sábado':'SÁB','Domingo':'DOM'};
 
-  // ── Agrupar por instructor ─────────────────────────────────────
   const porInst = {};
   regs.forEach(r => {
     const inst = instructores.find(i => String(i.id)===String(r.inst_id));
     if(!inst) return;
     if(!porInst[inst.id]) porInst[inst.id] = {inst, clases:[]};
-    // Formato hora 12h
     const h = r.hora||'';
-    let horaFmt = h;
-    let horaMin = 0; // minutos desde medianoche — para ordenar correctamente
+    let horaFmt = h, horaMin = 0;
     if(h && !h.includes('a.')&&!h.includes('p.')){
-      // Formato 24h "HH:MM" — convertir a 12h para mostrar y calcular minutos
       const [hh,mm] = h.split(':').map(Number);
       if(!isNaN(hh)){
-        const s = hh>=12?'p. m.':'a. m.';
+        const s = hh>=12?'p.m.':'a.m.';
         const h12 = hh===0?12:hh>12?hh-12:hh;
         horaFmt = `${h12}:${String(mm||0).padStart(2,'0')} ${s}`;
         horaMin = hh*60+(mm||0);
       }
     } else if(h){
-      // Ya está en formato 12h — convertir a minutos para ordenar
       const pm = h.toLowerCase().includes('p. m.')||h.toLowerCase().includes('pm');
       const numMatch = h.match(/(\d+):(\d+)/);
       if(numMatch){
@@ -7575,16 +7811,17 @@ function generarHojaFirmasPDF(){
         if(pm && hh!==12) hh+=12;
         if(!pm && hh===12) hh=0;
         horaMin = hh*60+mm;
+        // Normalizar a formato compacto
+        const s = pm ? 'p.m.' : 'a.m.';
+        const h12 = pm && parseInt(numMatch[1])!==12 ? parseInt(numMatch[1]) : (!pm && parseInt(numMatch[1])===12 ? 12 : parseInt(numMatch[1]));
+        horaFmt = `${h12}:${String(mm).padStart(2,'0')} ${s}`;
       }
     }
     porInst[inst.id].clases.push({
-      dia:    r.dia||'',
-      hora:   horaFmt,
-      horaMin,                 // ← minutos reales para ordenar
-      clase:  (r.clase||'').toUpperCase(),
-      alumnos: (r.asistentes!==undefined&&r.asistentes!==null&&r.asistentes!=='')
-               ? parseInt(r.asistentes) : null,
-      estado: r.estado||'ok',   // 'ok' | 'sub' | 'falta'
+      dia: r.dia||'', hora: horaFmt, horaMin,
+      clase: (r.clase||'').toUpperCase(),
+      alumnos: (r.asistentes!==undefined&&r.asistentes!==null&&r.asistentes!=='') ? parseInt(r.asistentes) : null,
+      estado: r.estado||'ok',
       suplente_id: r.suplente_id||null,
     });
   });
@@ -7592,7 +7829,6 @@ function generarHojaFirmasPDF(){
   const profesores = Object.values(porInst)
     .sort((a,b)=>a.inst.nombre.localeCompare(b.inst.nombre))
     .map(p=>{
-      // Deduplicar: misma dia+hora+clase → conservar el de mayor prioridad (falta>sub>ok)
       const mapa = {};
       p.clases.forEach(c=>{
         const k = `${c.dia}|${c.hora}|${c.clase}`;
@@ -7609,63 +7845,97 @@ function generarHojaFirmasPDF(){
     .filter(p=>p.clases.length>0);
 
   if(!profesores.length){
-    showToast('No hay registros de profesores en ese período.','warn'); return;
+    showToast('No hay registros de profesores en ese período.','warn'); return false;
   }
 
-  // ── Configuración de página: carta horizontal ──────────────────
+  // ── Configuración de página: carta horizontal ────────────────────────
   const doc = new jsPDF({orientation:'landscape', unit:'mm', format:'letter'});
   const PW=279.4, PH=215.9;
-  const ML=9, MR=9, MT=22, MB=8;
+  const ML=10, MR=10, MB=10;
   const CW = PW-ML-MR;
 
-  // ── Paleta de colores ──────────────────────────────────────────
-  const CV    = [26,92,53];      // verde institucional oscuro
-  const CV2   = [26,122,69];     // verde medio (línea firma)
-  const CV3   = [232,248,238];   // verde muy claro (alternado par)
-  const CGRIS = [190,190,190];   // gris encabezado subhdr
-  const CGALT = [248,248,248];   // blanco roto alternado
-  const CROJO = [176,0,0];       // rojo oscuro imprimible
-  const CRJBG = [255,240,240];   // rojo fondo muy suave
-  const CNEG  = [25,25,25];
-  const CBCO  = [255,255,255];
+  // ── Paleta institucional ─────────────────────────────────────────────
+  const CV     = [15, 80, 40];     // verde oscuro institucional
+  const CV2    = [26,122,69];      // verde medio (acentos)
+  const CV3    = [220,242,228];    // verde muy claro (fondo encabezado instructor)
+  const CGRIS  = [240,240,240];    // gris claro alternado
+  const CGRIS2 = [210,218,212];    // gris medio (líneas)
+  const CROJO  = [160, 20, 20];    // rojo oscuro imprimible
+  const CRJBG  = [254,243,243];    // rojo fondo muy suave
+  const CNEG   = [30, 30, 30];
+  const CBCO   = [255,255,255];
+  const CORO   = [140, 100, 0];    // dorado para badge firma digital
+  const COROBG = [255,248,225];    // fondo badge firma digital
+
+  // ── Altura de encabezado de página ──────────────────────────────────
+  const HDR_H = 24;  // mm — encabezado más alto y elegante
+  const MT    = HDR_H + 3;
 
   let pNum = 0;
 
   function nuevaPagina(){
     if(pNum>0) doc.addPage();
     pNum++;
-    // Barra de cabecera verde sólida
+
+    // ▌ Barra verde superior (más alta)
     doc.setFillColor(...CV);
-    doc.rect(0,0,PW,13,'F');
-    // Texto blanco: institución izq, semana der
+    doc.rect(0, 0, PW, HDR_H, 'F');
+
+    // Línea decorativa dorada/verde claro bajo la barra
+    doc.setFillColor(...CV2);
+    doc.rect(0, HDR_H, PW, 0.8, 'F');
+
+    // Logo / inicial "F" dentro de caja
+    doc.setFillColor(255,255,255,0.15);
+    doc.setDrawColor(255,255,255);
+    doc.setLineWidth(0.5);
+    doc.roundedRect(ML, 3.5, 17, 17, 2, 2, 'FD');
     doc.setFont('helvetica','bold');
-    doc.setFontSize(8);
+    doc.setFontSize(11);
+    doc.setTextColor(...CV2);
+    doc.text('FC', ML+8.5, 14, {align:'center'});
+
+    // Institución
+    doc.setFont('helvetica','bold');
+    doc.setFontSize(9.5);
     doc.setTextColor(...CBCO);
-    doc.text('CLUB CAMPESTRE AGUASCALIENTES  ·  COORDINACIÓN FITNESS', ML, 9);
-    doc.text(`SEMANA:  ${semana}`, PW-MR, 9, {align:'right'});
-    // Franja gris clara debajo
-    doc.setFillColor(238,238,238);
-    doc.rect(0,13,PW,7,'F');
+    doc.text('CLUB CAMPESTRE AGUASCALIENTES', ML+21, 10);
     doc.setFont('helvetica','normal');
     doc.setFontSize(6.5);
-    doc.setTextColor(90,90,90);
-    doc.text('HOJA DE ASISTENCIA Y FIRMAS  ·  CONTROL INTERNO  ·  NO CIRCULAR', ML, 18);
-    // Leyenda en la franja gris (derecha)
+    doc.setTextColor(180,230,200);
+    doc.text('COORDINACIÓN FITNESS  ·  CONTROL INTERNO  ·  NO CIRCULAR', ML+21, 15.5);
+
+    // Semana — alineada a la derecha
+    doc.setFont('helvetica','bold');
+    doc.setFontSize(7);
+    doc.setTextColor(...CBCO);
+    doc.text('SEMANA:', PW-MR, 9, {align:'right'});
+    doc.setFont('helvetica','normal');
+    doc.setFontSize(8.5);
+    doc.setTextColor(200,255,220);
+    doc.text(semana, PW-MR, 16, {align:'right'});
+
+    // Leyenda: rectángulo rojo dibujado + texto (sin símbolo ■)
+    const leyX = PW/2;
+    doc.setFillColor(...CROJO);
+    doc.rect(leyX - 28, 9.5, 3.5, 3.5, 'F');
+    doc.setFont('helvetica','normal');
     doc.setFontSize(6);
-    doc.setTextColor(...CROJO);
-    doc.text('■ Rojo = Suplencia o Falta', PW-MR, 18, {align:'right'});
-    // Pie de página
+    doc.setTextColor(255,200,200);
+    doc.text('Rojo = Suplencia o Falta', leyX - 23, 12.5);
+
+    // Número de página — pie
     doc.setFont('helvetica','normal');
     doc.setFontSize(5.5);
     doc.setTextColor(160,160,160);
-    doc.text('Fitness Control — Club Campestre Aguascalientes', ML, PH-3);
-    doc.text(`Página ${pNum}`, PW-MR, PH-3, {align:'right'});
+    doc.text('Fitness Control — Club Campestre Aguascalientes', ML, PH-4);
+    doc.text(`Pág. ${pNum}`, PW-MR, PH-4, {align:'right'});
   }
 
   nuevaPagina();
   let Y = MT;
 
-  // ── Helper: texto con color ────────────────────────────────────
+  // ── Helper drawText ──────────────────────────────────────────────────
   const drawText = (txt,x,y,opts={}) => {
     if(opts.color) doc.setTextColor(...opts.color); else doc.setTextColor(...CNEG);
     if(opts.bold)  doc.setFont('helvetica','bold');  else doc.setFont('helvetica','normal');
@@ -7673,8 +7943,13 @@ function generarHojaFirmasPDF(){
     doc.text(String(txt), x, y, opts.align?{align:opts.align}:{});
   };
 
-  // ── Dibujar cada profesor ──────────────────────────────────────
-  profesores.forEach(prof => {
+  // ── Constantes de fila ───────────────────────────────────────────────
+  const hCab  = 6.5;   // banner PROFESORA / días
+  const hSubh = 5.0;   // sub-header HR | CLASE | ALUM.
+  const hRow  = 6.0;   // fila de datos (ligeramente más alta)
+
+  // ── Dibujar cada profesor ────────────────────────────────────────────
+  profesores.forEach((prof, profIdx) => {
     const diasProf = DIAS_ORD.filter(d => prof.clases.some(c=>c.dia===d));
     if(!diasProf.length) return;
 
@@ -7683,159 +7958,225 @@ function generarHojaFirmasPDF(){
     const maxFilas = Math.max(...diasProf.map(d=>porDia[d].length));
     const nDias    = diasProf.length;
 
-    // Alturas fila (mm) — más cómodas para imprimir
-    const hCab  = 6.0;   // fila PROFESORA / días
-    const hSubh = 5.2;   // HR | CLASE | NO. ALUM.
-    const hRow  = 5.8;   // fila de datos
-    const hBloque = hCab + hSubh + maxFilas*hRow;
-
-    if(Y + hBloque > PH - MB - 4){ nuevaPagina(); Y = MT; }
-
-    // Anchos de columna dinámicos según nDias
-    const colNom = nDias<=3 ? 42 : nDias<=5 ? 38 : 34;
-    const colFir = 28;
+    // Columna FIRMA: más ancha cuando hay pocos días, más estrecha con muchos
+    const colFir = nDias <= 3 ? 34 : nDias <= 5 ? 30 : 26;
+    const colNom = nDias <= 3 ? 44 : nDias <= 5 ? 40 : 36;
     const colDat = CW - colNom - colFir;
     const colDW  = colDat / nDias;
-    // Proporciones: HR 30% | CLASE 45% | ALUM 25%
-    const cHr = colDW*0.30;
-    const cCl = colDW*0.45;
-    const cAl = colDW*0.25;
+    const cHr  = colDW * 0.31;
+    const cCl  = colDW * 0.44;
+    const cAl  = colDW * 0.25;
+
+    const hBloque = hCab + hSubh + maxFilas * hRow;
+
+    // Salto de página si no cabe
+    if(Y + hBloque > PH - MB - 5){ nuevaPagina(); Y = MT; }
 
     const Y0 = Y;
+    const xFirCol = ML + colNom + colDat;
 
-    // ── Fila 0: banner PROFESORA + nombres de día ──────────────
+    // ── FRANJA nombre del instructor (fondo verde claro degradado) ──
+    // Fondo verde muy claro para toda la fila de cabecera
     doc.setFillColor(...CV);
-    doc.rect(ML, Y, CW, hCab,'F');
+    doc.rect(ML, Y, CW, hCab, 'F');
+
     // Género
     const genNom = prof.inst.nombre||'';
     const esF = /\b(ana|cristina|blanca|marisa|karina|consuelo|sara|jimena|valeria|hermelinda|socorro|ernestina|araceli|gabriela|esthela|alejandra|diana|laura|patricia|rosa|maria|ma\.)\b/i.test(genNom);
-    drawText(esF?'PROFESORA':'PROFESOR', ML+2, Y+4.2, {bold:true, size:7, color:CBCO});
+
+    // Etiqueta PROF/A — pequeña, izquierda
+    drawText(esF?'PROFESORA':'PROFESOR', ML+2.5, Y+4.4, {bold:true, size:6.5, color:[160,220,185]});
+
+    // Días en la cabecera
     let xD = ML+colNom;
     diasProf.forEach(d=>{
-      drawText(DIAS_HDR[d]||d.toUpperCase(), xD+colDW/2, Y+4.2, {bold:true, size:7, color:CBCO, align:'center'});
+      drawText(DIAS_ABR[d]||d.slice(0,3).toUpperCase(), xD+colDW/2, Y+4.4, {bold:true, size:7, color:CBCO, align:'center'});
       xD+=colDW;
     });
-    drawText('FIRMA', ML+colNom+colDat+colFir/2, Y+4.2, {bold:true, size:7, color:CBCO, align:'center'});
-    Y+=hCab;
+    drawText('FIRMA', xFirCol+colFir/2, Y+4.4, {bold:true, size:7, color:CBCO, align:'center'});
+    Y += hCab;
 
-    // ── Fila 1: nombre instructor + sub-headers ────────────────
-    doc.setFillColor(...CGRIS);
-    doc.rect(ML, Y, CW, hSubh,'F');
-    // Nombre (ajustar si es muy largo)
-    const maxCarNom = Math.floor(colNom/1.85);
-    const nomCorto = genNom.length>maxCarNom ? genNom.slice(0,maxCarNom-1)+'…' : genNom;
-    drawText(nomCorto.toUpperCase(), ML+2, Y+3.7, {bold:true, size:7, color:CNEG});
+    // ── SUB-HEADER: nombre + columnas HR/CLASE/ALUM ──────────────────
+    doc.setFillColor(...CV3);
+    doc.rect(ML, Y, colNom+colDat, hSubh, 'F');
+    // Celda firma: blanco
+    doc.setFillColor(...CBCO);
+    doc.rect(xFirCol, Y, colFir, hSubh, 'F');
+
+    const maxCar = Math.floor(colNom / 1.7);
+    const nomCorto = genNom.length>maxCar ? genNom.slice(0,maxCar-1)+'…' : genNom;
+    drawText(nomCorto.toUpperCase(), ML+2.5, Y+3.6, {bold:true, size:7.5, color:CV});
+
     xD = ML+colNom;
     diasProf.forEach(()=>{
-      drawText('HR',         xD+cHr/2,       Y+3.6, {size:5.5, color:[60,60,60], align:'center'});
-      drawText('CLASE',      xD+cHr+cCl/2,   Y+3.6, {size:5.5, color:[60,60,60], align:'center'});
-      drawText('NO. ALUM.',  xD+cHr+cCl+cAl/2, Y+3.6, {size:5, color:[60,60,60], align:'center'});
-      xD+=colDW;
+      drawText('HR',      xD+cHr/2,           Y+3.5, {size:5.2, color:[80,100,88], align:'center'});
+      drawText('CLASE',   xD+cHr+cCl/2,       Y+3.5, {size:5.2, color:[80,100,88], align:'center'});
+      drawText('ALUM.',   xD+cHr+cCl+cAl/2,   Y+3.5, {size:4.8, color:[80,100,88], align:'center'});
+      xD += colDW;
     });
-    Y+=hSubh;
+    Y += hSubh;
 
-    // ── Filas de datos ─────────────────────────────────────────
-    for(let i=0;i<maxFilas;i++){
-      // Fondo alternado
-      doc.setFillColor(...(i%2===0?CBCO:CGALT));
-      doc.rect(ML, Y, CW, hRow,'F');
+    // ── FILAS DE DATOS ───────────────────────────────────────────────
+    for(let i=0; i<maxFilas; i++){
+      const bgFila = i%2===0 ? CBCO : CGRIS;
+      doc.setFillColor(...bgFila);
+      doc.rect(ML, Y, colNom+colDat, hRow, 'F');
+      // Columna firma siempre blanca
+      doc.setFillColor(...CBCO);
+      doc.rect(xFirCol, Y, colFir, hRow, 'F');
 
       xD = ML+colNom;
       diasProf.forEach(d=>{
         const cds = porDia[d]||[];
-        if(i<cds.length){
+        if(i < cds.length){
           const c = cds[i];
-          const esMal  = (c.estado==='sub'||c.estado==='falta');
+          const esMal = c.estado==='sub'||c.estado==='falta';
           const txtCol = esMal ? CROJO : CNEG;
 
-          // Fondo rojo muy tenue en toda la celda del día si es mal estado
           if(esMal){
             doc.setFillColor(...CRJBG);
-            doc.rect(xD, Y, colDW, hRow,'F');
+            doc.rect(xD, Y, colDW, hRow, 'F');
           }
 
-          // Hora
-          drawText(c.hora, xD+1.2, Y+3.9, {size:6.0, color:txtCol});
+          // Hora — compacta
+          drawText(c.hora, xD+1.0, Y+4.0, {size:5.8, color:txtCol});
 
           // Clase
-          const claseStr = c.clase.length>14 ? c.clase.slice(0,13)+'.' : c.clase;
-          drawText(claseStr, xD+cHr+0.8, Y+3.9, {size:6.0, color:txtCol, bold:esMal});
+          const maxClase = Math.floor(cCl / 1.55);
+          const claseStr = c.clase.length > maxClase ? c.clase.slice(0,maxClase-1)+'.' : c.clase;
+          drawText(claseStr, xD+cHr+0.8, Y+4.0, {size:5.8, color:txtCol, bold:esMal});
 
-          // Alumnos + descripción de estado
-          const aluX = xD+cHr+cCl+cAl/2;
+          // Alumnos / estado
+          const aluX = xD + cHr + cCl + cAl/2;
           if(esMal){
             const etiq = c.estado==='sub' ? 'SUP' : 'FALTA';
-            if(c.alumnos!==null&&c.alumnos!==undefined){
-              // Número de alumnos arriba, etiqueta abajo — todo rojo
-              drawText(String(c.alumnos), aluX, Y+2.8, {size:6.2, bold:true, color:CROJO, align:'center'});
-              drawText(etiq, aluX, Y+5.0, {size:4.8, bold:true, color:CROJO, align:'center'});
+            if(c.alumnos!==null && c.alumnos!==undefined){
+              // Número arriba, etiqueta debajo — separados claramente
+              drawText(String(c.alumnos), aluX, Y+2.6, {size:6.0, bold:true, color:CROJO, align:'center'});
+              drawText(etiq,              aluX, Y+5.2, {size:4.5, bold:true, color:CROJO, align:'center'});
             } else {
-              drawText(etiq, aluX, Y+3.9, {size:5.5, bold:true, color:CROJO, align:'center'});
+              drawText(etiq, aluX, Y+4.0, {size:5.0, bold:true, color:CROJO, align:'center'});
             }
           } else {
-            const aluStr = c.alumnos!==null&&c.alumnos!==undefined ? String(c.alumnos) : '';
-            drawText(aluStr, aluX, Y+3.9, {size:6.5, bold:true, color:CNEG, align:'center'});
+            const aluStr = (c.alumnos!==null && c.alumnos!==undefined) ? String(c.alumnos) : '';
+            drawText(aluStr, aluX, Y+4.0, {size:6.5, bold:true, color:CNEG, align:'center'});
           }
         }
-        xD+=colDW;
+        xD += colDW;
       });
-      Y+=hRow;
+      Y += hRow;
     }
 
-    // ── Bordes del bloque completo ─────────────────────────────
-    // Marco exterior verde
+    // ── FIRMA insertada o línea punteada ─────────────────────────────
+    const yFirmaTop  = Y0 + hCab;
+    const hFirmaCell = hBloque - hCab;
+    const wFirmaDisp = colFir - 5;
+    const xFirmaIni  = xFirCol + 2.5;
+
+    if(firmasDigitales && firmasDigitales[prof.inst.id]) {
+      try {
+        const RATIO = 3.0;
+        let imgH = hFirmaCell - 5;
+        let imgW = imgH * RATIO;
+        if(imgW > wFirmaDisp){ imgW = wFirmaDisp; imgH = imgW / RATIO; }
+        const imgX = xFirCol + (colFir - imgW) / 2;
+        const imgY = yFirmaTop + (hFirmaCell - imgH) / 2;
+        doc.addImage(firmasDigitales[prof.inst.id], 'PNG', imgX, imgY, imgW, imgH);
+        // Badge "✓ digital" en la parte inferior de la celda
+        doc.setFillColor(...COROBG);
+        doc.roundedRect(xFirCol+1.5, Y-5.5, colFir-3, 4.5, 1, 1, 'F');
+        doc.setFont('helvetica','bold'); doc.setFontSize(4.2); doc.setTextColor(...CORO);
+        doc.text('firma digital', xFirCol+colFir/2, Y-2.8, {align:'center'});
+      } catch(e) {
+        // Fallback línea
+        doc.setDrawColor(...CV2); doc.setLineWidth(0.5);
+        doc.line(xFirmaIni, Y-4, xFirmaIni+wFirmaDisp, Y-4);
+      }
+    } else {
+      // Sin firma: línea punteada centrada + texto "Firma"
+      const yLinea = yFirmaTop + hFirmaCell * 0.65;
+      doc.setDrawColor(...CGRIS2); doc.setLineWidth(0.4);
+      doc.setLineDashPattern([1.2, 0.8], 0);
+      doc.line(xFirmaIni+2, yLinea, xFirmaIni+wFirmaDisp-2, yLinea);
+      doc.setLineDashPattern([], 0);
+      doc.setFont('helvetica','italic'); doc.setFontSize(4.5); doc.setTextColor(180,180,180);
+      doc.text('Firma', xFirCol+colFir/2, yLinea+3.5, {align:'center'});
+    }
+
+    // ── BORDES del bloque ────────────────────────────────────────────
+    // Sombra / separación inferior entre bloques (espacio en blanco)
+    // Marco exterior verde institucional
     doc.setDrawColor(...CV);
-    doc.setLineWidth(0.6);
+    doc.setLineWidth(0.7);
     doc.rect(ML, Y0, CW, hBloque);
 
-    // Línea FIRMA — borde izquierdo más grueso y verde
-    const xFirma = ML+colNom+colDat;
-    doc.setLineWidth(1.0);
-    doc.setDrawColor(...CV2);
-    doc.line(xFirma, Y0, xFirma, Y0+hBloque);
+    // Línea divisoria columna FIRMA (verde más claro)
+    doc.setLineWidth(0.9); doc.setDrawColor(...CV2);
+    doc.line(xFirCol, Y0, xFirCol, Y0+hBloque);
 
-    // Grid interno (líneas finas entre columnas y filas)
-    doc.setLineWidth(0.18);
-    doc.setDrawColor(175,175,175);
+    // Grid interno — solo en zona de datos
+    doc.setLineWidth(0.15); doc.setDrawColor(...CGRIS2);
     let xG = ML+colNom;
     diasProf.forEach((d,idx)=>{
       if(idx>0) doc.line(xG, Y0+hCab, xG, Y0+hBloque);
       doc.line(xG+cHr,     Y0+hCab, xG+cHr,     Y0+hBloque);
       doc.line(xG+cHr+cCl, Y0+hCab, xG+cHr+cCl, Y0+hBloque);
-      xG+=colDW;
+      xG += colDW;
     });
-    // Líneas horizontales entre filas de datos
-    for(let i=1;i<maxFilas;i++){
+    // Líneas horizontales entre filas (no cruzan columna firma)
+    for(let i=1; i<maxFilas; i++){
       const yL = Y0+hCab+hSubh+i*hRow;
-      doc.line(ML, yL, ML+CW, yL);
+      doc.setLineWidth(0.12); doc.setDrawColor(...CGRIS2);
+      doc.line(ML, yL, xFirCol, yL);
     }
-    // Separador entre encabezado y sub-header
-    doc.setLineWidth(0.3);
-    doc.setDrawColor(...CV);
+    // Separador cabecera verde / sub-header
+    doc.setLineWidth(0.25); doc.setDrawColor(...CV);
     doc.line(ML, Y0+hCab, ML+CW, Y0+hCab);
 
-    Y+=4; // espacio entre bloques
+    // Espacio entre bloques
+    Y += 4.5;
   });
 
-  // ── Totales en última página ───────────────────────────────────
+  // ── TOTALES al pie de última página ─────────────────────────────────
   const totalClases = regs.filter(r=>r.estado==='ok'||r.estado==='sub').length;
   const totalSup    = regs.filter(r=>r.estado==='sub').length;
   const totalFaltas = regs.filter(r=>r.estado==='falta').length;
-  if(Y+12 < PH-MB){
-    doc.setDrawColor(...CV);
-    doc.setLineWidth(0.4);
-    doc.line(ML, Y+1, ML+CW, Y+1);
-    doc.setFont('helvetica','normal');
-    doc.setFontSize(6);
-    doc.setTextColor(80,80,80);
-    doc.text(`Total clases impartidas: ${totalClases}   ·   Suplencias: ${totalSup}   ·   Faltas: ${totalFaltas}   ·   Profesores: ${profesores.length}`, ML, Y+6);
-    doc.text(`Generado: ${new Date().toLocaleDateString('es-MX',{weekday:'long',day:'2-digit',month:'long',year:'numeric'})}`, PW-MR, Y+6, {align:'right'});
+  const firmCnt     = firmasDigitales ? Object.keys(firmasDigitales).length : 0;
+
+  if(Y+14 < PH-MB){
+    doc.setFillColor(245,250,246);
+    doc.rect(ML, Y+1, CW, 10, 'F');
+    doc.setDrawColor(...CV2); doc.setLineWidth(0.3);
+    doc.rect(ML, Y+1, CW, 10);
+    doc.setFont('helvetica','bold'); doc.setFontSize(6.5); doc.setTextColor(...CV);
+    const resumen = `Clases impartidas: ${totalClases}   ·   Suplencias: ${totalSup}   ·   Faltas: ${totalFaltas}   ·   Profesores: ${profesores.length}` +
+                    (firmCnt > 0 ? `   ·   Firmas digitales: ${firmCnt}` : '');
+    doc.text(resumen, ML+4, Y+7);
+    doc.setFont('helvetica','normal'); doc.setFontSize(6); doc.setTextColor(120,140,128);
+    doc.text(`Generado: ${new Date().toLocaleDateString('es-MX',{weekday:'long',day:'2-digit',month:'long',year:'numeric'})}`, PW-MR-2, Y+7, {align:'right'});
   }
 
-  const archivo = `HojaFirmas_${semana.replace(/[^\wáéíóúÁÉÍÓÚñÑ\s]/g,'').replace(/\s+/g,'_').slice(0,50)}.pdf`;
+  // ── Nombre de archivo y descarga ─────────────────────────────────────
+  const sufijo = firmasDigitales ? '_Digital' : '';
+  const archivo = `HojaFirmas${sufijo}_${semana.replace(/[^\wáéíóúÁÉÍÓÚñÑ\s]/g,'').replace(/\s+/g,'_').slice(0,50)}.pdf`;
   doc.save(archivo);
-  cerrarModal('m-reports');
-  showToast(`Hoja de firmas lista · ${profesores.length} profesores · ${totalSup} suplencias · ${totalFaltas} faltas`,'ok');
+  return { profesores: profesores.length, totalSup, totalFaltas, firmCnt };
+}
+
+function generarHojaFirmasPDF(){
+  const elI = document.getElementById('firmas-fecha-ini');
+  const elF = document.getElementById('firmas-fecha-fin');
+  const elT = document.getElementById('firmas-semana-txt');
+  const lun = new Date(lunesBase);
+  const dom = new Date(lun); dom.setDate(lun.getDate()+6);
+  const iso = d => d.toISOString().slice(0,10);
+  const fechaIni = (elI&&elI.value) ? elI.value : iso(lun);
+  const fechaFin = (elF&&elF.value) ? elF.value : iso(dom);
+  const fmt2 = s => new Date(s+'T12:00:00').toLocaleDateString('es-MX',{day:'2-digit',month:'long'});
+  const semana = (elT&&elT.value.trim()) ? elT.value.trim()
+               : `${fmt2(fechaIni)} al ${fmt2(fechaFin)} ${fechaIni.slice(0,4)}`;
+  const r = _generarHojaFirmasCore(fechaIni, fechaFin, semana, null);
+  if(r){ cerrarModal('m-reports'); showToast(`Hoja de firmas lista · ${r.profesores} profesores · ${r.totalSup} suplencias · ${r.totalFaltas} faltas`,'ok'); }
 }
 
 // ═══════════════════════════════════════════
@@ -9640,7 +9981,7 @@ const NAV_SECTIONS = {
   programa: { views: ['calendario','sup-plan'], label: { calendario:'Calendario', 'sup-plan':'Suplencias Plan.' } },
   equipo:   { views: ['instructores','salones'], label: { instructores:'Instructores', salones:'Salones' } },
   analisis: { views: ['dashboard','historial','ranking','heatmap','diagnostico','comparar'], label: { dashboard:'Dashboard', historial:'Historial', ranking:'Ranking', heatmap:'Mapa de Calor', diagnostico:'Diagnóstico', comparar:'Comparar' } },
-  mas:      { views: ['recorridos','alertas','log','reporte-dep'], label: { recorridos:'Recorridos', alertas:'Alertas', log:'Log', 'reporte-dep':'Reporte Dep.' } }
+  mas:      { views: ['recorridos','alertas','log','reporte-dep','eventos'], label: { recorridos:'Recorridos', alertas:'Alertas', log:'Log', 'reporte-dep':'Reporte Dep.', eventos:'Eventos' } }
 };
 
 const VIEW_TO_SECTION = {};
@@ -9756,6 +10097,7 @@ function _triggerRender(viewId) {
   if(viewId === 'log')        { renderLog(); return; }
   if(viewId === 'comparar')   { renderComparar(); return; }
   if(viewId === 'reporte-dep'){ renderReporteDep(); return; }
+  if(viewId === 'eventos'){ evtRenderAll(); return; }
 }
 
 // Redirigir funciones existentes que navegan directamente
@@ -13011,6 +13353,10 @@ function abrirFirmasDigitales() {
     .filter(p => p.clases.length > 0);
 
   _FD.profActivo = null;
+  _FD.firmas = {};  // limpiar para cargar frescas del storage
+
+  // Cargar firmas guardadas del periodo
+  _fdCargarFirmasGuardadas();
 
   // Abrir modal
   document.getElementById('m-firmas-digitales').classList.add('on');
@@ -13249,6 +13595,79 @@ function fd_limpiarFirma() {
   if(btn) btn.style.background = 'var(--v2)';
 }
 
+// ── Clave localStorage para firmas del periodo ────────────────────────
+function _fdStorageKey() {
+  // Clave única por periodo: fc_firmas_YYYYMMDD_YYYYMMDD
+  return `fc_firmas_${(_FD.fechaIni||'').replace(/-/g,'')}__${(_FD.fechaFin||'').replace(/-/g,'')}`;
+}
+
+// ── Guardar todas las firmas actuales en localStorage ─────────────────
+function _fdPersistirFirmas() {
+  try {
+    // Solo guardamos el mapa profId→dataURL (puede ser grande, usamos compresión básica)
+    const key = _fdStorageKey();
+    localStorage.setItem(key, JSON.stringify(_FD.firmas));
+    // Guardar también un índice de claves de firmas para poder limpiar antiguas
+    let idx = JSON.parse(localStorage.getItem('fc_firmas_idx') || '[]');
+    if(!idx.includes(key)) { idx.push(key); localStorage.setItem('fc_firmas_idx', JSON.stringify(idx)); }
+    // Purgar firmas de más de 60 días para no saturar el storage
+    idx = idx.filter(k => {
+      try {
+        const fecha = k.split('__')[0].replace('fc_firmas_','');
+        const y=fecha.slice(0,4), m=fecha.slice(4,6), d=fecha.slice(6,8);
+        const dt = new Date(`${y}-${m}-${d}`);
+        const dias = (Date.now() - dt.getTime()) / 86400000;
+        if(dias > 60) { localStorage.removeItem(k); return false; }
+        return true;
+      } catch(e){ return true; }
+    });
+    localStorage.setItem('fc_firmas_idx', JSON.stringify(idx));
+  } catch(e) {
+    console.warn('No se pudo persistir firmas:', e);
+  }
+}
+
+// ── Cargar firmas guardadas del periodo actual ────────────────────────
+function _fdCargarFirmasGuardadas() {
+  try {
+    const key = _fdStorageKey();
+    const raw = localStorage.getItem(key);
+    if(raw) {
+      const saved = JSON.parse(raw);
+      // Solo restaurar firmas de instructores que existen en el periodo actual
+      _FD.profesores.forEach(p => {
+        if(saved[p.id]) _FD.firmas[p.id] = saved[p.id];
+      });
+      const cnt = Object.keys(_FD.firmas).length;
+      if(cnt > 0) showToast(`${cnt} firma${cnt!==1?'s':''} recuperada${cnt!==1?'s':''} del periodo`, 'ok');
+    }
+  } catch(e) {
+    console.warn('No se pudieron cargar firmas guardadas:', e);
+  }
+}
+
+// ── Borrar firmas del periodo del localStorage ────────────────────────
+function fd_borrarFirmasPeriodo() {
+  const cnt = Object.keys(_FD.firmas).length;
+  if(cnt === 0) { showToast('No hay firmas guardadas en este periodo', 'info'); return; }
+  if(!confirm(`¿Borrar las ${cnt} firma${cnt!==1?'s':''} guardadas de este periodo?\nEsta acción no se puede deshacer.`)) return;
+  try { localStorage.removeItem(_fdStorageKey()); } catch(e){}
+  _FD.firmas = {};
+  _FD.profActivo = null;
+  _fdLimpiarCanvas();
+  _fdRenderLista();
+  _fdActualizarProgreso();
+  const ins = document.getElementById('fd-instruccion');
+  if(ins) ins.textContent = 'Selecciona un profesor de la lista para que firme en el área de abajo';
+  const av = document.getElementById('fd-prof-avatar');
+  if(av){ av.textContent = '?'; av.style.background = 'var(--verde)'; }
+  const nm = document.getElementById('fd-prof-nombre');
+  if(nm) nm.textContent = 'Selecciona un profesor';
+  const cl = document.getElementById('fd-prof-clases-lbl');
+  if(cl) cl.textContent = '';
+  showToast('Firmas del periodo eliminadas', 'ok');
+}
+
 // ── Guardar firma del profesor activo ──────────────────────────────────
 function fd_guardarFirma() {
   if(_FD.profActivo === null) {
@@ -13263,6 +13682,9 @@ function fd_guardarFirma() {
   const url = _FD.canvas.toDataURL('image/png');
   _FD.firmas[p.id] = url;
   _FD.puntosActual = 0;
+
+  // Persistir inmediatamente en localStorage
+  _fdPersistirFirmas();
 
   _fdActualizarProgreso();
   _fdRenderLista();
@@ -13312,218 +13734,11 @@ function fd_exportarPDF() {
 }
 
 function _fd_generarPDFConFirmas() {
-  const { jsPDF } = window.jspdf;
-
-  const fechaIni = _FD.fechaIni;
-  const fechaFin = _FD.fechaFin;
-  const semana   = _FD.semana;
-
-  const regs = registros.filter(r => r.fecha >= fechaIni && r.fecha <= fechaFin);
-  const DIAS_ORD = ['Lunes','Martes','Miércoles','Jueves','Viernes','Sábado','Domingo'];
-  const DIAS_HDR = {'Lunes':'LUNES','Martes':'MARTES','Miércoles':'MIÉRCOLES',
-                    'Jueves':'JUEVES','Viernes':'VIERNES','Sábado':'SÁBADO','Domingo':'DOMINGO'};
-
-  const doc  = new jsPDF({orientation:'landscape', unit:'mm', format:'letter'});
-  const PW=279.4, PH=215.9, ML=9, MR=9, MT=22, MB=8, CW=PW-ML-MR;
-
-  const CV=[26,92,53], CV2=[26,122,69], CGRIS=[190,190,190], CGALT=[248,248,248];
-  const CROJO=[176,0,0], CRJBG=[255,240,240], CNEG=[25,25,25], CBCO=[255,255,255];
-
-  let pNum = 0;
-  function nuevaPagina(){
-    if(pNum>0) doc.addPage(); pNum++;
-    doc.setFillColor(...CV); doc.rect(0,0,PW,13,'F');
-    doc.setFont('helvetica','bold'); doc.setFontSize(8); doc.setTextColor(...CBCO);
-    doc.text('CLUB CAMPESTRE AGUASCALIENTES  ·  COORDINACIÓN FITNESS', ML, 9);
-    doc.text(`SEMANA:  ${semana}`, PW-MR, 9, {align:'right'});
-    doc.setFillColor(238,238,238); doc.rect(0,13,PW,7,'F');
-    doc.setFont('helvetica','normal'); doc.setFontSize(6.5); doc.setTextColor(90,90,90);
-    doc.text('HOJA DE ASISTENCIA Y FIRMAS  ·  CONTROL INTERNO  ·  NO CIRCULAR', ML, 18);
-    doc.setFontSize(6); doc.setTextColor(...CROJO);
-    doc.text('■ Rojo = Suplencia o Falta', PW-MR, 18, {align:'right'});
-    doc.setFont('helvetica','normal'); doc.setFontSize(5.5); doc.setTextColor(160,160,160);
-    doc.text('Fitness Control — Club Campestre Aguascalientes', ML, PH-3);
-    doc.text(`Página ${pNum}`, PW-MR, PH-3, {align:'right'});
+  const r = _generarHojaFirmasCore(_FD.fechaIni, _FD.fechaFin, _FD.semana, _FD.firmas);
+  if(r){
+    cerrarModal('m-firmas-digitales');
+    showToast(`PDF listo · ${r.firmCnt} firma${r.firmCnt!==1?'s':''} digital${r.firmCnt!==1?'es':''}`, 'ok');
   }
-
-  const drawText = (txt,x,y,opts={}) => {
-    if(opts.color) doc.setTextColor(...opts.color); else doc.setTextColor(...CNEG);
-    if(opts.bold)  doc.setFont('helvetica','bold');  else doc.setFont('helvetica','normal');
-    if(opts.size)  doc.setFontSize(opts.size);
-    doc.text(String(txt), x, y, opts.align?{align:opts.align}:{});
-  };
-
-  nuevaPagina();
-  let Y = MT;
-
-  _FD.profesores.forEach(prof => {
-    const diasProf = DIAS_ORD.filter(d => prof.clases.some(c=>c.dia===d));
-    if(!diasProf.length) return;
-    const porDia   = {};
-    diasProf.forEach(d => { porDia[d]=prof.clases.filter(c=>c.dia===d); });
-    const maxFilas = Math.max(...diasProf.map(d=>porDia[d].length));
-    const nDias    = diasProf.length;
-
-    const hCab=6.0, hSubh=5.2, hRow=5.8;
-    // Sin fila extra — la firma va dentro de la columna FIRMA existente
-    const hBloque = hCab + hSubh + maxFilas*hRow;
-
-    if(Y + hBloque > PH - MB - 4){ nuevaPagina(); Y = MT; }
-
-    const colNom = nDias<=3?42:nDias<=5?38:34;
-    const colFir = 28;
-    const colDat = CW - colNom - colFir;
-    const colDW  = colDat / nDias;
-    const cHr=colDW*0.30, cCl=colDW*0.45, cAl=colDW*0.25;
-    const Y0 = Y;
-
-    // X inicio de la columna FIRMA
-    const xFirCol = ML + colNom + colDat;
-
-    // ── Cabecera verde ──
-    doc.setFillColor(...CV); doc.rect(ML, Y, CW, hCab,'F');
-    const genNom = prof.inst.nombre||'';
-    const esF = /(ana|cristina|blanca|marisa|karina|consuelo|sara|jimena|valeria|hermelinda|socorro|ernestina|araceli|gabriela|esthela|alejandra|diana|laura|patricia|rosa|maria|ma\.)/i.test(genNom);
-    drawText(esF?'PROFESORA':'PROFESOR', ML+2, Y+4.2, {bold:true,size:7,color:CBCO});
-    let xD=ML+colNom;
-    diasProf.forEach(d=>{
-      drawText(DIAS_HDR[d]||d.toUpperCase(), xD+colDW/2, Y+4.2, {bold:true,size:7,color:CBCO,align:'center'});
-      xD+=colDW;
-    });
-    drawText('FIRMA', xFirCol+colFir/2, Y+4.2, {bold:true,size:7,color:CBCO,align:'center'});
-    Y+=hCab;
-
-    // ── Sub-header gris ──
-    doc.setFillColor(...CGRIS); doc.rect(ML, Y, colNom+colDat, hSubh,'F');
-    // Celda FIRMA del sub-header: fondo blanco para que resalte el espacio de firma
-    doc.setFillColor(252,252,252); doc.rect(xFirCol, Y, colFir, hSubh,'F');
-    const maxCar=Math.floor(colNom/1.85);
-    const nomCorto=genNom.length>maxCar?genNom.slice(0,maxCar-1)+'…':genNom;
-    drawText(nomCorto.toUpperCase(), ML+2, Y+3.7, {bold:true,size:7,color:CNEG});
-    xD=ML+colNom;
-    diasProf.forEach(()=>{
-      drawText('HR',      xD+cHr/2,         Y+3.6, {size:5.5,color:[60,60,60],align:'center'});
-      drawText('CLASE',   xD+cHr+cCl/2,     Y+3.6, {size:5.5,color:[60,60,60],align:'center'});
-      drawText('ALUM.',   xD+cHr+cCl+cAl/2, Y+3.6, {size:5,  color:[60,60,60],align:'center'});
-      xD+=colDW;
-    });
-    Y+=hSubh;
-
-    // ── Filas de datos (solo columnas de datos, sin tocar columna FIRMA) ──
-    for(let i=0;i<maxFilas;i++){
-      // Fondo alternado solo en zona de datos+nombre (no en firma)
-      doc.setFillColor(...(i%2===0?CBCO:CGALT));
-      doc.rect(ML, Y, colNom+colDat, hRow,'F');
-      // Columna firma: fondo blanco siempre
-      doc.setFillColor(255,255,255);
-      doc.rect(xFirCol, Y, colFir, hRow,'F');
-
-      xD=ML+colNom;
-      diasProf.forEach(d=>{
-        const cds=porDia[d]||[];
-        if(i<cds.length){
-          const c=cds[i];
-          const esMal=c.estado==='sub'||c.estado==='falta';
-          const txtCol=esMal?CROJO:CNEG;
-          if(esMal){ doc.setFillColor(...CRJBG); doc.rect(xD,Y,colDW,hRow,'F'); }
-          drawText(c.hora, xD+1.2, Y+3.9, {size:6,color:txtCol});
-          const cls=c.clase.length>14?c.clase.slice(0,13)+'.':c.clase;
-          drawText(cls, xD+cHr+0.8, Y+3.9, {size:6,color:txtCol,bold:esMal});
-          const aluX=xD+cHr+cCl+cAl/2;
-          if(esMal){
-            const etiq=c.estado==='sub'?'SUP':'FALTA';
-            if(c.alumnos!=null){ drawText(String(c.alumnos),aluX,Y+2.8,{size:6.2,bold:true,color:CROJO,align:'center'}); drawText(etiq,aluX,Y+5.0,{size:4.8,bold:true,color:CROJO,align:'center'}); }
-            else drawText(etiq,aluX,Y+3.9,{size:5.5,bold:true,color:CROJO,align:'center'});
-          } else {
-            if(c.alumnos!=null) drawText(String(c.alumnos),aluX,Y+3.9,{size:6.5,bold:true,color:CNEG,align:'center'});
-          }
-        }
-        xD+=colDW;
-      });
-      Y+=hRow;
-    }
-
-    // ── Firma dentro de la columna FIRMA (desde Y0+hCab hasta Y) ──
-    // La celda de firma ocupa toda la altura del bloque de datos (hSubh + maxFilas*hRow)
-    const yFirmaTop = Y0 + hCab;          // empieza justo debajo del banner verde
-    const hFirmaCell = hBloque - hCab;    // alto disponible en la celda
-    const xFirmaIni  = xFirCol + 2;
-    const wFirmaDisp = colFir - 4;
-
-    if(_FD.firmas[prof.id]) {
-      // Insertar firma manteniendo aspect ratio 3:1 (canvas 600×200)
-      try {
-        const RATIO  = 3.0;
-        let imgH = hFirmaCell - 4;
-        let imgW = imgH * RATIO;
-        // Si el ancho calculado excede la columna, ajustar
-        if(imgW > wFirmaDisp){ imgW = wFirmaDisp; imgH = imgW / RATIO; }
-        // Centrar en la celda
-        const imgX = xFirCol + (colFir - imgW) / 2;
-        const imgY = yFirmaTop + (hFirmaCell - imgH) / 2;
-        doc.addImage(_FD.firmas[prof.id], 'PNG', imgX, imgY, imgW, imgH);
-        // Pequeño badge al pie de la celda
-        doc.setFont('helvetica','italic'); doc.setFontSize(4.0); doc.setTextColor(...CV2);
-        doc.text('✓ digital', xFirCol + colFir/2, Y-1.5, {align:'center'});
-      } catch(e) {
-        // Fallback: línea
-        doc.setDrawColor(...CV2); doc.setLineWidth(0.4);
-        doc.line(xFirmaIni, Y-3, xFirmaIni+wFirmaDisp, Y-3);
-      }
-    } else {
-      // Sin firma: línea punteada centrada verticalmente en la celda
-      doc.setDrawColor(180,180,180); doc.setLineWidth(0.3);
-      const yLine = yFirmaTop + hFirmaCell/2;
-      doc.setLineDashPattern([1,1], 0);
-      doc.line(xFirmaIni+2, yLine, xFirmaIni+wFirmaDisp-2, yLine);
-      doc.setLineDashPattern([], 0);
-    }
-
-    // ── Bordes del bloque completo ──
-    doc.setDrawColor(...CV); doc.setLineWidth(0.6);
-    doc.rect(ML, Y0, CW, hBloque);
-
-    // Línea divisoria antes de columna FIRMA (verde, más gruesa)
-    doc.setLineWidth(0.8); doc.setDrawColor(...CV2);
-    doc.line(xFirCol, Y0, xFirCol, Y0+hBloque);
-
-    // Grid interno (solo en zona de datos, no cruza la columna firma)
-    doc.setLineWidth(0.18); doc.setDrawColor(175,175,175);
-    let xG=ML+colNom;
-    diasProf.forEach((d,idx)=>{
-      if(idx>0) doc.line(xG, Y0+hCab, xG, Y0+hBloque);
-      doc.line(xG+cHr,     Y0+hCab, xG+cHr,     Y0+hBloque);
-      doc.line(xG+cHr+cCl, Y0+hCab, xG+cHr+cCl, Y0+hBloque);
-      xG+=colDW;
-    });
-    // Líneas horizontales entre filas (no cruzan columna firma)
-    for(let i=1;i<maxFilas;i++){
-      const yL=Y0+hCab+hSubh+i*hRow;
-      doc.line(ML, yL, xFirCol, yL);
-    }
-    // Separador cabecera / datos
-    doc.setLineWidth(0.3); doc.setDrawColor(...CV);
-    doc.line(ML, Y0+hCab, ML+CW, Y0+hCab);
-
-    Y += 4;
-  });
-
-  // ── Totales ──
-  const totalClases = regs.filter(r=>r.estado==='ok'||r.estado==='sub').length;
-  const totalSup    = regs.filter(r=>r.estado==='sub').length;
-  const totalFaltas = regs.filter(r=>r.estado==='falta').length;
-  const firmadosCnt = _FD.profesores.filter(p=>!!_FD.firmas[p.id]).length;
-  if(Y+14 < PH-MB){
-    doc.setDrawColor(...CV); doc.setLineWidth(0.4); doc.line(ML, Y+1, ML+CW, Y+1);
-    doc.setFont('helvetica','normal'); doc.setFontSize(6); doc.setTextColor(80,80,80);
-    doc.text(`Clases: ${totalClases}  ·  Suplencias: ${totalSup}  ·  Faltas: ${totalFaltas}  ·  Profesores: ${_FD.profesores.length}  ·  Firmas digitales: ${firmadosCnt}`, ML, Y+6);
-    doc.text(`Generado: ${new Date().toLocaleDateString('es-MX',{weekday:'long',day:'2-digit',month:'long',year:'numeric'})}`, PW-MR, Y+6, {align:'right'});
-  }
-
-  const archivo = `HojaFirmas_Digital_${semana.replace(/[^\wáéíóúÁÉÍÓÚñÑ\s]/g,'').replace(/\s+/g,'_').slice(0,50)}.pdf`;
-  doc.save(archivo);
-  cerrarModal('m-firmas-digitales');
-  showToast(`PDF listo · ${firmadosCnt} firma${firmadosCnt!==1?'s':''} digital${firmadosCnt!==1?'es':''}`, 'ok');
 }
 
 
@@ -14503,9 +14718,687 @@ window.addEventListener('appinstalled',()=>{
       }
     }
   });
+// ═══════════════════════════════════════════════════════════════
+// ═══ MÓDULO EVENTOS DEPORTIVOS ════════════════════════════════
+// ═══════════════════════════════════════════════════════════════
+
+const EVT_KEY = 'fitness_eventos_v1';
+let _evtEditing = null;
+let _evtCalFecha = new Date();
+let _evtResultados = [];
+let _evtVista = 'calendario';
+let _evtChartDeporte = null;
+let _evtChartMes = null;
+
+const EVT_LOGISTICA_ITEMS = [
+  {id:'sillas',      label:'🪑 Sillas / Butacas'},
+  {id:'mesas',       label:'🪞 Mesas'},
+  {id:'lonas',       label:'🏕 Lonas / Gazebos'},
+  {id:'sonido',      label:'🔊 Sistema de Sonido'},
+  {id:'microfono',   label:'🎤 Micrófono / Voceo'},
+  {id:'iluminacion', label:'💡 Iluminación extra'},
+  {id:'cronometraje',label:'⏱ Cronometraje'},
+  {id:'trofeos',     label:'🏆 Trofeos / Medallas'},
+  {id:'arbitros',    label:'🦺 Árbitros / Jueces'},
+  {id:'primeros',    label:'🩺 Primeros Auxilios'},
+  {id:'hidratacion', label:'💧 Hidratación / Agua'},
+  {id:'limpieza',    label:'🧹 Servicio de Limpieza'},
+  {id:'impresion',   label:'🖨 Impresiones / Lonas'},
+  {id:'seguridad',   label:'🔒 Seguridad'},
+  {id:'transporte',  label:'🚌 Transporte'},
+  {id:'catering',    label:'🍽 Catering / Refrigerio'},
+  {id:'fotografia',  label:'📷 Fotografía / Video'},
+  {id:'redes',       label:'📱 Difusión Redes Sociales'},
+];
+
+function evtCargarDatos(){
+  try{ return JSON.parse(localStorage.getItem(EVT_KEY)||'[]'); }catch(e){ return []; }
+}
+function evtGuardarDatos(arr){
+  localStorage.setItem(EVT_KEY, JSON.stringify(arr));
+}
+function evtId(){
+  return 'evt_'+Date.now()+'_'+Math.random().toString(36).slice(2,7);
+}
+
+// ── RENDER PRINCIPAL ─────────────────────────────────────────
+function evtRenderAll(){
+  document.getElementById('evtAnioActual').textContent = new Date().getFullYear();
+  evtActualizarKPIs();
+  evtVista(_evtVista);
+}
+
+function evtVista(v){
+  _evtVista = v;
+  ['calendario','lista','stats'].forEach(p=>{
+    const el = document.getElementById('evt-panel-'+p);
+    if(el) el.style.display = p===v ? 'block' : 'none';
+  });
+  // Botones activos
+  ['Cal','Lista','Stats'].forEach(b=>{
+    const btn = document.getElementById('evtBtn'+b);
+    if(!btn) return;
+    const match = b.toLowerCase() === v || (b==='Cal' && v==='calendario');
+    btn.style.background = match ? 'var(--verde)' : '';
+    btn.style.color = match ? '#fff' : '';
+    btn.style.borderColor = match ? 'var(--verde)' : '';
+  });
+  if(v==='calendario'){ evtRenderCalendario(); evtRenderProximos(); }
+  if(v==='lista'){ evtRenderFiltros(); renderEvtLista(); }
+  if(v==='stats'){ evtRenderCharts(); evtGenerarRecomendaciones(); }
+}
+
+// ── KPIs ─────────────────────────────────────────────────────
+function evtActualizarKPIs(){
+  const ev = evtCargarDatos();
+  const anio = new Date().getFullYear();
+  const esteAnio = ev.filter(e => e.fecha && e.fecha.startsWith(anio));
+  const deportes = [...new Set(ev.map(e=>e.deporte).filter(Boolean))].length;
+  document.getElementById('evtK1').textContent = ev.length;
+  document.getElementById('evtK2').textContent = esteAnio.length;
+  document.getElementById('evtK3').textContent = deportes;
+
+  // Próximo evento
+  const hoyStr = new Date().toISOString().slice(0,10);
+  const proximos = ev.filter(e=>e.fecha >= hoyStr && e.estado!=='cancelado').sort((a,b)=>a.fecha.localeCompare(b.fecha));
+  if(proximos.length){
+    const p = proximos[0];
+    document.getElementById('evtKProx').textContent = p.nombre || p.deporte;
+    const dias = Math.ceil((new Date(p.fecha+' 00:00') - new Date()) / 86400000);
+    document.getElementById('evtKProxDias').textContent = dias===0 ? '¡Hoy!' : `en ${dias} día${dias>1?'s':''}`;
+  } else {
+    document.getElementById('evtKProx').textContent = '—';
+    document.getElementById('evtKProxDias').textContent = 'Sin eventos próximos';
+  }
+}
+
+// ── CALENDARIO ───────────────────────────────────────────────
+function evtRenderCalendario(){
+  const ev = evtCargarDatos();
+  const anio = _evtCalFecha.getFullYear();
+  const mes  = _evtCalFecha.getMonth();
+  const MESES = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+  document.getElementById('evtCalLbl').textContent = MESES[mes] + ' ' + anio;
+
+  const primerDia = new Date(anio, mes, 1);
+  let dow = primerDia.getDay(); // 0=dom
+  dow = dow===0 ? 6 : dow-1;   // Lunes=0
+  const diasMes = new Date(anio, mes+1, 0).getDate();
+  const hoyStr = new Date().toISOString().slice(0,10);
+
+  const grid = document.getElementById('evtCalGrid');
+  grid.innerHTML = '';
+
+  // Celdas vacías al inicio
+  for(let i=0;i<dow;i++){
+    const c = document.createElement('div');
+    c.style.cssText = 'min-height:54px;border-radius:6px;background:transparent';
+    grid.appendChild(c);
+  }
+
+  for(let d=1;d<=diasMes;d++){
+    const dStr = `${anio}-${String(mes+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+    const evsDia = ev.filter(e=>e.fecha===dStr);
+    const esHoy = dStr===hoyStr;
+
+    const cell = document.createElement('div');
+    cell.style.cssText = `min-height:54px;border-radius:6px;padding:4px;cursor:default;
+      background:${esHoy?'rgba(94,255,160,.1)':'var(--panel2)'};
+      border:1px solid ${esHoy?'var(--neon)':'var(--border)'};
+      transition:all .15s;`;
+
+    cell.innerHTML = `<div style="font-size:.68rem;font-weight:${esHoy?'700':'500'};color:${esHoy?'var(--neon)':'var(--txt2)'};text-align:right;margin-bottom:2px">${d}</div>`;
+
+    evsDia.forEach(e=>{
+      const colores = {planificado:'var(--blue)',realizado:'var(--neon)',cancelado:'var(--red2)',pospuesto:'var(--gold2)'};
+      const chip = document.createElement('div');
+      chip.style.cssText = `font-size:.58rem;background:${colores[e.estado]||'var(--v2)'};color:#000;
+        border-radius:3px;padding:1px 4px;margin-bottom:1px;cursor:pointer;
+        white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-weight:600;
+        opacity:.92;`;
+      chip.textContent = (e.deporte||'') + (e.nombre ? ': '+e.nombre : '');
+      chip.title = e.nombre || e.deporte;
+      chip.onclick = ()=>abrirModalEvento(e.id);
+      cell.appendChild(chip);
+    });
+
+    if(evsDia.length===0){
+      cell.style.cursor = 'pointer';
+      cell.onclick = ()=>{
+        abrirModalEvento(null);
+        setTimeout(()=>{ document.getElementById('evtFecha').value = dStr; },100);
+      };
+    }
+    grid.appendChild(cell);
+  }
+}
+
+function evtCalMes(delta){
+  _evtCalFecha = new Date(_evtCalFecha.getFullYear(), _evtCalFecha.getMonth()+delta, 1);
+  evtRenderCalendario();
+}
+function evtCalHoy(){
+  _evtCalFecha = new Date();
+  evtRenderCalendario();
+}
+
+// ── PRÓXIMOS EVENTOS ─────────────────────────────────────────
+function evtRenderProximos(){
+  const ev = evtCargarDatos();
+  const hoyStr = new Date().toISOString().slice(0,10);
+  const prox = ev.filter(e=>e.fecha >= hoyStr && e.estado!=='cancelado')
+                 .sort((a,b)=>a.fecha.localeCompare(b.fecha)).slice(0,8);
+  const cont = document.getElementById('evtProxLista');
+  if(!prox.length){ cont.innerHTML='<div class="empty">No hay eventos próximos registrados.</div>'; return; }
+  cont.innerHTML = prox.map(e=>{
+    const dias = Math.ceil((new Date(e.fecha+' 00:00') - new Date()) / 86400000);
+    const diasLbl = dias===0 ? '<span style="color:var(--neon);font-weight:700">¡HOY!</span>' :
+                    dias===1 ? '<span style="color:var(--gold2)">Mañana</span>' :
+                    `<span style="color:var(--txt2)">En ${dias} días</span>`;
+    const colEst = {planificado:'var(--blue)',realizado:'var(--neon)',cancelado:'var(--red2)',pospuesto:'var(--gold2)'};
+    return `<div style="display:flex;align-items:center;gap:.7rem;padding:.6rem;border-bottom:1px solid var(--border);cursor:pointer" onclick="abrirModalEvento('${e.id}')">
+      <div style="min-width:38px;text-align:center">
+        <div style="font-family:'Bebas Neue',sans-serif;font-size:1.4rem;color:var(--neon);line-height:1">${new Date(e.fecha+'T00:00').getDate()}</div>
+        <div style="font-size:.55rem;color:var(--txt2);text-transform:uppercase">${['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'][new Date(e.fecha+'T00:00').getMonth()]}</div>
+      </div>
+      <div style="flex:1;min-width:0">
+        <div style="font-size:.82rem;font-weight:600;color:var(--txt)">${e.nombre||'Sin nombre'}</div>
+        <div style="font-size:.7rem;color:var(--txt2)">${e.deporte||''}${e.lugar ? ' · '+e.lugar : ''}${e.horaIni ? ' · '+e.horaIni : ''}</div>
+      </div>
+      <div style="text-align:right;flex-shrink:0">
+        ${diasLbl}
+        <div style="font-size:.62rem;color:${colEst[e.estado]||'var(--txt2)'};margin-top:2px;text-transform:capitalize">${e.estado||''}</div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ── LISTA / FILTROS ───────────────────────────────────────────
+function evtRenderFiltros(){
+  const ev = evtCargarDatos();
+  const deportes = [...new Set(ev.map(e=>e.deporte).filter(Boolean))].sort();
+  const anios    = [...new Set(ev.map(e=>e.fecha&&e.fecha.slice(0,4)).filter(Boolean))].sort().reverse();
+  const selD = document.getElementById('evtFiltroDeporte');
+  const selA = document.getElementById('evtFiltroAnio');
+  const vd = selD.value, va = selA.value;
+  selD.innerHTML = '<option value="">— Todos los deportes —</option>' + deportes.map(d=>`<option${vd===d?' selected':''}>${d}</option>`).join('');
+  selA.innerHTML = '<option value="">— Todos los años —</option>' + anios.map(a=>`<option${va===a?' selected':''}>${a}</option>`).join('');
+}
+
+function renderEvtLista(){
+  const ev = evtCargarDatos();
+  const fD = document.getElementById('evtFiltroDeporte')?.value||'';
+  const fA = document.getElementById('evtFiltroAnio')?.value||'';
+  let filtrados = ev;
+  if(fD) filtrados = filtrados.filter(e=>e.deporte===fD);
+  if(fA) filtrados = filtrados.filter(e=>e.fecha&&e.fecha.startsWith(fA));
+  filtrados = filtrados.sort((a,b)=>b.fecha.localeCompare(a.fecha));
+
+  const colEst = {planificado:'chip cpl',realizado:'chip cok',cancelado:'chip cbd',pospuesto:'chip cho'};
+  const tbod = document.getElementById('evtTablaBody');
+  if(!filtrados.length){ tbod.innerHTML='<tr><td colspan="8" class="empty">Sin eventos con los filtros seleccionados.</td></tr>'; return; }
+  tbod.innerHTML = filtrados.map(e=>{
+    const calif = e.calificacion ? '⭐'.repeat(e.calificacion) : '—';
+    const fecFmt = e.fecha ? new Date(e.fecha+'T00:00').toLocaleDateString('es-MX',{day:'2-digit',month:'short',year:'numeric'}) : '—';
+    return `<tr>
+      <td><span style="font-weight:600;color:var(--neon)">${e.deporte||'—'}</span></td>
+      <td>${e.nombre||'—'}</td>
+      <td class="mono" style="white-space:nowrap">${fecFmt}</td>
+      <td>${e.lugar||'—'}</td>
+      <td style="text-align:center">${e.participantes||'—'}</td>
+      <td style="text-align:center;font-size:.82rem">${calif}</td>
+      <td><span class="${colEst[e.estado]||'chip'}" style="text-transform:capitalize">${e.estado||'—'}</span></td>
+      <td>
+        <button class="abtn" onclick="abrirModalEvento('${e.id}')" style="margin-right:3px">✏️</button>
+        <button class="abtn" onclick="evtVerReporte('${e.id}')">📄</button>
+      </td>
+    </tr>`;
+  }).join('');
+}
+
+// ── CHARTS ───────────────────────────────────────────────────
+function evtRenderCharts(){
+  const ev = evtCargarDatos();
+  const txtColor = document.documentElement.classList.contains('tema-claro') ? '#2d5a3a' : '#7aaa90';
+  const gridColor = document.documentElement.classList.contains('tema-claro') ? 'rgba(26,122,69,.1)' : 'rgba(94,255,160,.07)';
+
+  // Chart deportes
+  const deporteCount = {};
+  ev.forEach(e=>{ if(e.deporte) deporteCount[e.deporte] = (deporteCount[e.deporte]||0)+1; });
+  const dLabels = Object.keys(deporteCount).sort((a,b)=>deporteCount[b]-deporteCount[a]).slice(0,8);
+  const dData   = dLabels.map(d=>deporteCount[d]);
+  const PALETA  = ['#5effa0','#4db8e8','#e8b84b','#e05050','#9b8ea8','#52c97d','#ffd06b','#ff7070'];
+
+  const ctxD = document.getElementById('evtChartDeporte');
+  if(_evtChartDeporte){ _evtChartDeporte.destroy(); }
+  if(ctxD && dLabels.length){
+    _evtChartDeporte = new Chart(ctxD, {
+      type:'doughnut',
+      data:{ labels:dLabels, datasets:[{ data:dData, backgroundColor:PALETA, borderWidth:0 }] },
+      options:{ responsive:true, maintainAspectRatio:false,
+        plugins:{ legend:{ labels:{ color:txtColor, font:{size:11} } } } }
+    });
+  }
+
+  // Chart por mes
+  const MESES = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
+  const anioActual = new Date().getFullYear();
+  const porMes = Array(12).fill(0);
+  ev.filter(e=>e.fecha&&e.fecha.startsWith(anioActual)).forEach(e=>{
+    const m = parseInt(e.fecha.slice(5,7))-1;
+    porMes[m]++;
+  });
+  const ctxM = document.getElementById('evtChartMes');
+  if(_evtChartMes){ _evtChartMes.destroy(); }
+  if(ctxM){
+    _evtChartMes = new Chart(ctxM, {
+      type:'bar',
+      data:{ labels:MESES, datasets:[{
+        label:'Eventos '+anioActual, data:porMes,
+        backgroundColor:'rgba(94,255,160,.7)', borderRadius:5, borderWidth:0
+      }]},
+      options:{ responsive:true, maintainAspectRatio:false,
+        scales:{
+          x:{ ticks:{color:txtColor,font:{size:10}}, grid:{color:gridColor} },
+          y:{ ticks:{color:txtColor,font:{size:10},stepSize:1}, grid:{color:gridColor}, beginAtZero:true }
+        },
+        plugins:{ legend:{display:false} }
+      }
+    });
+  }
+}
+
+// ── RECOMENDACIONES ──────────────────────────────────────────
+function evtGenerarRecomendaciones(){
+  const ev = evtCargarDatos();
+  const cont = document.getElementById('evtIARec');
+  if(!cont) return;
+  if(!ev.length){ cont.innerHTML='<div class="empty">Registra al menos un evento para recibir recomendaciones.</div>'; return; }
+  cont.innerHTML = '<div style="text-align:center;padding:1rem;color:var(--txt2);font-size:.8rem">⏳ Analizando historial de eventos...</div>';
+
+  // Análisis local inteligente
+  setTimeout(()=>{
+    const deporteCount = {};
+    const mesesUsados = Array(12).fill(0);
+    ev.forEach(e=>{
+      if(e.deporte) deporteCount[e.deporte] = (deporteCount[e.deporte]||0)+1;
+      if(e.fecha) mesesUsados[parseInt(e.fecha.slice(5,7))-1]++;
+    });
+
+    const topDeporte = Object.entries(deporteCount).sort((a,b)=>b[1]-a[1])[0];
+    const mesVacio = mesesUsados.indexOf(Math.min(...mesesUsados));
+    const mesConMas = mesesUsados.indexOf(Math.max(...mesesUsados));
+    const MESES = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+    const anioActual = new Date().getFullYear();
+    const esteAnio = ev.filter(e=>e.fecha&&e.fecha.startsWith(anioActual)).length;
+    const avgAnio = ev.length / Math.max(1, [...new Set(ev.map(e=>e.fecha&&e.fecha.slice(0,4)))].filter(Boolean).length);
+
+    const recomendaciones = [];
+
+    if(topDeporte){
+      recomendaciones.push({
+        icono:'🏆', titulo:`Potenciar ${topDeporte[0]}`,
+        desc:`Es tu deporte más activo con ${topDeporte[1]} evento${topDeporte[1]>1?'s':''}. Considera organizar una copa interna anual o una liga corta para mantener el impulso.`,
+        tipo:'green'
+      });
+    }
+    if(mesVacio !== -1 && mesesUsados[mesVacio]===0){
+      recomendaciones.push({
+        icono:'📅', titulo:`Activar ${MESES[mesVacio]}`,
+        desc:`${MESES[mesVacio]} no tiene eventos registrados. Es una oportunidad para programar un evento especial, torneo o clinic que anime al club en ese mes.`,
+        tipo:'blue'
+      });
+    }
+    if(esteAnio < Math.round(avgAnio) && avgAnio > 1){
+      recomendaciones.push({
+        icono:'📈', titulo:'Aumentar frecuencia este año',
+        desc:`Llevas ${esteAnio} evento${esteAnio!==1?'s':''} este año vs. un promedio histórico de ${Math.round(avgAnio)}. Planifica eventos adicionales para mantener el nivel de actividad.`,
+        tipo:'gold'
+      });
+    }
+    if(mesConMas !== -1){
+      recomendaciones.push({
+        icono:'🔥', titulo:`Aprovechar ${MESES[mesConMas]}`,
+        desc:`${MESES[mesConMas]} es tu mes con mayor actividad (${mesesUsados[mesConMas]} evento${mesesUsados[mesConMas]>1?'s':''}). Considera anclar un evento insignia anual en ese mes.`,
+        tipo:'green'
+      });
+    }
+
+    const deportesSugeridos = ['Triatlón Kids','Natación recreativa','Yoga al aire libre','Ciclismo familiar','Torneo de Pádel','Duatlón interno'].filter(s=>
+      !Object.keys(deporteCount).some(d=>s.toLowerCase().includes(d.toLowerCase()))
+    ).slice(0,2);
+    deportesSugeridos.forEach(s=>{
+      recomendaciones.push({
+        icono:'💡', titulo:`Nuevo: ${s}`,
+        desc:`Este deporte/formato no está en tu historial. Podría atraer nuevos segmentos del club y diversificar la oferta deportiva.`,
+        tipo:'blue'
+      });
+    });
+
+    const colTipo = {green:'alrt-green',blue:'alrt-blue',gold:'alrt-gold',red:'alrt-red'};
+    cont.innerHTML = recomendaciones.map(r=>`
+      <div class="alert-card ${colTipo[r.tipo]||''}">
+        <div class="alert-icon">${r.icono}</div>
+        <div class="alert-txt">
+          <strong>${r.titulo}</strong><br>${r.desc}
+        </div>
+      </div>`).join('') || '<div class="empty">Sin recomendaciones disponibles aún.</div>';
+  }, 600);
+}
+
+// ── MODAL NUEVO/EDITAR ────────────────────────────────────────
+function abrirModalEvento(id){
+  _evtEditing = id;
+  _evtResultados = [];
+
+  // Construir logística checkboxes ANTES de evtModalTab
+  const logWrap = document.getElementById('evtLogisticaWrap');
+  if(logWrap){
+    logWrap.innerHTML = EVT_LOGISTICA_ITEMS.map(it=>`
+    <label style="display:flex;align-items:center;gap:.4rem;font-size:.76rem;cursor:pointer;padding:4px 6px;border-radius:5px;border:1px solid var(--border);background:var(--panel2)">
+      <input type="checkbox" id="evtLog_${it.id}" style="accent-color:var(--verde)"> ${it.label}
+    </label>`).join('');
+  }
+
+  evtModalTab(1);
+
+  if(id){
+    const ev = evtCargarDatos().find(e=>e.id===id);
+    if(!ev) return;
+    document.getElementById('evtModalTitulo').textContent = '✏️ Editar Evento';
+    document.getElementById('evtBtnEliminar').style.display = 'inline-block';
+    document.getElementById('evtDeporte').value    = ev.deporte||'';
+    document.getElementById('evtNombre').value     = ev.nombre||'';
+    document.getElementById('evtFecha').value      = ev.fecha||'';
+    document.getElementById('evtLugar').value      = ev.lugar||'';
+    document.getElementById('evtHoraIni').value    = ev.horaIni||'';
+    document.getElementById('evtHoraFin').value    = ev.horaFin||'';
+    document.getElementById('evtCategoria').value  = ev.categoria||'';
+    document.getElementById('evtEstado').value     = ev.estado||'planificado';
+    document.getElementById('evtPartTotal').value  = ev.participantes||'';
+    document.getElementById('evtClubM').value      = ev.clubM||'';
+    document.getElementById('evtClubF').value      = ev.clubF||'';
+    document.getElementById('evtForM').value       = ev.forM||'';
+    document.getElementById('evtForF').value       = ev.forF||'';
+    document.getElementById('evtClubTotal').value  = ((ev.clubM||0)+(ev.clubF||0))||'';
+    document.getElementById('evtPresupuesto').value= ev.presupuesto||'';
+    document.getElementById('evtCostoReal').value  = ev.costoReal||'';
+    document.getElementById('evtNotasLog').value   = ev.notasLog||'';
+    document.getElementById('evtObservaciones').value = ev.observaciones||'';
+    document.getElementById('evtMejoras').value    = ev.mejoras||'';
+    evtSetStar(ev.calificacion||0, true);
+    // Logística checkboxes
+    (ev.logistica||[]).forEach(lid=>{ const cb=document.getElementById('evtLog_'+lid); if(cb) cb.checked=true; });
+    // Resultados
+    _evtResultados = JSON.parse(JSON.stringify(ev.resultados||[]));
+    evtRenderResultados();
+  } else {
+    document.getElementById('evtModalTitulo').textContent = '🏆 Nuevo Evento Deportivo';
+    document.getElementById('evtBtnEliminar').style.display = 'none';
+    ['evtDeporte','evtNombre','evtFecha','evtLugar','evtHoraIni','evtHoraFin',
+     'evtPartTotal','evtClubM','evtClubF','evtForM','evtForF','evtClubTotal',
+     'evtPresupuesto','evtCostoReal','evtNotasLog','evtObservaciones','evtMejoras'
+    ].forEach(f=>{ const el=document.getElementById(f); if(el) el.value=''; });
+    document.getElementById('evtCategoria').value = '';
+    document.getElementById('evtEstado').value    = 'planificado';
+    evtSetStar(0, true);
+    evtRenderResultados();
+  }
+  document.getElementById('ov-evento').classList.add('on');
+}
+
+function evtModalTab(n){
+  for(let i=1;i<=5;i++){
+    const panel = document.getElementById('evtMPanel'+i);
+    const btn   = document.getElementById('evtMTab'+i);
+    if(panel) panel.style.display = i===n ? 'block' : 'none';
+    if(btn){
+      btn.style.background    = i===n ? 'var(--verde)' : '';
+      btn.style.color         = i===n ? '#fff' : '';
+      btn.style.borderColor   = i===n ? 'var(--verde)' : '';
+    }
+  }
+}
+
+function evtActualizarTotales(){
+  const cm = parseInt(document.getElementById('evtClubM').value)||0;
+  const cf = parseInt(document.getElementById('evtClubF').value)||0;
+  document.getElementById('evtClubTotal').value = cm+cf || '';
+}
+
+function evtSetStar(n, silent){
+  const califEl = document.getElementById('evtCalif');
+  if(!califEl) return;
+  califEl.value = n;
+  const lbls = ['','Muy malo','Malo','Regular','Bueno','Excelente'];
+  const starLbl = document.getElementById('evtStarLbl');
+  if(starLbl) starLbl.textContent = n ? lbls[n]||'' : '';
+  document.querySelectorAll('#evtEstrellas span').forEach((s,i)=>{
+    s.textContent = i < n ? '⭐' : '☆';
+    s.style.transform = 'scale(1)';
+  });
+}
+
+// ── RESULTADOS ────────────────────────────────────────────────
+function evtAddResultado(){
+  _evtResultados.push({ nombre:'', sexo:'Masculino', categoria:'', modalidad:'', lugar:'' });
+  evtRenderResultados();
+}
+
+function evtRenderResultados(){
+  const wrap = document.getElementById('evtResultadosWrap');
+  if(!wrap) return;
+  if(!_evtResultados.length){
+    wrap.innerHTML='<div style="font-size:.75rem;color:var(--txt3);text-align:center;padding:1.2rem">Presiona "+ Agregar resultado" para capturar resultados.</div>';
+    return;
+  }
+  wrap.innerHTML = _evtResultados.map((r,i)=>`
+    <div style="background:var(--panel2);border:1px solid var(--border);border-radius:8px;padding:.6rem .7rem;margin-bottom:.4rem">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.4rem">
+        <span style="font-size:.7rem;color:var(--txt2);font-weight:600">Resultado #${i+1}</span>
+        <button class="abtn" onclick="evtDelResultado(${i})" style="color:var(--red2);border-color:var(--red);font-size:.65rem;padding:2px 7px">✕ Quitar</button>
+      </div>
+      <div style="display:grid;grid-template-columns:2fr 1fr 1fr 1fr 1fr;gap:.4rem;align-items:end">
+        <div class="fg" style="margin:0"><label>Nombre completo</label>
+          <input class="ctrl" style="font-size:.77rem" value="${r.nombre||''}" oninput="evtResEdit(${i},'nombre',this.value)" placeholder="Nombre del participante">
+        </div>
+        <div class="fg" style="margin:0"><label>Sexo</label>
+          <select class="ctrl" style="font-size:.77rem" onchange="evtResEdit(${i},'sexo',this.value)">
+            <option${r.sexo==='Masculino'?' selected':''}>Masculino</option>
+            <option${r.sexo==='Femenino'?' selected':''}>Femenino</option>
+          </select>
+        </div>
+        <div class="fg" style="margin:0"><label>Categoría</label>
+          <input class="ctrl" style="font-size:.77rem" value="${r.categoria||''}" oninput="evtResEdit(${i},'categoria',this.value)" placeholder="ej. 2010">
+        </div>
+        <div class="fg" style="margin:0"><label>Modalidad</label>
+          <input class="ctrl" style="font-size:.77rem" value="${r.modalidad||''}" oninput="evtResEdit(${i},'modalidad',this.value)" placeholder="ej. 100 mts.">
+        </div>
+        <div class="fg" style="margin:0"><label>Lugar</label>
+          <input class="ctrl" style="font-size:.77rem" value="${r.lugar||''}" oninput="evtResEdit(${i},'lugar',this.value)" placeholder="ej. 1ro.">
+        </div>
+      </div>
+    </div>`).join('');
+}
+
+function evtResEdit(i, campo, val){ _evtResultados[i][campo] = val; }
+function evtDelResultado(i){ _evtResultados.splice(i,1); evtRenderResultados(); }
+
+// ── GUARDAR / ELIMINAR ────────────────────────────────────────
+function guardarEvento(){
+  const deporte = document.getElementById('evtDeporte').value.trim();
+  const nombre  = document.getElementById('evtNombre').value.trim();
+  const fecha   = document.getElementById('evtFecha').value;
+  if(!deporte || !nombre || !fecha){
+    alert('Por favor completa: Deporte, Nombre del evento y Fecha.');
+    evtModalTab(1); return;
+  }
+  const logistica = EVT_LOGISTICA_ITEMS.filter(it=>{
+    const cb = document.getElementById('evtLog_'+it.id);
+    return cb && cb.checked;
+  }).map(it=>it.id);
+
+  const evento = {
+    id: _evtEditing || evtId(),
+    deporte, nombre, fecha,
+    lugar:        document.getElementById('evtLugar').value.trim(),
+    horaIni:      document.getElementById('evtHoraIni').value,
+    horaFin:      document.getElementById('evtHoraFin').value,
+    categoria:    document.getElementById('evtCategoria').value,
+    estado:       document.getElementById('evtEstado').value,
+    participantes:parseInt(document.getElementById('evtPartTotal').value)||0,
+    clubM:        parseInt(document.getElementById('evtClubM').value)||0,
+    clubF:        parseInt(document.getElementById('evtClubF').value)||0,
+    forM:         parseInt(document.getElementById('evtForM').value)||0,
+    forF:         parseInt(document.getElementById('evtForF').value)||0,
+    presupuesto:  parseFloat(document.getElementById('evtPresupuesto').value)||0,
+    costoReal:    parseFloat(document.getElementById('evtCostoReal').value)||0,
+    notasLog:     document.getElementById('evtNotasLog').value.trim(),
+    observaciones:document.getElementById('evtObservaciones').value.trim(),
+    mejoras:      document.getElementById('evtMejoras').value.trim(),
+    calificacion: parseInt(document.getElementById('evtCalif').value)||0,
+    logistica,
+    resultados:   JSON.parse(JSON.stringify(_evtResultados)),
+    creadoEn:     _evtEditing ? undefined : new Date().toISOString(),
+    modificadoEn: new Date().toISOString(),
+  };
+
+  let ev = evtCargarDatos();
+  if(_evtEditing){
+    const idx = ev.findIndex(e=>e.id===_evtEditing);
+    if(idx>=0){ evento.creadoEn = ev[idx].creadoEn; ev[idx] = evento; }
+    else ev.push(evento);
+  } else {
+    ev.push(evento);
+  }
+  evtGuardarDatos(ev);
+  cerrarOv('ov-evento');
+  evtRenderAll();
+}
+
+function eliminarEvento(){
+  if(!_evtEditing) return;
+  if(!confirm('¿Eliminar este evento? Esta acción no se puede deshacer.')) return;
+  let ev = evtCargarDatos().filter(e=>e.id!==_evtEditing);
+  evtGuardarDatos(ev);
+  cerrarOv('ov-evento');
+  evtRenderAll();
+}
+
+// ── REPORTE ───────────────────────────────────────────────────
+function evtVerReporte(id){
+  const ev = evtCargarDatos().find(e=>e.id===id);
+  if(!ev) return;
+  const fmtFecha = ev.fecha ? new Date(ev.fecha+'T00:00').toLocaleDateString('es-MX',{weekday:'long',day:'numeric',month:'long',year:'numeric'}) : '—';
+  const logItems = (ev.logistica||[]).map(lid=>{
+    const it = EVT_LOGISTICA_ITEMS.find(x=>x.id===lid);
+    return it ? it.label : lid;
+  });
+  const estrellas = ev.calificacion ? '⭐'.repeat(ev.calificacion) : '—';
+  const colEst = {planificado:'#4db8e8',realizado:'#5effa0',cancelado:'#e05050',pospuesto:'#e8b84b'};
+
+  let html = `
+  <div style="border:1px solid var(--border);border-radius:10px;overflow:hidden;margin-bottom:.8rem">
+    <div style="background:linear-gradient(90deg,var(--verde),#0a3020);padding:.9rem 1.1rem;display:flex;justify-content:space-between;align-items:center">
+      <div>
+        <div style="font-family:'Bebas Neue',sans-serif;font-size:1.3rem;letter-spacing:2px;color:#fff">🏆 Reporte de Evento Deportivo</div>
+        <div style="font-size:.65rem;color:rgba(255,255,255,.7);letter-spacing:1px">Club Campestre Aguascalientes</div>
+      </div>
+      <div style="background:${colEst[ev.estado]||'#888'};color:#000;font-size:.7rem;font-weight:700;padding:3px 10px;border-radius:12px;text-transform:uppercase">${ev.estado||'—'}</div>
+    </div>
+    <div style="padding:1rem">
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:.5rem .8rem;margin-bottom:.8rem;font-size:.8rem">
+        <div><span style="color:var(--txt2);font-size:.68rem;text-transform:uppercase;letter-spacing:1px">Deporte</span><div style="font-weight:600;color:var(--neon)">${ev.deporte||'—'}</div></div>
+        <div><span style="color:var(--txt2);font-size:.68rem;text-transform:uppercase;letter-spacing:1px">Nombre del Evento</span><div style="font-weight:600">${ev.nombre||'—'}</div></div>
+        <div><span style="color:var(--txt2);font-size:.68rem;text-transform:uppercase;letter-spacing:1px">Fecha</span><div style="font-weight:600">${fmtFecha}</div></div>
+        <div><span style="color:var(--txt2);font-size:.68rem;text-transform:uppercase;letter-spacing:1px">Lugar</span><div style="font-weight:600">${ev.lugar||'—'}</div></div>
+        <div><span style="color:var(--txt2);font-size:.68rem;text-transform:uppercase;letter-spacing:1px">Hora Inicio</span><div>${ev.horaIni||'—'}</div></div>
+        <div><span style="color:var(--txt2);font-size:.68rem;text-transform:uppercase;letter-spacing:1px">Hora Término</span><div>${ev.horaFin||'—'}</div></div>
+        <div><span style="color:var(--txt2);font-size:.68rem;text-transform:uppercase;letter-spacing:1px">Categoría</span><div>${ev.categoria||'—'}</div></div>
+        <div><span style="color:var(--txt2);font-size:.68rem;text-transform:uppercase;letter-spacing:1px">Calificación</span><div>${estrellas}</div></div>
+      </div>
+
+      <div style="border-top:1px solid var(--border);padding-top:.7rem;margin-bottom:.7rem">
+        <div style="font-size:.72rem;font-weight:700;color:var(--txt2);text-transform:uppercase;letter-spacing:1px;margin-bottom:.4rem">👥 Participantes</div>
+        <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:.4rem;font-size:.75rem;text-align:center">
+          <div style="background:var(--panel2);border-radius:6px;padding:.4rem"><div style="font-family:'Bebas Neue',sans-serif;font-size:1.4rem;color:var(--neon)">${ev.participantes||0}</div><div style="color:var(--txt2);font-size:.6rem">Total</div></div>
+          <div style="background:var(--panel2);border-radius:6px;padding:.4rem"><div style="font-family:'Bebas Neue',sans-serif;font-size:1.4rem;color:var(--blue)">${ev.clubM||0}</div><div style="color:var(--txt2);font-size:.6rem">Club Masc.</div></div>
+          <div style="background:var(--panel2);border-radius:6px;padding:.4rem"><div style="font-family:'Bebas Neue',sans-serif;font-size:1.4rem;color:var(--gold2)">${ev.clubF||0}</div><div style="color:var(--txt2);font-size:.6rem">Club Fem.</div></div>
+          <div style="background:var(--panel2);border-radius:6px;padding:.4rem"><div style="font-family:'Bebas Neue',sans-serif;font-size:1.4rem;color:var(--v3)">${ev.forM||0}</div><div style="color:var(--txt2);font-size:.6rem">For. Masc.</div></div>
+          <div style="background:var(--panel2);border-radius:6px;padding:.4rem"><div style="font-family:'Bebas Neue',sans-serif;font-size:1.4rem;color:var(--red2)">${ev.forF||0}</div><div style="color:var(--txt2);font-size:.6rem">For. Fem.</div></div>
+        </div>
+      </div>`;
+
+  if((ev.resultados||[]).length){
+    html += `
+      <div style="border-top:1px solid var(--border);padding-top:.7rem;margin-bottom:.7rem">
+        <div style="font-size:.72rem;font-weight:700;color:var(--txt2);text-transform:uppercase;letter-spacing:1px;margin-bottom:.4rem">🏅 Resultados</div>
+        <table style="width:100%;border-collapse:collapse;font-size:.77rem">
+          <thead><tr style="background:var(--panel2)">
+            <th style="padding:5px 8px;text-align:left;font-size:.63rem;color:var(--txt2)">Nombre</th>
+            <th style="padding:5px 8px;text-align:left;font-size:.63rem;color:var(--txt2)">Sexo</th>
+            <th style="padding:5px 8px;text-align:left;font-size:.63rem;color:var(--txt2)">Categoría</th>
+            <th style="padding:5px 8px;text-align:left;font-size:.63rem;color:var(--txt2)">Modalidad</th>
+            <th style="padding:5px 8px;text-align:left;font-size:.63rem;color:var(--txt2)">Lugar</th>
+          </tr></thead>
+          <tbody>${ev.resultados.map(r=>`<tr style="border-bottom:1px solid var(--border)">
+            <td style="padding:5px 8px">${r.nombre||'—'}</td>
+            <td style="padding:5px 8px">${r.sexo||'—'}</td>
+            <td style="padding:5px 8px">${r.categoria||'—'}</td>
+            <td style="padding:5px 8px">${r.modalidad||'—'}</td>
+            <td style="padding:5px 8px;font-weight:700;color:var(--gold2)">${r.lugar||'—'}</td>
+          </tr>`).join('')}</tbody>
+        </table>
+      </div>`;
+  }
+
+  if(logItems.length){
+    html += `
+      <div style="border-top:1px solid var(--border);padding-top:.7rem;margin-bottom:.7rem">
+        <div style="font-size:.72rem;font-weight:700;color:var(--txt2);text-transform:uppercase;letter-spacing:1px;margin-bottom:.4rem">🛒 Logística</div>
+        <div style="display:flex;flex-wrap:wrap;gap:.3rem">${logItems.map(l=>`<span style="background:var(--panel2);border:1px solid var(--border);border-radius:5px;padding:2px 8px;font-size:.71rem">${l}</span>`).join('')}</div>
+        ${ev.presupuesto||ev.costoReal ? `<div style="margin-top:.5rem;font-size:.77rem;display:flex;gap:1.5rem">
+          <span>Presupuesto: <strong style="color:var(--neon)">$${(ev.presupuesto||0).toLocaleString('es-MX',{minimumFractionDigits:2})}</strong></span>
+          <span>Costo real: <strong style="color:var(--gold2)">$${(ev.costoReal||0).toLocaleString('es-MX',{minimumFractionDigits:2})}</strong></span>
+        </div>` : ''}
+        ${ev.notasLog ? `<div style="font-size:.75rem;color:var(--txt2);margin-top:.4rem">${ev.notasLog}</div>` : ''}
+      </div>`;
+  }
+
+  if(ev.observaciones||ev.mejoras){
+    html += `
+      <div style="border-top:1px solid var(--border);padding-top:.7rem">
+        <div style="font-size:.72rem;font-weight:700;color:var(--txt2);text-transform:uppercase;letter-spacing:1px;margin-bottom:.4rem">📝 Observaciones</div>
+        ${ev.observaciones ? `<div style="font-size:.78rem;margin-bottom:.4rem">${ev.observaciones}</div>` : ''}
+        ${ev.mejoras ? `<div style="font-size:.75rem;color:var(--txt2)"><strong>Puntos de mejora:</strong> ${ev.mejoras}</div>` : ''}
+      </div>`;
+  }
+
+  html += `</div></div>`;
+  document.getElementById('evtReporteContenido').innerHTML = html;
+  document.getElementById('ov-evt-reporte').classList.add('on');
+}
+
+function evtImprimirReporte(){
+  window.print();
+}
+
+// ── INIT ──────────────────────────────────────────────────────
+// Alias para compatibilidad con el sistema
+function cerrarOv(id){ cerrarModal(id); }
+
+document.addEventListener('DOMContentLoaded', ()=>{
+  // Pre-cargar año actual en el KPI label
+  const sp = document.getElementById('evtAnioActual');
+  if(sp) sp.textContent = new Date().getFullYear();
+});
+
+
+
+
 })();
 
 </script>
 </body>
 </html>
-
