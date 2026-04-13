@@ -1912,6 +1912,77 @@ html.tema-claro .ag-preview-fecha{color:var(--verde);}
 .nota-pri-media { border-left-color: var(--gold2) !important; }
 .nota-pri-baja  { border-left-color: var(--blue) !important; }
 
+/* ═══ TEMA CLARO FORZADO EN MÓVIL ═══════════════════════════════ */
+/* En pantallas ≤640px siempre tema claro, independientemente de JS */
+@media (max-width: 640px) {
+  :root {
+    --bg:#f0f5f0 !important;
+    --panel:#ffffff !important;
+    --panel2:#f2f7f2 !important;
+    --border:#c2d8c2 !important;
+    --verde:#1a7a45 !important;
+    --v2:#2e9c5e !important;
+    --v3:#3db870 !important;
+    --neon:#1a7a45 !important;
+    --gold:#b8940a !important;
+    --gold2:#9a7800 !important;
+    --red:#c0392b !important;
+    --red2:#c0392b !important;
+    --blue:#1a5fa3 !important;
+    --txt:#1a2a1e !important;
+    --txt2:#2d5a3a !important;
+    --txt3:#6aaa7a !important;
+    --w:#ffffff !important;
+    --shadow:0 2px 16px rgba(26,122,69,.12) !important;
+  }
+  /* Fondo del body */
+  body {
+    background: #f0f5f0 !important;
+    background-image: radial-gradient(ellipse at 20% 20%, rgba(26,122,69,.06) 0%, transparent 55%),
+                      radial-gradient(ellipse at 80% 80%, rgba(26,122,69,.04) 0%, transparent 50%) !important;
+  }
+  /* Eliminar glassmorphism en móvil (no funciona bien en tema claro) */
+  .panel, .kpi, .modal, .rec-card, .diag-card, .sch-slot, .alert-card {
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+  }
+  /* Fila de tabla hover */
+  tbody tr:hover { background: #e8f5ec !important; }
+  /* Bottom nav */
+  #bottom-nav { background: rgba(255,255,255,.96) !important; border-top-color: #d4e8d4 !important; }
+  /* Header */
+  #hdr { background: linear-gradient(90deg,#ffffff,#f5f8f5) !important; border-bottom: 2px solid #1a7a45 !important; }
+  .htit { color: #1a7a45 !important; }
+  /* Inputs */
+  .ctrl { background: #ffffff !important; border-color: #c2d8c2 !important; color: #1a2a1e !important; }
+  .fg input, .fg select, .fg textarea { background: #fff !important; border-color: #c2d8c2 !important; color: #1a2a1e !important; }
+  /* Kval */
+  .kval { color: #1a7a45 !important; }
+  /* Chips */
+  .chip.cpl { background: #e0f5ea !important; color: #1a7a45 !important; }
+  .chip.cho { background: #fef9e0 !important; color: #9a7800 !important; }
+  .chip.cok { background: #e0f5ea !important; color: #1a7a45 !important; }
+  .chip.cwn { background: #fef9e0 !important; color: #9a7800 !important; }
+  .chip.cbd { background: #fde8e8 !important; color: #c0392b !important; }
+  /* Login */
+  #login-screen { background: #f0f5f0 !important; }
+  .login-box { background: #fff !important; border-color: #1a7a45 !important; }
+  .role-btn { background: #f5faf5 !important; border-color: #c2d8c2 !important; }
+  .role-btn.selected { background: #e0f5ea !important; border-color: #1a7a45 !important; }
+  .login-field input { background: #fff !important; border-color: #c2d8c2 !important; color: #1a2a1e !important; }
+  /* Mobile home items */
+  .mob-clase-item { background: #fff !important; border-color: #d4e4d4 !important; }
+  .mob-kpi { background: #fff !important; border-color: #c8dcc8 !important; }
+  .mob-rank-item { background: #fff !important; border-color: #d4e4d4 !important; }
+  /* Mob back bar */
+  #mob-back-bar { background: #f0f5f0 !important; border-bottom-color: #c2d8c2 !important; }
+  /* Toasts */
+  .toast-ok { background: #e0f5ea !important; border-color: #1a7a45 !important; color: #1a5a30 !important; }
+  .toast-err { background: #fde8e8 !important; border-color: #c0392b !important; color: #8b0000 !important; }
+  .toast-warn { background: #fef9e0 !important; border-color: #b8940a !important; color: #7a5c00 !important; }
+  .toast-info { background: #e8f4fb !important; border-color: #1a5fa3 !important; color: #0d3b6e !important; }
+}
+
 /* ═══ BLOQUEO DE ROTACIÓN EN MÓVIL ════════════════════════════ */
 @media (max-width: 640px) and (orientation: landscape) {
   #mobile-home.on,
@@ -2286,7 +2357,7 @@ html.tema-claro .rep-card-hdr { color: #1a7a45; }
       <svg class="ico" viewBox="0 0 20 20" style="width:.9em;height:.9em"><rect x="3" y="12" width="3" height="5" rx="1" stroke="currentColor" stroke-width="1.4" fill="none"/><rect x="8.5" y="8" width="3" height="9" rx="1" stroke="currentColor" stroke-width="1.4" fill="none"/><rect x="14" y="4" width="3" height="13" rx="1" stroke="currentColor" stroke-width="1.4" fill="none"/></svg>
       Mi Reporte
     </div>
-    <div class="inst-tab" onclick="instSwitchTab('firma')" data-t="firma" style="padding:11px 18px;font-size:.78rem;font-weight:600;color:var(--txt2);border-bottom:2px solid transparent;cursor:pointer;white-space:nowrap;transition:all .2s;display:flex;align-items:center;gap:5px" id="inst-tab-firma">
+    <div class="inst-tab" onclick="instSwitchTab('firma')" data-t="firma" style="padding:11px 18px;font-size:.78rem;font-weight:600;color:var(--txt2);border-bottom:2px solid transparent;cursor:pointer;white-space:nowrap;transition:all .2s;display:flex;align-items:center;gap:5px" id="inst-tabn-firma">
       <svg class="ico" viewBox="0 0 20 20" style="width:.9em;height:.9em"><path d="M4 14 Q6 10 8 12 Q10 14 12 8 Q13 5 15 6" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/><line x1="3" y1="17" x2="17" y2="17" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
       Firma Digital
     </div>
@@ -2296,7 +2367,7 @@ html.tema-claro .rep-card-hdr { color: #1a7a45; }
   <div style="flex:1;overflow-y:auto;padding:1rem;max-width:900px;width:100%;margin:0 auto;box-sizing:border-box" id="inst-content">
 
     <!-- ── TAB: Mis Clases Hoy ── -->
-    <div id="inst-tab-hoy" class="inst-panel">
+    <div id="inst-panel-hoy" class="inst-panel">
 
       <!-- Fecha y KPIs -->
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.9rem;flex-wrap:wrap;gap:.5rem">
@@ -2320,7 +2391,7 @@ html.tema-claro .rep-card-hdr { color: #1a7a45; }
     </div>
 
     <!-- ── TAB: Mi Reporte ── -->
-    <div id="inst-tab-reporte" class="inst-panel" style="display:none">
+    <div id="inst-panel-reporte" class="inst-panel" style="display:none">
       <div style="font-family:'Bebas Neue',sans-serif;font-size:1.1rem;letter-spacing:2px;color:var(--neon);margin-bottom:1rem">MI REPORTE PERSONAL</div>
 
       <!-- Filtro de periodo -->
@@ -2359,11 +2430,14 @@ html.tema-claro .rep-card-hdr { color: #1a7a45; }
     </div>
 
     <!-- ── TAB: Firma Digital ── -->
-    <div id="inst-tab-firma" class="inst-panel" style="display:none">
+    <div id="inst-panel-firma" class="inst-panel" style="display:none">
       <div id="inst-firma-sin-hoja" style="text-align:center;padding:3rem 1rem">
         <svg width="52" height="52" viewBox="0 0 52 52" fill="none" stroke="var(--txt3)" stroke-width="1.5" style="margin-bottom:1rem"><rect x="10" y="6" width="32" height="40" rx="4" stroke="var(--txt3)"/><line x1="18" y1="18" x2="34" y2="18" stroke="var(--txt3)" stroke-linecap="round"/><line x1="18" y1="24" x2="34" y2="24" stroke="var(--txt3)" stroke-linecap="round"/><path d="M18 33 Q21 29 23 31 Q25 33 27 27 Q28 25 30 26" stroke="var(--neon)" stroke-linecap="round" stroke-linejoin="round"/></svg>
         <div style="font-family:'Bebas Neue',sans-serif;font-size:1.1rem;letter-spacing:2px;color:var(--txt2);margin-bottom:.5rem">Sin hoja de firmas activa</div>
-        <div style="font-size:.78rem;color:var(--txt3);line-height:1.6">El coordinador debe generar una hoja de firmas digitales.<br>Cuando esté disponible, aparecerá aquí automáticamente.</div>
+        <div style="font-size:.78rem;color:var(--txt3);line-height:1.6;margin-bottom:1rem">El coordinador debe generar una hoja de firmas digitales.<br>Cuando esté disponible, aparecerá aquí automáticamente.</div>
+        <button onclick="instRenderFirmaTab()" style="background:var(--panel2);border:1px solid var(--border);border-radius:10px;padding:8px 18px;color:var(--txt2);font-family:'Outfit',sans-serif;font-size:.76rem;cursor:pointer;transition:all .2s" onmouseover="this.style.borderColor='var(--v3)'" onmouseout="this.style.borderColor='var(--border)'">
+          ↺ Verificar ahora
+        </button>
       </div>
 
       <div id="inst-firma-activa" style="display:none">
@@ -2379,6 +2453,14 @@ html.tema-claro .rep-card-hdr { color: #1a7a45; }
           </div>
           <div style="margin-left:auto">
             <span id="inst-firma-chip" style="font-size:.68rem;padding:3px 9px;border-radius:12px;background:rgba(224,80,80,.15);color:var(--red2);font-weight:700">✖ Sin firmar</span>
+          </div>
+        </div>
+
+        <!-- Tabla de clases del periodo -->
+        <div style="margin-bottom:1rem">
+          <div style="font-size:.6rem;text-transform:uppercase;letter-spacing:1.5px;color:var(--txt3);margin-bottom:.4rem">Clases del periodo que estás firmando</div>
+          <div id="inst-firma-clases-tabla" style="background:var(--panel2);border:1px solid var(--border);border-radius:10px;overflow:hidden">
+            <div class="empty" style="padding:1rem">Cargando...</div>
           </div>
         </div>
 
@@ -4447,6 +4529,18 @@ html.tema-claro .rep-card-hdr { color: #1a7a45; }
     <div style="font-size:.6rem;color:var(--txt3);margin-top:.4rem;line-height:1.6;text-align:center">
       PDF directo = descarga inmediata · Firmas digitales = cada profesor firma en tablet con stylus
     </div>
+    <!-- Indicador hoja activa -->
+    <div id="coord-hoja-activa-info" style="margin-top:.6rem;display:none;background:rgba(94,255,160,.07);border:1px solid rgba(94,255,160,.25);border-radius:8px;padding:.5rem .75rem;font-size:.68rem;color:var(--neon)">
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:.5rem;flex-wrap:wrap">
+        <span id="coord-hoja-activa-txt">✍ Hoja activa</span>
+        <span id="coord-hoja-activa-prog" style="font-weight:700;color:var(--gold2)"></span>
+      </div>
+      <div style="margin-top:.4rem;display:flex;gap:.4rem;flex-wrap:wrap">
+        <button onclick="coordCerrarHojaActiva()" style="background:rgba(224,80,80,.12);color:var(--red2);border:1px solid rgba(224,80,80,.3);border-radius:6px;padding:3px 10px;font-family:'Outfit',sans-serif;font-size:.65rem;cursor:pointer">
+          🔓 Cerrar hoja y generar nueva
+        </button>
+      </div>
+    </div>
   </div>
 </div>
 </div>
@@ -4832,6 +4926,11 @@ html.tema-claro .rep-card-hdr { color: #1a7a45; }
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script>
+// ── Variables globales de sesión — declaradas al inicio para evitar TDZ ──
+let rolActual = null;
+let rolLoginSeleccionado = 'admin';
+let instActualId = null;
+
 // ═══ SISTEMA DE TOAST ═══
 (function(){
   const ICONS={ok:'✔',err:'✖',warn:'⚠',info:'ℹ'};
@@ -7839,17 +7938,26 @@ function genReporteInstructor(){
 // TEMA — OSCURO / CLARO
 // ═══════════════════════════════════════════
 let temaActual = localStorage.getItem('fc_tema') || 'oscuro';
+
+// En móvil siempre tema claro — sin opción de cambio
+function _esMobil() { return window.innerWidth <= 640; }
+
 function aplicarTema(t) {
-  temaActual = t;
+  // Forzar tema claro en móvil independientemente de la preferencia
+  const temaEfectivo = _esMobil() ? 'claro' : t;
+  temaActual = t; // Guardar preferencia real (para tablet/desktop)
   const iconEl = document.getElementById('coord-tema-icon');
-  if(t === 'claro') {
+  const btnTema = document.getElementById('coord-tema-btn');
+  if(temaEfectivo === 'claro') {
     document.documentElement.classList.add('tema-claro');
     if(iconEl) iconEl.innerHTML = '<svg class="ico" viewBox="0 0 20 20"><circle cx="10" cy="10" r="3.5" stroke="currentColor" stroke-width="1.4" fill="none"/><line x1="10" y1="2" x2="10" y2="4.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><line x1="10" y1="15.5" x2="10" y2="18" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><line x1="2" y1="10" x2="4.5" y2="10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><line x1="15.5" y1="10" x2="18" y2="10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>';
   } else {
     document.documentElement.classList.remove('tema-claro');
     if(iconEl) iconEl.innerHTML = '<svg class="ico" viewBox="0 0 20 20"><path d="M14 4 Q10 4 8 7 Q6 10 8 13 Q10 16 14 16 Q11 14 11 10 Q11 6 14 4" stroke="currentColor" stroke-width="1.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>';
   }
-  localStorage.setItem('fc_tema', t);
+  // Ocultar botón "Cambiar apariencia" en móvil
+  if(btnTema) btnTema.style.display = _esMobil() ? 'none' : '';
+  if(!_esMobil()) localStorage.setItem('fc_tema', t);
   setTimeout(()=>{if(typeof renderDashboard==='function')renderDashboard();},80);
 }
 function toggleCoordMenu(){
@@ -7873,10 +7981,16 @@ function toggleCoordMenu(){
 }
 
 function toggleTema() {
+  if(_esMobil()) return; // No permitir cambio en móvil
   aplicarTema(temaActual === 'oscuro' ? 'claro' : 'oscuro');
 }
 // Aplicar tema guardado al cargar
 aplicarTema(temaActual);
+
+// Re-aplicar tema al cambiar tamaño de ventana (rotación, resize)
+window.addEventListener('resize', () => {
+  aplicarTema(temaActual);
+});
 
 // ═══════════════════════════════════════════
 // IMPRIMIR DESDE MODAL
@@ -8929,8 +9043,8 @@ function renderAll(){
 toggleRpt();
 actualizarSelectoresClase();
 initDiagClases();
-renderAll();
-renderCal();
+// renderAll() y renderCal() se llaman desde init() después de cargarLocal()
+// para evitar pantalla verde sin datos al primer arranque
 
 // ═══════════════════════════════════════════
 // SALONES — CAPACIDAD POR SALÓN
@@ -10270,6 +10384,9 @@ function navegarA(viewId) {
 }
 
 function _activateView(viewId, section) {
+  // Si el rol activo es instructor, no tocar la UI del coordinador
+  if(typeof rolActual !== 'undefined' && rolActual === 'instructor') return;
+
   _lastView[section] = viewId;
 
   // En móvil, sección 'hoy' = mobile-home (no usa .vista)
@@ -10844,6 +10961,8 @@ function renderMobRanking(){
 
 // ── Render de la home móvil ──────────────────────────
 function renderMobileHome() {
+  // No ejecutar si hay sesión de instructor activa
+  if(typeof rolActual !== 'undefined' && rolActual === 'instructor') return;
   const hoyStr  = fechaLocalStr(vistaFecha);
   const diaHoy  = DIAS[(vistaFecha.getDay()+6)%7];
   const esHoyReal = hoyStr === fechaLocalStr(hoy);
@@ -13748,6 +13867,38 @@ function _fdColor(id) {
 
 // ── Abrir el modal ────────────────────────────────────────────────────
 function abrirFirmasDigitales() {
+  // ── Verificar si hay hoja activa con firmas — bloquear si es diferente semana ──
+  try {
+    const hojaActiva = JSON.parse(localStorage.getItem('fc_hoja_firmas_activa') || 'null');
+    if(hojaActiva && hojaActiva.firmas) {
+      const firmados = Object.values(hojaActiva.firmas).filter(f => f && f.data).length;
+      if(firmados > 0) {
+        const semTxt = hojaActiva.encabezado || `${hojaActiva.semIni} → ${hojaActiva.semFin}`;
+        const elI = document.getElementById('firmas-fecha-ini');
+        const elF = document.getElementById('firmas-fecha-fin');
+        const nuevaIni = (elI && elI.value) ? elI.value : '';
+        const nuevaFin = (elF && elF.value) ? elF.value : '';
+        // Si es la misma semana, permitir (seguirá acumulando firmas)
+        if(nuevaIni === hojaActiva.semIni && nuevaFin === hojaActiva.semFin) {
+          // misma semana — continuar normalmente
+        } else {
+          // Semana diferente — advertir
+          const ok = confirm(
+            `⚠ HAY UNA HOJA ACTIVA CON ${firmados} FIRMA(S)\n\n` +
+            `Semana: ${semTxt}\n\n` +
+            `Si abres una hoja nueva para otra semana, perderás las firmas ya capturadas.\n\n` +
+            `¿Deseas cerrar la hoja actual y abrir una nueva?\n` +
+            `(Primero genera el PDF para guardar las firmas actuales)`
+          );
+          if(!ok) return;
+          // Cerrar hoja activa
+          localStorage.removeItem('fc_hoja_firmas_activa');
+          coordActualizarHojaActiva();
+        }
+      }
+    }
+  } catch(e){}
+
   const elI = document.getElementById('firmas-fecha-ini');
   const elF = document.getElementById('firmas-fecha-fin');
   const elT = document.getElementById('firmas-semana-txt');
@@ -14377,13 +14528,28 @@ async function inicializarFirebase(){
         }
 
         // Re-renderizar sin volver a subir a Firebase
-        _renderAllBase();
-        renderRecorridos();
-        if(document.getElementById('v-calendario')?.classList.contains('on')) renderCal();
-        if(document.getElementById('v-historial')?.classList.contains('on'))  renderHistorial();
-        if(document.getElementById('v-sup-plan')?.classList.contains('on'))    renderSupPlan();
-        if(document.getElementById('v-hoy')?.classList.contains('on'))         renderHoy();
-        if(document.getElementById('v-salones')?.classList.contains('on'))     renderSalones();
+        // Guardia: si el rol activo es instructor, no tocar la UI del coordinador
+        if(rolActual !== 'instructor') {
+          renderAll();
+          renderRecorridos();
+          if(document.getElementById('v-calendario')?.classList.contains('on')) renderCal();
+          if(document.getElementById('v-historial')?.classList.contains('on'))  renderHistorial();
+          if(document.getElementById('v-sup-plan')?.classList.contains('on'))    renderSupPlan();
+          if(document.getElementById('v-hoy')?.classList.contains('on'))         renderHoy();
+          if(document.getElementById('v-salones')?.classList.contains('on'))     renderSalones();
+        }
+        // Si hay sesión de instructor activa, actualizar su portal con datos frescos
+        if(rolActual === 'instructor' && instActualId) {
+          const inst = instructores.find(i => i.id === instActualId);
+          const nombreEl = document.getElementById('inst-portal-nombre');
+          if(inst && nombreEl && (nombreEl.textContent === 'Instructor' || nombreEl.textContent === '')) {
+            nombreEl.textContent = inst.nombre;
+          }
+          // Re-renderizar tab activo del portal
+          const tabActivo = document.querySelector('.inst-tab[style*="var(--neon)"]');
+          if(tabActivo && tabActivo.dataset.t) instSwitchTab(tabActivo.dataset.t);
+          else instSwitchTab('hoy');
+        }
 
       } finally{
         fbReceiving = false;
@@ -14467,9 +14633,7 @@ function setIndicador(txt){
 const PASS_ADMIN   = 'fitness2025';   // Coordinador — acceso total
 const PASS_USUARIO = 'campestre';     // Consulta — solo lectura
 
-let rolActual = null;
-let rolLoginSeleccionado = 'admin';
-let instActualId = null;
+// (rolActual, rolLoginSeleccionado, instActualId declarados al inicio del script)
 
 function seleccionarRol(rol) {
   rolLoginSeleccionado = rol;
@@ -14516,6 +14680,10 @@ function intentarLogin() {
     if(pass === pinGuardado) {
       rolActual = 'instructor';
       instActualId = instId;
+      // Guardar en localStorage con TTL 8h (sobrevive pull-to-refresh)
+      localStorage.setItem('fc_ses_rol', 'instructor');
+      localStorage.setItem('fc_ses_inst_id', String(instId));
+      localStorage.setItem('fc_ses_ttl', String(Date.now() + 8 * 3600000));
       sessionStorage.setItem('fc_rol', 'instructor');
       sessionStorage.setItem('fc_inst_id', String(instId));
       aplicarRol('instructor');
@@ -14540,10 +14708,20 @@ function intentarLogin() {
 
   if(pass === passCorrecta) {
     rolActual = rolLoginSeleccionado;
+    // Guardar en localStorage con TTL 8h
+    localStorage.setItem('fc_ses_rol', rolActual);
+    localStorage.setItem('fc_ses_ttl', String(Date.now() + 8 * 3600000));
     sessionStorage.setItem('fc_rol', rolActual);
     aplicarRol(rolActual);
     document.getElementById('login-screen').classList.add('oculto');
     document.getElementById('login-pass').value = '';
+    // Renderizar datos ahora que hay sesión activa
+    renderAll();
+    renderCal();
+    // En móvil, ir a la vista de hoy
+    if(window.innerWidth <= 640) {
+      switchSection('hoy');
+    }
   } else {
     errTxt.textContent = 'Contraseña incorrecta. Intenta de nuevo.';
     errEl.style.display = 'block';
@@ -14571,14 +14749,23 @@ function aplicarRol(rol) {
 
 function cerrarSesion() {
   if(!confirm('¿Cerrar sesión?')) return;
+  // Detener polling del portal
+  if(typeof instPararPoll === 'function') instPararPoll();
   rolActual = null;
   instActualId = null;
+  // Limpiar ambos storages
   sessionStorage.removeItem('fc_rol');
   sessionStorage.removeItem('fc_inst_id');
+  localStorage.removeItem('fc_ses_rol');
+  localStorage.removeItem('fc_ses_inst_id');
+  localStorage.removeItem('fc_ses_ttl');
   document.getElementById('login-pass').value = '';
   document.getElementById('login-error').style.display = 'none';
   const instScreen = document.getElementById('instructor-screen');
   if(instScreen) instScreen.style.display = 'none';
+  // Restaurar UI del coordinador
+  const hdr = document.getElementById('hdr');
+  if(hdr) hdr.style.display = '';
   document.getElementById('login-screen').classList.remove('oculto');
   seleccionarRol('admin');
 }
@@ -15015,27 +15202,65 @@ function guardarSupLocal(){
     setIndicador('🔴 Sin conexión · Cambios guardados localmente');
   });
 
-  // Verificar sesión guardada en la pestaña actual
-  const rolGuardado = sessionStorage.getItem('fc_rol');
-  if(rolGuardado === 'admin' || rolGuardado === 'usuario') {
-    aplicarRol(rolGuardado);
+  // Verificar sesión guardada — se guarda en localStorage con TTL de 8h
+  const _sesRol = localStorage.getItem('fc_ses_rol');
+  const _sesTtl = parseInt(localStorage.getItem('fc_ses_ttl') || '0');
+  const _sesValida = _sesTtl > Date.now();
+
+  if(_sesValida && (_sesRol === 'admin' || _sesRol === 'usuario')) {
+    aplicarRol(_sesRol);
     document.getElementById('login-screen').classList.add('oculto');
-  } else if(rolGuardado === 'instructor') {
-    const instIdGuardado = parseInt(sessionStorage.getItem('fc_inst_id'));
+    // Renovar TTL
+    localStorage.setItem('fc_ses_ttl', String(Date.now() + 8 * 3600000));
+  } else if(_sesValida && _sesRol === 'instructor') {
+    const instIdGuardado = parseInt(localStorage.getItem('fc_ses_inst_id') || '0');
     if(instIdGuardado) {
       rolActual = 'instructor';
       instActualId = instIdGuardado;
       aplicarRol('instructor');
       document.getElementById('login-screen').classList.add('oculto');
-      // Portal se abrirá después de cargarLocal()
-      setTimeout(abrirPortalInstructorLocal, 200);
+      localStorage.setItem('fc_ses_ttl', String(Date.now() + 8 * 3600000));
+      // Esperar a que instructores cargue (local o Firebase), con reintentos
+      let _instRestoreAttempts = 0;
+      const _instRestoreTimer = setInterval(() => {
+        _instRestoreAttempts++;
+        if(typeof instructores !== 'undefined' && instructores.length > 0) {
+          clearInterval(_instRestoreTimer);
+          abrirPortalInstructorLocal();
+        } else if(_instRestoreAttempts > 40) {
+          // 4 segundos máximo — abrir igual (mostrará el nombre como "Instructor")
+          clearInterval(_instRestoreTimer);
+          abrirPortalInstructorLocal();
+        }
+      }, 100);
     }
+  } else {
+    // Limpiar sesión expirada
+    localStorage.removeItem('fc_ses_rol');
+    localStorage.removeItem('fc_ses_inst_id');
+    localStorage.removeItem('fc_ses_ttl');
+  }
+  // Compatibilidad con sessionStorage anterior
+  const _sRol = sessionStorage.getItem('fc_rol');
+  if(!_sesValida && (_sRol === 'admin' || _sRol === 'usuario')) {
+    aplicarRol(_sRol);
+    document.getElementById('login-screen').classList.add('oculto');
   }
 
   const hayLocal = cargarLocal();
   if(hayLocal){
-    _renderAllBase();   // renderAll base — sin subir a Firebase todavía
-    renderCal();
+    // Si hay sesión activa de admin/usuario, renderizar normalmente
+    if(rolActual === 'admin' || rolActual === 'usuario') {
+      renderAll();
+      renderCal();
+    }
+    // Si es instructor, abrirPortalInstructorLocal() lo maneja
+  } else {
+    // Sin datos locales aún, renderizar de todas formas para dejar UI limpia
+    if(rolActual === 'admin' || rolActual === 'usuario') {
+      renderAll();
+      renderCal();
+    }
   }
 
   // Inicializar Firebase (conecta, carga y escucha cambios en tiempo real)
@@ -15060,16 +15285,32 @@ let _instFirmaHojaActiva = null;  // { semIni, semFin, encabezado, firmas:{} }
 
 // ── Abrir portal ──────────────────────────────
 function abrirPortalInstructorLocal() {
-  const inst = instructores.find(i => i.id === instActualId);
-  if(!inst) { showToast('Instructor no encontrado','err'); return; }
-
   const screen = document.getElementById('instructor-screen');
   if(!screen) return;
+
+  // CRÍTICO: ocultar cualquier elemento del sistema coordinador que pudiera verse
+  const mobileHome = document.getElementById('mobile-home');
+  if(mobileHome) mobileHome.classList.remove('on');
+  const bottomNav = document.getElementById('bottom-nav');
+  if(bottomNav) bottomNav.style.display = 'none';
+  const hdr = document.getElementById('hdr');
+  if(hdr) hdr.style.display = 'none';
+  const sidebar = document.getElementById('sidebar');
+  if(sidebar) sidebar.style.display = 'none';
+  const sectionNav = document.getElementById('section-nav');
+  if(sectionNav) sectionNav.style.display = 'none';
+  const backBar = document.getElementById('mob-back-bar');
+  if(backBar) backBar.style.display = 'none';
+  // Ocultar todas las vistas del coordinador
+  document.querySelectorAll('.vista').forEach(v => v.classList.remove('on'));
+
   screen.style.display = 'flex';
+
+  const inst = instructores.find(i => i.id === instActualId);
 
   // Nombre en el header
   const nombreEl = document.getElementById('inst-portal-nombre');
-  if(nombreEl) nombreEl.textContent = inst.nombre;
+  if(nombreEl) nombreEl.textContent = inst ? inst.nombre : 'Instructor';
 
   // Fecha de hoy en el datepicker
   const dp = document.getElementById('inst-date-picker');
@@ -15077,6 +15318,9 @@ function abrirPortalInstructorLocal() {
 
   // Cargar hoja de firmas activa si existe
   instCargarHojaFirmas();
+
+  // Iniciar polling para detectar cuando coordinador publica hoja
+  if(typeof instIniciarPoll === 'function') instIniciarPoll();
 
   // Renderizar tab inicial
   instSwitchTab('hoy');
@@ -15089,8 +15333,9 @@ function instSwitchTab(tab) {
     t.style.color = isOn ? 'var(--neon)' : 'var(--txt2)';
     t.style.borderBottomColor = isOn ? 'var(--neon)' : 'transparent';
   });
+  // Usar prefijo inst-panel- para evitar conflicto con los botones inst-tab-*
   document.querySelectorAll('.inst-panel').forEach(p => p.style.display = 'none');
-  const panel = document.getElementById('inst-tab-' + tab);
+  const panel = document.getElementById('inst-panel-' + tab);
   if(panel) panel.style.display = 'block';
 
   if(tab === 'hoy')     instRenderHoy();
@@ -15388,6 +15633,82 @@ function instRenderFirmaTab() {
   sinHoja.style.display = 'none';
   activa.style.display  = 'block';
 
+  // ── Tabla de clases del periodo ──
+  const tablaEl = document.getElementById('inst-firma-clases-tabla');
+  if(tablaEl) {
+    const semIni = _instFirmaHojaActiva.semIni || '';
+    const semFin = _instFirmaHojaActiva.semFin || '';
+    const inst   = instructores.find(i => i.id === instActualId);
+    const misRegs = inst ? registros.filter(r =>
+      String(r.inst_id) === String(inst.id) && r.fecha >= semIni && r.fecha <= semFin
+    ).sort((a,b) => a.fecha.localeCompare(b.fecha) || (a.hora||'').localeCompare(b.hora||'')) : [];
+
+    if(misRegs.length === 0) {
+      tablaEl.innerHTML = '<div class="empty" style="padding:.8rem;font-size:.72rem">Sin clases registradas en este periodo.</div>';
+    } else {
+      // Agrupar por clase única (dedup por dia+hora+clase)
+      const vistos = new Set();
+      const unicos = misRegs.filter(r => {
+        const k = `${r.dia}|${r.hora}|${r.clase}`;
+        if(vistos.has(k)) return false;
+        vistos.add(k); return true;
+      });
+
+      const total  = misRegs.filter(r => r.estado==='ok'||r.estado==='sub').length;
+      const faltas = misRegs.filter(r => r.estado==='falta').length;
+      const conAf  = misRegs.filter(r => (r.estado==='ok'||r.estado==='sub') && parseInt(r.cap||0)>0);
+      const aforProm = conAf.length > 0
+        ? Math.round(conAf.reduce((a,r)=>a+(parseInt(r.asistentes)||0)/parseInt(r.cap)*100,0)/conAf.length)
+        : null;
+
+      tablaEl.innerHTML = `
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;border-bottom:1px solid var(--border)">
+          <div style="padding:.5rem .7rem;text-align:center;border-right:1px solid var(--border)">
+            <div style="font-family:'Bebas Neue',sans-serif;font-size:1.4rem;color:var(--neon)">${total}</div>
+            <div style="font-size:.55rem;text-transform:uppercase;letter-spacing:1px;color:var(--txt3)">Impartidas</div>
+          </div>
+          <div style="padding:.5rem .7rem;text-align:center;border-right:1px solid var(--border)">
+            <div style="font-family:'Bebas Neue',sans-serif;font-size:1.4rem;color:${faltas>0?'var(--red2)':'var(--neon)'}">${faltas}</div>
+            <div style="font-size:.55rem;text-transform:uppercase;letter-spacing:1px;color:var(--txt3)">Faltas</div>
+          </div>
+          <div style="padding:.5rem .7rem;text-align:center">
+            <div style="font-family:'Bebas Neue',sans-serif;font-size:1.4rem;color:${aforProm!==null?pctCol(aforProm):'var(--txt3)'}">${aforProm!==null?aforProm+'%':'—'}</div>
+            <div style="font-size:.55rem;text-transform:uppercase;letter-spacing:1px;color:var(--txt3)">Aforo prom.</div>
+          </div>
+        </div>
+        <div style="overflow-x:auto">
+          <table style="width:100%;font-size:.72rem;border-collapse:collapse">
+            <thead>
+              <tr style="background:var(--panel)">
+                <th style="padding:5px 8px;text-align:left;font-size:.58rem;text-transform:uppercase;letter-spacing:1px;color:var(--txt2);font-weight:500">Fecha</th>
+                <th style="padding:5px 8px;text-align:left;font-size:.58rem;text-transform:uppercase;letter-spacing:1px;color:var(--txt2);font-weight:500">Clase</th>
+                <th style="padding:5px 8px;text-align:center;font-size:.58rem;text-transform:uppercase;letter-spacing:1px;color:var(--txt2);font-weight:500">Asist.</th>
+                <th style="padding:5px 8px;text-align:center;font-size:.58rem;text-transform:uppercase;letter-spacing:1px;color:var(--txt2);font-weight:500">Aforo</th>
+                <th style="padding:5px 8px;text-align:left;font-size:.58rem;text-transform:uppercase;letter-spacing:1px;color:var(--txt2);font-weight:500">Estado</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${misRegs.map(r => {
+                const fd = new Date(r.fecha+'T12:00:00').toLocaleDateString('es-MX',{day:'2-digit',month:'short'});
+                const asis = parseInt(r.asistentes)||0;
+                const cap  = parseInt(r.cap)||0;
+                const afo  = cap>0 ? Math.round(asis/cap*100) : null;
+                const estCol = r.estado==='ok'?'var(--neon)':r.estado==='falta'?'var(--red2)':'var(--blue)';
+                const estTxt = r.estado==='ok'?'✔':r.estado==='falta'?'✖':'⇄';
+                return `<tr style="border-bottom:1px solid var(--border)">
+                  <td style="padding:5px 8px;color:var(--txt2)">${fd}</td>
+                  <td style="padding:5px 8px;font-weight:600">${r.clase||'—'}<br><span style="font-size:.58rem;color:var(--txt3);font-weight:400">${r.hora||''}</span></td>
+                  <td style="padding:5px 8px;text-align:center;font-family:'DM Mono',monospace">${r.estado!=='falta'?asis:'—'}</td>
+                  <td style="padding:5px 8px;text-align:center;font-family:'DM Mono',monospace;color:${afo!==null?pctCol(afo):'var(--txt3)'}">${afo!==null?afo+'%':'—'}</td>
+                  <td style="padding:5px 8px;color:${estCol};font-weight:700">${estTxt}</td>
+                </tr>`;
+              }).join('')}
+            </tbody>
+          </table>
+        </div>`;
+    }
+  }
+
   // Info de la hoja
   const semLbl = document.getElementById('inst-firma-semana-lbl');
   if(semLbl) {
@@ -15509,6 +15830,7 @@ function instGuardarFirma() {
   // Actualizar UI
   instRenderFirmaTab();
   instCargarHojaFirmas();
+  coordActualizarHojaActiva();
   showToast('✔ Firma guardada correctamente','ok');
   registrarLog('instructor', `Firma digital registrada: ${instructores.find(i=>i.id===instActualId)?.nombre||'—'}`);
 }
@@ -15516,6 +15838,91 @@ function instGuardarFirma() {
 function instAbrirFirma() {
   instSwitchTab('firma');
 }
+
+// ─────────────────────────────────────────────
+// POLLING AUTOMÁTICO — revisar hoja cada 10s mientras instructor está en tab firma
+// ─────────────────────────────────────────────
+let _instPollTimer = null;
+
+function instIniciarPoll() {
+  instPararPoll();
+  _instPollTimer = setInterval(() => {
+    const panel = document.getElementById('inst-panel-firma');
+    if(!panel || panel.style.display === 'none') return;
+    const anteriorTenia = !!_instFirmaHojaActiva;
+    instCargarHojaFirmas();
+    const ahoraTiene = !!_instFirmaHojaActiva;
+    if(!anteriorTenia && ahoraTiene) {
+      instRenderFirmaTab();
+      showToast('✍ Hoja de firmas disponible — ya puedes firmar', 'ok');
+    }
+  }, 10000);
+}
+
+function instPararPoll() {
+  if(_instPollTimer) { clearInterval(_instPollTimer); _instPollTimer = null; }
+}
+
+// ─────────────────────────────────────────────
+// COORDINADOR — Indicador de hoja activa en modal de reportes
+// ─────────────────────────────────────────────
+// ─────────────────────────────────────────────
+// COORDINADOR — Indicador de hoja activa en modal de reportes
+// ─────────────────────────────────────────────
+function coordCerrarHojaActiva() {
+  try {
+    const hoja = JSON.parse(localStorage.getItem('fc_hoja_firmas_activa') || 'null');
+    if(!hoja) return;
+    const firmados = Object.values(hoja.firmas || {}).filter(f => f && f.data).length;
+    const msg = firmados > 0
+      ? `¿Cerrar la hoja activa?\n\nTiene ${firmados} firma(s) guardadas.\nAsegúrate de haber generado el PDF antes de cerrarla.\n\n¿Confirmar cierre?`
+      : '¿Cerrar la hoja activa para poder generar una nueva?';
+    if(!confirm(msg)) return;
+  } catch(e){}
+  localStorage.removeItem('fc_hoja_firmas_activa');
+  coordActualizarHojaActiva();
+  showToast('Hoja cerrada. Ya puedes generar una nueva.', 'info');
+}
+
+function coordActualizarHojaActiva() {
+  const infoEl = document.getElementById('coord-hoja-activa-info');
+  const txtEl  = document.getElementById('coord-hoja-activa-txt');
+  const progEl = document.getElementById('coord-hoja-activa-prog');
+  const btnFirmas = document.querySelector('[onclick="abrirFirmasDigitales()"]');
+  if(!infoEl) return;
+  try {
+    const hoja = JSON.parse(localStorage.getItem('fc_hoja_firmas_activa') || 'null');
+    if(!hoja) {
+      infoEl.style.display = 'none';
+      if(btnFirmas) {
+        btnFirmas.style.opacity = '';
+        btnFirmas.title = '';
+      }
+      return;
+    }
+    infoEl.style.display = 'block';
+    const firmas = hoja.firmas || {};
+    const firmados = Object.values(firmas).filter(f => f && f.data).length;
+    const regsDelPer = (typeof registros !== 'undefined')
+      ? [...new Set(registros.filter(r=>r.fecha>=(hoja.semIni||'')&&r.fecha<=(hoja.semFin||'')).map(r=>r.inst_id))]
+      : [];
+    const total = Math.max(regsDelPer.length, firmados, Object.keys(firmas).length);
+    const semTxt = hoja.encabezado || (hoja.semIni ? `${hoja.semIni} → ${hoja.semFin}` : 'Semana activa');
+    if(txtEl) txtEl.innerHTML = `✍ Hoja activa · <strong style="color:var(--neon)">${semTxt}</strong>`;
+    if(progEl) {
+      progEl.textContent = total > 0 ? `${firmados}/${total} firmados` : `${firmados} firmados`;
+      progEl.style.color = (total > 0 && firmados >= total) ? 'var(--neon)' : 'var(--gold2)';
+    }
+    // Resaltar el botón de firmas digitales si hay hoja activa con firmas
+    if(btnFirmas && firmados > 0) {
+      btnFirmas.title = `Hoja activa: ${firmados} firma(s) — se acumularán al abrir la misma semana`;
+    }
+  } catch(e) { if(infoEl) infoEl.style.display = 'none'; }
+}
+
+// Actualizar indicador periódicamente y al iniciar
+setInterval(coordActualizarHojaActiva, 8000);
+setTimeout(coordActualizarHojaActiva, 1500);
 
 // ─────────────────────────────────────────────
 // COORDINADOR: Generar / Publicar hoja de firmas
@@ -15548,6 +15955,8 @@ function instPublicarHojaFirmas(semIni, semFin, encabezado) {
 
   const hoja = { semIni, semFin, encabezado, firmas: prevFirmas, publicado: new Date().toISOString() };
   try { localStorage.setItem(INST_FIRMA_KEY, JSON.stringify(hoja)); } catch(e){}
+  // Actualizar indicador coordinador
+  setTimeout(coordActualizarHojaActiva, 100);
   // No mostrar toast aquí porque ya se llama al abrir el modal de firmas
 }
 
