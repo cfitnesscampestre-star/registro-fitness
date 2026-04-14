@@ -990,11 +990,10 @@ function repExportarWord() {
   const menosText = menosNombre ? menosNombre + (_repDep.profMenosRazon     ? ', ' + _repDep.profMenosRazon     : '') : '';
 
   // ── Helpers de XML ──────────────────────────────────────────────────────
-  const W = 'http://schemas.openxmlformats.org/wordprocessingml/2006/main';
   const enc = s => x(String(s||''));
 
   function par(text, opts={}) {
-    const {bold=false, size=20, color='000000', align='left', spBefore=0, spAfter=80, shade=null, italic=false} = opts;
+    const {bold=false, size=20, color='000000', align='left', spBefore=0, spAfter=80, shade=null, italic=false, font='Arial'} = opts;
     const alignXml = align!=='left' ? `<w:jc w:val="${align}"/>` : '';
     const shdXml   = shade ? `<w:shd w:val="clear" w:color="auto" w:fill="${shade}"/>` : '';
     const boldXml  = bold  ? '<w:b/><w:bCs/>' : '';
@@ -1005,11 +1004,27 @@ function repExportarWord() {
         <w:spacing w:before="${spBefore}" w:after="${spAfter}"/>
         ${alignXml}
         ${shdXml}
-        <w:rPr><w:rFonts w:ascii="Arial" w:hAnsi="Arial" w:cs="Arial"/>${boldXml}${italXml}<w:sz w:val="${size}"/><w:szCs w:val="${size}"/>${colorXml}</w:rPr>
+        <w:rPr><w:rFonts w:ascii="${font}" w:hAnsi="${font}" w:cs="${font}"/>${boldXml}${italXml}<w:sz w:val="${size}"/><w:szCs w:val="${size}"/>${colorXml}</w:rPr>
       </w:pPr>
       <w:r>
-        <w:rPr><w:rFonts w:ascii="Arial" w:hAnsi="Arial" w:cs="Arial"/>${boldXml}${italXml}<w:sz w:val="${size}"/><w:szCs w:val="${size}"/>${colorXml}</w:rPr>
+        <w:rPr><w:rFonts w:ascii="${font}" w:hAnsi="${font}" w:cs="${font}"/>${boldXml}${italXml}<w:sz w:val="${size}"/><w:szCs w:val="${size}"/>${colorXml}</w:rPr>
         <w:t xml:space="preserve">${enc(text)}</w:t>
+      </w:r>
+    </w:p>`;
+  }
+
+  // Párrafo con dos runs (bold label + normal value) en la misma línea
+  function parDual(label, value, opts={}) {
+    const {size=20, color='000000', font='Arial', spAfter=60} = opts;
+    return `<w:p>
+      <w:pPr><w:spacing w:before="0" w:after="${spAfter}"/></w:pPr>
+      <w:r>
+        <w:rPr><w:rFonts w:ascii="${font}" w:hAnsi="${font}" w:cs="${font}"/><w:b/><w:bCs/><w:sz w:val="${size}"/><w:szCs w:val="${size}"/><w:color w:val="${color}"/></w:rPr>
+        <w:t xml:space="preserve">${enc(label)}</w:t>
+      </w:r>
+      <w:r>
+        <w:rPr><w:rFonts w:ascii="${font}" w:hAnsi="${font}" w:cs="${font}"/><w:sz w:val="${size}"/><w:szCs w:val="${size}"/></w:rPr>
+        <w:t xml:space="preserve">${enc(value)}</w:t>
       </w:r>
     </w:p>`;
   }
@@ -1018,6 +1033,9 @@ function repExportarWord() {
   const TBL_W = 9360;
   const COL1  = 3900; // etiqueta ~42%
   const COL2  = TBL_W - COL1;
+
+  // Bordes de tabla mejorados
+  const BORDE_COLOR = 'B0B0B0';
 
   function cellShd(fill) {
     return `<w:shd w:val="clear" w:color="auto" w:fill="${fill}"/>`;
@@ -1034,15 +1052,15 @@ function repExportarWord() {
 
   function headerRow(label, span=2) {
     return `<w:tr>
-      <w:trPr><w:trHeight w:val="320"/></w:trPr>
-      ${td(label, {w: TBL_W, bold:true, color:'FFFFFF', shade:'1A7A45', size:20, span})}
+      <w:trPr><w:trHeight w:val="340"/></w:trPr>
+      ${td(label, {w: TBL_W, bold:true, color:'FFFFFF', shade:'1A7A45', size:21, span})}
     </w:tr>`;
   }
 
   function dataRow(label, value) {
     return `<w:tr>
-      <w:trPr><w:trHeight w:val="280"/></w:trPr>
-      ${td(label,  {w:COL1, bold:true,  shade:'F6FAF7'})}
+      <w:trPr><w:trHeight w:val="300"/></w:trPr>
+      ${td(label,  {w:COL1, bold:true,  shade:'F2F8F4'})}
       ${td(value,  {w:COL2, shade:'FFFFFF'})}
     </w:tr>`;
   }
@@ -1053,19 +1071,19 @@ function repExportarWord() {
       <w:tblPr>
         <w:tblW w:w="${TBL_W}" w:type="dxa"/>
         <w:tblBorders>
-          <w:top w:val="single" w:sz="4" w:space="0" w:color="C0C0C0"/>
-          <w:left w:val="single" w:sz="4" w:space="0" w:color="C0C0C0"/>
-          <w:bottom w:val="single" w:sz="4" w:space="0" w:color="C0C0C0"/>
-          <w:right w:val="single" w:sz="4" w:space="0" w:color="C0C0C0"/>
-          <w:insideH w:val="single" w:sz="4" w:space="0" w:color="C0C0C0"/>
-          <w:insideV w:val="single" w:sz="4" w:space="0" w:color="C0C0C0"/>
+          <w:top w:val="single" w:sz="4" w:space="0" w:color="${BORDE_COLOR}"/>
+          <w:left w:val="single" w:sz="4" w:space="0" w:color="${BORDE_COLOR}"/>
+          <w:bottom w:val="single" w:sz="4" w:space="0" w:color="${BORDE_COLOR}"/>
+          <w:right w:val="single" w:sz="4" w:space="0" w:color="${BORDE_COLOR}"/>
+          <w:insideH w:val="single" w:sz="4" w:space="0" w:color="${BORDE_COLOR}"/>
+          <w:insideV w:val="single" w:sz="4" w:space="0" w:color="${BORDE_COLOR}"/>
         </w:tblBorders>
         <w:tblCellMar><w:top w:w="0" w:type="dxa"/><w:left w:w="0" w:type="dxa"/><w:bottom w:w="0" w:type="dxa"/><w:right w:w="0" w:type="dxa"/></w:tblCellMar>
       </w:tblPr>
       <w:tblGrid>${grid}</w:tblGrid>
       ${rows}
     </w:tbl>
-    <w:p><w:pPr><w:spacing w:after="120"/></w:pPr></w:p>`;
+    <w:p><w:pPr><w:spacing w:after="140"/></w:pPr></w:p>`;
   }
 
   // ── Competencias ────────────────────────────────────────────────────────
@@ -1073,62 +1091,71 @@ function repExportarWord() {
   const compRows = comps.length
     ? comps.map(c=>`<w:tr><w:trPr><w:trHeight w:val="280"/></w:trPr>${td(c,{w:TBL_W,span:1})}</w:tr>`).join('')
     : `<w:tr><w:trPr><w:trHeight w:val="280"/></w:trPr>${td('—',{w:TBL_W,span:1,italic:true,color:'888888'})}</w:tr>`;
-  // 2 filas vacías de relleno
   const compEmpty = `<w:tr><w:trPr><w:trHeight w:val="320"/></w:trPr>${td('',{w:TBL_W,span:1})}</w:tr>`.repeat(2);
 
   // ── Logros ──────────────────────────────────────────────────────────────
-  const COL_L1=2400, COL_L2=5320, COL_L3=1640;
+  const COL_L1=2400, COL_L2=5160, COL_L3=1800;
   const logros = (_repDep.logros||[]).filter(l=>l.logro||l.descripcion);
   const logroHeader = `<w:tr>
     <w:trPr><w:trHeight w:val="280"/></w:trPr>
-    ${td('Logro',          {w:COL_L1, bold:true, shade:'E8F5EC', size:19})}
-    ${td('Descripción',    {w:COL_L2, bold:true, shade:'E8F5EC', size:19})}
-    ${td('¿Publicar en redes? (Si/No)',{w:COL_L3, bold:true, shade:'E8F5EC', size:18, align:'center'})}
+    ${td('Logro',          {w:COL_L1, bold:true, shade:'E4F2E8', size:19, color:'1A5A35'})}
+    ${td('Descripción',    {w:COL_L2, bold:true, shade:'E4F2E8', size:19, color:'1A5A35'})}
+    ${td('¿Consideras necesario publicarlo en redes? (Si/ No)',{w:COL_L3, bold:true, shade:'E4F2E8', size:16, align:'center', color:'1A5A35'})}
   </w:tr>`;
   const logroRows = logros.length
     ? logros.map((l,i)=>`<w:tr>
-        <w:trPr><w:trHeight w:val="280"/></w:trPr>
+        <w:trPr><w:trHeight w:val="300"/></w:trPr>
         ${td(`${i+1}. ${l.logro}`, {w:COL_L1, bold:true})}
         ${td(l.descripcion||'',    {w:COL_L2})}
         ${td(l.redes||'No',        {w:COL_L3, align:'center', bold: l.redes==='Si', color: l.redes==='Si'?'1A7A45':'000000'})}
       </w:tr>`).join('')
     : `<w:tr><w:trPr><w:trHeight w:val="280"/></w:trPr>${td('—',{w:COL_L1})}${td('',{w:COL_L2})}${td('',{w:COL_L3})}</w:tr>`;
   const logroEmpty = `<w:tr>
-    <w:trPr><w:trHeight w:val="340"/></w:trPr>
+    <w:trPr><w:trHeight w:val="360"/></w:trPr>
     ${td('',{w:COL_L1})}${td('',{w:COL_L2})}${td('',{w:COL_L3})}
   </w:tr>`.repeat(3);
   const notaLogro = par('En dado caso que consideres necesario publicarlo en redes, hay que anexar en el drive una carpeta con el número del logro y las imágenes correspondientes.',
-    {size:18, color:'555555', italic:true, spBefore:0, spAfter:160});
+    {size:18, color:'555555', italic:true, spBefore:0, spAfter:180});
 
   // ── Incidencias ─────────────────────────────────────────────────────────
   const COL_I1=3900, COL_I2=5460;
   const incids = (_repDep.incidencias||[]).filter(i=>i.incidencia||i.solucion);
   const incHeader = `<w:tr>
     <w:trPr><w:trHeight w:val="280"/></w:trPr>
-    ${td('Incidencia',{w:COL_I1, bold:true, shade:'E8F5EC', size:19})}
-    ${td('Solución',  {w:COL_I2, bold:true, shade:'E8F5EC', size:19})}
+    ${td('Incidencia',{w:COL_I1, bold:true, shade:'E4F2E8', size:19, color:'1A5A35'})}
+    ${td('Solución',  {w:COL_I2, bold:true, shade:'E4F2E8', size:19, color:'1A5A35'})}
   </w:tr>`;
   const incRows = incids.length
     ? incids.map(inc=>`<w:tr>
-        <w:trPr><w:trHeight w:val="320"/></w:trPr>
+        <w:trPr><w:trHeight w:val="340"/></w:trPr>
         ${td(inc.incidencia||'', {w:COL_I1, bold:true})}
         ${td(inc.solucion||'',   {w:COL_I2})}
       </w:tr>`).join('')
     : `<w:tr><w:trPr><w:trHeight w:val="320"/></w:trPr>${td('—',{w:COL_I1})}${td('',{w:COL_I2})}</w:tr>`;
   const incEmpty = `<w:tr>
-    <w:trPr><w:trHeight w:val="400"/></w:trPr>
+    <w:trPr><w:trHeight w:val="420"/></w:trPr>
     ${td('',{w:COL_I1})}${td('',{w:COL_I2})}
-  </w:tr>`.repeat(Math.max(0, 5 - incids.length));
+  </w:tr>`.repeat(Math.max(0, 4 - incids.length));
 
-  // ── Tabla gerencia ───────────────────────────────────────────────────────
+  // ── Tabla gerencia — ahora con verde (igual que el PDF original) ───────
   const gerenciaRow = `<w:tr>
     <w:trPr><w:trHeight w:val="1800" w:hRule="atLeast"/></w:trPr>
     ${td(_repDep.ayuda||'', {w:TBL_W, span:1})}
   </w:tr>`;
 
-  // ── Título del documento ─────────────────────────────────────────────────
-  const titulo = par('Reporte semanal | Deportes',
-    {bold:true, size:28, spBefore:240, spAfter:240});
+  // ── Título del documento con línea verde ──────────────────────────────
+  const titulo = `<w:p>
+    <w:pPr>
+      <w:spacing w:before="200" w:after="120"/>
+      <w:pBdr><w:bottom w:val="single" w:sz="12" w:space="4" w:color="1A7A45"/></w:pBdr>
+      <w:rPr><w:rFonts w:ascii="Arial" w:hAnsi="Arial" w:cs="Arial"/><w:b/><w:bCs/><w:sz w:val="30"/><w:szCs w:val="30"/></w:rPr>
+    </w:pPr>
+    <w:r>
+      <w:rPr><w:rFonts w:ascii="Arial" w:hAnsi="Arial" w:cs="Arial"/><w:b/><w:bCs/><w:sz w:val="30"/><w:szCs w:val="30"/></w:rPr>
+      <w:t>Reporte semanal | Deportes</w:t>
+    </w:r>
+  </w:p>
+  <w:p><w:pPr><w:spacing w:after="160"/></w:pPr></w:p>`;
 
   // ── Ensamblado del body ──────────────────────────────────────────────────
   const body = [
@@ -1136,7 +1163,7 @@ function repExportarWord() {
 
     table([
       headerRow('Datos generales'),
-      dataRow('Disciplina', _repDep.disciplina),
+      dataRow('Disciplina', _repDep.disciplina || 'Fitness'),
       dataRow('Semana',     _repDep.semana),
       dataRow('Director',   _repDep.director),
     ]),
@@ -1173,15 +1200,65 @@ function repExportarWord() {
     table([headerRow('Incidencias generales semanales', 2), incHeader, incRows, incEmpty], [COL_I1, COL_I2]),
 
     table([
-      `<w:tr><w:trPr><w:trHeight w:val="320"/></w:trPr>
-        ${td('¿En qué te puede ayudar la gerencia deportiva?',{w:TBL_W, bold:true, color:'FFFFFF', shade:'1A4A8A', size:20, span:1})}
+      `<w:tr><w:trPr><w:trHeight w:val="340"/></w:trPr>
+        ${td('¿En qué te puede ayudar la gerencia deportiva?',{w:TBL_W, bold:true, color:'FFFFFF', shade:'1A7A45', size:21, span:1})}
       </w:tr>`,
       gerenciaRow,
     ], [TBL_W]),
 
   ].join('\n');
 
-  // ── Armar document.xml ───────────────────────────────────────────────────
+  // ── Header XML (aparece en cada página) ──────────────────────────────────
+  const headerXml = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<w:hdr xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main"
+       xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships">
+  <w:p>
+    <w:pPr>
+      <w:pBdr><w:bottom w:val="single" w:sz="6" w:space="2" w:color="1A7A45"/></w:pBdr>
+      <w:jc w:val="right"/>
+      <w:rPr><w:rFonts w:ascii="Arial" w:hAnsi="Arial"/><w:sz w:val="16"/><w:color w:val="1A7A45"/></w:rPr>
+    </w:pPr>
+    <w:r>
+      <w:rPr><w:rFonts w:ascii="Arial" w:hAnsi="Arial"/><w:b/><w:sz w:val="18"/><w:color w:val="1A7A45"/></w:rPr>
+      <w:t xml:space="preserve">Club Campestre Aguascalientes</w:t>
+    </w:r>
+    <w:r>
+      <w:rPr><w:rFonts w:ascii="Arial" w:hAnsi="Arial"/><w:sz w:val="16"/><w:color w:val="777777"/></w:rPr>
+      <w:t xml:space="preserve"> · Coordinación Fitness</w:t>
+    </w:r>
+  </w:p>
+</w:hdr>`;
+
+  // ── Footer XML ───────────────────────────────────────────────────────────
+  const footerXml = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<w:ftr xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main"
+       xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships">
+  <w:p>
+    <w:pPr>
+      <w:pBdr><w:top w:val="single" w:sz="6" w:space="2" w:color="1A7A45"/></w:pBdr>
+      <w:jc w:val="center"/>
+      <w:rPr><w:rFonts w:ascii="Arial" w:hAnsi="Arial"/><w:sz w:val="14"/><w:color w:val="999999"/></w:rPr>
+    </w:pPr>
+    <w:r>
+      <w:rPr><w:rFonts w:ascii="Arial" w:hAnsi="Arial"/><w:sz w:val="14"/><w:color w:val="999999"/></w:rPr>
+      <w:t xml:space="preserve">Reporte Semanal Deportes · Fitness Control · Club Campestre Aguascalientes · </w:t>
+    </w:r>
+    <w:r>
+      <w:rPr><w:rFonts w:ascii="Arial" w:hAnsi="Arial"/><w:sz w:val="14"/><w:color w:val="999999"/></w:rPr>
+      <w:fldChar w:fldCharType="begin"/>
+    </w:r>
+    <w:r>
+      <w:rPr><w:rFonts w:ascii="Arial" w:hAnsi="Arial"/><w:sz w:val="14"/><w:color w:val="999999"/></w:rPr>
+      <w:instrText> PAGE </w:instrText>
+    </w:r>
+    <w:r>
+      <w:rPr><w:rFonts w:ascii="Arial" w:hAnsi="Arial"/><w:sz w:val="14"/><w:color w:val="999999"/></w:rPr>
+      <w:fldChar w:fldCharType="end"/>
+    </w:r>
+  </w:p>
+</w:ftr>`;
+
+  // ── Armar document.xml con referencia a header/footer ────────────────────
   const documentXml = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <w:document xmlns:wpc="http://schemas.microsoft.com/office/word/2010/wordprocessingCanvas"
             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
@@ -1202,8 +1279,10 @@ function repExportarWord() {
   <w:body>
     ${body}
     <w:sectPr>
+      <w:headerReference w:type="default" r:id="rIdHdr1"/>
+      <w:footerReference w:type="default" r:id="rIdFtr1"/>
       <w:pgSz w:w="12240" w:h="15840"/>
-      <w:pgMar w:top="1440" w:right="1440" w:bottom="1440" w:left="1440" w:header="720" w:footer="720" w:gutter="0"/>
+      <w:pgMar w:top="1440" w:right="1260" w:bottom="1440" w:left="1440" w:header="720" w:footer="720" w:gutter="0"/>
     </w:sectPr>
   </w:body>
 </w:document>`;
@@ -1214,6 +1293,8 @@ function repExportarWord() {
   <Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/>
   <Default Extension="xml"  ContentType="application/xml"/>
   <Override PartName="/word/document.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.document.main+xml"/>
+  <Override PartName="/word/header1.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.header+xml"/>
+  <Override PartName="/word/footer1.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.footer+xml"/>
 </Types>`;
 
   const relsRoot = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
@@ -1223,26 +1304,30 @@ function repExportarWord() {
 
   const relsWord = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">
+  <Relationship Id="rIdHdr1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/header" Target="header1.xml"/>
+  <Relationship Id="rIdFtr1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/footer" Target="footer1.xml"/>
 </Relationships>`;
 
   // ── Comprimir y descargar ────────────────────────────────────────────────
   const te = new TextEncoder();
   const zipped = fflate.zipSync({
-    '[Content_Types].xml':   te.encode(contentTypes),
-    '_rels/.rels':           te.encode(relsRoot),
-    'word/document.xml':     te.encode(documentXml),
-    'word/_rels/document.xml.rels': te.encode(relsWord),
+    '[Content_Types].xml':              te.encode(contentTypes),
+    '_rels/.rels':                      te.encode(relsRoot),
+    'word/document.xml':                te.encode(documentXml),
+    'word/header1.xml':                 te.encode(headerXml),
+    'word/footer1.xml':                 te.encode(footerXml),
+    'word/_rels/document.xml.rels':     te.encode(relsWord),
   }, { level: 6 });
 
   const blob = new Blob([zipped], { type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' });
   const url  = URL.createObjectURL(blob);
   const a    = document.createElement('a');
-  const nombre = `Reporte_${(_repDep.disciplina||'Fitness').replace(/\s+/g,'_')}_${(_repDep.semana||'semana').replace(/[^a-zA-Z0-9]/g,'_').slice(0,30)}.docx`;
+  const nombre = `Reporte_Semanal_Deportes_${(_repDep.disciplina||'Fitness').replace(/\s+/g,'_')}_${(_repDep.semana||'semana').replace(/[^a-zA-Z0-9áéíóúñÁÉÍÓÚÑ]/g,'_').slice(0,35)}.docx`;
   a.href = url; a.download = nombre;
   document.body.appendChild(a); a.click();
   document.body.removeChild(a);
   setTimeout(()=>URL.revokeObjectURL(url), 2000);
-  showToast(`Word descargado · ${nombre}`, 'ok');
+  showToast(`📄 Word descargado: ${nombre}`, 'ok');
 }
 
 // ── Sidebar: hover expand (tablet) + click-to-collapse (desktop) ──────────
