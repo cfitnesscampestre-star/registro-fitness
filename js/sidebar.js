@@ -516,28 +516,44 @@ function repImprimir() {
     .map(c=>`<tr><td style="padding:5px 8px">${esc(c)}</td></tr>`).join('')
     || '<tr><td style="padding:5px 8px;color:#888">—</td></tr>';
 
-  const logroRows = (_repDep.logros||[]).map((l,i)=>`
+  const logroRows = (_repDep.logros||[]).filter(l=>l.logro||l.descripcion).map((l,i)=>`
     <tr>
-      <td style="padding:5px 8px;font-weight:600;vertical-align:top">${i+1}. ${esc(l.logro)}</td>
-      <td style="padding:5px 8px;vertical-align:top">${esc(l.descripcion)}</td>
-      <td style="padding:5px 8px;text-align:center;vertical-align:top;font-weight:${l.redes==='Si'?'bold':'normal'};color:${l.redes==='Si'?'#1a7a45':'#333'}">${esc(l.redes)}</td>
+      <td style="padding:6px 8px;font-weight:600;vertical-align:top;width:22%">${i+1}. ${esc(l.logro)}</td>
+      <td style="padding:6px 8px;vertical-align:top">${esc(l.descripcion)}</td>
+      <td style="padding:6px 8px;text-align:center;vertical-align:top;font-weight:${l.redes==='Si'?'bold':'normal'};color:${l.redes==='Si'?'#1a7a45':'#333'};width:18%">${esc(l.redes)}</td>
     </tr>`).join('') || '<tr><td colspan="3" style="padding:5px 8px;color:#888">—</td></tr>';
 
-  const incRows = (_repDep.incidencias||[]).map(inc=>`
+  const incRows = (_repDep.incidencias||[]).filter(i=>i.incidencia||i.solucion).map(inc=>`
     <tr>
-      <td style="padding:6px 8px;vertical-align:top;font-weight:600">${esc(inc.incidencia)}</td>
+      <td style="padding:6px 8px;vertical-align:top;font-weight:600;width:42%">${esc(inc.incidencia)}</td>
       <td style="padding:6px 8px;vertical-align:top">${esc(inc.solucion)}</td>
     </tr>`).join('') || '<tr><td colspan="2" style="padding:6px 8px;color:#888">—</td></tr>';
 
   const incCount = (_repDep.incidencias||[]).filter(i=>i.incidencia.trim()).length;
-  const emptyIncRows = Array(Math.max(0, 5-incCount)).fill('<tr><td style="padding:10px 8px">&nbsp;</td><td>&nbsp;</td></tr>').join('');
+  const emptyIncRows = Array(Math.max(0, 4-incCount)).fill('<tr><td style="padding:10px 8px">&nbsp;</td><td>&nbsp;</td></tr>').join('');
 
-  const deco = ['#1a7a45','#2b8fd6','#6c6c6c'].flatMap(c=>[c,c,c])
-    .map(c=>`<div class="deco-seg" style="background:${c}"></div>`).join('');
+  // Decoración lateral izquierda — patrón de semicírculos verde/gris/amarillo-verde
+  const colPattern = ['#3b8955','#a0c850','#b0b0b0','#1a7a45','#6db050','#d0d0d0'];
+  const decoSegs = Array(40).fill(0).map((_,i)=>{
+    const c = colPattern[i % colPattern.length];
+    return `<div class="deco-seg" style="background:${c}"></div>`;
+  }).join('');
 
   const logoHtml = logoSrc
-    ? `<img src="${logoSrc}" alt="Club Campestre" style="height:13mm;width:auto">`
-    : `<div style="font-weight:bold;font-size:13px;color:#1a7a45;text-align:right;line-height:1.4">Club Campestre<br>Aguascalientes</div>`;
+    ? `<img src="${logoSrc}" alt="Club Campestre" style="height:14mm;width:auto">`
+    : `<div class="logo-text"><span class="logo-c">C</span>ampestre<br><small>Aguascalientes</small></div>`;
+
+  // Iconos deportivos SVG para el footer (consistentes en todos los navegadores)
+  const deporteIcons = [
+    '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M13.5 5.5c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zM9.8 8.9L7 23h2.1l1.8-8 2.1 2v6h2v-7.5l-2.1-2 .6-3C14.8 12 16.8 13 19 13v-2c-1.9 0-3.5-1-4.3-2.4l-1-1.6c-.4-.6-1-1-1.7-1-.3 0-.5.1-.8.1L6 8.3V13h2V9.6l1.8-.7"/></svg>',
+    '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M13.49 5.48c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm-3.6 13.9l1-4.4 2.1 2v6h2v-7.5l-2.1-2 .6-3c1.3 1.5 3.3 2.5 5.5 2.5v-2c-1.9 0-3.5-1-4.3-2.4l-1-1.6c-.4-.6-1-1-1.7-1-.3 0-.5.1-.8.1L6 8.3V13h2V9.6l1.8-.7"/></svg>',
+    '<svg viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="2" r="2"/><path d="M4.5 16.5l1.3-.8L9 12.5V9l-2-1.5L4 9v3.5l.5 4z"/><path d="M19.5 16.5l-1.3-.8L15 12.5V9l2-1.5L20 9v3.5l-.5 4z"/><path d="M12 22c.5 0 1-.4 1-1v-5.5L9 12l3-3 3 3-4 3.5V21c0 .6.5 1 1 1z"/></svg>',
+    '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M22 12c0-5.5-4.5-10-10-10S2 6.5 2 12s4.5 10 10 10 10-4.5 10-10zM4.1 14.1l5.1-1.4.5 2.4-4 1.1c-.7-.6-1.2-1.3-1.6-2.1zm16.4-2.2l-5.1 1.4-.5-2.4 4-1.1c.7.6 1.2 1.3 1.6 2.1zM12 20c-4.4 0-8-3.6-8-8s3.6-8 8-8 8 3.6 8 8-3.6 8-8 8z"/></svg>',
+    '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M15.5 5.5c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zM5 12c-2.8 0-5 2.2-5 5s2.2 5 5 5 5-2.2 5-5-2.2-5-5-5zm0 8.5c-1.9 0-3.5-1.6-3.5-3.5S3.1 13.5 5 13.5s3.5 1.6 3.5 3.5-1.6 3.5-3.5 3.5zm5.8-10l2.4-2.4.8.8c1.3 1.3 3 2.1 5 2.1V9c-1.5 0-2.7-.6-3.6-1.5l-1.9-1.9c-.5-.4-1-.6-1.6-.6s-1.1.2-1.4.6L7.8 8.4c-.4.4-.6.9-.6 1.4 0 .6.2 1.1.6 1.4L11 14v5h2v-6.2l-2.2-2.3zM19 12c-2.8 0-5 2.2-5 5s2.2 5 5 5 5-2.2 5-5-2.2-5-5-5zm0 8.5c-1.9 0-3.5-1.6-3.5-3.5s1.6-3.5 3.5-3.5 3.5 1.6 3.5 3.5-1.6 3.5-3.5 3.5z"/></svg>',
+    '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10 10-4.5 10-10S17.5 2 12 2zm-2 15l-5-5 1.4-1.4L10 14.2l7.6-7.6L19 8l-9 9z"/></svg>',
+  ];
+  const footerIcons = Array(20).fill(deporteIcons).flat().slice(0,20)
+    .map(icon=>`<span class="ft-ico">${icon}</span>`).join('');
 
   const html = `<!DOCTYPE html>
 <html lang="es"><head>
@@ -545,24 +561,46 @@ function repImprimir() {
 <title>Reporte Semanal Deportes · ${esc(_repDep.disciplina)} · ${esc(_repDep.semana)}</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
-html,body{width:210mm;background:#fff;font-family:Arial,Helvetica,sans-serif;font-size:10.5px;color:#111}
-.deco{position:fixed;left:0;top:0;width:11mm;height:100%;display:flex;flex-direction:column;overflow:hidden}
-.deco-seg{width:100%;height:11mm;border-radius:0 0 50% 50%;flex-shrink:0}
-.page{padding:10mm 12mm 22mm 18mm;min-height:277mm}
-.top{display:flex;justify-content:space-between;align-items:flex-end;padding-bottom:3mm;margin-bottom:6mm;border-bottom:2px solid #1a7a45}
-.ptitle{font-size:15px;font-weight:bold}
-table{width:100%;border-collapse:collapse;margin-bottom:5mm}
-td,th{border:1px solid #c0c0c0;padding:4px 7px;vertical-align:top;line-height:1.45;font-size:10px}
-.sh td{background:#1a7a45;color:#fff;font-weight:bold;font-size:10px;letter-spacing:.4px}
-.sh2 td{background:#1a4a8a;color:#fff;font-weight:bold;font-size:10px}
-.lbl{font-weight:bold;width:42%;background:#f6faf7}
-.thdr td{background:#e8f5ec;font-weight:bold;font-size:9.5px}
-.nota{font-size:8.5px;color:#555;font-style:italic;padding:4px 7px;border:1px solid #c0c0c0;border-top:none}
-.footer{position:fixed;bottom:0;left:11mm;right:0;height:12mm;background:linear-gradient(90deg,#1a4a8a,#1a7a45);display:flex;align-items:center;justify-content:space-around;padding:0 4mm}
-.footer span{color:rgba(255,255,255,.5);font-size:14px}
-@media print{*{-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important}}
+html,body{width:210mm;background:#fff;font-family:Arial,Helvetica,sans-serif;font-size:10.5px;color:#222}
+@page{size:A4 portrait;margin:0}
+
+/* Decoración lateral — semicírculos alternados */
+.deco{position:fixed;left:0;top:0;width:12mm;height:100%;display:flex;flex-direction:column;overflow:hidden;z-index:10}
+.deco-seg{width:12mm;height:12mm;border-radius:50%;flex-shrink:0;margin:0 0 -1px -3mm}
+
+/* Logo */
+.logo-text{font-weight:bold;font-size:14px;color:#1a7a45;text-align:right;line-height:1.2;font-family:Georgia,serif}
+.logo-text .logo-c{font-size:22px;font-style:italic;color:#2a9a55}
+.logo-text small{font-size:9px;color:#555;font-weight:normal;letter-spacing:1px}
+
+/* Página */
+.page{padding:8mm 12mm 18mm 19mm;position:relative}
+.top{display:flex;justify-content:space-between;align-items:flex-end;padding-bottom:2mm;margin-bottom:5mm;border-bottom:2.5px solid #1a7a45}
+.ptitle{font-size:16px;font-weight:bold;color:#111}
+
+/* Tablas */
+table{width:100%;border-collapse:collapse;margin-bottom:4mm;page-break-inside:avoid}
+td,th{border:1px solid #b8b8b8;padding:4.5px 7px;vertical-align:top;line-height:1.5;font-size:10px}
+.sh td{background:#1a7a45;color:#fff;font-weight:bold;font-size:10.5px;letter-spacing:.5px;padding:5px 8px;border-color:#158a4a}
+.sh2 td{background:#1a7a45;color:#fff;font-weight:bold;font-size:10.5px;letter-spacing:.5px;padding:5px 8px;border-color:#158a4a}
+.lbl{font-weight:bold;width:42%;background:#f2f8f4;color:#111}
+.thdr td{background:#e4f2e8;font-weight:bold;font-size:9.8px;color:#1a5a35}
+.nota{font-size:8.5px;color:#555;font-style:italic;padding:5px 8px;border:1px solid #b8b8b8;border-top:none;margin-bottom:4mm;page-break-inside:avoid}
+
+/* Footer deportivo */
+.footer{position:fixed;bottom:0;left:12mm;right:0;height:13mm;background:linear-gradient(135deg,#1a3a5a 0%,#1a5a3a 100%);display:flex;align-items:center;justify-content:space-around;padding:0 6mm;overflow:hidden}
+.ft-ico{display:inline-flex;width:13px;height:13px;opacity:.35}
+.ft-ico svg{width:100%;height:100%;fill:rgba(255,255,255,.6)}
+
+/* Print fidelity */
+@media print{
+  *{-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important}
+  .page{padding:8mm 12mm 18mm 19mm}
+  table{page-break-inside:avoid}
+  tr{page-break-inside:avoid}
+}
 </style></head><body>
-<div class="deco">${deco}${deco}${deco}</div>
+<div class="deco">${decoSegs}</div>
 <div class="page">
   <div class="top">
     <div class="ptitle">Reporte semanal | Deportes</div>
@@ -571,7 +609,7 @@ td,th{border:1px solid #c0c0c0;padding:4px 7px;vertical-align:top;line-height:1.
 
   <table>
     <tr class="sh"><td colspan="2">Datos generales</td></tr>
-    <tr><td class="lbl">Disciplina</td><td>${esc(_repDep.disciplina)}</td></tr>
+    <tr><td class="lbl">Disciplina</td><td>${esc(_repDep.disciplina)||'Fitness'}</td></tr>
     <tr><td class="lbl">Semana</td><td>${esc(_repDep.semana)}</td></tr>
     <tr><td class="lbl">Director</td><td>${esc(_repDep.director)}</td></tr>
   </table>
@@ -580,13 +618,13 @@ td,th{border:1px solid #c0c0c0;padding:4px 7px;vertical-align:top;line-height:1.
     <tr class="sh"><td colspan="2">Objetivos</td></tr>
     <tr><td class="lbl">Objetivo semanal anterior de dirección</td><td>${esc(_repDep.objAnterior)}</td></tr>
     <tr><td class="lbl">¿Se cumplió? Si/ No, ¿Por qué?</td><td>${esc(_repDep.objCumplido)}</td></tr>
-    <tr><td class="lbl">Objetivo semanal próximo de dirección</td><td>${esc(_repDep.objProximo)}</td></tr>
+    <tr><td class="lbl">Objetivo semanal próximo de dirección</td><td style="line-height:1.5">${esc(_repDep.objProximo)}</td></tr>
   </table>
 
   <table>
     <tr class="sh"><td colspan="2">Alumnado</td></tr>
     <tr><td class="lbl">Cantidad total de alumnado</td><td>${esc(_repDep.alumTotal)}</td></tr>
-    <tr><td class="lbl">Asistencia total semanal</td><td>${esc(_repDep.alumAsistencia)}</td></tr>
+    <tr><td class="lbl">Asistencia total semanal</td><td><strong>${esc(_repDep.alumAsistencia)}</strong></td></tr>
     <tr><td class="lbl">Nuevos alumnos</td><td>${esc(_repDep.alumNuevos)}</td></tr>
     <tr><td class="lbl">Edades predominantes de alumnado</td><td>${esc(_repDep.alumEdades)}</td></tr>
   </table>
@@ -611,8 +649,8 @@ td,th{border:1px solid #c0c0c0;padding:4px 7px;vertical-align:top;line-height:1.
     <tr class="sh"><td colspan="3">Logros semanales</td></tr>
     <tr class="thdr">
       <td style="width:22%">Logro</td>
-      <td style="width:58%">Descripción</td>
-      <td style="width:20%;text-align:center;font-size:9px">¿Consideras necesario<br>publicarlo en redes? (Si/ No)</td>
+      <td style="width:60%">Descripción</td>
+      <td style="width:18%;text-align:center;font-size:9px;line-height:1.3">¿Consideras necesario<br>publicarlo en redes? (Si/ No)</td>
     </tr>
     ${logroRows}
     <tr><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>
@@ -620,7 +658,6 @@ td,th{border:1px solid #c0c0c0;padding:4px 7px;vertical-align:top;line-height:1.
     <tr><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>
   </table>
   <div class="nota">En dado caso que consideres necesario publicarlo en redes, hay que anexar en el drive una carpeta con el número del logro y las imágenes correspondientes.</div>
-  <div style="margin-bottom:5mm"></div>
 
   <table>
     <tr class="sh"><td colspan="2">Incidencias generales semanales</td></tr>
@@ -630,21 +667,308 @@ td,th{border:1px solid #c0c0c0;padding:4px 7px;vertical-align:top;line-height:1.
 
   <table>
     <tr class="sh2"><td>¿En qué te puede ayudar la gerencia deportiva?</td></tr>
-    <tr><td style="min-height:20mm;height:20mm;vertical-align:top;padding:5px 7px">${esc(_repDep.ayuda)}</td></tr>
+    <tr><td style="min-height:18mm;height:18mm;vertical-align:top;padding:5px 8px">${esc(_repDep.ayuda)}</td></tr>
   </table>
 </div>
-<div class="footer">
-  <span>🚶</span><span>🏃</span><span>⛹️</span><span>🏊</span><span>🚴</span>
-  <span>🤸</span><span>🧘</span><span>🥊</span><span>⚽</span><span>🏀</span>
-  <span>🎾</span><span>🏋️</span><span>🚶</span><span>🏃</span><span>⛹️</span>
-  <span>🏊</span><span>🚴</span><span>🤸</span><span>🧘</span><span>🥊</span>
-</div>
-<script>window.onload=()=>{setTimeout(()=>window.print(),350);};<\/script>
+<div class="footer">${footerIcons}</div>
+<script>window.onload=()=>{setTimeout(()=>window.print(),400);};<\/script>
 </body></html>`;
 
   const w = window.open('','_blank','width=940,height=760');
   if(!w){ showToast('⚠ Permite ventanas emergentes para imprimir','warn'); return; }
   w.document.open(); w.document.write(html); w.document.close();
+}
+
+// ═══════════════════════════════════════════════════════════════
+// EXPORTAR PDF DIRECTO (jsPDF) — Reporte Semanal Deportes
+// Genera PDF profesional sin depender de "imprimir como PDF"
+// ═══════════════════════════════════════════════════════════════
+function repExportarPDF() {
+  _repLeerCampos();
+  repAutoguardar();
+
+  if(!window.jspdf){ showToast('Librería jsPDF no disponible. Usa "Imprimir / PDF".','warn'); return; }
+  const {jsPDF} = window.jspdf;
+  const doc = new jsPDF({orientation:'portrait', unit:'mm', format:'a4'});
+  const PW=210, PH=297, ML=18, MR=12, MB=18;
+  const CW=PW-ML-MR;
+
+  // Paleta
+  const V=[26,122,69], VL=[228,242,232], VBG=[242,248,244];
+  const GR=[184,184,184], NEG=[34,34,34], GRIS=[90,90,90], BCO=[255,255,255];
+  const AZUL_OSC=[26,58,90];
+
+  let Y=0, pNum=0;
+
+  // Nombres de instructores
+  const destInst = instructores.find(i=>String(i.id)===String(_repDep.profDestacadoId));
+  const menosInst = instructores.find(i=>String(i.id)===String(_repDep.profMenosId));
+  const destText = destInst ? destInst.nombre + (_repDep.profDestacadoRazon?', '+_repDep.profDestacadoRazon:'') : '';
+  const menosText = menosInst ? menosInst.nombre + (_repDep.profMenosRazon?', '+_repDep.profMenosRazon:'') : '';
+
+  // ── Decoración lateral ──
+  function dibujarDeco() {
+    const cols=[[59,137,85],[160,200,80],[180,180,180],[26,122,69],[100,170,60],[210,210,210]];
+    for(let i=0;i<Math.ceil(PH/12)+2;i++){
+      const c=cols[i%cols.length];
+      doc.setFillColor(...c);
+      doc.circle(3,6+i*12,5.5,'F');
+    }
+  }
+
+  // ── Footer ──
+  function dibujarFooter() {
+    doc.setFillColor(...AZUL_OSC);
+    doc.rect(12,PH-13,PW-12,13,'F');
+    // Línea de gradiente verde
+    doc.setFillColor(...V);
+    doc.rect(12,PH-13,PW-12,0.5,'F');
+    // Texto página
+    doc.setFont('helvetica','normal'); doc.setFontSize(5.5); doc.setTextColor(160,180,170);
+    doc.text('Fitness Control · Club Campestre Aguascalientes', ML, PH-6);
+    doc.text(`Pág. ${pNum}`, PW-MR, PH-6, {align:'right'});
+  }
+
+  // ── Nueva página ──
+  function nuevaPag() {
+    if(pNum>0) doc.addPage();
+    pNum++;
+    dibujarDeco();
+    Y=12;
+  }
+
+  function checkSpace(h) {
+    if(Y+h > PH-MB) { dibujarFooter(); nuevaPag(); }
+  }
+
+  // ── Título + Logo ──
+  function dibujarHeader() {
+    doc.setFont('helvetica','bold'); doc.setFontSize(15); doc.setTextColor(...NEG);
+    doc.text('Reporte semanal | Deportes', ML, Y);
+    // Logo placeholder derecho
+    doc.setFont('helvetica','bold'); doc.setFontSize(10); doc.setTextColor(...V);
+    doc.text('ampestre', PW-MR, Y-2, {align:'right'});
+    doc.setFont('helvetica','normal'); doc.setFontSize(6.5); doc.setTextColor(...GRIS);
+    doc.text('Aguascalientes', PW-MR, Y+2.5, {align:'right'});
+    // Línea verde
+    Y+=3;
+    doc.setDrawColor(...V); doc.setLineWidth(0.8); doc.line(ML,Y,PW-MR,Y);
+    Y+=5;
+  }
+
+  // ── Encabezado de sección ──
+  function secHeader(texto) {
+    checkSpace(9);
+    doc.setFillColor(...V);
+    doc.setDrawColor(...GR);
+    doc.setLineWidth(0.15);
+    doc.rect(ML,Y,CW,6.5,'FD');
+    doc.setFont('helvetica','bold'); doc.setFontSize(9.5); doc.setTextColor(...BCO);
+    doc.text(texto, ML+3, Y+4.5);
+    Y+=6.5;
+  }
+
+  // ── Fila clave-valor ──
+  function fila(label, valor) {
+    const labelW=72, valW=CW-labelW;
+    const maxValW=valW-4;
+    doc.setFont('helvetica','normal'); doc.setFontSize(8.5);
+    const lines = doc.splitTextToSize(String(valor||''), maxValW);
+    const labelLines = doc.splitTextToSize(String(label||''), labelW-4);
+    const h = Math.max(7, Math.max(lines.length, labelLines.length)*3.6+3);
+
+    checkSpace(h);
+    // Label cell
+    doc.setFillColor(...VBG); doc.setDrawColor(...GR); doc.setLineWidth(0.15);
+    doc.rect(ML,Y,labelW,h,'FD');
+    doc.setFont('helvetica','bold'); doc.setFontSize(8.5); doc.setTextColor(...NEG);
+    doc.text(labelLines, ML+2.5, Y+4.2);
+
+    // Value cell
+    doc.setFillColor(...BCO);
+    doc.rect(ML+labelW,Y,valW,h,'FD');
+    doc.setFont('helvetica','normal'); doc.setFontSize(8.5); doc.setTextColor(...GRIS);
+    doc.text(lines, ML+labelW+2.5, Y+4.2);
+    Y+=h;
+  }
+
+  // ── Tabla multi-columna ──
+  function tblHeader(cols, widths) {
+    const h=6.5;
+    checkSpace(h+7);
+    let x=ML;
+    cols.forEach((txt,i)=>{
+      doc.setFillColor(228,242,232); doc.setDrawColor(...GR); doc.setLineWidth(0.15);
+      doc.rect(x,Y,widths[i],h,'FD');
+      doc.setFont('helvetica','bold'); doc.setFontSize(7.8); doc.setTextColor(26,90,53);
+      const lines = doc.splitTextToSize(txt, widths[i]-4);
+      doc.text(lines, x+2, Y+4);
+      x+=widths[i];
+    });
+    Y+=h;
+  }
+
+  function tblRow(cells, widths, opts={}) {
+    const h = opts.h || 7;
+    checkSpace(h);
+    let x=ML;
+    cells.forEach((txt,i)=>{
+      doc.setFillColor(...BCO); doc.setDrawColor(...GR); doc.setLineWidth(0.15);
+      doc.rect(x,Y,widths[i],h,'FD');
+      const bold = opts.boldCols && opts.boldCols.includes(i);
+      doc.setFont('helvetica', bold?'bold':'normal');
+      doc.setFontSize(7.8); doc.setTextColor(...(opts.color||GRIS));
+      const lines = doc.splitTextToSize(String(txt||''), widths[i]-4);
+      doc.text(lines, x+2, Y+4.2);
+      x+=widths[i];
+    });
+    Y+=h;
+  }
+
+  function tblRowMultiline(cells, widths, opts={}) {
+    doc.setFont('helvetica','normal'); doc.setFontSize(7.8);
+    let maxH=7;
+    const allLines=cells.map((txt,i)=>{
+      const lines = doc.splitTextToSize(String(txt||''), widths[i]-4);
+      maxH = Math.max(maxH, lines.length*3.5+3.5);
+      return lines;
+    });
+    checkSpace(maxH);
+    let x=ML;
+    allLines.forEach((lines,i)=>{
+      doc.setFillColor(...BCO); doc.setDrawColor(...GR); doc.setLineWidth(0.15);
+      doc.rect(x,Y,widths[i],maxH,'FD');
+      const bold = opts.boldCols && opts.boldCols.includes(i);
+      doc.setFont('helvetica', bold?'bold':'normal');
+      doc.setFontSize(7.8); doc.setTextColor(...(opts.color||GRIS));
+      doc.text(lines, x+2, Y+4);
+      x+=widths[i];
+    });
+    Y+=maxH;
+  }
+
+  function emptyRow(widths, h=8) {
+    checkSpace(h);
+    let x=ML;
+    widths.forEach(w=>{
+      doc.setFillColor(...BCO); doc.setDrawColor(...GR); doc.setLineWidth(0.15);
+      doc.rect(x,Y,w,h,'FD');
+      x+=w;
+    });
+    Y+=h;
+  }
+
+  // ═══ CONSTRUIR PDF ═══
+  nuevaPag();
+  dibujarHeader();
+
+  // ── Datos generales ──
+  secHeader('Datos generales');
+  fila('Disciplina', _repDep.disciplina || 'Fitness');
+  fila('Semana', _repDep.semana);
+  fila('Director', _repDep.director);
+  Y+=3;
+
+  // ── Objetivos ──
+  secHeader('Objetivos');
+  fila('Objetivo semanal anterior de dirección', _repDep.objAnterior);
+  fila('¿Se cumplió? Si/ No, ¿Por qué?', _repDep.objCumplido);
+  fila('Objetivo semanal próximo de dirección', _repDep.objProximo);
+  Y+=3;
+
+  // ── Alumnado ──
+  secHeader('Alumnado');
+  fila('Cantidad total de alumnado', _repDep.alumTotal);
+  fila('Asistencia total semanal', _repDep.alumAsistencia);
+  fila('Nuevos alumnos', _repDep.alumNuevos);
+  fila('Edades predominantes de alumnado', _repDep.alumEdades);
+  Y+=3;
+
+  // ── Profesores ──
+  secHeader('Profesores');
+  fila('Cantidad total de profesores', _repDep.profTotal);
+  fila('Cantidad total de clases', _repDep.profClases);
+  fila('Inasistencias semanales', _repDep.profInasistencias);
+  fila('Profesor más destacado de la semana (explica la razón)', destText);
+  fila('Profesor menos destacado de la semana (explica la razón)', menosText);
+  Y+=3;
+
+  // ── Competencias activas ──
+  secHeader('Competencias activas');
+  const comps = (_repDep.competencias||[]).filter(c=>c.trim());
+  if(comps.length){
+    comps.forEach(c=>{ fila('', c); }); // usar fila de ancho completo
+  } else {
+    checkSpace(7);
+    doc.setFillColor(...BCO); doc.setDrawColor(...GR); doc.setLineWidth(0.15);
+    doc.rect(ML,Y,CW,7,'FD');
+    doc.setFont('helvetica','italic'); doc.setFontSize(8); doc.setTextColor(160,160,160);
+    doc.text('—', ML+CW/2, Y+4.5, {align:'center'});
+    Y+=7;
+  }
+  emptyRow([CW],7);
+  emptyRow([CW],7);
+  Y+=3;
+
+  // ── Logros semanales ──
+  secHeader('Logros semanales');
+  const colL=[CW*0.22, CW*0.58, CW*0.20];
+  tblHeader(['Logro','Descripción','¿Consideras necesario\npublicarlo en redes? (Si/ No)'], colL);
+  const logros = (_repDep.logros||[]).filter(l=>l.logro||l.descripcion);
+  if(logros.length){
+    logros.forEach((l,i)=>{
+      tblRowMultiline([`${i+1}. ${l.logro}`, l.descripcion||'', l.redes||'No'], colL, {boldCols:[0]});
+    });
+  } else {
+    tblRow(['—','',''], colL);
+  }
+  // Filas vacías
+  for(let i=0;i<3;i++) emptyRow(colL,8);
+
+  // Nota
+  Y+=1;
+  checkSpace(8);
+  doc.setFont('helvetica','italic'); doc.setFontSize(7); doc.setTextColor(120,120,120);
+  doc.text('En dado caso que consideres necesario publicarlo en redes, hay que anexar en el drive una', ML, Y+3);
+  doc.text('carpeta con el número del logro y las imágenes correspondientes.', ML, Y+6.5);
+  Y+=9;
+
+  // ── Incidencias ──
+  secHeader('Incidencias generales semanales');
+  const colI=[CW*0.42, CW*0.58];
+  tblHeader(['Incidencia','Solución'], colI);
+  const incids = (_repDep.incidencias||[]).filter(i=>i.incidencia||i.solucion);
+  if(incids.length){
+    incids.forEach(inc=>{
+      tblRowMultiline([inc.incidencia||'', inc.solucion||''], colI, {boldCols:[0]});
+    });
+  } else {
+    tblRow(['—',''], colI);
+  }
+  for(let i=0;i<Math.max(0,4-incids.length);i++) emptyRow(colI,10);
+  Y+=3;
+
+  // ── Ayuda gerencia ──
+  secHeader('¿En qué te puede ayudar la gerencia deportiva?');
+  const ayudaLines = doc.splitTextToSize(_repDep.ayuda||'', CW-5);
+  const ayudaH = Math.max(16, ayudaLines.length*3.5+5);
+  checkSpace(ayudaH);
+  doc.setFillColor(...BCO); doc.setDrawColor(...GR); doc.setLineWidth(0.15);
+  doc.rect(ML,Y,CW,ayudaH,'FD');
+  doc.setFont('helvetica','normal'); doc.setFontSize(8.5); doc.setTextColor(...GRIS);
+  if(_repDep.ayuda) doc.text(ayudaLines, ML+2.5, Y+4.5);
+  Y+=ayudaH;
+
+  // Footer en todas las páginas
+  for(let p=1;p<=doc.getNumberOfPages();p++){
+    doc.setPage(p);
+    dibujarFooter();
+  }
+
+  // Nombre archivo
+  const nombre = `Reporte_Semanal_Deportes_${(_repDep.disciplina||'Fitness').replace(/\s+/g,'_')}_${(_repDep.semana||'').replace(/[^a-zA-Z0-9áéíóúñ]/gi,'_').replace(/_+/g,'_').slice(0,40)}.pdf`;
+  doc.save(nombre);
+  showToast(`✔ PDF descargado: ${nombre}`, 'ok');
 }
 
 
