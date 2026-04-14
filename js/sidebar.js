@@ -1348,6 +1348,144 @@ function _repGenerarWordInterno() {
   showToast(`📄 Word descargado: ${nombre}`, 'ok');
 }
 
+// ═══════════════════════════════════════════════════════════════
+// EXPORTAR GOOGLE DOCS — HTML descargable que Drive abre nativo
+// Sin dependencia de fflate · Compatible 100% con Google Docs
+// ═══════════════════════════════════════════════════════════════
+function repExportarGDocs() {
+  _repLeerCampos();
+  repAutoguardar();
+
+  const esc = s => (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+
+  // Nombres de instructores
+  const destInst = instructores.find(i => String(i.id) === String(_repDep.profDestacadoId));
+  const menosInst = instructores.find(i => String(i.id) === String(_repDep.profMenosId));
+  const destNombre = destInst ? destInst.nombre : '';
+  const menosNombre = menosInst ? menosInst.nombre : '';
+  const profDestCell = destNombre
+    ? `<strong>${esc(destNombre)}</strong>${_repDep.profDestacadoRazon ? ', ' + esc(_repDep.profDestacadoRazon) : ''}`
+    : '';
+  const profMenosCell = menosNombre
+    ? `<strong>${esc(menosNombre)}</strong>${_repDep.profMenosRazon ? ', ' + esc(_repDep.profMenosRazon) : ''}`
+    : '';
+
+  const compRows = (_repDep.competencias||[]).filter(c=>c.trim())
+    .map(c=>`<tr><td style="padding:5px 8px">${esc(c)}</td></tr>`).join('')
+    || '<tr><td style="padding:5px 8px;color:#888">—</td></tr>';
+
+  const logroRows = (_repDep.logros||[]).filter(l=>l.logro||l.descripcion).map((l,i)=>`
+    <tr>
+      <td style="padding:6px 8px;font-weight:bold;vertical-align:top">${i+1}. ${esc(l.logro)}</td>
+      <td style="padding:6px 8px;vertical-align:top">${esc(l.descripcion)}</td>
+      <td style="padding:6px 8px;text-align:center;vertical-align:top;color:${l.redes==='Si'?'#1a7a45':'#333'};font-weight:${l.redes==='Si'?'bold':'normal'}">${esc(l.redes)}</td>
+    </tr>`).join('') || '<tr><td colspan="3" style="padding:5px 8px;color:#888">—</td></tr>';
+
+  const incRows = (_repDep.incidencias||[]).filter(i=>i.incidencia||i.solucion).map(inc=>`
+    <tr>
+      <td style="padding:6px 8px;vertical-align:top;font-weight:bold">${esc(inc.incidencia)}</td>
+      <td style="padding:6px 8px;vertical-align:top">${esc(inc.solucion)}</td>
+    </tr>`).join('') || '<tr><td colspan="2" style="padding:6px 8px;color:#888">—</td></tr>';
+
+  const incCount = (_repDep.incidencias||[]).filter(i=>(i.incidencia||'').trim()).length;
+  const emptyIncRows = Array(Math.max(0, 4-incCount)).fill('<tr><td style="padding:10px 8px">&nbsp;</td><td>&nbsp;</td></tr>').join('');
+
+  const emptyLogroRows = '<tr><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>'.repeat(3);
+
+  const html = `<!DOCTYPE html>
+<html lang="es"><head>
+<meta charset="UTF-8">
+<title>Reporte Semanal Deportes · ${esc(_repDep.disciplina||'Fitness')} · ${esc(_repDep.semana)}</title>
+<style>
+body{font-family:Arial,Helvetica,sans-serif;font-size:10.5pt;color:#222;margin:20px 30px;line-height:1.5}
+table{width:100%;border-collapse:collapse;margin-bottom:14px}
+td,th{border:1px solid #b0b0b0;padding:5px 8px;vertical-align:top;font-size:10pt}
+.sh td{background-color:#1a7a45;color:#ffffff;font-weight:bold;font-size:10.5pt;letter-spacing:0.5px;padding:6px 8px}
+.lbl{font-weight:bold;width:42%;background-color:#f2f8f4}
+.thdr td{background-color:#e4f2e8;font-weight:bold;font-size:9.5pt;color:#1a5a35}
+h1{font-size:16pt;font-weight:bold;color:#111;border-bottom:3px solid #1a7a45;padding-bottom:6px;margin-bottom:18px}
+.nota{font-size:8.5pt;color:#555;font-style:italic;margin-bottom:14px}
+</style></head><body>
+
+<h1>Reporte semanal | Deportes</h1>
+
+<table>
+  <tr class="sh"><td colspan="2">Datos generales</td></tr>
+  <tr><td class="lbl">Disciplina</td><td>${esc(_repDep.disciplina)||'Fitness'}</td></tr>
+  <tr><td class="lbl">Semana</td><td>${esc(_repDep.semana)}</td></tr>
+  <tr><td class="lbl">Director</td><td>${esc(_repDep.director)}</td></tr>
+</table>
+
+<table>
+  <tr class="sh"><td colspan="2">Objetivos</td></tr>
+  <tr><td class="lbl">Objetivo semanal anterior de dirección</td><td>${esc(_repDep.objAnterior)}</td></tr>
+  <tr><td class="lbl">¿Se cumplió? Si/ No, ¿Por qué?</td><td>${esc(_repDep.objCumplido)}</td></tr>
+  <tr><td class="lbl">Objetivo semanal próximo de dirección</td><td>${esc(_repDep.objProximo)}</td></tr>
+</table>
+
+<table>
+  <tr class="sh"><td colspan="2">Alumnado</td></tr>
+  <tr><td class="lbl">Cantidad total de alumnado</td><td>${esc(_repDep.alumTotal)}</td></tr>
+  <tr><td class="lbl">Asistencia total semanal</td><td><strong>${esc(_repDep.alumAsistencia)}</strong></td></tr>
+  <tr><td class="lbl">Nuevos alumnos</td><td>${esc(String(_repDep.alumNuevos||''))}</td></tr>
+  <tr><td class="lbl">Edades predominantes de alumnado</td><td>${esc(_repDep.alumEdades)}</td></tr>
+</table>
+
+<table>
+  <tr class="sh"><td colspan="2">Profesores</td></tr>
+  <tr><td class="lbl">Cantidad total de profesores</td><td>${esc(String(_repDep.profTotal||''))}</td></tr>
+  <tr><td class="lbl">Cantidad total de clases</td><td>${esc(String(_repDep.profClases||''))}</td></tr>
+  <tr><td class="lbl">Inasistencias semanales</td><td>${esc(String(_repDep.profInasistencias||''))}</td></tr>
+  <tr><td class="lbl">Profesor más destacado de la semana (explica la razón)</td><td>${profDestCell}</td></tr>
+  <tr><td class="lbl">Profesor menos destacado de la semana (explica la razón)</td><td>${profMenosCell}</td></tr>
+</table>
+
+<table>
+  <tr class="sh"><td>Competencias activas</td></tr>
+  ${compRows}
+  <tr><td style="padding:8px">&nbsp;</td></tr>
+  <tr><td style="padding:8px">&nbsp;</td></tr>
+</table>
+
+<table>
+  <tr class="sh"><td colspan="3">Logros semanales</td></tr>
+  <tr class="thdr">
+    <td style="width:22%">Logro</td>
+    <td style="width:60%">Descripción</td>
+    <td style="width:18%;text-align:center;font-size:9pt;line-height:1.3">¿Consideras necesario publicarlo en redes? (Si/ No)</td>
+  </tr>
+  ${logroRows}
+  ${emptyLogroRows}
+</table>
+<p class="nota">En dado caso que consideres necesario publicarlo en redes, hay que anexar en el drive una carpeta con el número del logro y las imágenes correspondientes.</p>
+
+<table>
+  <tr class="sh"><td colspan="2">Incidencias generales semanales</td></tr>
+  <tr class="thdr"><td style="width:42%">Incidencia</td><td>Solución</td></tr>
+  ${incRows}${emptyIncRows}
+</table>
+
+<table>
+  <tr class="sh"><td>¿En qué te puede ayudar la gerencia deportiva?</td></tr>
+  <tr><td style="min-height:60px;padding:6px 8px;vertical-align:top">${esc(_repDep.ayuda)}</td></tr>
+</table>
+
+</body></html>`;
+
+  // Descargar como .html
+  const blob = new Blob([html], { type: 'text/html;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  const nombre = `Reporte_Semanal_Deportes_${(_repDep.disciplina||'Fitness').replace(/\s+/g,'_')}_${(_repDep.semana||'').replace(/[^a-zA-Z0-9áéíóúñÁÉÍÓÚÑ ]/g,'_').replace(/_+/g,'_').slice(0,35)}.html`;
+  a.href = url;
+  a.download = nombre;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  setTimeout(() => URL.revokeObjectURL(url), 2000);
+  showToast('📝 Archivo descargado. Súbelo a Google Drive y ábrelo con Google Docs.', 'ok');
+}
+
 // ── Sidebar: hover expand (tablet) + click-to-collapse (desktop) ──────────
 (function() {
   const sb = document.getElementById('sidebar');
