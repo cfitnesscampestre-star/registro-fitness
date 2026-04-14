@@ -977,7 +977,25 @@ function repExportarWord() {
   _repLeerCampos();
   repAutoguardar();
 
-  if(!window.fflate) { showToast('Librería ZIP no disponible aún, intenta en un momento','warn'); return; }
+  if(!window.fflate) {
+    showToast('Cargando librería ZIP, espera un momento...','info');
+    if(window._cargarFflate){
+      window._cargarFflate().then(function(){
+        showToast('✔ Librería lista, generando Word...','ok');
+        _repGenerarWordInterno();
+      }).catch(function(){
+        showToast('No se pudo cargar la librería ZIP. Verifica tu conexión a internet.','err');
+      });
+    } else {
+      showToast('Librería ZIP no disponible. Recarga la página e intenta de nuevo.','err');
+    }
+    return;
+  }
+
+  _repGenerarWordInterno();
+}
+
+function _repGenerarWordInterno() {
 
   const x = s => (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 
