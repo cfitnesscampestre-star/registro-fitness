@@ -85,11 +85,6 @@ async function sincronizarFirebase(){
       solicitudes: solicitudesInst.reduce((a,s)=>{ a[String(s.id)]=s; return a; },{}),
       ts: Date.now()
     };
-    // Incluir hoja de firmas activa si existe
-    try {
-      const hojaActiva = JSON.parse(localStorage.getItem('fc_hoja_firmas_activa') || 'null');
-      if(hojaActiva) payload.hojaFirmasActiva = hojaActiva;
-    } catch(e) {}
     await fbDb.ref('fitness').set(payload);
     setIndicador('🟢 Guardado en la nube ✔');
     console.log('☁️  Firebase ←', new Date().toLocaleTimeString('es-MX'),
@@ -188,86 +183,6 @@ async function inicializarFirebase(){
         if(data.solicitudes)
           solicitudesInst = Object.values(data.solicitudes);
 
-        // ── Sincronizar hoja de firmas activa ──────────────────────────────────
-        // Si Firebase trae una hoja, actualizamos localStorage para que el
-        // instructor en este dispositivo la vea sin necesidad de recargar.
-        try {
-          if(data.hojaFirmasActiva) {
-            const localHoja = JSON.parse(localStorage.getItem('fc_hoja_firmas_activa') || 'null');
-            const fbHoja = data.hojaFirmasActiva;
-
-            // ── Proteger firmas borradas intencionalmente ────────────────────
-            // Si el instructor borró su firma (hay registro en firmasBorradas),
-            // no restaurar esa firma aunque Firebase la tenga.
-            const borradasLocal = (localHoja && localHoja.firmasBorradas) || {};
-            const borradasFb    = fbHoja.firmasBorradas || {};
-            // Unir registros de borrado: gana el más reciente
-            const borradasMerge = Object.assign({}, borradasFb, borradasLocal);
-            Object.entries(borradasMerge).forEach(([instId, tsLocal]) => {
-              const tsFb = borradasFb[instId] || '';
-              // Usar el timestamp de borrado más reciente
-              borradasMerge[instId] = tsLocal > tsFb ? tsLocal : tsFb;
-            });
-            // Eliminar de fbHoja las firmas que fueron borradas después de guardarse
-            if(fbHoja.firmas) {
-              Object.keys(borradasMerge).forEach(instId => {
-                const firma = fbHoja.firmas[instId];
-                if(firma && firma.ts) {
-                  // Si el borrado es posterior a la firma → quitar de fbHoja
-                  if(borradasMerge[instId] > firma.ts) {
-                    delete fbHoja.firmas[instId];
-                  }
-                } else if(firma) {
-                  // Firma sin timestamp → borrar de todas formas
-                  delete fbHoja.firmas[instId];
-                }
-              });
-            }
-            fbHoja.firmasBorradas = borradasMerge;
-
-            // ── Decidir si aplicar la hoja de Firebase ───────────────────────
-            const localFirmas = localHoja ? Object.values(localHoja.firmas || {}).filter(f=>f&&f.data).length : -1;
-            const fbFirmas    = Object.values(fbHoja.firmas || {}).filter(f=>f&&f.data).length;
-            const fbPublicadoTs = new Date(fbHoja.publicado || 0).getTime();
-            const localPubTs    = localHoja ? new Date(localHoja.publicado || 0).getTime() : 0;
-
-            if(!localHoja || fbPublicadoTs >= localPubTs || fbFirmas > localFirmas) {
-              localStorage.setItem('fc_hoja_firmas_activa', JSON.stringify(fbHoja));
-              // Notificar al portal del instructor si está abierto
-              if(typeof instCargarHojaFirmas === 'function') {
-                const teniaHoja = !!localHoja;
-                instCargarHojaFirmas();
-                // Si acaba de aparecer la hoja (antes no había), avisar al instructor
-                if(!teniaHoja && typeof instRenderFirmaTab === 'function') {
-                  const panel = document.getElementById('inst-panel-firma');
-                  if(panel && panel.style.display !== 'none') {
-                    instRenderFirmaTab();
-                    if(typeof showToast === 'function')
-                      showToast('✍ Hoja de firmas disponible — ya puedes firmar', 'ok');
-                  }
-                }
-              }
-              // Actualizar indicador del coordinador si está visible
-              if(typeof coordActualizarHojaActiva === 'function') coordActualizarHojaActiva();
-            }
-          } else if(data.hasOwnProperty('hojaFirmasActiva') && !data.hojaFirmasActiva) {
-            // El coordinador cerró la hoja — eliminarla en este dispositivo también
-            const teniaHojaAntes = !!localStorage.getItem('fc_hoja_firmas_activa');
-            localStorage.removeItem('fc_hoja_firmas_activa');
-            if(typeof instCargarHojaFirmas === 'function') instCargarHojaFirmas();
-            if(typeof coordActualizarHojaActiva === 'function') coordActualizarHojaActiva();
-            // Si el instructor tenía la hoja visible, actualizar su tab y notificar
-            if(teniaHojaAntes) {
-              const panelFirma = document.getElementById('inst-panel-firma');
-              if(panelFirma && panelFirma.style.display !== 'none' && typeof instRenderFirmaTab === 'function') {
-                instRenderFirmaTab();
-              }
-              if(typeof showToast === 'function')
-                showToast('La hoja de firmas fue cerrada por coordinación.', 'info');
-            }
-          }
-        } catch(e) { console.warn('Error sync hoja firmas:', e.message); }
-
         normalizarRegistros();
 
         // Persistir localmente sin actualizar fc_local_ts (fbReceiving=true lo evita)
@@ -344,3 +259,92 @@ function setIndicador(txt){
 
 // Indicador de estado en el header
 // ═══════════════════════════════════════════
+
+// ═══════════════════════════════════════════════════════
+// AUTO-REFRESH — Sincronización periódica para escritorio
+// El listener de Firebase solo reacciona a cambios.
+// Este interval fuerza una lectura cada 30s cuando la
+// computadora está activa en vista coordinador.
+// ═══════════════════════════════════════════════════════
+(function iniciarAutoRefresh() {
+  let _autoRefreshTimer = null;
+
+  function _doRefresh() {
+    // Solo ejecutar si hay Firebase activo y NO es una sesión de instructor
+    if (typeof FIREBASE_ACTIVO === 'undefined' || !FIREBASE_ACTIVO) return;
+    if (typeof rolActual !== 'undefined' && rolActual === 'instructor') return;
+    if (typeof fbDb === 'undefined' || !fbDb) return;
+    if (typeof fbSyncing !== 'undefined' && fbSyncing) return;
+
+    // Leer una vez de Firebase para forzar actualización
+    fbDb.ref('fitness').once('value')
+      .then(snap => {
+        const data = snap.val();
+        if (!data) return;
+
+        const localTs = parseInt(localStorage.getItem('fc_local_ts') || '0');
+        const fbTs    = parseInt(data.ts || '0');
+
+        // Solo aplicar si Firebase tiene datos más nuevos que los locales
+        if (fbTs <= localTs + 2000) return;
+
+        console.log('🔄 Auto-refresh: datos más nuevos en Firebase →', new Date().toLocaleTimeString('es-MX'));
+
+        if (Array.isArray(data.instructores) && data.instructores.length > 0)
+          instructores = data.instructores;
+        if (data.registros)
+          registros = Object.values(data.registros);
+        if (data.recorridos)
+          recorridos = Object.values(data.recorridos);
+        if (Array.isArray(data.salones) && data.salones.length > 0)
+          salones = data.salones;
+        if (data.suplencias)
+          suplenciasPlan = Object.values(data.suplencias);
+        if (data.solicitudes)
+          solicitudesInst = Object.values(data.solicitudes);
+
+        // Sincronizar hoja de firmas si llegó actualizada
+        if (data.hojaFirmasActiva !== undefined) {
+          try {
+            if (data.hojaFirmasActiva) {
+              localStorage.setItem('fc_hoja_firmas_activa', JSON.stringify(data.hojaFirmasActiva));
+            } else {
+              localStorage.removeItem('fc_hoja_firmas_activa');
+            }
+            if (typeof coordActualizarHojaActiva === 'function') coordActualizarHojaActiva();
+          } catch(e) {}
+        }
+
+        if (typeof normalizarRegistros === 'function') normalizarRegistros();
+        if (typeof guardarLocal === 'function') guardarLocal();
+        if (typeof _renderAllBase === 'function') _renderAllBase();
+        else if (typeof renderAll === 'function') renderAll();
+
+        // Actualizar indicador
+        if (typeof setIndicador === 'function')
+          setIndicador('🟢 Actualizado ' + new Date().toLocaleTimeString('es-MX', {hour:'2-digit', minute:'2-digit'}));
+      })
+      .catch(e => console.warn('Auto-refresh error:', e.message));
+  }
+
+  // Arrancar cuando Firebase esté listo (espera 5s para que inicialice)
+  setTimeout(() => {
+    _autoRefreshTimer = setInterval(_doRefresh, 30000); // cada 30 segundos
+    console.log('⏱ Auto-refresh activado — cada 30s');
+  }, 5000);
+
+  // También refrescar cuando la pestaña/ventana recupera el foco
+  // (muy útil en computadora: abres otra app y vuelves)
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'visible') {
+      if (typeof rolActual !== 'undefined' && rolActual === 'instructor') return;
+      console.log('👁 Pestaña visible — forzando refresh');
+      setTimeout(_doRefresh, 800);
+    }
+  });
+
+  window.addEventListener('focus', () => {
+    if (typeof rolActual !== 'undefined' && rolActual === 'instructor') return;
+    setTimeout(_doRefresh, 800);
+  });
+})();

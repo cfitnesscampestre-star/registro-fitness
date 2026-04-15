@@ -286,10 +286,39 @@ function cerrarSesion() {
   localStorage.removeItem('fc_ses_fp');
   document.getElementById('login-pass').value = '';
   document.getElementById('login-error').style.display = 'none';
+
+  // Ocultar pantalla del instructor
   const instScreen = document.getElementById('instructor-screen');
   if (instScreen) instScreen.style.display = 'none';
+
+  // Restaurar TODOS los elementos que abrirPortalInstructorLocal ocultó
   const hdr = document.getElementById('hdr');
   if (hdr) hdr.style.display = '';
+  const bottomNav = document.getElementById('bottom-nav');
+  if (bottomNav) bottomNav.style.display = '';
+  const sidebar = document.getElementById('sidebar');
+  if (sidebar) sidebar.style.display = '';
+  const sectionNav = document.getElementById('section-nav');
+  if (sectionNav) sectionNav.style.display = '';
+  const backBar = document.getElementById('mob-back-bar');
+  if (backBar) backBar.style.display = '';
+
+  // Asegurar que al menos una vista esté activa para que no quede pantalla en blanco
+  const hayVistaActiva = document.querySelector('.vista.on');
+  if (!hayVistaActiva) {
+    // Activar la vista de inicio por defecto
+    const vInicio = document.getElementById('v-hoy') || document.querySelector('.vista');
+    if (vInicio) {
+      document.querySelectorAll('.vista').forEach(v => v.classList.remove('on'));
+      vInicio.classList.add('on');
+    }
+    const tabInicio = document.querySelector('[data-v="hoy"]') || document.querySelector('.tab');
+    if (tabInicio) {
+      document.querySelectorAll('.tab').forEach(t => t.classList.remove('on'));
+      tabInicio.classList.add('on');
+    }
+  }
+
   document.getElementById('login-screen').classList.remove('oculto');
   seleccionarRol('admin');
 }
