@@ -673,6 +673,52 @@ async function inicializarFirebase(){
         if(data.solicitudes)
           solicitudesInst = Object.values(data.solicitudes);
 
+        // ── Sincronizar hoja de firmas activa desde Firebase ──────────────
+        // Esto permite que cuando el coordinador publica una hoja,
+        // los instructores en otros dispositivos la vean inmediatamente
+        if(data.hojaFirmasActiva !== undefined) {
+          try {
+            const hojaLocal  = JSON.parse(localStorage.getItem('fc_hoja_firmas_activa') || 'null');
+            const hojaRemota = data.hojaFirmasActiva;
+
+            if(hojaRemota) {
+              if(!hojaLocal) {
+                // No tenemos hoja local → usar la de Firebase directamente
+                localStorage.setItem('fc_hoja_firmas_activa', JSON.stringify(hojaRemota));
+              } else if(hojaLocal.semIni === hojaRemota.semIni && hojaLocal.semFin === hojaRemota.semFin) {
+                // Misma semana → merge de firmas (no perder firmas locales ni remotas)
+                const firmasMerge = { ...(hojaRemota.firmas || {}) };
+                Object.entries(hojaLocal.firmas || {}).forEach(([instId, firmaLocal]) => {
+                  if(firmaLocal && firmaLocal.data) {
+                    const firmaRemota = firmasMerge[instId];
+                    if(!firmaRemota || !firmaRemota.data) {
+                      // Firma local existe pero remota no → conservar local
+                      firmasMerge[instId] = firmaLocal;
+                    } else {
+                      // Ambas existen → la más reciente gana
+                      const tsLocal  = new Date(firmaLocal.ts || 0).getTime();
+                      const tsRemota = new Date(firmaRemota.ts || 0).getTime();
+                      if(tsLocal > tsRemota) firmasMerge[instId] = firmaLocal;
+                    }
+                  }
+                });
+                const hojaMerge = { ...hojaRemota, firmas: firmasMerge };
+                localStorage.setItem('fc_hoja_firmas_activa', JSON.stringify(hojaMerge));
+              } else {
+                // Semana diferente → la de Firebase es la nueva (el coordinador cambió de semana)
+                localStorage.setItem('fc_hoja_firmas_activa', JSON.stringify(hojaRemota));
+              }
+            } else if(!hojaRemota && hojaLocal) {
+              // Firebase no tiene hoja (coordinador la cerró) → limpiar local
+              localStorage.removeItem('fc_hoja_firmas_activa');
+            }
+
+            // Actualizar UI de firmas si está visible
+            if(typeof coordActualizarHojaActiva === 'function') coordActualizarHojaActiva();
+            if(typeof instCargarHojaFirmas === 'function') instCargarHojaFirmas();
+          } catch(e) { console.warn('Error sincronizando hoja firmas:', e); }
+        }
+
         normalizarRegistros();
 
         // Actualizar contadores máximos tras recibir datos de Firebase
