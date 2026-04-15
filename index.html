@@ -525,13 +525,13 @@ window._cargarFflate=function(){
         <div class="inst-canvas-wrap" id="inst-firma-canvas-wrap">
           <div style="padding:.65rem 1rem;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;background:rgba(0,0,0,.15)">
             <span style="font-size:.65rem;text-transform:uppercase;letter-spacing:1.2px;color:var(--txt2);font-weight:600">✏ Firma aquí</span>
-            <button onclick="instLimpiarFirma()" style="background:none;border:1px solid var(--border);border-radius:6px;color:var(--txt3);font-size:.64rem;padding:3px 9px;cursor:pointer;font-family:'Outfit',sans-serif;transition:all .2s" onmouseover="this.style.borderColor='var(--red)';this.style.color='var(--red2)'" onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--txt3)'">↺ Borrar</button>
+            <button id="inst-canvas-borrar-btn" onclick="instLimpiarFirma()" style="background:none;border:1px solid var(--border);border-radius:6px;color:var(--txt3);font-size:.64rem;padding:3px 9px;cursor:pointer;font-family:'Outfit',sans-serif;transition:all .2s">↺ Limpiar</button>
           </div>
           <canvas id="inst-firma-canvas" style="display:block;width:100%;touch-action:none;cursor:crosshair;background:#fff" height="200"></canvas>
         </div>
         <div style="font-size:.66rem;color:var(--txt3);text-align:center;margin-bottom:1rem">Usa tu dedo o stylus para firmar en el área de arriba</div>
 
-        <button onclick="instGuardarFirma()" class="inst-guardar-btn">
+        <button id="inst-guardar-btn" onclick="instGuardarFirma()" class="inst-guardar-btn">
           ✔ Guardar Firma
         </button>
       </div>
