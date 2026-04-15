@@ -552,6 +552,11 @@ function instGuardarFirma() {
 
   try { localStorage.setItem(INST_FIRMA_KEY, JSON.stringify(_instFirmaHojaActiva)); } catch(e){}
 
+  // ── Subir firma a Firebase para que el coordinador la vea en tiempo real ──
+  if(typeof sincronizarFirebase === 'function') {
+    setTimeout(sincronizarFirebase, 300);
+  }
+
   // Actualizar UI
   instRenderFirmaTab();
   instCargarHojaFirmas();
@@ -606,6 +611,10 @@ function coordCerrarHojaActiva() {
   } catch(e){}
   localStorage.removeItem('fc_hoja_firmas_activa');
   coordActualizarHojaActiva();
+  // ── Sincronizar el cierre a Firebase (la hoja desaparecerá en todos los dispositivos) ──
+  if(typeof sincronizarFirebase === 'function') {
+    setTimeout(sincronizarFirebase, 500);
+  }
   showToast('Hoja cerrada. Ya puedes generar una nueva.', 'info');
 }
 
@@ -682,6 +691,10 @@ function instPublicarHojaFirmas(semIni, semFin, encabezado) {
   try { localStorage.setItem(INST_FIRMA_KEY, JSON.stringify(hoja)); } catch(e){}
   // Actualizar indicador coordinador
   setTimeout(coordActualizarHojaActiva, 100);
+  // ── Subir a Firebase para que instructores en otros dispositivos la vean ──
+  if(typeof sincronizarFirebase === 'function') {
+    setTimeout(sincronizarFirebase, 500);
+  }
   // No mostrar toast aquí porque ya se llama al abrir el modal de firmas
 }
 

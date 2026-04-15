@@ -963,6 +963,9 @@ async function sincronizarFirebase(){
   fbSyncing = true;
   try{
     const ts = Date.now();
+    // Incluir hoja de firmas activa para que instructores en otros dispositivos la vean
+    let _hojaFirmas = null;
+    try { _hojaFirmas = JSON.parse(localStorage.getItem('fc_hoja_firmas_activa') || 'null'); } catch(e){}
     const payload = {
       instructores,
       registros:   registros.reduce((a,r)=>{ a[String(r.id)]=r; return a; },{}),
@@ -970,6 +973,7 @@ async function sincronizarFirebase(){
       salones,
       suplencias:  suplenciasPlan.reduce((a,s)=>{ a[String(s.id)]=s; return a; },{}),
       solicitudes: solicitudesInst.reduce((a,s)=>{ a[String(s.id)]=s; return a; },{}),
+      hojaFirmasActiva: _hojaFirmas,
       ts
     };
     await fbDb.ref('fitness').set(payload);
