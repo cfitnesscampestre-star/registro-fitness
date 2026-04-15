@@ -422,13 +422,20 @@ function _fdCargarFirmasGuardadas() {
   }
 
   // ── También importar firmas que los instructores pusieron desde su portal ──
+  // Respeta firmasBorradas: no importa firmas que fueron borradas intencionalmente
   try {
     const hojaActiva = JSON.parse(localStorage.getItem('fc_hoja_firmas_activa') || 'null');
     if(hojaActiva && hojaActiva.firmas && hojaActiva.semIni === _FD.fechaIni && hojaActiva.semFin === _FD.fechaFin) {
+      const borradas = hojaActiva.firmasBorradas || {};
       let importadas = 0;
       Object.entries(hojaActiva.firmas).forEach(([instId, firmaDatos]) => {
         const idNum = parseInt(instId);
-        if(firmaDatos && firmaDatos.data && !_FD.firmas[idNum]) {
+        if(!firmaDatos || !firmaDatos.data) return;
+        // No importar si fue borrada después de guardarse
+        const tsBorrado = borradas[instId] || borradas[String(idNum)] || '';
+        const tsFirma   = firmaDatos.ts || '';
+        if(tsBorrado && tsBorrado >= tsFirma) return;
+        if(!_FD.firmas[idNum]) {
           _FD.firmas[idNum] = firmaDatos.data;
           importadas++;
         }
@@ -443,7 +450,37 @@ function fd_borrarFirmasPeriodo() {
   const cnt = Object.keys(_FD.firmas).length;
   if(cnt === 0) { showToast('No hay firmas guardadas en este periodo', 'info'); return; }
   if(!confirm(`¿Borrar las ${cnt} firma${cnt!==1?'s':''} guardadas de este periodo?\nEsta acción no se puede deshacer.`)) return;
+
+  const tsAhora = new Date().toISOString();
+
+  // 1. Limpiar almacén propio del modal
   try { localStorage.removeItem(_fdStorageKey()); } catch(e){}
+
+  // 2. Limpiar firmas de la hoja activa — registrar cada una como borrada
+  try {
+    const hoja = JSON.parse(localStorage.getItem('fc_hoja_firmas_activa') || 'null');
+    if(hoja && hoja.semIni === _FD.fechaIni && hoja.semFin === _FD.fechaFin) {
+      if(!hoja.firmasBorradas) hoja.firmasBorradas = {};
+      // Registrar timestamp de borrado para cada instructor que tenía firma
+      Object.keys(hoja.firmas || {}).forEach(instId => {
+        hoja.firmasBorradas[instId] = tsAhora;
+      });
+      hoja.firmas = {};
+      localStorage.setItem('fc_hoja_firmas_activa', JSON.stringify(hoja));
+      // Subir directamente a Firebase para propagar el borrado a todos los dispositivos
+      if(typeof fbDb !== 'undefined' && fbDb) {
+        fbDb.ref('fitness/hojaFirmasActiva').set(hoja)
+          .then(() => console.log('🗑 Firmas borradas en Firebase'))
+          .catch(e => {
+            console.warn('Error borrando firmas en Firebase:', e.message);
+            if(typeof sincronizarFirebase === 'function') setTimeout(sincronizarFirebase, 500);
+          });
+      } else if(typeof sincronizarFirebase === 'function') {
+        setTimeout(sincronizarFirebase, 300);
+      }
+    }
+  } catch(e) { console.warn('Error limpiando hoja activa:', e); }
+
   _FD.firmas = {};
   _FD.profActivo = null;
   _fdLimpiarCanvas();
@@ -457,6 +494,7 @@ function fd_borrarFirmasPeriodo() {
   if(nm) nm.textContent = 'Selecciona un profesor';
   const cl = document.getElementById('fd-prof-clases-lbl');
   if(cl) cl.textContent = '';
+  if(typeof coordActualizarHojaActiva === 'function') coordActualizarHojaActiva();
   showToast('Firmas del periodo eliminadas', 'ok');
 }
 
@@ -686,23 +724,37 @@ async function inicializarFirebase(){
                 // No tenemos hoja local → usar la de Firebase directamente
                 localStorage.setItem('fc_hoja_firmas_activa', JSON.stringify(hojaRemota));
               } else if(hojaLocal.semIni === hojaRemota.semIni && hojaLocal.semFin === hojaRemota.semFin) {
-                // Misma semana → merge de firmas (no perder firmas locales ni remotas)
+                // Misma semana → merge de firmas respetando borrados intencionales
+                const borradasLocal  = hojaLocal.firmasBorradas  || {};
+                const borradasRemota = hojaRemota.firmasBorradas || {};
+                // Merge de registros de borrado: gana el timestamp más reciente
+                const borradasMerge = { ...borradasRemota };
+                Object.entries(borradasLocal).forEach(([instId, ts]) => {
+                  if(!borradasMerge[instId] || ts > borradasMerge[instId])
+                    borradasMerge[instId] = ts;
+                });
+
                 const firmasMerge = { ...(hojaRemota.firmas || {}) };
                 Object.entries(hojaLocal.firmas || {}).forEach(([instId, firmaLocal]) => {
-                  if(firmaLocal && firmaLocal.data) {
-                    const firmaRemota = firmasMerge[instId];
-                    if(!firmaRemota || !firmaRemota.data) {
-                      // Firma local existe pero remota no → conservar local
-                      firmasMerge[instId] = firmaLocal;
-                    } else {
-                      // Ambas existen → la más reciente gana
-                      const tsLocal  = new Date(firmaLocal.ts || 0).getTime();
-                      const tsRemota = new Date(firmaRemota.ts || 0).getTime();
-                      if(tsLocal > tsRemota) firmasMerge[instId] = firmaLocal;
-                    }
+                  if(!firmaLocal || !firmaLocal.data) return;
+                  const firmaRemota = firmasMerge[instId];
+                  if(!firmaRemota || !firmaRemota.data) {
+                    firmasMerge[instId] = firmaLocal;
+                  } else {
+                    const tsLocal  = new Date(firmaLocal.ts || 0).getTime();
+                    const tsRemota = new Date(firmaRemota.ts || 0).getTime();
+                    if(tsLocal > tsRemota) firmasMerge[instId] = firmaLocal;
                   }
                 });
-                const hojaMerge = { ...hojaRemota, firmas: firmasMerge };
+
+                // Eliminar firmas que fueron borradas intencionalmente
+                Object.entries(borradasMerge).forEach(([instId, tsBorrado]) => {
+                  const firma = firmasMerge[instId];
+                  if(firma && firma.ts && tsBorrado >= firma.ts) delete firmasMerge[instId];
+                  else if(firma && !firma.ts) delete firmasMerge[instId];
+                });
+
+                const hojaMerge = { ...hojaRemota, firmas: firmasMerge, firmasBorradas: borradasMerge };
                 localStorage.setItem('fc_hoja_firmas_activa', JSON.stringify(hojaMerge));
               } else {
                 // Semana diferente → la de Firebase es la nueva (el coordinador cambió de semana)
