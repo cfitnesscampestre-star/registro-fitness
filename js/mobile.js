@@ -215,6 +215,9 @@ function renderHoy() {
 // ═══ VERIFICAR CLASES SIN REGISTRAR ══════════════════
 // ═══════════════════════════════════════════════════════
 function verificarClasesSinRegistrar(silencioso = false) {
+  // Solo aplica para coordinador — el instructor no ve clases de otros
+  if(typeof rolActual !== 'undefined' && rolActual === 'instructor') return;
+
   const hoyStr = fechaLocalStr(hoy);
   const diaHoy = DIAS[(hoy.getDay() + 6) % 7];
 
@@ -2155,6 +2158,8 @@ function _toggleVoz(btnId, onResult) {
 
 // Alerta de notas al abrir la app (se llama desde el init)
 function mostrarAlertasAgenda() {
+  // Solo aplica para coordinador
+  if(typeof rolActual !== 'undefined' && rolActual === 'instructor') return;
   const pend = agendaNotas.filter(n=>!n.resuelta);
   if(pend.length===0) return;
   const priAlta = pend.filter(n=>n.prioridad==='alta');

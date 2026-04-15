@@ -85,6 +85,11 @@ async function sincronizarFirebase(){
       solicitudes: solicitudesInst.reduce((a,s)=>{ a[String(s.id)]=s; return a; },{}),
       ts: Date.now()
     };
+    // Incluir hoja de firmas activa si existe
+    try {
+      const hojaActiva = JSON.parse(localStorage.getItem('fc_hoja_firmas_activa') || 'null');
+      if(hojaActiva) payload.hojaFirmasActiva = hojaActiva;
+    } catch(e) {}
     await fbDb.ref('fitness').set(payload);
     setIndicador('🟢 Guardado en la nube ✔');
     console.log('☁️  Firebase ←', new Date().toLocaleTimeString('es-MX'),
@@ -182,6 +187,46 @@ async function inicializarFirebase(){
 
         if(data.solicitudes)
           solicitudesInst = Object.values(data.solicitudes);
+
+        // ── Sincronizar hoja de firmas activa ──────────────────────────────────
+        // Si Firebase trae una hoja, actualizamos localStorage para que el
+        // instructor en este dispositivo la vea sin necesidad de recargar.
+        try {
+          if(data.hojaFirmasActiva) {
+            const localHoja = JSON.parse(localStorage.getItem('fc_hoja_firmas_activa') || 'null');
+            const fbHoja = data.hojaFirmasActiva;
+            // Usar la hoja de Firebase si: no hay local, o la de Firebase es más reciente,
+            // o tiene más firmas que la local
+            const localFirmas  = localHoja  ? Object.values(localHoja.firmas  || {}).filter(f=>f&&f.data).length : -1;
+            const fbFirmas     = Object.values(fbHoja.firmas || {}).filter(f=>f&&f.data).length;
+            const fbPublicadoTs = new Date(fbHoja.publicado || 0).getTime();
+            const localPubTs   = localHoja ? new Date(localHoja.publicado || 0).getTime() : 0;
+            if(!localHoja || fbPublicadoTs >= localPubTs || fbFirmas > localFirmas) {
+              localStorage.setItem('fc_hoja_firmas_activa', JSON.stringify(fbHoja));
+              // Notificar al portal del instructor si está abierto
+              if(typeof instCargarHojaFirmas === 'function') {
+                const teniaHoja = !!localHoja;
+                instCargarHojaFirmas();
+                // Si acaba de aparecer la hoja (antes no había), avisar al instructor
+                if(!teniaHoja && typeof instRenderFirmaTab === 'function') {
+                  const panel = document.getElementById('inst-panel-firma');
+                  if(panel && panel.style.display !== 'none') {
+                    instRenderFirmaTab();
+                    if(typeof showToast === 'function')
+                      showToast('✍ Hoja de firmas disponible — ya puedes firmar', 'ok');
+                  }
+                }
+              }
+              // Actualizar indicador del coordinador si está visible
+              if(typeof coordActualizarHojaActiva === 'function') coordActualizarHojaActiva();
+            }
+          } else if(data.hasOwnProperty('hojaFirmasActiva') && !data.hojaFirmasActiva) {
+            // El coordinador cerró la hoja — eliminarla en este dispositivo también
+            localStorage.removeItem('fc_hoja_firmas_activa');
+            if(typeof instCargarHojaFirmas === 'function') instCargarHojaFirmas();
+            if(typeof coordActualizarHojaActiva === 'function') coordActualizarHojaActiva();
+          }
+        } catch(e) { console.warn('Error sync hoja firmas:', e.message); }
 
         normalizarRegistros();
 
