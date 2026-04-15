@@ -563,17 +563,47 @@ function instGuardarFirma() {
 
   try { localStorage.setItem(INST_FIRMA_KEY, JSON.stringify(_instFirmaHojaActiva)); } catch(e){}
 
-  // ── Subir firma a Firebase para que el coordinador la vea en tiempo real ──
-  if(typeof sincronizarFirebase === 'function') {
-    setTimeout(sincronizarFirebase, 300);
-  }
+  // ── Subir firma a Firebase SOLO si la hoja sigue activa en Firebase ──────
+  // Esto evita que una hoja "fantasma" (ya cerrada por coordinación pero aún
+  // en localStorage del instructor) se regenere al guardar la firma.
+  (async () => {
+    let hojaValidaEnFirebase = false;
+    try {
+      if(typeof fbDb !== 'undefined' && fbDb) {
+        const snap = await fbDb.ref('fitness/hojaFirmasActiva').once('value');
+        const fbHoja = snap.val();
+        if(fbHoja && fbHoja.semIni === _instFirmaHojaActiva.semIni
+                  && fbHoja.semFin === _instFirmaHojaActiva.semFin) {
+          hojaValidaEnFirebase = true;
+        } else if(fbHoja === null || fbHoja === undefined) {
+          // Coordinador ya cerró la hoja — limpiar localStorage del instructor
+          localStorage.removeItem(INST_FIRMA_KEY);
+          _instFirmaHojaActiva = null;
+          instCargarHojaFirmas();
+          instRenderFirmaTab();
+          showToast('La hoja fue cerrada por coordinación. Tu firma no pudo guardarse.', 'warn');
+          return;
+        }
+      } else {
+        // Sin Firebase — confiar en localStorage
+        hojaValidaEnFirebase = true;
+      }
+    } catch(e) {
+      // Error de red — subir de todos modos (modo offline)
+      hojaValidaEnFirebase = true;
+    }
 
-  // Actualizar UI
-  instRenderFirmaTab();
-  instCargarHojaFirmas();
-  coordActualizarHojaActiva();
-  showToast('✔ Firma guardada correctamente','ok');
-  registrarLog('instructor', `Firma digital registrada: ${instructores.find(i=>i.id===instActualId)?.nombre||'—'}`);
+    if(hojaValidaEnFirebase && typeof sincronizarFirebase === 'function') {
+      setTimeout(sincronizarFirebase, 300);
+    }
+
+    // Actualizar UI
+    instRenderFirmaTab();
+    instCargarHojaFirmas();
+    coordActualizarHojaActiva();
+    showToast('✔ Firma guardada correctamente','ok');
+    registrarLog('instructor', `Firma digital registrada: ${instructores.find(i=>i.id===instActualId)?.nombre||'—'}`);
+  })();
 }
 
 function instAbrirFirma() {
@@ -588,16 +618,25 @@ let _instPollTimer = null;
 function instIniciarPoll() {
   instPararPoll();
   _instPollTimer = setInterval(() => {
-    const panel = document.getElementById('inst-panel-firma');
-    if(!panel || panel.style.display === 'none') return;
     const anteriorTenia = !!_instFirmaHojaActiva;
     instCargarHojaFirmas();
     const ahoraTiene = !!_instFirmaHojaActiva;
-    if(!anteriorTenia && ahoraTiene) {
+
+    const panel = document.getElementById('inst-panel-firma');
+    const panelVisible = panel && panel.style.display !== 'none';
+
+    // Hoja apareció → notificar si el tab está visible
+    if(!anteriorTenia && ahoraTiene && panelVisible) {
       instRenderFirmaTab();
-      showToast('✍ Hoja de firmas disponible — ya puedes firmar', 'ok');
+      showToast('\u270d Hoja de firmas disponible \u2014 ya puedes firmar', 'ok');
     }
-  }, 10000);
+    // Hoja desapareció (coordinador la cerró) → actualizar UI siempre
+    if(anteriorTenia && !ahoraTiene) {
+      _instFirmaHojaActiva = null;
+      if(panelVisible) instRenderFirmaTab();
+      showToast('La hoja de firmas fue cerrada por coordinación.', 'info');
+    }
+  }, 5000); // Reducido a 5s para detectar cierres más rápido
 }
 
 function instPararPoll() {

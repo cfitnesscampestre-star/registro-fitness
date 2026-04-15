@@ -222,9 +222,19 @@ async function inicializarFirebase(){
             }
           } else if(data.hasOwnProperty('hojaFirmasActiva') && !data.hojaFirmasActiva) {
             // El coordinador cerró la hoja — eliminarla en este dispositivo también
+            const teniaHojaAntes = !!localStorage.getItem('fc_hoja_firmas_activa');
             localStorage.removeItem('fc_hoja_firmas_activa');
             if(typeof instCargarHojaFirmas === 'function') instCargarHojaFirmas();
             if(typeof coordActualizarHojaActiva === 'function') coordActualizarHojaActiva();
+            // Si el instructor tenía la hoja visible, actualizar su tab y notificar
+            if(teniaHojaAntes) {
+              const panelFirma = document.getElementById('inst-panel-firma');
+              if(panelFirma && panelFirma.style.display !== 'none' && typeof instRenderFirmaTab === 'function') {
+                instRenderFirmaTab();
+              }
+              if(typeof showToast === 'function')
+                showToast('La hoja de firmas fue cerrada por coordinación.', 'info');
+            }
           }
         } catch(e) { console.warn('Error sync hoja firmas:', e.message); }
 
