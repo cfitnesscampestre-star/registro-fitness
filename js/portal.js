@@ -582,32 +582,40 @@ function instBorrarFirmaGuardada() {
   const nombre = inst ? inst.nombre.split(' ')[0] : 'tu firma';
   if(!confirm(`¿Borrar la firma guardada de ${nombre}?\nPodrás volver a firmar.`)) return;
 
+  const instId = String(instActualId);
+  const tsAhora = new Date().toISOString();
+
   // Eliminar firma del objeto en memoria
   if(_instFirmaHojaActiva.firmas) {
-    delete _instFirmaHojaActiva.firmas[String(instActualId)];
+    delete _instFirmaHojaActiva.firmas[instId];
   }
+  // Registrar timestamp de borrado — el listener de Firebase NO sobreescribirá
+  // una firma que fue borrada intencionalmente después de ese timestamp
+  if(!_instFirmaHojaActiva.firmasBorradas) _instFirmaHojaActiva.firmasBorradas = {};
+  _instFirmaHojaActiva.firmasBorradas[instId] = tsAhora;
 
-  // Actualizar localStorage
+  // Persistir en localStorage con el registro de borrado
   try { localStorage.setItem(INST_FIRMA_KEY, JSON.stringify(_instFirmaHojaActiva)); } catch(e){}
 
-  // Subir a Firebase para que coordinación también vea el borrado
+  // Subir DIRECTAMENTE a Firebase (no via sincronizarFirebase que puede estar bloqueado)
   (async () => {
     try {
       if(typeof fbDb !== 'undefined' && fbDb) {
-        const snap = await fbDb.ref('fitness/hojaFirmasActiva').once('value');
-        const fbHoja = snap.val();
-        if(fbHoja && fbHoja.semIni === _instFirmaHojaActiva.semIni) {
-          if(fbHoja.firmas) delete fbHoja.firmas[String(instActualId)];
-          _instFirmaHojaActiva = fbHoja;
-          localStorage.setItem(INST_FIRMA_KEY, JSON.stringify(_instFirmaHojaActiva));
-        }
+        // Actualizar solo la hoja en Firebase, sin tocar el resto del payload
+        await fbDb.ref('fitness/hojaFirmasActiva').set(_instFirmaHojaActiva);
+        console.log('🗑 Firma borrada y subida a Firebase');
+      } else if(typeof sincronizarFirebase === 'function') {
+        setTimeout(sincronizarFirebase, 300);
       }
-    } catch(e) {}
-    if(typeof sincronizarFirebase === 'function') setTimeout(sincronizarFirebase, 300);
+    } catch(e) {
+      console.warn('Error al borrar firma en Firebase:', e.message);
+      if(typeof sincronizarFirebase === 'function') setTimeout(sincronizarFirebase, 500);
+    }
   })();
 
   // Refrescar UI — canvas limpio y habilitado
   instRenderFirmaTab();
+  if(typeof coordActualizarHojaActiva === 'function') coordActualizarHojaActiva();
   showToast('Firma eliminada. Ya puedes volver a firmar.', 'info');
   registrarLog('instructor', `Firma eliminada: ${inst?.nombre||'—'}`);
 }

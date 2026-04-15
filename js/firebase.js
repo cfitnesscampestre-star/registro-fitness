@@ -195,12 +195,42 @@ async function inicializarFirebase(){
           if(data.hojaFirmasActiva) {
             const localHoja = JSON.parse(localStorage.getItem('fc_hoja_firmas_activa') || 'null');
             const fbHoja = data.hojaFirmasActiva;
-            // Usar la hoja de Firebase si: no hay local, o la de Firebase es más reciente,
-            // o tiene más firmas que la local
-            const localFirmas  = localHoja  ? Object.values(localHoja.firmas  || {}).filter(f=>f&&f.data).length : -1;
-            const fbFirmas     = Object.values(fbHoja.firmas || {}).filter(f=>f&&f.data).length;
+
+            // ── Proteger firmas borradas intencionalmente ────────────────────
+            // Si el instructor borró su firma (hay registro en firmasBorradas),
+            // no restaurar esa firma aunque Firebase la tenga.
+            const borradasLocal = (localHoja && localHoja.firmasBorradas) || {};
+            const borradasFb    = fbHoja.firmasBorradas || {};
+            // Unir registros de borrado: gana el más reciente
+            const borradasMerge = Object.assign({}, borradasFb, borradasLocal);
+            Object.entries(borradasMerge).forEach(([instId, tsLocal]) => {
+              const tsFb = borradasFb[instId] || '';
+              // Usar el timestamp de borrado más reciente
+              borradasMerge[instId] = tsLocal > tsFb ? tsLocal : tsFb;
+            });
+            // Eliminar de fbHoja las firmas que fueron borradas después de guardarse
+            if(fbHoja.firmas) {
+              Object.keys(borradasMerge).forEach(instId => {
+                const firma = fbHoja.firmas[instId];
+                if(firma && firma.ts) {
+                  // Si el borrado es posterior a la firma → quitar de fbHoja
+                  if(borradasMerge[instId] > firma.ts) {
+                    delete fbHoja.firmas[instId];
+                  }
+                } else if(firma) {
+                  // Firma sin timestamp → borrar de todas formas
+                  delete fbHoja.firmas[instId];
+                }
+              });
+            }
+            fbHoja.firmasBorradas = borradasMerge;
+
+            // ── Decidir si aplicar la hoja de Firebase ───────────────────────
+            const localFirmas = localHoja ? Object.values(localHoja.firmas || {}).filter(f=>f&&f.data).length : -1;
+            const fbFirmas    = Object.values(fbHoja.firmas || {}).filter(f=>f&&f.data).length;
             const fbPublicadoTs = new Date(fbHoja.publicado || 0).getTime();
-            const localPubTs   = localHoja ? new Date(localHoja.publicado || 0).getTime() : 0;
+            const localPubTs    = localHoja ? new Date(localHoja.publicado || 0).getTime() : 0;
+
             if(!localHoja || fbPublicadoTs >= localPubTs || fbFirmas > localFirmas) {
               localStorage.setItem('fc_hoja_firmas_activa', JSON.stringify(fbHoja));
               // Notificar al portal del instructor si está abierto
