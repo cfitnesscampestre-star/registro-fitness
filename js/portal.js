@@ -481,6 +481,30 @@ function instRenderFirmaTab() {
     chipEl.style.color      = firmado ? 'var(--neon)'          : 'var(--red2)';
   }
 
+  // Actualizar botón borrar del canvas según estado
+  const btnBorrar = document.getElementById('inst-canvas-borrar-btn');
+  if(btnBorrar) {
+    if(firmado) {
+      btnBorrar.textContent = '✖ Borrar firma guardada';
+      btnBorrar.style.borderColor = 'var(--red)';
+      btnBorrar.style.color = 'var(--red2)';
+      btnBorrar.title = 'Eliminar tu firma guardada para volver a firmar';
+    } else {
+      btnBorrar.textContent = '↺ Limpiar';
+      btnBorrar.style.borderColor = 'var(--border)';
+      btnBorrar.style.color = 'var(--txt3)';
+      btnBorrar.title = '';
+    }
+  }
+
+  // Actualizar botón guardar según estado
+  const btnGuardar = document.getElementById('inst-guardar-btn');
+  if(btnGuardar) {
+    btnGuardar.style.opacity = firmado ? '0.5' : '1';
+    btnGuardar.style.pointerEvents = firmado ? 'none' : 'auto';
+    btnGuardar.textContent = firmado ? '✔ Firma guardada' : '✔ Guardar Firma';
+  }
+
   // Inicializar canvas
   setTimeout(() => instInicializarCanvas(firmado ? misFirma.data : null), 100);
 }
@@ -519,23 +543,73 @@ function instInicializarCanvas(dataUrl) {
   if(dataUrl) { const img=new Image(); img.onload=()=>cx.drawImage(img,0,0); img.src=dataUrl; }
   _instFirmaCtx = cx;
 
+  // Si ya hay firma guardada, bloquear el dibujo (solo lectura)
+  const _canvasReadOnly = !!dataUrl;
+  c.style.cursor = _canvasReadOnly ? 'not-allowed' : 'crosshair';
+  c.style.opacity = _canvasReadOnly ? '0.85' : '1';
+
   // Mouse
-  c.addEventListener('mousedown', e => { _instFirmaDrawing=true; cx.beginPath(); const r=c.getBoundingClientRect(); cx.moveTo(e.clientX-r.left, e.clientY-r.top); });
-  c.addEventListener('mousemove', e => { if(!_instFirmaDrawing)return; const r=c.getBoundingClientRect(); cx.lineWidth=2.5; cx.lineCap='round'; cx.strokeStyle='#1a1a1a'; cx.lineTo(e.clientX-r.left, e.clientY-r.top); cx.stroke(); });
+  c.addEventListener('mousedown', e => { if(_canvasReadOnly) return; _instFirmaDrawing=true; cx.beginPath(); const r=c.getBoundingClientRect(); cx.moveTo(e.clientX-r.left, e.clientY-r.top); });
+  c.addEventListener('mousemove', e => { if(_instFirmaDrawing && !_canvasReadOnly) { const r=c.getBoundingClientRect(); cx.lineWidth=2.5; cx.lineCap='round'; cx.strokeStyle='#1a1a1a'; cx.lineTo(e.clientX-r.left, e.clientY-r.top); cx.stroke(); } });
   c.addEventListener('mouseup',   () => _instFirmaDrawing = false);
   c.addEventListener('mouseleave',() => _instFirmaDrawing = false);
 
   // Touch
-  c.addEventListener('touchstart', e => { e.preventDefault(); _instFirmaDrawing=true; cx.beginPath(); const r=c.getBoundingClientRect(); const t=e.touches[0]; cx.moveTo(t.clientX-r.left, t.clientY-r.top); }, {passive:false});
-  c.addEventListener('touchmove',  e => { e.preventDefault(); if(!_instFirmaDrawing)return; const r=c.getBoundingClientRect(); const t=e.touches[0]; cx.lineWidth=2.5; cx.lineCap='round'; cx.strokeStyle='#1a1a1a'; cx.lineTo(t.clientX-r.left, t.clientY-r.top); cx.stroke(); }, {passive:false});
+  c.addEventListener('touchstart', e => { if(_canvasReadOnly) return; e.preventDefault(); _instFirmaDrawing=true; cx.beginPath(); const r=c.getBoundingClientRect(); const t=e.touches[0]; cx.moveTo(t.clientX-r.left, t.clientY-r.top); }, {passive:false});
+  c.addEventListener('touchmove',  e => { e.preventDefault(); if(!_instFirmaDrawing || _canvasReadOnly) return; const r=c.getBoundingClientRect(); const t=e.touches[0]; cx.lineWidth=2.5; cx.lineCap='round'; cx.strokeStyle='#1a1a1a'; cx.lineTo(t.clientX-r.left, t.clientY-r.top); cx.stroke(); }, {passive:false});
   c.addEventListener('touchend',   () => _instFirmaDrawing = false);
 }
 
 function instLimpiarFirma() {
+  // Si ya hay firma guardada → pedir confirmación y borrarla
+  const firmas = _instFirmaHojaActiva ? (_instFirmaHojaActiva.firmas || {}) : {};
+  const misFirma = firmas[String(instActualId)];
+  if(misFirma && misFirma.data) {
+    instBorrarFirmaGuardada();
+    return;
+  }
+  // Si no hay firma guardada → solo limpiar el canvas
   const canvas = document.getElementById('inst-firma-canvas');
   if(!canvas || !_instFirmaCtx) return;
   _instFirmaCtx.fillStyle = '#ffffff';
   _instFirmaCtx.fillRect(0, 0, canvas.width, canvas.height);
+}
+
+// ── Borrar firma ya guardada (con confirmación) ───────────────────────
+function instBorrarFirmaGuardada() {
+  if(!_instFirmaHojaActiva) return;
+  const inst = instructores.find(i => i.id === instActualId);
+  const nombre = inst ? inst.nombre.split(' ')[0] : 'tu firma';
+  if(!confirm(`¿Borrar la firma guardada de ${nombre}?\nPodrás volver a firmar.`)) return;
+
+  // Eliminar firma del objeto en memoria
+  if(_instFirmaHojaActiva.firmas) {
+    delete _instFirmaHojaActiva.firmas[String(instActualId)];
+  }
+
+  // Actualizar localStorage
+  try { localStorage.setItem(INST_FIRMA_KEY, JSON.stringify(_instFirmaHojaActiva)); } catch(e){}
+
+  // Subir a Firebase para que coordinación también vea el borrado
+  (async () => {
+    try {
+      if(typeof fbDb !== 'undefined' && fbDb) {
+        const snap = await fbDb.ref('fitness/hojaFirmasActiva').once('value');
+        const fbHoja = snap.val();
+        if(fbHoja && fbHoja.semIni === _instFirmaHojaActiva.semIni) {
+          if(fbHoja.firmas) delete fbHoja.firmas[String(instActualId)];
+          _instFirmaHojaActiva = fbHoja;
+          localStorage.setItem(INST_FIRMA_KEY, JSON.stringify(_instFirmaHojaActiva));
+        }
+      }
+    } catch(e) {}
+    if(typeof sincronizarFirebase === 'function') setTimeout(sincronizarFirebase, 300);
+  })();
+
+  // Refrescar UI — canvas limpio y habilitado
+  instRenderFirmaTab();
+  showToast('Firma eliminada. Ya puedes volver a firmar.', 'info');
+  registrarLog('instructor', `Firma eliminada: ${inst?.nombre||'—'}`);
 }
 
 function instGuardarFirma() {
