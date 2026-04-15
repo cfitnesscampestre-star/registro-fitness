@@ -53,12 +53,19 @@ function abrirPortalInstructorLocal() {
 
 // ── Navegación por tabs ───────────────────────
 function instSwitchTab(tab) {
+  document.querySelectorAll('.inst-tab-btn').forEach(t => {
+    const isOn = t.dataset.t === tab;
+    t.classList.toggle('on', isOn);
+    // fallback para compatibilidad si aún existen .inst-tab viejos
+    t.style.color = '';
+    t.style.borderBottomColor = '';
+  });
+  // compatibilidad hacia atrás con .inst-tab (divs)
   document.querySelectorAll('.inst-tab').forEach(t => {
     const isOn = t.dataset.t === tab;
     t.style.color = isOn ? 'var(--neon)' : 'var(--txt2)';
     t.style.borderBottomColor = isOn ? 'var(--neon)' : 'transparent';
   });
-  // Usar prefijo inst-panel- para evitar conflicto con los botones inst-tab-*
   document.querySelectorAll('.inst-panel').forEach(p => p.style.display = 'none');
   const panel = document.getElementById('inst-panel-' + tab);
   if(panel) panel.style.display = 'block';
@@ -71,11 +78,15 @@ function instSwitchTab(tab) {
 // ── Cambio de periodo en reporte ──────────────
 function instSelPeriodo(btn, dias) {
   _instPeriodoDias = parseInt(dias);
-  document.querySelectorAll('.inst-periodo-btn').forEach(b => {
+  document.querySelectorAll('.inst-periodo-pill,.inst-periodo-btn').forEach(b => {
     const isOn = b.dataset.p === String(dias);
-    b.style.background = isOn ? 'var(--verde)' : 'var(--panel2)';
-    b.style.color = isOn ? '#fff' : 'var(--txt2)';
-    b.style.borderColor = isOn ? 'var(--verde)' : 'var(--border)';
+    b.classList.toggle('on', isOn);
+    // fallback estilos inline para .inst-periodo-btn antiguos
+    if(b.classList.contains('inst-periodo-btn')) {
+      b.style.background = isOn ? 'var(--verde)' : 'var(--panel2)';
+      b.style.color = isOn ? '#fff' : 'var(--txt2)';
+      b.style.borderColor = isOn ? 'var(--verde)' : 'var(--border)';
+    }
   });
   instRenderReporte();
 }

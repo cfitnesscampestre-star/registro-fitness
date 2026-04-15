@@ -22,7 +22,7 @@ function calcularAlertas() {
       const bajos = recientes.slice(0,3).filter(r=>r.cap>0&&(r.asistentes/r.cap*100)<20);
       if(bajos.length>=3) {
         const inst = instructores.find(i=>i.id===g.inst_id);
-        alertas.push({tipo:'red',icon:'<svg class="ico" viewBox="0 0 20 20"><circle cx="10" cy="10" r="5" fill="var(--red2)"/></svg>',texto:`<strong>${g.clase}</strong> con ${inst?.nombre||'?'} a las ${g.hora} lleva 3+ sesiones consecutivas con aforo menor al 20%.`,accion:'Considera revisar o reasignar este horario.'});
+        alertas.push({tipo:'red',icon:'<svg class="ico" viewBox="0 0 20 20"><circle cx="10" cy="10" r="5" fill="var(--red2)"/></svg>',texto:`<strong>${g.clase}</strong> con ${inst?.nombre||'?'} a las ${g.hora} lleva 3+ sesiones consecutivas con aforo menor al 20%.`,accion:'Verifica la difusión y convocatoria de esta clase.'});
       }
     }
   });
@@ -31,7 +31,7 @@ function calcularAlertas() {
   instructores.forEach(inst => {
     const faltas = registros.filter(r=>r.inst_id===inst.id&&r.estado==='falta'&&new Date(r.fecha)>=hoy30);
     if(faltas.length>=2) {
-      alertas.push({tipo:'gold',icon:'<svg class="ico ico-warn" viewBox="0 0 20 20"><path d="M10 3 L18 17 H2 Z" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linejoin="round"/><line x1="10" y1="9" x2="10" y2="13" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><circle cx="10" cy="15.5" r="0.8" fill="currentColor"/></svg>️',texto:`<strong>${inst.nombre}</strong> tiene <strong>${faltas.length} faltas</strong> en los últimos 30 días.`,accion:'Requiere seguimiento de RRHH o coordinación.'});
+      alertas.push({tipo:'gold',icon:'<svg class="ico ico-warn" viewBox="0 0 20 20"><path d="M10 3 L18 17 H2 Z" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linejoin="round"/><line x1="10" y1="9" x2="10" y2="13" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><circle cx="10" cy="15.5" r="0.8" fill="currentColor"/></svg>️',texto:`<strong>${inst.nombre}</strong> tiene <strong>${faltas.length} faltas</strong> en los últimos 30 días.`,accion:'Revisa tu historial de asistencia.'});
     }
   });
 
@@ -80,7 +80,7 @@ function calcularAlertas() {
     const impTotal = registros.filter(r=>r.inst_id===inst.id&&(r.estado==='ok'||r.estado==='sub')&&new Date(r.fecha)>=hoy30).length;
     const sups = registros.filter(r=>r.inst_id===inst.id&&r.estado==='sub'&&new Date(r.fecha)>=hoy30).length;
     if(impTotal>=4 && sups/impTotal >= 0.5){
-      alertas.push({tipo:'gold',icon:'<svg class="ico" viewBox="0 0 20 20"><path d="M4 10a6 6 0 0 1 6-6 6 6 0 0 1 5.2 3" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round"/><path d="M16 10a6 6 0 0 1-6 6 6 6 0 0 1-5.2-3" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round"/><polyline points="14.5,7 15.5,3.8 18.5,5" stroke="currentColor" stroke-width="1.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/><polyline points="5.5,13 4.5,16.2 1.5,15" stroke="currentColor" stroke-width="1.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>',texto:`<strong>${inst.nombre}</strong> tiene suplentes en el <strong>${Math.round(sups/impTotal*100)}%</strong> de sus clases este mes (${sups} de ${impTotal}).`,accion:'Considera revisar disponibilidad o reasignación de clases.'});
+      alertas.push({tipo:'gold',icon:'<svg class="ico" viewBox="0 0 20 20"><path d="M4 10a6 6 0 0 1 6-6 6 6 0 0 1 5.2 3" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round"/><path d="M16 10a6 6 0 0 1-6 6 6 6 0 0 1-5.2-3" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round"/><polyline points="14.5,7 15.5,3.8 18.5,5" stroke="currentColor" stroke-width="1.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/><polyline points="5.5,13 4.5,16.2 1.5,15" stroke="currentColor" stroke-width="1.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>',texto:`<strong>${inst.nombre}</strong> tiene suplentes en el <strong>${Math.round(sups/impTotal*100)}%</strong> de sus clases este mes (${sups} de ${impTotal}).`,accion:'Revisa tu disponibilidad y agenda del mes.'});
     }
   });
 
