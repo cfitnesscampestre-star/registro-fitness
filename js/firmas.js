@@ -29,62 +29,54 @@ function _fdColor(id) {
 
 // ── Abrir el modal ────────────────────────────────────────────────────
 function abrirFirmasDigitales() {
-  // ── Verificar si hay hoja activa con firmas ─────────────────────────────────
+  // ── Verificar si hay hoja activa ANTES de abrir ──────────────────────────────
+  // El bloqueo se basa en el ESTADO de la hoja, no en las fechas seleccionadas.
   // Reglas:
-  //   1. Misma semana → siempre permitir (sigue acumulando firmas)
-  //   2. Semana diferente + firmas INCOMPLETAS → BLOQUEAR hasta cerrar la hoja
-  //   3. Semana diferente + todas firmadas → avisar y permitir cerrar
-  //   4. Hoja activa sin ninguna firma → permitir (no hay riesgo de pérdida)
+  //   1. Hoja activa con firmas INCOMPLETAS → BLOQUEAR siempre
+  //   2. Hoja activa con todas las firmas completas → confirmar cierre
+  //   3. Hoja activa sin ninguna firma → reemplazar silenciosamente
+  //   4. Sin hoja activa → continuar normalmente
   try {
     const hojaActiva = JSON.parse(localStorage.getItem('fc_hoja_firmas_activa') || 'null');
     if(hojaActiva) {
-      const elI = document.getElementById('firmas-fecha-ini');
-      const elF = document.getElementById('firmas-fecha-fin');
-      const nuevaIni = (elI && elI.value) ? elI.value : '';
-      const nuevaFin = (elF && elF.value) ? elF.value : '';
-      const esMismaSemana = (nuevaIni === hojaActiva.semIni && nuevaFin === hojaActiva.semFin);
+      const firmados  = Object.values(hojaActiva.firmas || {}).filter(f => f && f.data).length;
+      const semTxt    = hojaActiva.encabezado || `${hojaActiva.semIni} → ${hojaActiva.semFin}`;
 
-      if(!esMismaSemana) {
-        const firmados  = Object.values(hojaActiva.firmas || {}).filter(f => f && f.data).length;
-        const semTxt    = hojaActiva.encabezado || `${hojaActiva.semIni} → ${hojaActiva.semFin}`;
+      // Total de instructores con horario asignado
+      const totalInst = typeof instructores !== 'undefined'
+        ? instructores.filter(i => (i.horario||[]).length > 0).length
+        : firmados;
+      const pendientes = Math.max(0, totalInst - firmados);
 
-        // Calcular total de instructores esperados
-        const totalInst = typeof instructores !== 'undefined'
-          ? instructores.filter(i => (i.horario||[]).length > 0).length
-          : firmados;
-        const pendientes = Math.max(0, totalInst - firmados);
-
-        if(firmados > 0 && pendientes > 0) {
-          // ── BLOQUEO: hay firmas pero faltan por completar ──
-          showToast(
-            `⚠ Hoja activa con ${firmados} de ${totalInst} firma(s). ` +
-            `Completa o cierra la hoja antes de crear una nueva.`,
-            'warn'
-          );
-          alert(
-            `🔒 NO SE PUEDE CREAR UNA NUEVA HOJA\n\n` +
-            `Semana activa: ${semTxt}\n` +
-            `Firmas recibidas: ${firmados} de ${totalInst}\n\n` +
-            `Opciones:\n` +
-            `• Espera a que los ${pendientes} instructor(es) restante(s) firmen.\n` +
-            `• O usa "Cerrar hoja y generar nueva" para descartarla.\n\n` +
-            `⚠ Si cierras sin completar perderás las firmas ya guardadas.`
-          );
-          return; // BLOQUEAR — no continuar
-        } else if(firmados > 0 && pendientes === 0) {
-          // Todas firmadas — solo confirmar el cambio
-          const ok = confirm(
-            `✔ La hoja de la semana "${semTxt}" está COMPLETAMENTE firmada.\n\n` +
-            `¿Deseas generar el PDF y crear una hoja nueva?`
-          );
-          if(!ok) return;
-          localStorage.removeItem('fc_hoja_firmas_activa');
-          if(typeof coordActualizarHojaActiva === 'function') coordActualizarHojaActiva();
-        } else if(firmados === 0 && hojaActiva.semIni) {
-          // Hoja activa sin firmas — permitir reemplazar sin aviso
-          localStorage.removeItem('fc_hoja_firmas_activa');
-          if(typeof coordActualizarHojaActiva === 'function') coordActualizarHojaActiva();
-        }
+      if(firmados > 0 && pendientes > 0) {
+        // ── BLOQUEO TOTAL: hoja activa con firmas incompletas ──
+        showToast(
+          `🔒 Hay una hoja activa con ${firmados}/${totalInst} firmas. Complétala primero.`,
+          'warn'
+        );
+        alert(
+          `🔒 NO SE PUEDE ABRIR UNA NUEVA HOJA\n\n` +
+          `Semana activa: ${semTxt}\n` +
+          `Firmas recibidas: ${firmados} de ${totalInst} (faltan ${pendientes})\n\n` +
+          `Para continuar tienes dos opciones:\n` +
+          `  1. Espera a que los ${pendientes} instructor(es) restante(s) firmen.\n` +
+          `  2. Ve a "Cerrar hoja y generar nueva" para descartarla.\n\n` +
+          `⚠ Si cierras perderás las ${firmados} firma(s) ya guardadas.`
+        );
+        return; // BLOQUEO — no seguir
+      } else if(firmados > 0 && pendientes === 0) {
+        // ── Todas firmadas — confirmar cierre ──
+        const ok = confirm(
+          `✔ La hoja "${semTxt}" está COMPLETAMENTE firmada (${firmados}/${totalInst}).\n\n` +
+          `¿Generar PDF y abrir una hoja nueva?`
+        );
+        if(!ok) return;
+        localStorage.removeItem('fc_hoja_firmas_activa');
+        if(typeof coordActualizarHojaActiva === 'function') coordActualizarHojaActiva();
+      } else {
+        // ── Sin firmas — reemplazar sin aviso ──
+        localStorage.removeItem('fc_hoja_firmas_activa');
+        if(typeof coordActualizarHojaActiva === 'function') coordActualizarHojaActiva();
       }
     }
   } catch(e){}
