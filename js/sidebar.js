@@ -2183,3 +2183,77 @@ function calsupSelDia(key) {
 
 
 // ═══════════════════════════════════════════════════════════════════════
+
+
+// ═══════════════════════════════════════════════════════════════════
+// ACCESO DIRECTO A FIRMAS DIGITALES desde el sidebar
+// Abre el modal de reportes preconfigurado en modo Firmas Digitales,
+// usando la semana actual como rango por defecto.
+// ═══════════════════════════════════════════════════════════════════
+function abrirFirmasDigitalesDirecto() {
+  // 1. Abrir el modal de reportes
+  const modal = document.getElementById('m-reports');
+  if(modal) modal.classList.add('on');
+
+  // 2. Precalcular semana actual (lunes→domingo)
+  const hoy = new Date();
+  const dow  = hoy.getDay(); // 0=dom
+  const diff = dow === 0 ? -6 : 1 - dow;
+  const lunes = new Date(hoy); lunes.setDate(hoy.getDate() + diff);
+  const dom   = new Date(lunes); dom.setDate(lunes.getDate() + 6);
+  const iso   = d => d.toISOString().slice(0, 10);
+
+  // 3. Rellenar campos de fecha de la hoja de firmas
+  setTimeout(() => {
+    const elIni = document.getElementById('firmas-fecha-ini');
+    const elFin = document.getElementById('firmas-fecha-fin');
+    const elTxt = document.getElementById('firmas-semana-txt');
+
+    if(elIni && !elIni.value) elIni.value = iso(lunes);
+    if(elFin && !elFin.value) elFin.value = iso(dom);
+
+    // Generar texto de encabezado si está vacío
+    if(elTxt && !elTxt.value && typeof firmasActualizarLabel === 'function') {
+      firmasActualizarLabel();
+    }
+
+    // 4. Hacer scroll hasta la sección de Firmas Digitales en el modal
+    const firmasSec = document.querySelector('[onclick="abrirFirmasDigitales()"]');
+    if(firmasSec) {
+      firmasSec.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      // Pulsar automáticamente el botón para abrir el modal de firmas
+      setTimeout(() => {
+        if(typeof abrirFirmasDigitales === 'function') {
+          abrirFirmasDigitales();
+        }
+      }, 400);
+    }
+  }, 150);
+}
+
+// ── Actualizar badge de Firmas en el sidebar ─────────────────────
+// Muestra cuántas firmas están pendientes (instructores sin firmar)
+function _syncFirmasBadge() {
+  const badge = document.getElementById('sb-firmas-badge');
+  if(!badge) return;
+  try {
+    const hoja = JSON.parse(localStorage.getItem('fc_hoja_firmas_activa') || 'null');
+    if(!hoja) { badge.style.display = 'none'; return; }
+    const firmados  = Object.values(hoja.firmas || {}).filter(f => f && f.data).length;
+    // Contar instructores que tienen clases en el periodo
+    const total = typeof instructores !== 'undefined'
+      ? instructores.filter(i => (i.horario||[]).length > 0).length
+      : 0;
+    const pendientes = Math.max(0, total - firmados);
+    if(pendientes > 0) {
+      badge.textContent = pendientes;
+      badge.style.display = 'inline';
+    } else {
+      badge.style.display = 'none';
+    }
+  } catch(e) { badge.style.display = 'none'; }
+}
+
+// Correr cada 8 segundos y al cargar
+setInterval(_syncFirmasBadge, 8000);
+setTimeout(_syncFirmasBadge, 2000);
