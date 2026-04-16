@@ -2191,44 +2191,36 @@ function calsupSelDia(key) {
 // usando la semana actual como rango por defecto.
 // ═══════════════════════════════════════════════════════════════════
 function abrirFirmasDigitalesDirecto() {
-  // 1. Abrir el modal de reportes
-  const modal = document.getElementById('m-reports');
-  if(modal) modal.classList.add('on');
-
-  // 2. Precalcular semana actual (lunes→domingo)
-  const hoy = new Date();
-  const dow  = hoy.getDay(); // 0=dom
+  // Precalcular semana actual (lunes→domingo)
+  const hoy  = new Date();
+  const dow  = hoy.getDay();
   const diff = dow === 0 ? -6 : 1 - dow;
   const lunes = new Date(hoy); lunes.setDate(hoy.getDate() + diff);
   const dom   = new Date(lunes); dom.setDate(lunes.getDate() + 6);
   const iso   = d => d.toISOString().slice(0, 10);
 
-  // 3. Rellenar campos de fecha de la hoja de firmas
+  // Rellenar fechas en el modal de reportes ANTES de validar
+  // para que abrirFirmasDigitales pueda comparar correctamente
+  const elIni = document.getElementById('firmas-fecha-ini');
+  const elFin = document.getElementById('firmas-fecha-fin');
+  const elTxt = document.getElementById('firmas-semana-txt');
+  if(elIni && !elIni.value) elIni.value = iso(lunes);
+  if(elFin && !elFin.value) elFin.value = iso(dom);
+  if(elTxt && !elTxt.value && typeof firmasActualizarLabel === 'function') {
+    firmasActualizarLabel();
+  }
+
+  // Abrir el modal de reportes (necesario para que los elementos existan en el DOM)
+  const modal = document.getElementById('m-reports');
+  if(modal) modal.classList.add('on');
+
+  // Delegar completamente a abrirFirmasDigitales — que contiene todas las validaciones
+  // y bloqueos de hoja activa. NO saltar directo al modal de firmas.
   setTimeout(() => {
-    const elIni = document.getElementById('firmas-fecha-ini');
-    const elFin = document.getElementById('firmas-fecha-fin');
-    const elTxt = document.getElementById('firmas-semana-txt');
-
-    if(elIni && !elIni.value) elIni.value = iso(lunes);
-    if(elFin && !elFin.value) elFin.value = iso(dom);
-
-    // Generar texto de encabezado si está vacío
-    if(elTxt && !elTxt.value && typeof firmasActualizarLabel === 'function') {
-      firmasActualizarLabel();
+    if(typeof abrirFirmasDigitales === 'function') {
+      abrirFirmasDigitales();
     }
-
-    // 4. Hacer scroll hasta la sección de Firmas Digitales en el modal
-    const firmasSec = document.querySelector('[onclick="abrirFirmasDigitales()"]');
-    if(firmasSec) {
-      firmasSec.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      // Pulsar automáticamente el botón para abrir el modal de firmas
-      setTimeout(() => {
-        if(typeof abrirFirmasDigitales === 'function') {
-          abrirFirmasDigitales();
-        }
-      }, 400);
-    }
-  }, 150);
+  }, 200);
 }
 
 // ── Actualizar badge de Firmas en el sidebar ─────────────────────

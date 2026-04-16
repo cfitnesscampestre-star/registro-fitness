@@ -29,33 +29,61 @@ function _fdColor(id) {
 
 // ── Abrir el modal ────────────────────────────────────────────────────
 function abrirFirmasDigitales() {
-  // ── Verificar si hay hoja activa con firmas — bloquear si es diferente semana ──
+  // ── Verificar si hay hoja activa con firmas ─────────────────────────────────
+  // Reglas:
+  //   1. Misma semana → siempre permitir (sigue acumulando firmas)
+  //   2. Semana diferente + firmas INCOMPLETAS → BLOQUEAR hasta cerrar la hoja
+  //   3. Semana diferente + todas firmadas → avisar y permitir cerrar
+  //   4. Hoja activa sin ninguna firma → permitir (no hay riesgo de pérdida)
   try {
     const hojaActiva = JSON.parse(localStorage.getItem('fc_hoja_firmas_activa') || 'null');
-    if(hojaActiva && hojaActiva.firmas) {
-      const firmados = Object.values(hojaActiva.firmas).filter(f => f && f.data).length;
-      if(firmados > 0) {
-        const semTxt = hojaActiva.encabezado || `${hojaActiva.semIni} → ${hojaActiva.semFin}`;
-        const elI = document.getElementById('firmas-fecha-ini');
-        const elF = document.getElementById('firmas-fecha-fin');
-        const nuevaIni = (elI && elI.value) ? elI.value : '';
-        const nuevaFin = (elF && elF.value) ? elF.value : '';
-        // Si es la misma semana, permitir (seguirá acumulando firmas)
-        if(nuevaIni === hojaActiva.semIni && nuevaFin === hojaActiva.semFin) {
-          // misma semana — continuar normalmente
-        } else {
-          // Semana diferente — advertir
+    if(hojaActiva) {
+      const elI = document.getElementById('firmas-fecha-ini');
+      const elF = document.getElementById('firmas-fecha-fin');
+      const nuevaIni = (elI && elI.value) ? elI.value : '';
+      const nuevaFin = (elF && elF.value) ? elF.value : '';
+      const esMismaSemana = (nuevaIni === hojaActiva.semIni && nuevaFin === hojaActiva.semFin);
+
+      if(!esMismaSemana) {
+        const firmados  = Object.values(hojaActiva.firmas || {}).filter(f => f && f.data).length;
+        const semTxt    = hojaActiva.encabezado || `${hojaActiva.semIni} → ${hojaActiva.semFin}`;
+
+        // Calcular total de instructores esperados
+        const totalInst = typeof instructores !== 'undefined'
+          ? instructores.filter(i => (i.horario||[]).length > 0).length
+          : firmados;
+        const pendientes = Math.max(0, totalInst - firmados);
+
+        if(firmados > 0 && pendientes > 0) {
+          // ── BLOQUEO: hay firmas pero faltan por completar ──
+          showToast(
+            `⚠ Hoja activa con ${firmados} de ${totalInst} firma(s). ` +
+            `Completa o cierra la hoja antes de crear una nueva.`,
+            'warn'
+          );
+          alert(
+            `🔒 NO SE PUEDE CREAR UNA NUEVA HOJA\n\n` +
+            `Semana activa: ${semTxt}\n` +
+            `Firmas recibidas: ${firmados} de ${totalInst}\n\n` +
+            `Opciones:\n` +
+            `• Espera a que los ${pendientes} instructor(es) restante(s) firmen.\n` +
+            `• O usa "Cerrar hoja y generar nueva" para descartarla.\n\n` +
+            `⚠ Si cierras sin completar perderás las firmas ya guardadas.`
+          );
+          return; // BLOQUEAR — no continuar
+        } else if(firmados > 0 && pendientes === 0) {
+          // Todas firmadas — solo confirmar el cambio
           const ok = confirm(
-            `⚠ HAY UNA HOJA ACTIVA CON ${firmados} FIRMA(S)\n\n` +
-            `Semana: ${semTxt}\n\n` +
-            `Si abres una hoja nueva para otra semana, perderás las firmas ya capturadas.\n\n` +
-            `¿Deseas cerrar la hoja actual y abrir una nueva?\n` +
-            `(Primero genera el PDF para guardar las firmas actuales)`
+            `✔ La hoja de la semana "${semTxt}" está COMPLETAMENTE firmada.\n\n` +
+            `¿Deseas generar el PDF y crear una hoja nueva?`
           );
           if(!ok) return;
-          // Cerrar hoja activa
           localStorage.removeItem('fc_hoja_firmas_activa');
-          coordActualizarHojaActiva();
+          if(typeof coordActualizarHojaActiva === 'function') coordActualizarHojaActiva();
+        } else if(firmados === 0 && hojaActiva.semIni) {
+          // Hoja activa sin firmas — permitir reemplazar sin aviso
+          localStorage.removeItem('fc_hoja_firmas_activa');
+          if(typeof coordActualizarHojaActiva === 'function') coordActualizarHojaActiva();
         }
       }
     }
