@@ -624,6 +624,10 @@ window._cargarFflate=function(){
       <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><rect x="3" y="4" width="14" height="13" rx="2"/><line x1="3" y1="9" x2="17" y2="9"/><line x1="10" y1="6" x2="10" y2="7.5"/><line x1="10" y1="12" x2="10" y2="15"/><line x1="8.5" y1="13.5" x2="11.5" y2="13.5"/></svg>
       <span class="sb-item-lbl">Suplencias</span>
     </div>
+    <div class="sb-item" data-s="programa" data-tip="Recorridos" onclick="navegarA('recorridos')" id="sb-recorridos">
+      <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="10" cy="4" r="2"/><path d="M10 6 L9 11 L7 16 M10 6 L11 11 L13 16 M9 11 L12 11"/></svg>
+      <span class="sb-item-lbl">Recorridos</span>
+    </div>
   </div>
 
   <div class="sb-divider"></div>
@@ -638,6 +642,11 @@ window._cargarFflate=function(){
     <div class="sb-item" data-s="equipo" data-tip="Salones" onclick="navegarA('salones')" id="sb-salones">
       <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M3 10 L10 3 L17 10 L17 17 L3 17 Z"/><rect x="7.5" y="12" width="5" height="5" rx="0.5"/></svg>
       <span class="sb-item-lbl">Salones</span>
+    </div>
+    <div class="sb-item solo-admin" data-s="equipo" data-tip="Firmas Digitales" onclick="abrirFirmasDigitalesDirecto()" id="sb-firmas">
+      <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 14 Q6 10 8 12 Q10 14 12 8 Q13 5 15 6"/><line x1="3" y1="17" x2="17" y2="17"/><circle cx="16" cy="5" r="2" fill="currentColor" opacity=".25" stroke="none"/></svg>
+      <span class="sb-item-lbl">Firmas</span>
+      <span class="sb-badge" id="sb-firmas-badge" style="display:none"></span>
     </div>
   </div>
 
@@ -677,10 +686,6 @@ window._cargarFflate=function(){
   <!-- MÁS -->
   <div class="sb-section">
     <div class="sb-section-lbl">Más</div>
-    <div class="sb-item" data-s="mas" data-tip="Recorridos" onclick="navegarA('recorridos')" id="sb-recorridos">
-      <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="10" cy="4" r="2"/><path d="M10 6 L9 11 L7 16 M10 6 L11 11 L13 16 M9 11 L12 11"/></svg>
-      <span class="sb-item-lbl">Recorridos</span>
-    </div>
     <div class="sb-item" data-s="mas" data-tip="Alertas" onclick="navegarA('alertas')" id="sb-alertas">
       <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M10 2 Q14 2 15 7 L16 14 L4 14 L5 7 Q6 2 10 2"/><path d="M7.5 14 Q7.5 17 10 17 Q12.5 17 12.5 14"/></svg>
       <span class="sb-item-lbl">Alertas</span>
