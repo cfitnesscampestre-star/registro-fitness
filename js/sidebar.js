@@ -2254,6 +2254,23 @@ function _syncFirmasBadge() {
   } catch(e) { badge.style.display = 'none'; }
 }
 
+// Sincronizar también los badges móviles (snav y mobile-home)
+const _origSyncFirmasBadge = _syncFirmasBadge;
+_syncFirmasBadge = function() {
+  _origSyncFirmasBadge();
+  // Badge en section-nav móvil
+  const snavBadge = document.getElementById('snav-firmas-badge');
+  const mobBadge  = document.getElementById('mob-firmas-badge');
+  const sbBadge   = document.getElementById('sb-firmas-badge');
+  const txt = sbBadge ? sbBadge.textContent : '';
+  const vis = sbBadge ? sbBadge.style.display : 'none';
+  [snavBadge, mobBadge].forEach(b => {
+    if(!b) return;
+    b.textContent = txt;
+    b.style.display = vis;
+  });
+};
+
 // Correr cada 8 segundos y al cargar
 setInterval(_syncFirmasBadge, 8000);
 setTimeout(_syncFirmasBadge, 2000);
