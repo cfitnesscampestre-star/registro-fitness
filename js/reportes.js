@@ -1155,6 +1155,105 @@ function _generarHojaFirmasCore(fechaIni, fechaFin, semana, firmasDigitales){
     Y += 4.5;
   });
 
+  // ── BLOQUE COORDINADOR al pie ────────────────────────────────────────
+  // Se dibuja siempre (con o sin firma digital), justo antes de los totales.
+  // Ancho: mitad izquierda (firma coordinador) + mitad derecha (Vo.Bo. RRHH)
+  {
+    const COORD_H  = 18;   // altura total del bloque
+    const COORD_W  = CW;
+    const halfW    = COORD_W / 2;
+    const CORO_LOC = [140, 100, 0];    // dorado
+    const COROBG_L = [255, 248, 225];  // fondo badge dorado
+
+    // Salto de página si no cabe
+    if(Y + COORD_H + 16 > PH - MB) { nuevaPagina(); Y = MT; }
+
+    const Y0c = Y + 2;
+
+    // Fondo izquierdo (coord) — verde muy claro dorado
+    doc.setFillColor(250, 248, 235);
+    doc.rect(ML, Y0c, halfW, COORD_H, 'F');
+    // Fondo derecho (RRHH) — gris muy claro
+    doc.setFillColor(245, 245, 245);
+    doc.rect(ML + halfW, Y0c, halfW, COORD_H, 'F');
+
+    // Marco exterior
+    doc.setDrawColor(...CV2); doc.setLineWidth(0.4);
+    doc.rect(ML, Y0c, COORD_W, COORD_H);
+    // Divisor central
+    doc.setDrawColor(...CV2); doc.setLineWidth(0.3);
+    doc.line(ML + halfW, Y0c, ML + halfW, Y0c + COORD_H);
+
+    // ── LADO IZQUIERDO: Coordinador ──────────────────────────────────
+    const coordNombrePDF = (firmasDigitales && firmasDigitales['coord_nombre'])
+      ? firmasDigitales['coord_nombre']
+      : (typeof _FD !== 'undefined' && _FD.coordNombre ? _FD.coordNombre
+        : (localStorage.getItem('fc_coord_nombre') || 'Coordinador Fitness'));
+
+    // Etiqueta superior
+    doc.setFont('helvetica', 'bold'); doc.setFontSize(5.5);
+    doc.setTextColor(...CORO_LOC);
+    doc.text('COORDINADOR FITNESS', ML + 3, Y0c + 4);
+
+    // Nombre del coordinador
+    doc.setFont('helvetica', 'bold'); doc.setFontSize(7);
+    doc.setTextColor(50, 40, 0);
+    doc.text(coordNombrePDF.toUpperCase(), ML + 3, Y0c + 8.5);
+
+    // Institución
+    doc.setFont('helvetica', 'normal'); doc.setFontSize(5.5);
+    doc.setTextColor(120, 100, 40);
+    doc.text('Club Campestre Aguascalientes', ML + 3, Y0c + 12);
+
+    // Firma digital del coordinador o línea punteada
+    if(firmasDigitales && firmasDigitales['coord']) {
+      try {
+        const sigW = 28, sigH = 8;
+        const sigX = ML + halfW - sigW - 4;
+        const sigY = Y0c + (COORD_H - sigH) / 2 - 1;
+        doc.addImage(firmasDigitales['coord'], 'PNG', sigX, sigY, sigW, sigH);
+        // Badge "firma digital"
+        doc.setFillColor(...COROBG_L);
+        doc.roundedRect(sigX, Y0c + COORD_H - 5.5, sigW, 4, 0.8, 0.8, 'F');
+        doc.setFont('helvetica','bold'); doc.setFontSize(4); doc.setTextColor(...CORO_LOC);
+        doc.text('firma digital', sigX + sigW/2, Y0c + COORD_H - 2.8, {align:'center'});
+      } catch(e) {
+        // fallback línea
+        doc.setDrawColor(...CORO_LOC); doc.setLineWidth(0.4);
+        doc.line(ML + halfW - 36, Y0c + COORD_H - 4, ML + halfW - 4, Y0c + COORD_H - 4);
+      }
+    } else {
+      // Línea punteada para firma manual
+      doc.setDrawColor(180, 160, 80); doc.setLineWidth(0.35);
+      doc.setLineDashPattern([1.0, 0.8], 0);
+      doc.line(ML + halfW - 38, Y0c + COORD_H - 4, ML + halfW - 4, Y0c + COORD_H - 4);
+      doc.setLineDashPattern([], 0);
+      doc.setFont('helvetica','italic'); doc.setFontSize(4.5); doc.setTextColor(160,140,80);
+      doc.text('Firma', ML + halfW - 21, Y0c + COORD_H - 1.5, {align:'center'});
+    }
+
+    // ── LADO DERECHO: Vo.Bo. RRHH ────────────────────────────────────
+    const xR = ML + halfW + 3;
+    doc.setFont('helvetica','bold'); doc.setFontSize(5.5);
+    doc.setTextColor(80, 80, 80);
+    doc.text('Vo.Bo. RECURSOS HUMANOS', xR, Y0c + 4);
+
+    doc.setFont('helvetica','normal'); doc.setFontSize(5.5);
+    doc.setTextColor(120, 120, 120);
+    doc.text('Club Campestre Aguascalientes', xR, Y0c + 8.5);
+
+    // Línea para firma manual RRHH
+    doc.setDrawColor(180, 180, 180); doc.setLineWidth(0.35);
+    doc.setLineDashPattern([1.0, 0.8], 0);
+    const xRH = ML + halfW + halfW/2;
+    doc.line(xRH - 22, Y0c + COORD_H - 4, xRH + 22, Y0c + COORD_H - 4);
+    doc.setLineDashPattern([], 0);
+    doc.setFont('helvetica','italic'); doc.setFontSize(4.5); doc.setTextColor(160,160,160);
+    doc.text('Firma', xRH, Y0c + COORD_H - 1.5, {align:'center'});
+
+    Y = Y0c + COORD_H + 3;
+  }
+
   // ── TOTALES al pie de última página ─────────────────────────────────
   const totalClases = regs.filter(r=>r.estado==='ok'||r.estado==='sub').length;
   const totalSup    = regs.filter(r=>r.estado==='sub').length;

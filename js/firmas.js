@@ -569,7 +569,6 @@ function fd_guardarFirma() {
     showToast('El área de firma está vacía. Firma con el stylus primero.', 'warn');
     return;
   }
-  const p   = _FD.profesores[_FD.profActivo];
   const url = _FD.canvas.toDataURL('image/png');
   _FD.firmas[p.id] = url;
   _FD.puntosActual = 0;
@@ -640,7 +639,11 @@ function fd_exportarPDF() {
 }
 
 function _fd_generarPDFConFirmas() {
-  const r = _generarHojaFirmasCore(_FD.fechaIni, _FD.fechaFin, _FD.semana, _FD.firmas);
+  // Adjuntar nombre del coordinador al objeto de firmas para que el PDF lo muestre
+  const firmasConNombre = Object.assign({}, _FD.firmas, {
+    coord_nombre: _FD.coordNombre || localStorage.getItem('fc_coord_nombre') || 'Coordinador Fitness'
+  });
+  const r = _generarHojaFirmasCore(_FD.fechaIni, _FD.fechaFin, _FD.semana, firmasConNombre);
   if(r){
     cerrarModal('m-firmas-digitales');
     showToast(`PDF listo · ${r.firmCnt} firma${r.firmCnt!==1?'s':''} digital${r.firmCnt!==1?'es':''}`, 'ok');
