@@ -727,6 +727,11 @@ window._cargarFflate=function(){
     <svg class="ico" viewBox="0 0 20 20"><circle cx="8" cy="6" r="3" stroke="currentColor" stroke-width="1.4" fill="none"/><path d="M2 17 Q2 12 8 12 Q14 12 14 17" stroke="currentColor" stroke-width="1.4" fill="none" stroke-linecap="round"/><circle cx="14" cy="6" r="2.5" stroke="currentColor" stroke-width="1.3" fill="none"/><path d="M14 11 Q18 11 18 16" stroke="currentColor" stroke-width="1.3" fill="none" stroke-linecap="round"/></svg>
     Equipo
   </div>
+  <div class="snav-item solo-admin" id="snav-firmas" onclick="abrirFirmasDigitalesDirecto()" style="position:relative">
+    <svg class="ico" viewBox="0 0 20 20"><path d="M4 14 Q6 10 8 12 Q10 14 12 8 Q13 5 15 6" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/><line x1="3" y1="17" x2="17" y2="17" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+    Firmas
+    <span id="snav-firmas-badge" style="display:none;position:absolute;top:4px;right:6px;background:var(--red2);color:#fff;font-size:.48rem;font-weight:700;border-radius:8px;padding:0 4px;line-height:13px;"></span>
+  </div>
   <div class="snav-item" data-s="analisis" onclick="switchSection('analisis')">
     <svg class="ico" viewBox="0 0 20 20"><rect x="3" y="12" width="3" height="5" rx="1" stroke="currentColor" stroke-width="1.4" fill="none"/><rect x="8.5" y="8" width="3" height="9" rx="1" stroke="currentColor" stroke-width="1.4" fill="none"/><rect x="14" y="4" width="3" height="13" rx="1" stroke="currentColor" stroke-width="1.4" fill="none"/></svg>
     Análisis
@@ -1215,6 +1220,13 @@ window._cargarFflate=function(){
               <svg width="16" height="16" viewBox="0 0 20 20" fill="none" stroke="#4db8e8" stroke-width="1.7" stroke-linecap="round"><rect x="3" y="4" width="14" height="13" rx="2"/><line x1="3" y1="9" x2="17" y2="9"/><line x1="7" y1="2" x2="7" y2="6"/><line x1="13" y1="2" x2="13" y2="6"/><line x1="7" y1="13" x2="13" y2="13"/><line x1="10" y1="11" x2="10" y2="15"/></svg>
             </div>
             <div class="mob-sm-lbl" style="color:var(--blue)">Suplencia</div>
+          </div>
+          <div class="mob-btn-sm solo-admin" style="width:88px;border-radius:18px;position:relative" onclick="abrirFirmasDigitalesDirecto()">
+            <div class="mob-sm-icon" style="background:rgba(94,255,160,.1);border:1px solid rgba(94,255,160,.25);">
+              <svg width="16" height="16" viewBox="0 0 20 20" fill="none" stroke="var(--neon)" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 14 Q6 10 8 12 Q10 14 12 8 Q13 5 15 6"/><line x1="3" y1="17" x2="17" y2="17"/></svg>
+            </div>
+            <div class="mob-sm-lbl" style="color:var(--neon)">Firmas</div>
+            <span id="mob-firmas-badge" style="display:none;position:absolute;top:4px;right:6px;background:var(--red2);color:#fff;font-size:.48rem;font-weight:700;border-radius:8px;padding:0 4px;line-height:13px;"></span>
           </div>
         </div>
 
