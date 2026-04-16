@@ -2191,7 +2191,47 @@ function calsupSelDia(key) {
 // usando la semana actual como rango por defecto.
 // ═══════════════════════════════════════════════════════════════════
 function abrirFirmasDigitalesDirecto() {
-  // Precalcular semana actual (lunes→domingo)
+  // ── VERIFICACIÓN PREVIA: bloquear si hay hoja activa incompleta ──
+  // Esta verificación es idéntica a la de abrirFirmasDigitales()
+  // pero se ejecuta ANTES de abrir cualquier modal.
+  try {
+    const hojaActiva = JSON.parse(localStorage.getItem('fc_hoja_firmas_activa') || 'null');
+    if(hojaActiva) {
+      const firmados  = Object.values(hojaActiva.firmas || {}).filter(f => f && f.data).length;
+      const semTxt    = hojaActiva.encabezado || `${hojaActiva.semIni} → ${hojaActiva.semFin}`;
+      const totalInst = typeof instructores !== 'undefined'
+        ? instructores.filter(i => (i.horario||[]).length > 0).length
+        : firmados;
+      const pendientes = Math.max(0, totalInst - firmados);
+
+      if(firmados > 0 && pendientes > 0) {
+        // BLOQUEO — no abrir nada
+        if(typeof showToast === 'function')
+          showToast(`🔒 Hoja activa con ${firmados}/${totalInst} firmas. Complétala primero.`, 'warn');
+        alert(
+          `🔒 NO SE PUEDE ABRIR UNA NUEVA HOJA
+
+` +
+          `Semana activa: ${semTxt}
+` +
+          `Firmas recibidas: ${firmados} de ${totalInst} (faltan ${pendientes})
+
+` +
+          `Opciones:
+` +
+          `  1. Espera a que los ${pendientes} instructor(es) restante(s) firmen.
+` +
+          `  2. Ve a "Cerrar hoja y generar nueva" para descartarla.
+
+` +
+          `⚠ Si cierras perderás las ${firmados} firma(s) ya guardadas.`
+        );
+        return; // BLOQUEO TOTAL — no continuar
+      }
+    }
+  } catch(e) {}
+
+  // Sin bloqueo — precalcular semana y abrir el modal de reportes
   const hoy  = new Date();
   const dow  = hoy.getDay();
   const diff = dow === 0 ? -6 : 1 - dow;
@@ -2199,28 +2239,21 @@ function abrirFirmasDigitalesDirecto() {
   const dom   = new Date(lunes); dom.setDate(lunes.getDate() + 6);
   const iso   = d => d.toISOString().slice(0, 10);
 
-  // Rellenar fechas en el modal de reportes ANTES de validar
-  // para que abrirFirmasDigitales pueda comparar correctamente
-  const elIni = document.getElementById('firmas-fecha-ini');
-  const elFin = document.getElementById('firmas-fecha-fin');
-  const elTxt = document.getElementById('firmas-semana-txt');
-  if(elIni && !elIni.value) elIni.value = iso(lunes);
-  if(elFin && !elFin.value) elFin.value = iso(dom);
-  if(elTxt && !elTxt.value && typeof firmasActualizarLabel === 'function') {
-    firmasActualizarLabel();
-  }
-
-  // Abrir el modal de reportes (necesario para que los elementos existan en el DOM)
   const modal = document.getElementById('m-reports');
   if(modal) modal.classList.add('on');
 
-  // Delegar completamente a abrirFirmasDigitales — que contiene todas las validaciones
-  // y bloqueos de hoja activa. NO saltar directo al modal de firmas.
   setTimeout(() => {
-    if(typeof abrirFirmasDigitales === 'function') {
-      abrirFirmasDigitales();
-    }
-  }, 200);
+    const elIni = document.getElementById('firmas-fecha-ini');
+    const elFin = document.getElementById('firmas-fecha-fin');
+    const elTxt = document.getElementById('firmas-semana-txt');
+    if(elIni && !elIni.value) elIni.value = iso(lunes);
+    if(elFin && !elFin.value) elFin.value = iso(dom);
+    if(elTxt && !elTxt.value && typeof firmasActualizarLabel === 'function')
+      firmasActualizarLabel();
+
+    // Llamar a abrirFirmasDigitales (que también tiene su propia verificación)
+    if(typeof abrirFirmasDigitales === 'function') abrirFirmasDigitales();
+  }, 150);
 }
 
 // ── Actualizar badge de Firmas en el sidebar ─────────────────────
