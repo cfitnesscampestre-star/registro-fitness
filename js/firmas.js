@@ -13,6 +13,7 @@ const _FD = {
   lastX:        0,
   lastY:        0,
   puntosActual: 0,    // para detectar si el canvas tiene algo
+  coordNombre:  '',   // nombre del coordinador que firma la hoja
 };
 
 // ── Helpers ──────────────────────────────────────────────────────────
@@ -39,25 +40,27 @@ function abrirFirmasDigitales() {
   try {
     const hojaActiva = JSON.parse(localStorage.getItem('fc_hoja_firmas_activa') || 'null');
     if(hojaActiva) {
-      const firmados  = Object.values(hojaActiva.firmas || {}).filter(f => f && f.data).length;
+      const firmasObj = hojaActiva.firmas || {};
+      const firmados  = Object.values(firmasObj).filter(f => f && f.data).length;
       const semTxt    = hojaActiva.encabezado || `${hojaActiva.semIni} → ${hojaActiva.semFin}`;
 
-      // Total de instructores con horario asignado
+      // Total = coordinador + instructores con horario
       const totalInst = typeof instructores !== 'undefined'
         ? instructores.filter(i => (i.horario||[]).length > 0).length
-        : firmados;
-      const pendientes = Math.max(0, totalInst - firmados);
+        : Math.max(0, firmados - 1);
+      const totalConCoord = totalInst + 1; // +1 por el coordinador
+      const pendientes = Math.max(0, totalConCoord - firmados);
 
       if(firmados > 0 && pendientes > 0) {
         // ── BLOQUEO TOTAL: hoja activa con firmas incompletas ──
         showToast(
-          `🔒 Hay una hoja activa con ${firmados}/${totalInst} firmas. Complétala primero.`,
+          `🔒 Hay una hoja activa con ${firmados}/${totalConCoord} firmas. Complétala primero.`,
           'warn'
         );
         alert(
           `🔒 NO SE PUEDE ABRIR UNA NUEVA HOJA\n\n` +
           `Semana activa: ${semTxt}\n` +
-          `Firmas recibidas: ${firmados} de ${totalInst} (faltan ${pendientes})\n\n` +
+          `Firmas recibidas: ${firmados} de ${totalConCoord} (faltan ${pendientes})\n\n` +
           `Para continuar tienes dos opciones:\n` +
           `  1. Espera a que los ${pendientes} instructor(es) restante(s) firmen.\n` +
           `  2. Ve a "Cerrar hoja y generar nueva" para descartarla.\n\n` +
@@ -67,7 +70,7 @@ function abrirFirmasDigitales() {
       } else if(firmados > 0 && pendientes === 0) {
         // ── Todas firmadas — confirmar cierre ──
         const ok = confirm(
-          `✔ La hoja "${semTxt}" está COMPLETAMENTE firmada (${firmados}/${totalInst}).\n\n` +
+          `✔ La hoja "${semTxt}" está COMPLETAMENTE firmada (${firmados}/${totalConCoord}).\n\n` +
           `¿Generar PDF y abrir una hoja nueva?`
         );
         if(!ok) return;
@@ -128,7 +131,18 @@ function abrirFirmasDigitales() {
     });
   });
 
-  _FD.profesores = Object.values(porInst)
+  // Recuperar nombre del coordinador guardado
+  _FD.coordNombre = localStorage.getItem('fc_coord_nombre') || 'Coordinador';
+
+  // Entrada especial del COORDINADOR — siempre primera en la lista
+  const entradaCoord = {
+    id: 'coord',
+    esCoord: true,
+    inst: { id: 'coord', nombre: _FD.coordNombre },
+    clases: []
+  };
+
+  _FD.profesores = [entradaCoord, ...Object.values(porInst)
     .sort((a,b) => a.inst.nombre.localeCompare(b.inst.nombre))
     .map(p => {
       const mapa = {};
@@ -143,7 +157,7 @@ function abrirFirmasDigitales() {
       });
       return { inst: p.inst, clases, id: p.inst.id };
     })
-    .filter(p => p.clases.length > 0);
+    .filter(p => p.clases.length > 0)];
 
   _FD.profActivo = null;
   _FD.firmas = {};  // limpiar para cargar frescas del storage
@@ -269,25 +283,30 @@ function _fdRenderLista() {
   const cont = document.getElementById('fd-lista');
   if(!cont) return;
 
-  let html = '<div style="font-size:.6rem;text-transform:uppercase;letter-spacing:1.5px;color:var(--txt3);padding:.3rem .4rem .4rem;font-weight:700;">Profesores</div>';
+  let html = '';
 
   _FD.profesores.forEach((p, idx) => {
-    const firmado   = !!_FD.firmas[p.id];
-    const activo    = _FD.profActivo === idx;
-    const color     = _fdColor(p.id);
-    const initials  = _fdInits(p.inst.nombre);
-    const clsCnt    = p.clases.length;
+    const firmado  = !!_FD.firmas[p.id];
+    const activo   = _FD.profActivo === idx;
+    const esCoord  = !!p.esCoord;
+    const color    = esCoord ? 'var(--v2)' : _fdColor(p.id);
+    const initials = _fdInits(p.inst.nombre);
+    const clsCnt   = p.clases.length;
+
+    // Separador de sección antes del primer instructor
+    if(idx === 0) html += `<div style="font-size:.58rem;text-transform:uppercase;letter-spacing:1.5px;color:var(--gold2);padding:.3rem .4rem .2rem;font-weight:700;">Coordinación</div>`;
+    if(idx === 1) html += `<div style="font-size:.58rem;text-transform:uppercase;letter-spacing:1.5px;color:var(--txt3);padding:.5rem .4rem .2rem;font-weight:700;border-top:1px solid var(--border);margin-top:4px;">Instructores</div>`;
 
     html += `<div onclick="fd_seleccionarProf(${idx})" style="
       display:flex;align-items:center;gap:8px;padding:8px 8px;
       border-radius:10px;cursor:pointer;margin-bottom:3px;
-      background:${activo ? 'rgba(26,122,69,.18)' : 'transparent'};
-      border:1px solid ${activo ? 'var(--verde)' : 'transparent'};
+      background:${activo ? (esCoord?'rgba(232,184,75,.12)':'rgba(26,122,69,.18)') : 'transparent'};
+      border:1px solid ${activo ? (esCoord?'var(--gold)':'var(--verde)') : 'transparent'};
       transition:all .15s;-webkit-tap-highlight-color:transparent;">
       <div style="position:relative;flex-shrink:0;">
-        <div style="width:34px;height:34px;border-radius:50%;background:${color};
+        <div style="width:34px;height:34px;border-radius:${esCoord?'8px':'50%'};background:${color};
           display:flex;align-items:center;justify-content:center;
-          font-size:.7rem;font-weight:700;color:#fff;">${initials}</div>
+          font-size:.7rem;font-weight:700;color:#fff;">${esCoord?'CO':initials}</div>
         ${firmado ? `<div style="position:absolute;bottom:-1px;right:-1px;width:13px;height:13px;
           border-radius:50%;background:var(--neon);border:2px solid var(--panel);
           display:flex;align-items:center;justify-content:center;">
@@ -296,12 +315,12 @@ function _fdRenderLista() {
           </svg></div>` : ''}
       </div>
       <div style="flex:1;min-width:0;">
-        <div style="font-size:.78rem;font-weight:600;color:${activo?'var(--neon)':'var(--txt)'};
+        <div style="font-size:.78rem;font-weight:600;color:${activo?(esCoord?'var(--gold2)':'var(--neon)'):'var(--txt)'};
           white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">
-          ${p.inst.nombre.split(' ').slice(0,2).join(' ')}
+          ${esCoord ? (p.inst.nombre || 'Coordinador') : p.inst.nombre.split(' ').slice(0,2).join(' ')}
         </div>
-        <div style="font-size:.62rem;color:${firmado?'var(--neon)':'var(--txt3)'};">
-          ${firmado ? '✔ Firmado' : clsCnt + ' clase' + (clsCnt!==1?'s':'')}
+        <div style="font-size:.62rem;color:${firmado?'var(--neon)':(esCoord?'var(--gold2)':'var(--txt3)')};font-style:${esCoord&&!firmado?'italic':'normal'};">
+          ${firmado ? '✔ Firmado' : (esCoord ? '← Firma primero aquí' : clsCnt + ' clase' + (clsCnt!==1?'s':''))}
         </div>
       </div>
     </div>`;
@@ -319,21 +338,34 @@ function fd_seleccionarProf(idx) {
 
   _FD.profActivo = idx;
   const p = _FD.profesores[idx];
-  const color = _fdColor(p.id);
+  const esCoord = !!p.esCoord;
+  const color = esCoord ? 'var(--v2)' : _fdColor(p.id);
 
   // Avatar e info
   const av = document.getElementById('fd-prof-avatar');
-  if(av){ av.textContent = _fdInits(p.inst.nombre); av.style.background = color; }
+  if(av){ av.textContent = esCoord ? 'CO' : _fdInits(p.inst.nombre); av.style.background = color; av.style.borderRadius = esCoord ? '8px' : '50%'; }
   const nm = document.getElementById('fd-prof-nombre');
-  if(nm) nm.textContent = p.inst.nombre.toUpperCase();
+  if(nm) {
+    if(esCoord) {
+      // Campo editable para nombre del coordinador
+      nm.innerHTML = `<input id="fd-coord-nombre-input" type="text"
+        value="${_FD.coordNombre}"
+        placeholder="Nombre del coordinador"
+        style="background:transparent;border:none;border-bottom:1px solid var(--gold);color:var(--gold2);
+               font-family:'Outfit',sans-serif;font-size:.82rem;font-weight:700;width:100%;outline:none;padding:2px 0;"
+        oninput="fd_actualizarNombreCoord(this.value)">`;
+    } else {
+      nm.textContent = p.inst.nombre.toUpperCase();
+    }
+  }
   const cl = document.getElementById('fd-prof-clases-lbl');
-  if(cl) cl.textContent = `${p.clases.length} clase${p.clases.length!==1?'s':''} esta semana`;
+  if(cl) cl.textContent = esCoord ? 'Coordinación · Firma la hoja para activarla' : `${p.clases.length} clase${p.clases.length!==1?'s':''} esta semana`;
 
   // Instrucción
   const ins = document.getElementById('fd-instruccion');
   if(ins) ins.textContent = _FD.firmas[p.id]
-    ? 'Ya tienes una firma guardada. Puedes borrarla y volver a firmar.'
-    : 'Firma en el área de abajo con el stylus pen';
+    ? (esCoord ? 'Hoja activada con tu firma. Puedes borrarla si necesitas rehacerla.' : 'Ya tienes una firma guardada. Puedes borrarla y volver a firmar.')
+    : (esCoord ? 'Firma aquí para ACTIVAR la hoja — los instructores podrán firmar después.' : 'Firma en el área de abajo con el stylus pen');
 
   // Botón guardar
   const btn = document.getElementById('fd-btn-guardar');
@@ -524,6 +556,15 @@ function fd_guardarFirma() {
     showToast('Selecciona primero un profesor', 'warn');
     return;
   }
+
+  // Verificar que el coordinador ya firmó antes de aceptar firmas de instructores
+  const p = _FD.profesores[_FD.profActivo];
+  if(!p.esCoord && !_FD.firmas['coord']) {
+    showToast('⚠ Primero debe firmar el coordinador para activar la hoja', 'warn');
+    alert('El coordinador debe firmar primero.\n\nSelecciona "Coordinación" en la lista y agrega tu firma para activar la hoja.');
+    return;
+  }
+
   if(_FD.puntosActual < 5) {
     showToast('El área de firma está vacía. Firma con el stylus primero.', 'warn');
     return;
@@ -554,9 +595,24 @@ function fd_guardarFirma() {
 }
 
 // ── Progreso ───────────────────────────────────────────────────────────
+
+
+// ── Actualizar nombre del coordinador en tiempo real ──────────────────
+function fd_actualizarNombreCoord(nombre) {
+  _FD.coordNombre = nombre.trim() || 'Coordinador';
+  // Actualizar en la lista de profesores
+  const coordProf = _FD.profesores.find(p => p.esCoord);
+  if(coordProf) coordProf.inst.nombre = _FD.coordNombre;
+  // Guardar en localStorage
+  try { localStorage.setItem('fc_coord_nombre', _FD.coordNombre); } catch(e) {}
+}
+
 function _fdActualizarProgreso() {
-  const total    = _FD.profesores.length;
-  const firmados = _FD.profesores.filter(p => !!_FD.firmas[p.id]).length;
+  // Contar coordinador por separado — solo instructores en el total del progreso
+  const coordFirmado = !!_FD.firmas['coord'];
+  const instructoresList = _FD.profesores.filter(p => !p.esCoord);
+  const total    = instructoresList.length;
+  const firmados = instructoresList.filter(p => !!_FD.firmas[p.id]).length;
   const el1 = document.getElementById('fd-prog-firmados');
   const el2 = document.getElementById('fd-prog-total');
   if(el1) el1.textContent = firmados;

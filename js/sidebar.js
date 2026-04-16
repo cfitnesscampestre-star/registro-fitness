@@ -2200,7 +2200,7 @@ function abrirFirmasDigitalesDirecto() {
       const firmados  = Object.values(hojaActiva.firmas || {}).filter(f => f && f.data).length;
       const semTxt    = hojaActiva.encabezado || `${hojaActiva.semIni} → ${hojaActiva.semFin}`;
       const totalInst = typeof instructores !== 'undefined'
-        ? instructores.filter(i => (i.horario||[]).length > 0).length
+        ? instructores.filter(i => (i.horario||[]).length > 0).length + 1 // +1 coordinador
         : firmados;
       const pendientes = Math.max(0, totalInst - firmados);
 
@@ -2267,7 +2267,7 @@ function _syncFirmasBadge() {
     const firmados  = Object.values(hoja.firmas || {}).filter(f => f && f.data).length;
     // Contar instructores que tienen clases en el periodo
     const total = typeof instructores !== 'undefined'
-      ? instructores.filter(i => (i.horario||[]).length > 0).length
+      ? instructores.filter(i => (i.horario||[]).length > 0).length + 1 // +1 coordinador
       : 0;
     const pendientes = Math.max(0, total - firmados);
     if(pendientes > 0) {
