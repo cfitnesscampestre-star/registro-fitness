@@ -578,13 +578,12 @@ function genReporteInstructor(){
 // ═══════════════════════════════════════════
 let temaActual = localStorage.getItem('fc_tema') || 'oscuro';
 
-// En móvil siempre tema claro — sin opción de cambio
 function _esMobil() { return window.innerWidth <= 640; }
 
 function aplicarTema(t) {
-  // Forzar tema claro en móvil independientemente de la preferencia
-  const temaEfectivo = _esMobil() ? 'claro' : t;
-  temaActual = t; // Guardar preferencia real (para tablet/desktop)
+  // Respetar la preferencia del usuario en todos los dispositivos
+  const temaEfectivo = t || 'oscuro';
+  temaActual = temaEfectivo;
   const iconEl = document.getElementById('coord-tema-icon');
   const btnTema = document.getElementById('coord-tema-btn');
   if(temaEfectivo === 'claro') {
@@ -596,7 +595,7 @@ function aplicarTema(t) {
   }
   // Ocultar botón "Cambiar apariencia" en móvil
   if(btnTema) btnTema.style.display = _esMobil() ? 'none' : '';
-  if(!_esMobil()) localStorage.setItem('fc_tema', t);
+  localStorage.setItem('fc_tema', temaEfectivo);
   setTimeout(()=>{if(typeof renderDashboard==='function')renderDashboard();},80);
 }
 function toggleCoordMenu(){
