@@ -1197,70 +1197,196 @@ window._cargarFflate=function(){
   <div id="mob-carousel">
     <div id="mob-track">
 
-      <!-- ── SLIDE 1: Inicio / Hoy ── -->
+      <!-- ── SLIDE 1: Inicio / Hoy — Diseño App Nativa ── -->
       <div class="mob-slide" id="mob-slide-1">
-        <!-- Acciones fila 1: Recorrido + Registro -->
-        <div class="mob-actions">
-          <button class="mob-btn-rec" onclick="iniciarRecorrido()">
-            <div class="mob-rec-sub">Iniciar</div>
-            <div class="mob-rec-title">Recorrido</div>
-            <div class="mob-rec-modes">
-              <span class="mob-mode-tag turbo" onclick="event.stopPropagation();modoRecorrido='turbo';iniciarRecorrido()">⚡ Turbo</span>
-              <span class="mob-mode-tag normal" onclick="event.stopPropagation();modoRecorrido='normal';iniciarRecorrido()">Normal</span>
+
+        <!-- ── HERO: Botón Recorrido completo ── -->
+        <button class="mob-hero-rec solo-admin" onclick="iniciarRecorrido()">
+          <!-- Fondo animado con círculos de profundidad -->
+          <div class="mob-hero-bg"></div>
+          <div class="mob-hero-content">
+            <div class="mob-hero-left">
+              <!-- Ícono 3D de recorrido -->
+              <div class="mob-hero-icon">
+                <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <!-- Sombra del ícono -->
+                  <ellipse cx="24" cy="44" rx="14" ry="3" fill="rgba(0,0,0,.25)"/>
+                  <!-- Cuerpo persona estilizado -->
+                  <circle cx="24" cy="9" r="5" fill="url(#rec_head)"/>
+                  <!-- Torso inclinado hacia adelante (corriendo) -->
+                  <path d="M24 14 L21 26 L17 36" stroke="url(#rec_body)" stroke-width="3.5" stroke-linecap="round" fill="none"/>
+                  <path d="M24 14 L27 22 L32 30" stroke="url(#rec_body)" stroke-width="3.5" stroke-linecap="round" fill="none"/>
+                  <!-- Brazos en movimiento -->
+                  <path d="M22 17 L15 22" stroke="url(#rec_arm)" stroke-width="3" stroke-linecap="round" fill="none"/>
+                  <path d="M25 20 L33 18" stroke="url(#rec_arm)" stroke-width="3" stroke-linecap="round" fill="none"/>
+                  <!-- Línea de piso / rastro -->
+                  <path d="M10 40 Q24 36 38 40" stroke="rgba(94,255,160,.3)" stroke-width="1.5" stroke-linecap="round" fill="none"/>
+                  <!-- Degradados -->
+                  <defs>
+                    <linearGradient id="rec_head" x1="0" y1="0" x2="1" y2="1">
+                      <stop offset="0%" stop-color="#9effd4"/>
+                      <stop offset="100%" stop-color="#3ecf7a"/>
+                    </linearGradient>
+                    <linearGradient id="rec_body" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0%" stop-color="#5effa0"/>
+                      <stop offset="100%" stop-color="#1a7a45"/>
+                    </linearGradient>
+                    <linearGradient id="rec_arm" x1="0" y1="0" x2="1" y2="0">
+                      <stop offset="0%" stop-color="#5effa0" stop-opacity=".9"/>
+                      <stop offset="100%" stop-color="#3ecf7a" stop-opacity=".5"/>
+                    </linearGradient>
+                  </defs>
+                </svg>
+              </div>
+              <div>
+                <div class="mob-hero-sup">INICIAR</div>
+                <div class="mob-hero-title">RECORRIDO</div>
+                <div class="mob-hero-modes">
+                  <span class="mob-mode-tag turbo" onclick="event.stopPropagation();modoRecorrido='turbo';iniciarRecorrido()">⚡ Turbo</span>
+                  <span class="mob-mode-tag normal" onclick="event.stopPropagation();modoRecorrido='normal';iniciarRecorrido()">Normal</span>
+                </div>
+              </div>
             </div>
-          </button>
-          <div class="mob-btn-sm mob-btn-clase solo-admin" style="width:88px;border-radius:18px;" onclick="abrirModal('m-clase')">
-            <div class="mob-sm-icon" style="background:rgba(94,255,160,.12);border:1px solid rgba(94,255,160,.3);">
-              <svg width="16" height="16" viewBox="0 0 20 20" fill="none" stroke="var(--neon)" stroke-width="1.8"><line x1="10" y1="3" x2="10" y2="17" stroke-linecap="round"/><line x1="3" y1="10" x2="17" y2="10" stroke-linecap="round"/></svg>
+            <div class="mob-hero-arrow">
+              <svg viewBox="0 0 24 24" fill="none" width="28" height="28">
+                <circle cx="12" cy="12" r="11" stroke="rgba(94,255,160,.3)" stroke-width="1.5"/>
+                <polyline points="9,7 15,12 9,17" stroke="#5effa0" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
             </div>
-            <div class="mob-sm-lbl" style="color:var(--txt2)">Registro<br>clase</div>
           </div>
-          <div class="mob-btn-sm solo-admin" style="width:88px;border-radius:18px;" onclick="abrirSupPlanner()">
-            <div class="mob-sm-icon" style="background:rgba(41,128,185,.15);border:1px solid rgba(41,128,185,.35);">
-              <svg width="16" height="16" viewBox="0 0 20 20" fill="none" stroke="#4db8e8" stroke-width="1.7" stroke-linecap="round"><rect x="3" y="4" width="14" height="13" rx="2"/><line x1="3" y1="9" x2="17" y2="9"/><line x1="7" y1="2" x2="7" y2="6"/><line x1="13" y1="2" x2="13" y2="6"/><line x1="7" y1="13" x2="13" y2="13"/><line x1="10" y1="11" x2="10" y2="15"/></svg>
+        </button>
+
+        <!-- ── GRID DE ACCIONES 3 botones ── -->
+        <div class="mob-actions-grid solo-admin">
+
+          <!-- Registro de clase -->
+          <div class="mob-action-card" onclick="abrirModal('m-clase')">
+            <div class="mob-ac-icon" style="background:linear-gradient(135deg,rgba(94,255,160,.18),rgba(94,255,160,.06));box-shadow:0 4px 16px rgba(94,255,160,.15),inset 0 1px 0 rgba(255,255,255,.12);">
+              <svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg" width="28" height="28">
+                <!-- Clipboard 3D -->
+                <rect x="6" y="8" width="20" height="20" rx="3.5" fill="url(#clip_bg)" stroke="rgba(94,255,160,.4)" stroke-width="1"/>
+                <rect x="6" y="9" width="20" height="3" rx="0" fill="rgba(255,255,255,.08)"/>
+                <!-- Clip en top -->
+                <rect x="12" y="5" width="8" height="5" rx="2" fill="rgba(94,255,160,.4)" stroke="rgba(94,255,160,.6)" stroke-width="1"/>
+                <!-- Cruz / más -->
+                <line x1="16" y1="14" x2="16" y2="24" stroke="#5effa0" stroke-width="2.2" stroke-linecap="round"/>
+                <line x1="11" y1="19" x2="21" y2="19" stroke="#5effa0" stroke-width="2.2" stroke-linecap="round"/>
+                <defs>
+                  <linearGradient id="clip_bg" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stop-color="rgba(30,55,38,.9)"/>
+                    <stop offset="100%" stop-color="rgba(15,28,20,.9)"/>
+                  </linearGradient>
+                </defs>
+              </svg>
             </div>
-            <div class="mob-sm-lbl" style="color:var(--blue)">Suplencia</div>
+            <div class="mob-ac-lbl">Registrar<br><span>Clase</span></div>
           </div>
-          <div class="mob-btn-sm solo-admin" style="width:88px;border-radius:18px;position:relative" onclick="abrirFirmasDigitalesDirecto()">
-            <div class="mob-sm-icon" style="background:rgba(94,255,160,.1);border:1px solid rgba(94,255,160,.25);">
-              <svg width="16" height="16" viewBox="0 0 20 20" fill="none" stroke="var(--neon)" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 14 Q6 10 8 12 Q10 14 12 8 Q13 5 15 6"/><line x1="3" y1="17" x2="17" y2="17"/></svg>
+
+          <!-- Suplencia -->
+          <div class="mob-action-card" onclick="abrirSupPlanner()">
+            <div class="mob-ac-icon" style="background:linear-gradient(135deg,rgba(77,184,232,.18),rgba(77,184,232,.05));box-shadow:0 4px 16px rgba(77,184,232,.18),inset 0 1px 0 rgba(255,255,255,.1);">
+              <svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg" width="28" height="28">
+                <!-- Dos personas 3D -->
+                <!-- Persona 1 saliendo -->
+                <circle cx="10" cy="10" r="4" fill="url(#sup_p1)"/>
+                <path d="M4 26 Q4 19 10 19 Q13 19 15 21" stroke="#4db8e8" stroke-width="2" stroke-linecap="round" fill="none"/>
+                <!-- Persona 2 entrando -->
+                <circle cx="22" cy="10" r="4" fill="url(#sup_p2)"/>
+                <path d="M17 21 Q19 19 22 19 Q28 19 28 26" stroke="rgba(94,255,160,.7)" stroke-width="2" stroke-linecap="round" fill="none"/>
+                <!-- Flechas de intercambio -->
+                <path d="M14 15 L18 15" stroke="#4db8e8" stroke-width="1.8" stroke-linecap="round"/>
+                <polyline points="17,13 19,15 17,17" stroke="#4db8e8" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+                <defs>
+                  <linearGradient id="sup_p1" x1="0" y1="0" x2="1" y2="1">
+                    <stop offset="0%" stop-color="#7dd3f8"/>
+                    <stop offset="100%" stop-color="#2a8fbf"/>
+                  </linearGradient>
+                  <linearGradient id="sup_p2" x1="0" y1="0" x2="1" y2="1">
+                    <stop offset="0%" stop-color="#9effd4"/>
+                    <stop offset="100%" stop-color="#2d9e5c"/>
+                  </linearGradient>
+                </defs>
+              </svg>
             </div>
-            <div class="mob-sm-lbl" style="color:var(--neon)">Firmas</div>
-            <span id="mob-firmas-badge" style="display:none;position:absolute;top:4px;right:6px;background:var(--red2);color:#fff;font-size:.48rem;font-weight:700;border-radius:8px;padding:0 4px;line-height:13px;"></span>
+            <div class="mob-ac-lbl" style="color:var(--blue)">Suplencia</div>
+            <span id="mob-firmas-badge-sup" style="display:none"></span>
           </div>
+
+          <!-- Firmas -->
+          <div class="mob-action-card" onclick="abrirFirmasDigitalesDirecto()" style="position:relative">
+            <div class="mob-ac-icon" style="background:linear-gradient(135deg,rgba(94,255,160,.15),rgba(62,207,122,.05));box-shadow:0 4px 16px rgba(94,255,160,.12),inset 0 1px 0 rgba(255,255,255,.1);">
+              <svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg" width="28" height="28">
+                <!-- Hoja de papel 3D -->
+                <path d="M8 4 L22 4 L26 8 L26 28 L8 28 Z" fill="url(#sign_paper)" stroke="rgba(94,255,160,.35)" stroke-width="1"/>
+                <path d="M22 4 L22 8 L26 8" fill="rgba(94,255,160,.12)" stroke="rgba(94,255,160,.35)" stroke-width="1"/>
+                <!-- Luz en papel -->
+                <path d="M8 4 L22 4 L22 6 L8 6 Z" fill="rgba(255,255,255,.08)"/>
+                <!-- Firma ondulada -->
+                <path d="M12 18 Q14 15 16 17 Q18 19 20 14 Q21 12 22 13" stroke="url(#sign_ink)" stroke-width="2" stroke-linecap="round" fill="none"/>
+                <line x1="11" y1="22" x2="21" y2="22" stroke="rgba(94,255,160,.3)" stroke-width="1.2" stroke-linecap="round"/>
+                <defs>
+                  <linearGradient id="sign_paper" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stop-color="rgba(25,50,35,.95)"/>
+                    <stop offset="100%" stop-color="rgba(12,25,18,.95)"/>
+                  </linearGradient>
+                  <linearGradient id="sign_ink" x1="0" y1="0" x2="1" y2="0">
+                    <stop offset="0%" stop-color="#5effa0"/>
+                    <stop offset="100%" stop-color="#3ecf7a" stop-opacity=".6"/>
+                  </linearGradient>
+                </defs>
+              </svg>
+            </div>
+            <div class="mob-ac-lbl">Firmas</div>
+            <span id="mob-firmas-badge" style="display:none;position:absolute;top:6px;right:6px;background:var(--red2);color:#fff;font-size:.5rem;font-weight:700;border-radius:8px;padding:1px 5px;line-height:13px;min-width:16px;text-align:center;"></span>
+          </div>
+
         </div>
 
-        <!-- Agenda -->
-        <div class="mob-btn-agenda-row" onclick="abrirAgendaMob()">
-          <div style="display:flex;align-items:center;gap:10px;flex:1;">
-            <div class="mob-sm-icon" style="background:rgba(232,184,75,.15);border:1px solid rgba(232,184,75,.3);flex-shrink:0;">
-              <svg width="15" height="15" viewBox="0 0 20 20" fill="none" stroke="var(--gold2)" stroke-width="1.5"><rect x="3" y="3" width="14" height="14" rx="2"/><line x1="7" y1="8" x2="13" y2="8" stroke-linecap="round"/><line x1="7" y1="11" x2="10" y2="11" stroke-linecap="round"/></svg>
-            </div>
-            <div>
-              <div style="font-size:.78rem;font-weight:600;color:var(--gold2)">Agenda</div>
-              <div style="font-size:.62rem;color:var(--txt3);margin-top:1px">Notas y recordatorios</div>
-            </div>
+        <!-- ── Agenda ── -->
+        <div class="mob-agenda-card" onclick="abrirAgendaMob()">
+          <div class="mob-ag-icon">
+            <svg viewBox="0 0 28 28" fill="none" width="22" height="22">
+              <rect x="3" y="5" width="22" height="20" rx="4" fill="rgba(232,184,75,.15)" stroke="rgba(232,184,75,.4)" stroke-width="1.2"/>
+              <rect x="3" y="9" width="22" height="3" fill="rgba(232,184,75,.12)"/>
+              <line x1="8" y1="4" x2="8" y2="7" stroke="var(--gold2)" stroke-width="2" stroke-linecap="round"/>
+              <line x1="20" y1="4" x2="20" y2="7" stroke="var(--gold2)" stroke-width="2" stroke-linecap="round"/>
+              <line x1="8" y1="16" x2="16" y2="16" stroke="rgba(232,184,75,.7)" stroke-width="1.5" stroke-linecap="round"/>
+              <line x1="8" y1="19" x2="13" y2="19" stroke="rgba(232,184,75,.5)" stroke-width="1.5" stroke-linecap="round"/>
+            </svg>
           </div>
-          <div style="display:flex;align-items:center;gap:8px;">
-            <div class="mob-agenda-badge" id="mob-agenda-badge" style="display:none">0</div>
-            <svg width="14" height="14" viewBox="0 0 20 20" fill="none" stroke="var(--gold2)" stroke-width="1.5" opacity=".6"><polyline points="7,4 13,10 7,16" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          <div class="mob-ag-text">
+            <div class="mob-ag-title">Agenda</div>
+            <div class="mob-ag-sub">Notas y recordatorios</div>
           </div>
+          <div class="mob-agenda-badge" id="mob-agenda-badge" style="display:none">0</div>
+          <svg viewBox="0 0 20 20" fill="none" width="14" height="14" style="opacity:.4">
+            <polyline points="7,4 13,10 7,16" stroke="var(--gold2)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
         </div>
 
-        <!-- KPIs de hoy -->
-        <!-- Selector de fecha móvil -->
-        <div style="display:flex;align-items:center;justify-content:space-between;background:var(--panel2);border:1px solid var(--border);border-radius:14px;padding:7px 12px;gap:6px">
-          <button onclick="cambiarVistaFecha(-1)" style="background:none;border:none;color:var(--neon);font-size:1.2rem;cursor:pointer;padding:0 2px;line-height:1;font-weight:300">‹</button>
+        <!-- ── Selector de fecha + KPIs ── -->
+        <div class="mob-date-bar">
+          <button class="mob-date-nav" onclick="cambiarVistaFecha(-1)">‹</button>
           <div style="flex:1;text-align:center">
-            <input type="date" id="mob-date-picker" style="background:none;border:none;color:var(--txt);font-family:'Outfit',sans-serif;font-size:.81rem;font-weight:600;text-align:center;width:100%;outline:none;cursor:pointer" onchange="setVistaFecha(this.value)">
+            <input type="date" id="mob-date-picker" class="mob-date-input" onchange="setVistaFecha(this.value)">
           </div>
-          <button onclick="cambiarVistaFecha(1)" style="background:none;border:none;color:var(--neon);font-size:1.2rem;cursor:pointer;padding:0 2px;line-height:1;font-weight:300">›</button>
-          <button id="mob-btn-hoy" onclick="resetVistaFecha()" style="background:var(--verde);color:#fff;border:none;border-radius:8px;font-family:'Outfit',sans-serif;font-size:.65rem;font-weight:700;padding:4px 10px;cursor:pointer;white-space:nowrap;letter-spacing:.3px">Hoy</button>
+          <button class="mob-date-nav" onclick="cambiarVistaFecha(1)">›</button>
+          <button id="mob-btn-hoy" class="mob-date-today" onclick="resetVistaFecha()">Hoy</button>
         </div>
+
         <div class="mob-kpi-row" id="mob-kpi-row">
-          <div class="mob-kpi"><div class="mob-kpi-val" style="color:var(--neon)" id="mob-k-reg">—</div><div class="mob-kpi-lbl">Registradas<br>hoy</div></div>
-          <div class="mob-kpi"><div class="mob-kpi-val" style="color:var(--red2)" id="mob-k-pend">—</div><div class="mob-kpi-lbl">Pendientes<br>hoy</div></div>
-          <div class="mob-kpi"><div class="mob-kpi-val" style="color:var(--blue)" id="mob-k-aforo">—</div><div class="mob-kpi-lbl">Aforo<br>promedio</div></div>
+          <div class="mob-kpi">
+            <div class="mob-kpi-val" style="color:var(--neon)" id="mob-k-reg">—</div>
+            <div class="mob-kpi-lbl">Registradas<br>hoy</div>
+          </div>
+          <div class="mob-kpi">
+            <div class="mob-kpi-val" style="color:var(--red2)" id="mob-k-pend">—</div>
+            <div class="mob-kpi-lbl">Pendientes<br>hoy</div>
+          </div>
+          <div class="mob-kpi">
+            <div class="mob-kpi-val" style="color:var(--blue)" id="mob-k-aforo">—</div>
+            <div class="mob-kpi-lbl">Aforo<br>promedio</div>
+          </div>
         </div>
 
         <!-- Lista clases -->
