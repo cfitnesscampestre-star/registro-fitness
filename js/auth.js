@@ -72,9 +72,7 @@ const HASH_USUARIO_DEFAULT = 'c3d6f9a2e5b8d1f4a7c0e3b6d9f2a5c8e1b4d7f0a3c6e9b2d5
 
 // ── Inicializar hashes en primer arranque ──
 async function inicializarHashes() {
-  const hashExistente = localStorage.getItem('fc_hash_admin');
-
-  // Si hay contraseña en texto plano de versión anterior → migrar primero
+  // Migrar texto plano si existía (versión anterior)
   const passViejaAdmin = localStorage.getItem('fc_pass_admin');
   const passViejaUser  = localStorage.getItem('fc_pass_usuario');
 
@@ -82,23 +80,23 @@ async function inicializarHashes() {
     const h = await sha256(passViejaAdmin);
     localStorage.setItem('fc_hash_admin', h);
     localStorage.removeItem('fc_pass_admin');
-    console.log('🔐 Pass admin migrada a hash');
-  } else if (!hashExistente || hashExistente.length !== 64) {
-    // No hay hash válido (SHA-256 = 64 chars hex) → crear con contraseña por defecto
-    const hashAdmin = await sha256('fitness2025');
-    localStorage.setItem('fc_hash_admin', hashAdmin);
-    console.log('🔐 Hash admin inicializado');
+  } else {
+    const hashExistente = localStorage.getItem('fc_hash_admin');
+    // Si no hay hash o tiene longitud incorrecta (no es SHA-256 válido = 64 chars)
+    if (!hashExistente || hashExistente.length !== 64) {
+      localStorage.setItem('fc_hash_admin', await sha256('fitness2025'));
+    }
   }
 
   if (passViejaUser) {
     const h = await sha256(passViejaUser);
     localStorage.setItem('fc_hash_usuario', h);
     localStorage.removeItem('fc_pass_usuario');
-    console.log('🔐 Pass usuario migrada a hash');
-  } else if (!localStorage.getItem('fc_hash_usuario') || localStorage.getItem('fc_hash_usuario').length !== 64) {
-    const hashUsuario = await sha256('campestre');
-    localStorage.setItem('fc_hash_usuario', hashUsuario);
-    console.log('🔐 Hash usuario inicializado');
+  } else {
+    const hashExistenteU = localStorage.getItem('fc_hash_usuario');
+    if (!hashExistenteU || hashExistenteU.length !== 64) {
+      localStorage.setItem('fc_hash_usuario', await sha256('campestre'));
+    }
   }
 }
 
