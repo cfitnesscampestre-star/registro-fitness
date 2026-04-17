@@ -374,15 +374,8 @@ function guardarSupLocal(){
 
 // ─── Arranque ───
 (function init(){
-  // En móvil siempre oscuro — es la experiencia diseñada
-  // En desktop/tablet respetar preferencia guardada
-  const _isMob = window.innerWidth <= 640;
-  if(_isMob) {
-    localStorage.setItem('fc_tema', 'oscuro');
-    aplicarTema('oscuro');
-  } else {
-    aplicarTema(localStorage.getItem('fc_tema')||'oscuro');
-  }
+  // Aplicar tema guardado
+  aplicarTema(localStorage.getItem('fc_tema')||'oscuro');
 
   // ── Inicializar hashes de contraseñas (migra texto plano → SHA-256) ──
   if(typeof inicializarHashes === 'function') inicializarHashes();
