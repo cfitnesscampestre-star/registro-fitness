@@ -72,28 +72,50 @@ const HASH_USUARIO_DEFAULT = 'c3d6f9a2e5b8d1f4a7c0e3b6d9f2a5c8e1b4d7f0a3c6e9b2d5
 
 // ── Inicializar hashes en primer arranque ──
 async function inicializarHashes() {
-  // Si ya existe hash guardado, no hacer nada
-  if (localStorage.getItem('fc_hash_admin')) return;
-
-  // Primera vez: hashear las contraseñas por defecto y guardar
-  const hashAdmin   = await sha256('fitness2025');
-  const hashUsuario = await sha256('campestre');
-  localStorage.setItem('fc_hash_admin',   hashAdmin);
-  localStorage.setItem('fc_hash_usuario', hashUsuario);
-
-  // Migrar contraseñas en texto plano si existían de versiones anteriores
+  // ── Migrar contraseñas en texto plano PRIMERO (versiones anteriores) ──
   const passViejaAdmin = localStorage.getItem('fc_pass_admin');
   const passViejaUser  = localStorage.getItem('fc_pass_usuario');
+
   if (passViejaAdmin) {
+    // Había contraseña en texto plano → hashearla y guardar
     const h = await sha256(passViejaAdmin);
     localStorage.setItem('fc_hash_admin', h);
-    localStorage.removeItem('fc_pass_admin'); // eliminar texto plano
+    localStorage.removeItem('fc_pass_admin');
+    console.log('🔐 Contraseña admin migrada a hash');
+  } else if (!localStorage.getItem('fc_hash_admin')) {
+    // Primera vez absoluta → usar contraseña por defecto
+    const hashAdmin = await sha256('fitness2025');
+    localStorage.setItem('fc_hash_admin', hashAdmin);
+    console.log('🔐 Hash admin inicializado con contraseña por defecto');
   }
+
   if (passViejaUser) {
     const h = await sha256(passViejaUser);
     localStorage.setItem('fc_hash_usuario', h);
     localStorage.removeItem('fc_pass_usuario');
+    console.log('🔐 Contraseña usuario migrada a hash');
+  } else if (!localStorage.getItem('fc_hash_usuario')) {
+    const hashUsuario = await sha256('campestre');
+    localStorage.setItem('fc_hash_usuario', hashUsuario);
+    console.log('🔐 Hash usuario inicializado con contraseña por defecto');
   }
+}
+
+// ── Función de emergencia: resetear hashes a contraseñas por defecto ──
+// Llamar desde consola del navegador si el login no funciona:
+// resetearHashesDefecto()
+async function resetearHashesDefecto() {
+  const hashAdmin   = await sha256('fitness2025');
+  const hashUsuario = await sha256('campestre');
+  localStorage.setItem('fc_hash_admin',   hashAdmin);
+  localStorage.setItem('fc_hash_usuario', hashUsuario);
+  // Limpiar bloqueos
+  localStorage.removeItem('fc_intentos_admin');
+  localStorage.removeItem('fc_intentos_usuario');
+  localStorage.removeItem('fc_bloqueo_admin');
+  localStorage.removeItem('fc_bloqueo_usuario');
+  console.log('✅ Hashes reseteados. Contraseñas: admin=fitness2025 / usuario=campestre');
+  alert('✅ Hashes reseteados.\nCoordinador: fitness2025\nConsulta: campestre\n\nRecarga la página.');
 }
 
 // ── Selección de rol en la pantalla de login ──
