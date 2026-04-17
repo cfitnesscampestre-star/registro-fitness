@@ -72,50 +72,34 @@ const HASH_USUARIO_DEFAULT = 'c3d6f9a2e5b8d1f4a7c0e3b6d9f2a5c8e1b4d7f0a3c6e9b2d5
 
 // ── Inicializar hashes en primer arranque ──
 async function inicializarHashes() {
-  // ── Migrar contraseñas en texto plano PRIMERO (versiones anteriores) ──
+  const hashExistente = localStorage.getItem('fc_hash_admin');
+
+  // Si hay contraseña en texto plano de versión anterior → migrar primero
   const passViejaAdmin = localStorage.getItem('fc_pass_admin');
   const passViejaUser  = localStorage.getItem('fc_pass_usuario');
 
   if (passViejaAdmin) {
-    // Había contraseña en texto plano → hashearla y guardar
     const h = await sha256(passViejaAdmin);
     localStorage.setItem('fc_hash_admin', h);
     localStorage.removeItem('fc_pass_admin');
-    console.log('🔐 Contraseña admin migrada a hash');
-  } else if (!localStorage.getItem('fc_hash_admin')) {
-    // Primera vez absoluta → usar contraseña por defecto
+    console.log('🔐 Pass admin migrada a hash');
+  } else if (!hashExistente || hashExistente.length !== 64) {
+    // No hay hash válido (SHA-256 = 64 chars hex) → crear con contraseña por defecto
     const hashAdmin = await sha256('fitness2025');
     localStorage.setItem('fc_hash_admin', hashAdmin);
-    console.log('🔐 Hash admin inicializado con contraseña por defecto');
+    console.log('🔐 Hash admin inicializado');
   }
 
   if (passViejaUser) {
     const h = await sha256(passViejaUser);
     localStorage.setItem('fc_hash_usuario', h);
     localStorage.removeItem('fc_pass_usuario');
-    console.log('🔐 Contraseña usuario migrada a hash');
-  } else if (!localStorage.getItem('fc_hash_usuario')) {
+    console.log('🔐 Pass usuario migrada a hash');
+  } else if (!localStorage.getItem('fc_hash_usuario') || localStorage.getItem('fc_hash_usuario').length !== 64) {
     const hashUsuario = await sha256('campestre');
     localStorage.setItem('fc_hash_usuario', hashUsuario);
-    console.log('🔐 Hash usuario inicializado con contraseña por defecto');
+    console.log('🔐 Hash usuario inicializado');
   }
-}
-
-// ── Función de emergencia: resetear hashes a contraseñas por defecto ──
-// Llamar desde consola del navegador si el login no funciona:
-// resetearHashesDefecto()
-async function resetearHashesDefecto() {
-  const hashAdmin   = await sha256('fitness2025');
-  const hashUsuario = await sha256('campestre');
-  localStorage.setItem('fc_hash_admin',   hashAdmin);
-  localStorage.setItem('fc_hash_usuario', hashUsuario);
-  // Limpiar bloqueos
-  localStorage.removeItem('fc_intentos_admin');
-  localStorage.removeItem('fc_intentos_usuario');
-  localStorage.removeItem('fc_bloqueo_admin');
-  localStorage.removeItem('fc_bloqueo_usuario');
-  console.log('✅ Hashes reseteados. Contraseñas: admin=fitness2025 / usuario=campestre');
-  alert('✅ Hashes reseteados.\nCoordinador: fitness2025\nConsulta: campestre\n\nRecarga la página.');
 }
 
 // ── Selección de rol en la pantalla de login ──
@@ -185,7 +169,7 @@ async function intentarLogin() {
   const errTxt = document.getElementById('login-error-txt');
   errEl.style.display = 'none';
 
-  // ── Login instructor (PIN numérico — hasheado con SHA-256) ──
+  // ── Login instructor (PIN numérico — sin hashear, cortos) ──
   if (rolLoginSeleccionado === 'instructor') {
     const instId = parseInt(document.getElementById('login-instructor-sel').value);
     if (!instId) {
@@ -193,28 +177,11 @@ async function intentarLogin() {
       errEl.style.display = 'block';
       return;
     }
-    // Verificar bloqueo para instructores también
-    const bloqueadoInst = getRolBloqueado('inst_' + instId);
-    if (bloqueadoInst) {
-      errTxt.textContent = `⛔ Demasiados intentos. Espera ${tiempoRestante(bloqueadoInst)}.`;
-      errEl.style.display = 'block';
-      return;
-    }
-    const hashIngresadoPin = await sha256(pass);
-    // Si no hay hash guardado, comparar contra hash del PIN por defecto '1234'
-    const hashPinDefault = await sha256('1234');
-    const hashPinGuardado = localStorage.getItem(`fc_hash_pin_${instId}`) || hashPinDefault;
-    if (hashIngresadoPin === hashPinGuardado) {
-      limpiarIntentos('inst_' + instId);
+    const pinGuardado = localStorage.getItem(`fc_pin_${instId}`) || '1234';
+    if (pass === pinGuardado) {
       _loginExitoso('instructor', instId);
     } else {
-      const intentosInst = registrarIntentoFallido('inst_' + instId);
-      const restantesInst = MAX_INTENTOS - intentosInst;
-      if (restantesInst <= 0) {
-        _loginFallido('instructor', '⛔ Demasiados intentos. Cuenta bloqueada 15 min.');
-      } else {
-        _loginFallido('instructor', `PIN incorrecto. ${restantesInst} intento(s) restante(s).`);
-      }
+      _loginFallido('instructor', 'PIN incorrecto. Intenta de nuevo.');
     }
     return;
   }
@@ -262,9 +229,6 @@ function _loginExitoso(rol, instId) {
   aplicarRol(rol);
   document.getElementById('login-screen').classList.add('oculto');
   document.getElementById('login-pass').value = '';
-
-  // Migrar PINs en texto plano a hashes si existieran (compatibilidad con versión anterior)
-  if (typeof migrarPinsInstructores === 'function') migrarPinsInstructores();
 
   if (rol === 'instructor') {
     abrirPortalInstructorLocal();
@@ -318,17 +282,8 @@ function aplicarRol(rol) {
 function cerrarSesion() {
   if (!confirm('¿Cerrar sesión?')) return;
   if (typeof instPararPoll === 'function') instPararPoll();
-
-  // ── Limpiar datos en memoria para que el siguiente usuario empiece limpio ──
-  // IMPORTANTE: no borramos localStorage (los datos persisten para el próximo login),
-  // solo reseteamos las variables en memoria que podrían "filtrar" info entre sesiones.
-  rolActual    = null;
+  rolActual = null;
   instActualId = null;
-  // Cancelar timer de sincronización pendiente si lo hay
-  if (typeof renderAll._timer !== 'undefined' && renderAll._timer) {
-    clearTimeout(renderAll._timer);
-    renderAll._timer = null;
-  }
   sessionStorage.removeItem('fc_rol');
   sessionStorage.removeItem('fc_inst_id');
   localStorage.removeItem('fc_ses_rol');
@@ -416,39 +371,3 @@ async function cambiarPass(tipo) {
   s.textContent = '@keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-8px)}75%{transform:translateX(8px)}}';
   document.head.appendChild(s);
 })();
-
-// ── Migrar PINs en texto plano a hashes (llamar una vez al iniciar) ──
-async function migrarPinsInstructores() {
-  for (const inst of (instructores || [])) {
-    const pinPlano = localStorage.getItem(`fc_pin_${inst.id}`);
-    if (pinPlano) {
-      // PIN viejo en texto plano — hashear y guardar
-      const h = await sha256(pinPlano);
-      localStorage.setItem(`fc_hash_pin_${inst.id}`, h);
-      localStorage.removeItem(`fc_pin_${inst.id}`);
-      console.log(`🔐 PIN de ${inst.nombre} migrado a hash`);
-    }
-  }
-}
-
-// ── Cambiar PIN de instructor (solo el propio instructor o el coordinador) ──
-async function cambiarPinInstructor(instId, pinNuevo, pinActual) {
-  if (!pinNuevo || !/^\d{4,8}$/.test(pinNuevo)) {
-    showToast('El PIN debe ser numérico de 4 a 8 dígitos.', 'err');
-    return false;
-  }
-  // Si se proporciona PIN actual, verificar antes de cambiar
-  if (pinActual !== undefined) {
-    const hashIngresado = await sha256(String(pinActual));
-    const hashDefault   = await sha256('1234');
-    const hashGuardado  = localStorage.getItem(`fc_hash_pin_${instId}`) || hashDefault;
-    if (hashIngresado !== hashGuardado) {
-      showToast('El PIN actual es incorrecto.', 'err');
-      return false;
-    }
-  }
-  const hashNuevo = await sha256(String(pinNuevo));
-  localStorage.setItem(`fc_hash_pin_${instId}`, hashNuevo);
-  showToast('✔ PIN actualizado correctamente.', 'ok');
-  return true;
-}
