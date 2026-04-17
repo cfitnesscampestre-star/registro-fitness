@@ -42,7 +42,7 @@
   document.head.appendChild(link);
 })();
 </script>
-<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:ital,wght@0,400;0,600;0,700;1,600&family=Bebas+Neue&family=Outfit:wght@400;500;600&family=DM+Mono&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700&family=Bebas+Neue&family=Outfit:wght@400;500;600&family=DM+Mono&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
@@ -1197,45 +1197,27 @@ window._cargarFflate=function(){
   <div id="mob-carousel">
     <div id="mob-track">
 
-      <!-- ── SLIDE 1: Inicio / Hoy — Diseño App Nativa ── -->
+      <!-- ── SLIDE 1: Inicio / Hoy ── -->
       <div class="mob-slide" id="mob-slide-1">
 
-        <!-- ── HERO: Botón Recorrido completo ── -->
+        <!-- HERO RECORRIDO -->
         <button class="mob-hero-rec solo-admin" onclick="iniciarRecorrido()">
-          <!-- Fondo animado con círculos de profundidad -->
           <div class="mob-hero-bg"></div>
           <div class="mob-hero-content">
             <div class="mob-hero-left">
-              <!-- Ícono 3D de recorrido -->
               <div class="mob-hero-icon">
-                <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <!-- Sombra del ícono -->
-                  <ellipse cx="24" cy="44" rx="14" ry="3" fill="rgba(0,0,0,.25)"/>
-                  <!-- Cuerpo persona estilizado -->
-                  <circle cx="24" cy="9" r="5" fill="url(#rec_head)"/>
-                  <!-- Torso inclinado hacia adelante (corriendo) -->
-                  <path d="M24 14 L21 26 L17 36" stroke="url(#rec_body)" stroke-width="3.5" stroke-linecap="round" fill="none"/>
-                  <path d="M24 14 L27 22 L32 30" stroke="url(#rec_body)" stroke-width="3.5" stroke-linecap="round" fill="none"/>
-                  <!-- Brazos en movimiento -->
-                  <path d="M22 17 L15 22" stroke="url(#rec_arm)" stroke-width="3" stroke-linecap="round" fill="none"/>
-                  <path d="M25 20 L33 18" stroke="url(#rec_arm)" stroke-width="3" stroke-linecap="round" fill="none"/>
-                  <!-- Línea de piso / rastro -->
-                  <path d="M10 40 Q24 36 38 40" stroke="rgba(94,255,160,.3)" stroke-width="1.5" stroke-linecap="round" fill="none"/>
-                  <!-- Degradados -->
+                <svg viewBox="0 0 52 52" fill="none" xmlns="http://www.w3.org/2000/svg">
                   <defs>
-                    <linearGradient id="rec_head" x1="0" y1="0" x2="1" y2="1">
-                      <stop offset="0%" stop-color="#9effd4"/>
-                      <stop offset="100%" stop-color="#3ecf7a"/>
-                    </linearGradient>
-                    <linearGradient id="rec_body" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="0%" stop-color="#5effa0"/>
-                      <stop offset="100%" stop-color="#1a7a45"/>
-                    </linearGradient>
-                    <linearGradient id="rec_arm" x1="0" y1="0" x2="1" y2="0">
-                      <stop offset="0%" stop-color="#5effa0" stop-opacity=".9"/>
-                      <stop offset="100%" stop-color="#3ecf7a" stop-opacity=".5"/>
-                    </linearGradient>
+                    <linearGradient id="rh" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#9effd4"/><stop offset="100%" stop-color="#3ecf7a"/></linearGradient>
+                    <linearGradient id="rb" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#5effa0"/><stop offset="100%" stop-color="#1a7a45"/></linearGradient>
+                    <linearGradient id="ra" x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stop-color="#5effa0" stop-opacity=".9"/><stop offset="100%" stop-color="#3ecf7a" stop-opacity=".4"/></linearGradient>
                   </defs>
+                  <circle cx="26" cy="9" r="5.5" fill="url(#rh)"/>
+                  <path d="M26 15 L23 27 L18 38" stroke="url(#rb)" stroke-width="3.5" stroke-linecap="round" fill="none"/>
+                  <path d="M26 15 L30 24 L35 32" stroke="url(#rb)" stroke-width="3.5" stroke-linecap="round" fill="none"/>
+                  <path d="M24 18 L15 23" stroke="url(#ra)" stroke-width="3" stroke-linecap="round" fill="none"/>
+                  <path d="M28 21 L37 19" stroke="url(#ra)" stroke-width="3" stroke-linecap="round" fill="none"/>
+                  <path d="M10 43 Q26 38 42 43" stroke="rgba(94,255,160,.25)" stroke-width="1.5" stroke-linecap="round" fill="none"/>
                 </svg>
               </div>
               <div>
@@ -1248,110 +1230,75 @@ window._cargarFflate=function(){
               </div>
             </div>
             <div class="mob-hero-arrow">
-              <svg viewBox="0 0 24 24" fill="none" width="28" height="28">
-                <circle cx="12" cy="12" r="11" stroke="rgba(94,255,160,.3)" stroke-width="1.5"/>
+              <svg viewBox="0 0 24 24" fill="none" width="30" height="30">
+                <circle cx="12" cy="12" r="11" stroke="rgba(94,255,160,.35)" stroke-width="1.5"/>
                 <polyline points="9,7 15,12 9,17" stroke="#5effa0" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
               </svg>
             </div>
           </div>
         </button>
 
-        <!-- ── GRID DE ACCIONES 3 botones ── -->
+        <!-- GRID 3 ACCIONES -->
         <div class="mob-actions-grid solo-admin">
 
-          <!-- Registro de clase -->
           <div class="mob-action-card" onclick="abrirModal('m-clase')">
-            <div class="mob-ac-icon" style="background:linear-gradient(135deg,rgba(94,255,160,.18),rgba(94,255,160,.06));box-shadow:0 4px 16px rgba(94,255,160,.15),inset 0 1px 0 rgba(255,255,255,.12);">
-              <svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg" width="28" height="28">
-                <!-- Clipboard 3D -->
-                <rect x="6" y="8" width="20" height="20" rx="3.5" fill="url(#clip_bg)" stroke="rgba(94,255,160,.4)" stroke-width="1"/>
-                <rect x="6" y="9" width="20" height="3" rx="0" fill="rgba(255,255,255,.08)"/>
-                <!-- Clip en top -->
-                <rect x="12" y="5" width="8" height="5" rx="2" fill="rgba(94,255,160,.4)" stroke="rgba(94,255,160,.6)" stroke-width="1"/>
-                <!-- Cruz / más -->
-                <line x1="16" y1="14" x2="16" y2="24" stroke="#5effa0" stroke-width="2.2" stroke-linecap="round"/>
-                <line x1="11" y1="19" x2="21" y2="19" stroke="#5effa0" stroke-width="2.2" stroke-linecap="round"/>
-                <defs>
-                  <linearGradient id="clip_bg" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stop-color="rgba(30,55,38,.9)"/>
-                    <stop offset="100%" stop-color="rgba(15,28,20,.9)"/>
-                  </linearGradient>
-                </defs>
+            <div class="mob-ac-icon" style="background:linear-gradient(135deg,rgba(94,255,160,.18),rgba(94,255,160,.05));box-shadow:0 6px 18px rgba(94,255,160,.15),inset 0 1px 0 rgba(255,255,255,.1);">
+              <svg viewBox="0 0 36 36" fill="none" width="30" height="30">
+                <rect x="7" y="9" width="22" height="22" rx="4" fill="rgba(94,255,160,.08)" stroke="rgba(94,255,160,.35)" stroke-width="1.2"/>
+                <rect x="13" y="6" width="10" height="6" rx="2.5" fill="rgba(94,255,160,.25)" stroke="rgba(94,255,160,.5)" stroke-width="1"/>
+                <line x1="18" y1="16" x2="18" y2="26" stroke="#5effa0" stroke-width="2.5" stroke-linecap="round"/>
+                <line x1="13" y1="21" x2="23" y2="21" stroke="#5effa0" stroke-width="2.5" stroke-linecap="round"/>
               </svg>
             </div>
-            <div class="mob-ac-lbl">Registrar<br><span>Clase</span></div>
+            <div class="mob-ac-lbl">Registrar<br><span style="color:var(--neon)">Clase</span></div>
           </div>
 
-          <!-- Suplencia -->
           <div class="mob-action-card" onclick="abrirSupPlanner()">
-            <div class="mob-ac-icon" style="background:linear-gradient(135deg,rgba(77,184,232,.18),rgba(77,184,232,.05));box-shadow:0 4px 16px rgba(77,184,232,.18),inset 0 1px 0 rgba(255,255,255,.1);">
-              <svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg" width="28" height="28">
-                <!-- Dos personas 3D -->
-                <!-- Persona 1 saliendo -->
-                <circle cx="10" cy="10" r="4" fill="url(#sup_p1)"/>
-                <path d="M4 26 Q4 19 10 19 Q13 19 15 21" stroke="#4db8e8" stroke-width="2" stroke-linecap="round" fill="none"/>
-                <!-- Persona 2 entrando -->
-                <circle cx="22" cy="10" r="4" fill="url(#sup_p2)"/>
-                <path d="M17 21 Q19 19 22 19 Q28 19 28 26" stroke="rgba(94,255,160,.7)" stroke-width="2" stroke-linecap="round" fill="none"/>
-                <!-- Flechas de intercambio -->
-                <path d="M14 15 L18 15" stroke="#4db8e8" stroke-width="1.8" stroke-linecap="round"/>
-                <polyline points="17,13 19,15 17,17" stroke="#4db8e8" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+            <div class="mob-ac-icon" style="background:linear-gradient(135deg,rgba(77,184,232,.18),rgba(77,184,232,.05));box-shadow:0 6px 18px rgba(77,184,232,.18),inset 0 1px 0 rgba(255,255,255,.08);">
+              <svg viewBox="0 0 36 36" fill="none" width="30" height="30">
                 <defs>
-                  <linearGradient id="sup_p1" x1="0" y1="0" x2="1" y2="1">
-                    <stop offset="0%" stop-color="#7dd3f8"/>
-                    <stop offset="100%" stop-color="#2a8fbf"/>
-                  </linearGradient>
-                  <linearGradient id="sup_p2" x1="0" y1="0" x2="1" y2="1">
-                    <stop offset="0%" stop-color="#9effd4"/>
-                    <stop offset="100%" stop-color="#2d9e5c"/>
-                  </linearGradient>
+                  <linearGradient id="sp1" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#7dd3f8"/><stop offset="100%" stop-color="#2a90c0"/></linearGradient>
+                  <linearGradient id="sp2" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#9effd4"/><stop offset="100%" stop-color="#2d9e5c"/></linearGradient>
                 </defs>
+                <circle cx="11" cy="11" r="4.5" fill="url(#sp1)"/>
+                <path d="M4 28 Q4 21 11 21 Q14 21 16 23" stroke="#4db8e8" stroke-width="2.2" stroke-linecap="round" fill="none"/>
+                <circle cx="25" cy="11" r="4.5" fill="url(#sp2)"/>
+                <path d="M20 23 Q22 21 25 21 Q32 21 32 28" stroke="rgba(94,255,160,.8)" stroke-width="2.2" stroke-linecap="round" fill="none"/>
+                <path d="M15 17 L21 17" stroke="#4db8e8" stroke-width="2" stroke-linecap="round"/>
+                <polyline points="20,15 22,17 20,19" stroke="#4db8e8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
               </svg>
             </div>
-            <div class="mob-ac-lbl" style="color:var(--blue)">Suplencia</div>
-            <span id="mob-firmas-badge-sup" style="display:none"></span>
+            <div class="mob-ac-lbl" style="color:rgba(120,195,230,.85)">Suplencia</div>
           </div>
 
-          <!-- Firmas -->
           <div class="mob-action-card" onclick="abrirFirmasDigitalesDirecto()" style="position:relative">
-            <div class="mob-ac-icon" style="background:linear-gradient(135deg,rgba(94,255,160,.15),rgba(62,207,122,.05));box-shadow:0 4px 16px rgba(94,255,160,.12),inset 0 1px 0 rgba(255,255,255,.1);">
-              <svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg" width="28" height="28">
-                <!-- Hoja de papel 3D -->
-                <path d="M8 4 L22 4 L26 8 L26 28 L8 28 Z" fill="url(#sign_paper)" stroke="rgba(94,255,160,.35)" stroke-width="1"/>
-                <path d="M22 4 L22 8 L26 8" fill="rgba(94,255,160,.12)" stroke="rgba(94,255,160,.35)" stroke-width="1"/>
-                <!-- Luz en papel -->
-                <path d="M8 4 L22 4 L22 6 L8 6 Z" fill="rgba(255,255,255,.08)"/>
-                <!-- Firma ondulada -->
-                <path d="M12 18 Q14 15 16 17 Q18 19 20 14 Q21 12 22 13" stroke="url(#sign_ink)" stroke-width="2" stroke-linecap="round" fill="none"/>
-                <line x1="11" y1="22" x2="21" y2="22" stroke="rgba(94,255,160,.3)" stroke-width="1.2" stroke-linecap="round"/>
+            <div class="mob-ac-icon" style="background:linear-gradient(135deg,rgba(94,255,160,.15),rgba(62,207,122,.04));box-shadow:0 6px 18px rgba(94,255,160,.12),inset 0 1px 0 rgba(255,255,255,.08);">
+              <svg viewBox="0 0 36 36" fill="none" width="30" height="30">
                 <defs>
-                  <linearGradient id="sign_paper" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stop-color="rgba(25,50,35,.95)"/>
-                    <stop offset="100%" stop-color="rgba(12,25,18,.95)"/>
-                  </linearGradient>
-                  <linearGradient id="sign_ink" x1="0" y1="0" x2="1" y2="0">
-                    <stop offset="0%" stop-color="#5effa0"/>
-                    <stop offset="100%" stop-color="#3ecf7a" stop-opacity=".6"/>
-                  </linearGradient>
+                  <linearGradient id="sig" x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stop-color="#5effa0"/><stop offset="100%" stop-color="#3ecf7a" stop-opacity=".5"/></linearGradient>
                 </defs>
+                <path d="M9 5 L25 5 L30 10 L30 31 L9 31 Z" fill="rgba(94,255,160,.06)" stroke="rgba(94,255,160,.3)" stroke-width="1.2" stroke-linejoin="round"/>
+                <path d="M25 5 L25 10 L30 10" fill="rgba(94,255,160,.1)" stroke="rgba(94,255,160,.3)" stroke-width="1" stroke-linejoin="round"/>
+                <path d="M13 20 Q15 17 17 19 Q19 21 21 16 Q22 14 24 15" stroke="url(#sig)" stroke-width="2.2" stroke-linecap="round" fill="none"/>
+                <line x1="12" y1="25" x2="24" y2="25" stroke="rgba(94,255,160,.3)" stroke-width="1.5" stroke-linecap="round"/>
               </svg>
             </div>
             <div class="mob-ac-lbl">Firmas</div>
-            <span id="mob-firmas-badge" style="display:none;position:absolute;top:6px;right:6px;background:var(--red2);color:#fff;font-size:.5rem;font-weight:700;border-radius:8px;padding:1px 5px;line-height:13px;min-width:16px;text-align:center;"></span>
+            <span id="mob-firmas-badge" style="display:none;position:absolute;top:6px;right:6px;background:var(--red2);color:#fff;font-size:.5rem;font-weight:700;border-radius:8px;padding:1px 5px;line-height:14px;min-width:16px;text-align:center;"></span>
           </div>
 
         </div>
 
-        <!-- ── Agenda ── -->
+        <!-- AGENDA -->
         <div class="mob-agenda-card" onclick="abrirAgendaMob()">
           <div class="mob-ag-icon">
             <svg viewBox="0 0 28 28" fill="none" width="22" height="22">
-              <rect x="3" y="5" width="22" height="20" rx="4" fill="rgba(232,184,75,.15)" stroke="rgba(232,184,75,.4)" stroke-width="1.2"/>
-              <rect x="3" y="9" width="22" height="3" fill="rgba(232,184,75,.12)"/>
+              <rect x="3" y="5" width="22" height="20" rx="3.5" fill="rgba(232,184,75,.12)" stroke="rgba(232,184,75,.4)" stroke-width="1.2"/>
+              <rect x="3" y="9" width="22" height="3" fill="rgba(232,184,75,.1)"/>
               <line x1="8" y1="4" x2="8" y2="7" stroke="var(--gold2)" stroke-width="2" stroke-linecap="round"/>
               <line x1="20" y1="4" x2="20" y2="7" stroke="var(--gold2)" stroke-width="2" stroke-linecap="round"/>
               <line x1="8" y1="16" x2="16" y2="16" stroke="rgba(232,184,75,.7)" stroke-width="1.5" stroke-linecap="round"/>
-              <line x1="8" y1="19" x2="13" y2="19" stroke="rgba(232,184,75,.5)" stroke-width="1.5" stroke-linecap="round"/>
+              <line x1="8" y1="19" x2="13" y2="19" stroke="rgba(232,184,75,.45)" stroke-width="1.5" stroke-linecap="round"/>
             </svg>
           </div>
           <div class="mob-ag-text">
@@ -1359,12 +1306,12 @@ window._cargarFflate=function(){
             <div class="mob-ag-sub">Notas y recordatorios</div>
           </div>
           <div class="mob-agenda-badge" id="mob-agenda-badge" style="display:none">0</div>
-          <svg viewBox="0 0 20 20" fill="none" width="14" height="14" style="opacity:.4">
+          <svg viewBox="0 0 20 20" fill="none" width="14" height="14" style="opacity:.4;flex-shrink:0">
             <polyline points="7,4 13,10 7,16" stroke="var(--gold2)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
           </svg>
         </div>
 
-        <!-- ── Selector de fecha + KPIs ── -->
+        <!-- FECHA + KPIs -->
         <div class="mob-date-bar">
           <button class="mob-date-nav" onclick="cambiarVistaFecha(-1)">‹</button>
           <div style="flex:1;text-align:center">
@@ -1375,21 +1322,11 @@ window._cargarFflate=function(){
         </div>
 
         <div class="mob-kpi-row" id="mob-kpi-row">
-          <div class="mob-kpi">
-            <div class="mob-kpi-val" style="color:var(--neon)" id="mob-k-reg">—</div>
-            <div class="mob-kpi-lbl">Registradas<br>hoy</div>
-          </div>
-          <div class="mob-kpi">
-            <div class="mob-kpi-val" style="color:var(--red2)" id="mob-k-pend">—</div>
-            <div class="mob-kpi-lbl">Pendientes<br>hoy</div>
-          </div>
-          <div class="mob-kpi">
-            <div class="mob-kpi-val" style="color:var(--blue)" id="mob-k-aforo">—</div>
-            <div class="mob-kpi-lbl">Aforo<br>promedio</div>
-          </div>
+          <div class="mob-kpi"><div class="mob-kpi-val" style="color:var(--neon)" id="mob-k-reg">—</div><div class="mob-kpi-lbl">Registradas<br>hoy</div></div>
+          <div class="mob-kpi"><div class="mob-kpi-val" style="color:var(--red2)" id="mob-k-pend">—</div><div class="mob-kpi-lbl">Pendientes<br>hoy</div></div>
+          <div class="mob-kpi"><div class="mob-kpi-val" style="color:var(--blue)" id="mob-k-aforo">—</div><div class="mob-kpi-lbl">Aforo<br>promedio</div></div>
         </div>
 
-        <!-- Lista clases -->
         <div class="mob-sec-lbl" id="mob-lista-lbl">Clases del día</div>
         <div id="mob-clases-lista"></div>
       </div>
