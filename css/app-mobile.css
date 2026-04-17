@@ -1,0 +1,898 @@
+/* ═══════════════════════════════════════════════════════════════
+   APP-MOBILE.CSS — Fitness Control · Club Campestre
+   Sobreescribe la UI móvil para que se sienta como app nativa.
+   Solo aplica en pantallas ≤ 640px (breakpoint móvil).
+   ═══════════════════════════════════════════════════════════════ */
+
+@import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:ital,wght@0,400;0,600;0,700;1,600&display=swap');
+
+/* ── Variables extra ─────────────────────────────────────────── */
+:root {
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+  --nav-h: 68px;
+  --hdr-mob-h: 56px;
+}
+
+/* ════════════════════════════════════════════════════════════════
+   LOGIN — pantalla de bienvenida tipo app
+   ════════════════════════════════════════════════════════════════ */
+@media (max-width: 640px) {
+
+  #login-screen {
+    background: #080f0a !important;
+    background-image:
+      radial-gradient(ellipse 90% 55% at 50% 105%, rgba(26,122,69,.35) 0%, transparent 60%),
+      radial-gradient(ellipse 60% 35% at 85% 5%,   rgba(58,172,220,.08) 0%, transparent 50%)
+      !important;
+    padding: 0 !important;
+    align-items: flex-end !important;
+  }
+
+  .login-box {
+    width: 100% !important;
+    max-width: 100% !important;
+    border-radius: 28px 28px 0 0 !important;
+    border: none !important;
+    border-top: 1px solid rgba(94,255,160,.18) !important;
+    padding: 24px 24px calc(24px + var(--safe-bottom)) !important;
+    background: rgba(10,20,13,.97) !important;
+    box-shadow: 0 -20px 60px rgba(0,0,0,.6) !important;
+    animation: slideUp .38s cubic-bezier(.16,1,.3,1) !important;
+  }
+
+  @keyframes slideUp {
+    from { transform: translateY(60px); opacity: 0; }
+    to   { transform: translateY(0);    opacity: 1; }
+  }
+
+  .login-logo {
+    margin-bottom: 20px !important;
+    gap: 12px !important;
+  }
+
+  .hico {
+    width: 44px !important;
+    height: 44px !important;
+    border-radius: 14px !important;
+    background: var(--verde) !important;
+    box-shadow: 0 0 20px rgba(94,255,160,.3) !important;
+  }
+
+  .login-title {
+    font-size: 1.6rem !important;
+    letter-spacing: 3px !important;
+    text-shadow: 0 0 20px rgba(94,255,160,.4) !important;
+  }
+
+  .login-sub {
+    font-family: 'Barlow Condensed', sans-serif !important;
+    font-size: .65rem !important;
+    letter-spacing: 2.5px !important;
+  }
+
+  /* Selector de rol — 3 tabs horizontales tipo pill */
+  .login-role-btns {
+    display: flex !important;
+    gap: 0 !important;
+    background: rgba(255,255,255,.06) !important;
+    border-radius: 14px !important;
+    padding: 4px !important;
+    margin-bottom: 20px !important;
+  }
+
+  .role-btn {
+    flex: 1 !important;
+    border-radius: 10px !important;
+    border: none !important;
+    background: transparent !important;
+    padding: 10px 6px !important;
+    transition: all .2s !important;
+  }
+
+  .role-btn.selected {
+    background: var(--verde) !important;
+    box-shadow: 0 4px 14px rgba(26,122,69,.45) !important;
+  }
+
+  .role-btn .role-icon { font-size: 1.3rem !important; }
+
+  .role-btn .role-name {
+    font-family: 'Barlow Condensed', sans-serif !important;
+    font-size: .78rem !important;
+    font-weight: 700 !important;
+    letter-spacing: .5px !important;
+    text-transform: uppercase !important;
+    color: var(--txt) !important;
+  }
+
+  .role-btn.selected .role-name { color: #fff !important; }
+
+  .role-btn .role-desc {
+    font-size: .58rem !important;
+    color: var(--txt3) !important;
+  }
+  .role-btn.selected .role-desc { color: rgba(255,255,255,.7) !important; }
+
+  /* Campo password */
+  .login-field label {
+    font-family: 'Barlow Condensed', sans-serif !important;
+    font-size: .7rem !important;
+    letter-spacing: 2px !important;
+    text-transform: uppercase !important;
+    color: var(--txt2) !important;
+  }
+
+  .login-field input,
+  .login-field select {
+    border-radius: 14px !important;
+    padding: 14px 16px !important;
+    font-size: .95rem !important;
+    background: rgba(255,255,255,.06) !important;
+    border: 1px solid rgba(255,255,255,.1) !important;
+    color: #fff !important;
+  }
+
+  .login-field input:focus,
+  .login-field select:focus {
+    border-color: var(--neon) !important;
+    background: rgba(94,255,160,.05) !important;
+    box-shadow: 0 0 0 4px rgba(94,255,160,.1) !important;
+  }
+
+  /* Botón entrar — full width, grande */
+  .login-btn {
+    border-radius: 16px !important;
+    padding: 16px !important;
+    font-family: 'Barlow Condensed', sans-serif !important;
+    font-size: 1.1rem !important;
+    letter-spacing: 3px !important;
+    font-weight: 700 !important;
+    text-transform: uppercase !important;
+    box-shadow: 0 6px 24px rgba(34,160,90,.45) !important;
+    margin-top: 6px !important;
+  }
+
+  .login-error {
+    border-radius: 10px !important;
+    font-size: .78rem !important;
+  }
+}
+
+/* Tema claro en login móvil */
+@media (max-width: 640px) {
+  html.tema-claro #login-screen {
+    background: linear-gradient(160deg, #e8f5ec 0%, #f8fff9 60%) !important;
+    align-items: center !important;
+  }
+  html.tema-claro .login-box {
+    border-radius: 24px !important;
+    border: 1px solid rgba(26,122,69,.2) !important;
+    background: #fff !important;
+    box-shadow: 0 16px 60px rgba(26,122,69,.15) !important;
+    width: 92% !important;
+    padding: 28px 22px !important;
+    animation: modalIn .32s cubic-bezier(.16,1,.3,1) !important;
+  }
+  html.tema-claro .login-role-btns {
+    background: #f0f7f2 !important;
+  }
+  html.tema-claro .role-btn.selected {
+    background: #1a7a45 !important;
+  }
+  html.tema-claro .login-field input {
+    background: #f5faf5 !important;
+    border-color: rgba(26,122,69,.2) !important;
+    color: #0d1f14 !important;
+  }
+}
+
+/* ════════════════════════════════════════════════════════════════
+   HEADER MÓVIL — ultra compacto, una sola línea
+   ════════════════════════════════════════════════════════════════ */
+@media (max-width: 640px) {
+
+  #hdr {
+    height: var(--hdr-mob-h) !important;
+    padding: 0 14px !important;
+    flex-wrap: nowrap !important;
+    gap: 8px !important;
+    background: rgba(6,12,8,.97) !important;
+    border-bottom: none !important;
+    box-shadow: none !important;
+  }
+
+  /* Línea de acento inferior */
+  #hdr::after {
+    content: '';
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(94,255,160,.35) 40%, rgba(94,255,160,.35) 60%, transparent);
+  }
+
+  html.tema-claro #hdr {
+    background: rgba(255,255,255,.98) !important;
+    box-shadow: 0 1px 0 rgba(26,122,69,.15) !important;
+  }
+
+  /* Ocultar sub-label y botones del header — todo está en bottom nav */
+  .hsub   { display: none !important; }
+  .hr     { display: none !important; }
+
+  .htit {
+    font-size: 1.05rem !important;
+    letter-spacing: 3px !important;
+  }
+
+  .hico {
+    width: 34px !important;
+    height: 34px !important;
+    border-radius: 10px !important;
+  }
+
+  /* Sync indicator compacto */
+  #sync-indicator {
+    font-size: .58rem !important;
+    opacity: .8;
+  }
+}
+
+/* ════════════════════════════════════════════════════════════════
+   BOTTOM NAV — estilo app nativa (iOS/Android)
+   ════════════════════════════════════════════════════════════════ */
+@media (max-width: 640px) {
+
+  #bottom-nav {
+    display: flex !important;
+    height: calc(var(--nav-h) + var(--safe-bottom)) !important;
+    padding-bottom: var(--safe-bottom) !important;
+    background: rgba(6,12,8,.97) !important;
+    border-top: 1px solid rgba(255,255,255,.07) !important;
+    backdrop-filter: blur(24px) saturate(180%) !important;
+    -webkit-backdrop-filter: blur(24px) saturate(180%) !important;
+    box-shadow: 0 -1px 0 rgba(0,0,0,.3) !important;
+    justify-content: space-around !important;
+    align-items: flex-start !important;
+    padding-top: 8px !important;
+  }
+
+  html.tema-claro #bottom-nav {
+    background: rgba(255,255,255,.97) !important;
+    border-top-color: rgba(26,122,69,.15) !important;
+    box-shadow: 0 -4px 20px rgba(26,122,69,.08) !important;
+  }
+
+  .bnav-item {
+    flex: 1 !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    gap: 4px !important;
+    padding: 2px 4px !important;
+    cursor: pointer !important;
+    color: rgba(120,160,130,.65) !important;
+    font-family: 'Barlow Condensed', sans-serif !important;
+    font-size: .62rem !important;
+    font-weight: 600 !important;
+    letter-spacing: .8px !important;
+    text-transform: uppercase !important;
+    transition: color .15s !important;
+    position: relative !important;
+    min-width: 0 !important;
+    border-radius: 0 !important;
+    -webkit-tap-highlight-color: transparent !important;
+  }
+
+  /* Indicador activo — punto sobre el icono */
+  .bnav-item.on {
+    color: var(--neon) !important;
+  }
+
+  .bnav-item.on::before {
+    content: '';
+    position: absolute;
+    top: -8px; left: 50%;
+    transform: translateX(-50%);
+    width: 28px; height: 3px;
+    background: var(--neon);
+    border-radius: 0 0 3px 3px;
+  }
+
+  html.tema-claro .bnav-item.on { color: #1a7a45 !important; }
+  html.tema-claro .bnav-item.on::before { background: #1a7a45; }
+  html.tema-claro .bnav-item { color: rgba(60,120,80,.5) !important; }
+
+  .bnav-item svg {
+    width: 22px !important;
+    height: 22px !important;
+    stroke-width: 1.4 !important;
+  }
+
+  .bnav-item.on svg {
+    stroke-width: 2 !important;
+  }
+
+  /* Badge de notificaciones */
+  .bnav-dot {
+    position: absolute !important;
+    top: 0px !important; right: calc(50% - 18px) !important;
+    width: 8px !important; height: 8px !important;
+    background: var(--red2) !important;
+    border-radius: 50% !important;
+    border: 2px solid rgba(6,12,8,.97) !important;
+  }
+
+  /* Padding para que el contenido no quede bajo el nav */
+  main {
+    padding-bottom: calc(var(--nav-h) + var(--safe-bottom) + 8px) !important;
+  }
+}
+
+/* ════════════════════════════════════════════════════════════════
+   MOBILE HOME — pantalla principal tipo app
+   ════════════════════════════════════════════════════════════════ */
+@media (max-width: 640px) {
+
+  #mobile-home.on {
+    display: flex !important;
+    flex-direction: column !important;
+    min-height: calc(100dvh - var(--hdr-mob-h)) !important;
+    background: var(--bg) !important;
+    gap: 0 !important;
+    padding: 0 !important;
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    padding-bottom: calc(var(--nav-h) + var(--safe-bottom) + 8px) !important;
+  }
+
+  /* Buscador — barra tipo iOS */
+  #mob-search-bar {
+    background: rgba(255,255,255,.07) !important;
+    border: 1px solid rgba(255,255,255,.1) !important;
+    border-radius: 14px !important;
+    padding: 12px 14px !important;
+    box-shadow: none !important;
+  }
+
+  #mob-search-bar:focus-within {
+    border-color: rgba(94,255,160,.4) !important;
+    background: rgba(94,255,160,.05) !important;
+  }
+
+  #mob-search-input {
+    font-size: .88rem !important;
+    color: var(--txt) !important;
+  }
+
+  html.tema-claro #mob-search-bar {
+    background: #fff !important;
+    border-color: rgba(26,122,69,.15) !important;
+    box-shadow: 0 2px 10px rgba(0,0,0,.05) !important;
+  }
+
+  /* Sync pill */
+  #mob-sync-pill {
+    font-size: .62rem !important;
+    justify-content: center !important;
+  }
+
+  /* ── DOTS del carrusel ── */
+  #mob-dots {
+    display: flex !important;
+    gap: 5px !important;
+    justify-content: center !important;
+    padding: 4px 0 2px !important;
+  }
+
+  .mob-dot {
+    width: 6px !important;
+    height: 6px !important;
+    border-radius: 50% !important;
+    background: var(--txt3) !important;
+    transition: all .25s !important;
+    cursor: pointer !important;
+  }
+  .mob-dot.on {
+    width: 20px !important;
+    border-radius: 3px !important;
+    background: var(--neon) !important;
+  }
+  html.tema-claro .mob-dot.on { background: var(--verde) !important; }
+
+  /* ── Botón RECORRIDO — tarjeta hero ── */
+  .mob-btn-rec {
+    background: linear-gradient(135deg, #1a7a45 0%, #0d5530 60%, #0a3d22 100%) !important;
+    border-radius: 22px !important;
+    padding: 18px 18px 14px !important;
+    box-shadow: 0 8px 28px rgba(13,85,48,.5), inset 0 1px 0 rgba(255,255,255,.12) !important;
+    position: relative !important;
+    overflow: hidden !important;
+  }
+
+  .mob-btn-rec::after {
+    content: '';
+    position: absolute;
+    top: -40px; right: -40px;
+    width: 100px; height: 100px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(94,255,160,.15) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .mob-rec-sub {
+    font-family: 'Barlow Condensed', sans-serif !important;
+    font-size: .65rem !important;
+    letter-spacing: 3px !important;
+    text-transform: uppercase !important;
+    color: rgba(255,255,255,.5) !important;
+  }
+
+  .mob-rec-title {
+    font-family: 'Bebas Neue', sans-serif !important;
+    font-size: 2.2rem !important;
+    letter-spacing: 2px !important;
+    color: #fff !important;
+    text-shadow: 0 0 20px rgba(94,255,160,.3) !important;
+  }
+
+  .mob-mode-tag {
+    font-family: 'Barlow Condensed', sans-serif !important;
+    font-size: .62rem !important;
+    letter-spacing: 1px !important;
+    font-weight: 700 !important;
+    padding: 4px 11px !important;
+    border-radius: 20px !important;
+  }
+  .mob-mode-tag.turbo  { background: rgba(94,255,160,.2) !important; color: #b6ffda !important; }
+  .mob-mode-tag.normal { background: rgba(255,255,255,.1) !important; color: rgba(255,255,255,.65) !important; }
+
+  /* ── Botones de acción rápida ── */
+  .mob-btn-sm {
+    border-radius: 18px !important;
+    background: rgba(255,255,255,.05) !important;
+    border: 1px solid rgba(255,255,255,.09) !important;
+    padding: 12px 6px !important;
+    transition: transform .12s, background .15s !important;
+  }
+  .mob-btn-sm:active {
+    transform: scale(.92) !important;
+    background: rgba(255,255,255,.1) !important;
+  }
+
+  .mob-sm-icon {
+    width: 34px !important;
+    height: 34px !important;
+    border-radius: 12px !important;
+    margin-bottom: 2px !important;
+  }
+
+  .mob-sm-lbl {
+    font-family: 'Barlow Condensed', sans-serif !important;
+    font-size: .64rem !important;
+    font-weight: 700 !important;
+    letter-spacing: .5px !important;
+    text-transform: uppercase !important;
+    line-height: 1.2 !important;
+  }
+
+  html.tema-claro .mob-btn-sm {
+    background: #fff !important;
+    border-color: rgba(26,122,69,.15) !important;
+    box-shadow: 0 2px 10px rgba(0,0,0,.06) !important;
+  }
+
+  /* ── Fila Agenda ── */
+  .mob-btn-agenda-row {
+    border-radius: 18px !important;
+    padding: 14px 16px !important;
+    background: rgba(232,184,75,.07) !important;
+    border: 1px solid rgba(232,184,75,.2) !important;
+  }
+
+  /* ── Selector de fecha ── */
+  #mobile-home > div > div[style*="flex;align-items:center;justify-content:space-between"] {
+    border-radius: 16px !important;
+    padding: 10px 14px !important;
+  }
+
+  /* ── KPIs del día — 3 tarjetas ── */
+  .mob-kpi-row {
+    gap: 8px !important;
+  }
+
+  .mob-kpi {
+    background: rgba(255,255,255,.05) !important;
+    border: 1px solid rgba(255,255,255,.08) !important;
+    border-radius: 18px !important;
+    padding: 14px 10px 12px !important;
+  }
+
+  .mob-kpi::after {
+    height: 2px !important;
+    border-radius: 18px 18px 0 0 !important;
+  }
+
+  .mob-kpi-val {
+    font-family: 'Bebas Neue', sans-serif !important;
+    font-size: 2rem !important;
+    letter-spacing: 1px !important;
+  }
+
+  .mob-kpi-lbl {
+    font-family: 'Barlow Condensed', sans-serif !important;
+    font-size: .6rem !important;
+    letter-spacing: 1.5px !important;
+    text-transform: uppercase !important;
+    color: var(--txt3) !important;
+  }
+
+  html.tema-claro .mob-kpi {
+    background: #fff !important;
+    border-color: rgba(26,122,69,.12) !important;
+    box-shadow: 0 2px 10px rgba(0,0,0,.05) !important;
+  }
+
+  /* ── Etiqueta de sección ── */
+  .mob-sec-lbl {
+    font-family: 'Barlow Condensed', sans-serif !important;
+    font-size: .65rem !important;
+    letter-spacing: 2.5px !important;
+    text-transform: uppercase !important;
+    color: var(--txt3) !important;
+    padding: 0 2px !important;
+  }
+
+  /* ── Lista de clases — tarjetas tipo app ── */
+  .mob-clase-item {
+    background: rgba(255,255,255,.04) !important;
+    border: 1px solid rgba(255,255,255,.07) !important;
+    border-radius: 16px !important;
+    padding: 13px 14px !important;
+    margin-bottom: 6px !important;
+  }
+
+  .mob-clase-item.pendiente {
+    background: rgba(224,80,80,.06) !important;
+    border-color: rgba(224,80,80,.2) !important;
+    border-left: 3px solid var(--red2) !important;
+  }
+
+  .mob-clase-item.registrada {
+    border-left: 3px solid var(--v3) !important;
+  }
+
+  .mob-clase-item:active {
+    transform: scale(.98) !important;
+    background: rgba(255,255,255,.07) !important;
+  }
+
+  .mob-c-hora {
+    font-family: 'DM Mono', monospace !important;
+    font-size: .72rem !important;
+    color: var(--gold2) !important;
+    min-width: 42px !important;
+  }
+
+  .mob-c-nombre {
+    font-size: .88rem !important;
+    font-weight: 700 !important;
+    letter-spacing: .3px !important;
+  }
+
+  .mob-c-inst {
+    font-family: 'Barlow Condensed', sans-serif !important;
+    font-size: .68rem !important;
+    letter-spacing: .8px !important;
+    color: var(--txt3) !important;
+  }
+
+  html.tema-claro .mob-clase-item {
+    background: #fff !important;
+    border-color: rgba(26,122,69,.1) !important;
+    box-shadow: 0 2px 8px rgba(0,0,0,.04) !important;
+  }
+  html.tema-claro .mob-clase-item.pendiente {
+    background: #fff9f9 !important;
+    border-color: rgba(200,48,48,.2) !important;
+  }
+
+  /* ── Chips en lista ── */
+  .chip {
+    font-family: 'Barlow Condensed', sans-serif !important;
+    font-size: .68rem !important;
+    letter-spacing: .5px !important;
+    font-weight: 700 !important;
+    border-radius: 6px !important;
+    padding: 3px 8px !important;
+  }
+
+  /* ── Slides 2 y 3 ── */
+  .mob-slide-ttl {
+    font-family: 'Bebas Neue', sans-serif !important;
+    font-size: 1.1rem !important;
+    letter-spacing: 2px !important;
+    color: var(--neon) !important;
+  }
+  html.tema-claro .mob-slide-ttl { color: var(--verde) !important; }
+}
+
+/* ════════════════════════════════════════════════════════════════
+   BARRA DE REGRESO MÓVIL
+   ════════════════════════════════════════════════════════════════ */
+@media (max-width: 640px) {
+
+  #mob-back-bar {
+    background: rgba(6,12,8,.97) !important;
+    border-bottom: 1px solid rgba(255,255,255,.07) !important;
+    padding: 10px 14px !important;
+    height: 48px !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+  }
+
+  html.tema-claro #mob-back-bar {
+    background: #fff !important;
+    border-bottom-color: rgba(26,122,69,.12) !important;
+  }
+
+  .mob-back-btn {
+    font-family: 'Barlow Condensed', sans-serif !important;
+    font-size: .78rem !important;
+    font-weight: 700 !important;
+    letter-spacing: 1px !important;
+    text-transform: uppercase !important;
+    color: var(--neon) !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 4px !important;
+    background: none !important;
+    border: none !important;
+    cursor: pointer !important;
+    padding: 4px 6px !important;
+    border-radius: 8px !important;
+  }
+
+  html.tema-claro .mob-back-btn { color: var(--verde) !important; }
+
+  .mob-back-section {
+    font-family: 'Barlow Condensed', sans-serif !important;
+    font-size: .85rem !important;
+    font-weight: 700 !important;
+    letter-spacing: 1.5px !important;
+    text-transform: uppercase !important;
+    color: var(--txt2) !important;
+  }
+}
+
+/* ════════════════════════════════════════════════════════════════
+   MODALES EN MÓVIL — sheet desde abajo
+   ════════════════════════════════════════════════════════════════ */
+@media (max-width: 640px) {
+
+  .ov {
+    align-items: flex-end !important;
+    background: rgba(0,0,0,.75) !important;
+    backdrop-filter: blur(6px) !important;
+    -webkit-backdrop-filter: blur(6px) !important;
+  }
+
+  .modal,
+  .modal.wide,
+  .modal.narrow {
+    width: 100% !important;
+    max-width: 100% !important;
+    border-radius: 24px 24px 0 0 !important;
+    border: none !important;
+    border-top: 1px solid rgba(255,255,255,.1) !important;
+    padding: 20px 20px calc(20px + var(--safe-bottom)) !important;
+    max-height: 92dvh !important;
+    animation: sheetUp .28s cubic-bezier(.16,1,.3,1) !important;
+    /* Handle bar */
+    background-image: radial-gradient(ellipse 40px 4px at 50% 10px, rgba(255,255,255,.2) 0%, transparent 100%) !important;
+  }
+
+  @keyframes sheetUp {
+    from { transform: translateY(50px); opacity: 0.6; }
+    to   { transform: translateY(0);    opacity: 1; }
+  }
+
+  html.tema-claro .modal {
+    border-top-color: rgba(26,122,69,.15) !important;
+    background-image: radial-gradient(ellipse 40px 4px at 50% 10px, rgba(26,122,69,.2) 0%, transparent 100%) !important;
+  }
+
+  .mttl {
+    font-size: 1.15rem !important;
+    letter-spacing: 2px !important;
+    margin-top: 6px !important;
+  }
+
+  /* Campos más grandes y táctiles */
+  .fg input, .fg select, .fg textarea {
+    padding: 12px 14px !important;
+    border-radius: 12px !important;
+    font-size: .9rem !important;
+  }
+
+  .fr, .fr3 { grid-template-columns: 1fr !important; }
+
+  .bsave {
+    padding: 14px !important;
+    border-radius: 14px !important;
+    font-family: 'Barlow Condensed', sans-serif !important;
+    font-size: 1rem !important;
+    letter-spacing: 2px !important;
+    font-weight: 700 !important;
+    text-transform: uppercase !important;
+    box-shadow: 0 6px 22px rgba(34,160,90,.4) !important;
+  }
+
+  .bdel {
+    padding: 12px !important;
+    border-radius: 14px !important;
+    font-family: 'Barlow Condensed', sans-serif !important;
+    font-size: .95rem !important;
+    letter-spacing: 2px !important;
+    font-weight: 700 !important;
+    text-transform: uppercase !important;
+  }
+}
+
+/* ════════════════════════════════════════════════════════════════
+   TOASTS — notificaciones estilo app
+   ════════════════════════════════════════════════════════════════ */
+@media (max-width: 640px) {
+
+  #toast-container {
+    bottom: calc(var(--nav-h) + var(--safe-bottom) + 8px) !important;
+    padding: 0 12px !important;
+  }
+
+  .toast {
+    border-radius: 14px !important;
+    padding: 12px 16px !important;
+    font-size: .84rem !important;
+    backdrop-filter: blur(20px) !important;
+    -webkit-backdrop-filter: blur(20px) !important;
+  }
+}
+
+/* ════════════════════════════════════════════════════════════════
+   OVERLAYS DE BÚSQUEDA Y AGENDA — pantalla completa
+   ════════════════════════════════════════════════════════════════ */
+@media (max-width: 640px) {
+
+  #mob-search-overlay {
+    background: var(--bg) !important;
+    padding-top: 0 !important;
+  }
+
+  #mob-search-overlay > div:first-child {
+    padding: 12px 14px 0 !important;
+    background: rgba(6,12,8,.98) !important;
+    border-bottom: 1px solid rgba(255,255,255,.07) !important;
+  }
+
+  html.tema-claro #mob-search-overlay > div:first-child {
+    background: #fff !important;
+    border-bottom-color: rgba(26,122,69,.12) !important;
+  }
+
+  /* Filtros rápidos — pills */
+  .srch-fil {
+    font-family: 'Barlow Condensed', sans-serif !important;
+    font-size: .72rem !important;
+    font-weight: 700 !important;
+    letter-spacing: .8px !important;
+    text-transform: uppercase !important;
+    padding: 6px 14px !important;
+    border-radius: 20px !important;
+  }
+
+  /* Resultados */
+  .mob-search-result,
+  .srch-item {
+    border-radius: 14px !important;
+    padding: 12px 14px !important;
+  }
+}
+
+/* ════════════════════════════════════════════════════════════════
+   RECORRIDO EN MÓVIL — numérico grande tipo workout tracker
+   ════════════════════════════════════════════════════════════════ */
+@media (max-width: 640px) {
+
+  .rec-card {
+    border-radius: 18px !important;
+    background: rgba(255,255,255,.04) !important;
+    border-color: rgba(255,255,255,.07) !important;
+    padding: 14px !important;
+  }
+
+  .rec-clase-big {
+    font-size: 2rem !important;
+    letter-spacing: 2px !important;
+  }
+
+  .rec-num {
+    font-size: 4rem !important;
+    letter-spacing: 3px !important;
+  }
+
+  .num-btn {
+    width: 52px !important;
+    height: 52px !important;
+    font-size: 1.8rem !important;
+    border-radius: 50% !important;
+  }
+
+  .num-inp {
+    font-size: 3.2rem !important;
+    width: 110px !important;
+    border-radius: 16px !important;
+  }
+
+  html.tema-claro .rec-card {
+    background: #fff !important;
+    border-color: rgba(26,122,69,.1) !important;
+    box-shadow: 0 2px 10px rgba(0,0,0,.05) !important;
+  }
+}
+
+/* ════════════════════════════════════════════════════════════════
+   VISTAS DE SECCIÓN — padding inferior para no quedar bajo nav
+   ════════════════════════════════════════════════════════════════ */
+@media (max-width: 640px) {
+
+  /* Fondo body para todo */
+  body { background-color: #080f0a !important; }
+  html.tema-claro body { background-color: #f0f6f1 !important; }
+
+  /* Paneles */
+  .panel {
+    border-radius: 18px !important;
+    border-color: rgba(255,255,255,.07) !important;
+    background: rgba(255,255,255,.04) !important;
+  }
+  html.tema-claro .panel {
+    background: #fff !important;
+    border-color: rgba(26,122,69,.1) !important;
+    box-shadow: 0 2px 12px rgba(0,0,0,.05) !important;
+  }
+
+  /* KPIs en vistas internas */
+  .kpi {
+    border-radius: 18px !important;
+    border-color: rgba(255,255,255,.07) !important;
+    background: rgba(255,255,255,.04) !important;
+  }
+  html.tema-claro .kpi {
+    background: #fff !important;
+    border-color: rgba(26,122,69,.1) !important;
+    box-shadow: 0 2px 10px rgba(0,0,0,.04) !important;
+  }
+
+  /* Tabla */
+  table { font-size: .75rem !important; }
+  thead th {
+    font-family: 'Barlow Condensed', sans-serif !important;
+    font-size: .65rem !important;
+    letter-spacing: 1.5px !important;
+    padding: 8px 10px !important;
+  }
+  tbody td { padding: 9px 10px !important; }
+
+  /* Títulos de sección */
+  .pttl {
+    font-family: 'Bebas Neue', sans-serif !important;
+    letter-spacing: 2.5px !important;
+  }
+}
+
+/* ════════════════════════════════════════════════════════════════
+   FAB — oculto en móvil (reemplazado por botones en home)
+   ════════════════════════════════════════════════════════════════ */
+@media (max-width: 640px) {
+  #fab-clase, #fab-menu, #fab-overlay { display: none !important; }
+}
