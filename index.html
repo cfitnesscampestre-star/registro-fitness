@@ -2247,8 +2247,13 @@ window._cargarFflate=function(){
       <select id="rf-tipo"><option value="injustificada">Injustificada</option><option value="justificada">Justificada</option><option value="permiso">Permiso</option></select>
     </div>
   </div>
-  <div class="fg"><label>Día</label>
-    <select id="rf-dia"><option>Lunes</option><option>Martes</option><option>Miércoles</option><option>Jueves</option><option>Viernes</option><option>Sábado</option><option>Domingo</option></select>
+  <div class="fr">
+    <div class="fg"><label>Día</label>
+      <select id="rf-dia"><option>Lunes</option><option>Martes</option><option>Miércoles</option><option>Jueves</option><option>Viernes</option><option>Sábado</option><option>Domingo</option></select>
+    </div>
+    <div class="fg"><label>Fecha</label>
+      <input type="date" id="rf-fecha" title="Puedes registrar faltas de días anteriores (máx. 30 días)">
+    </div>
   </div>
   <div class="fg"><label>Nota</label><textarea id="rf-nota" placeholder="Motivo..."></textarea></div>
   <button class="bsave" onclick="guardarFalta()">Guardar</button>
