@@ -392,6 +392,8 @@ td .ico{width:1em;height:1em;}
   .hsub{ display:none; }
   /* Ocultar botones del header en móvil — todo está en bottom nav */
   .hr{ display:none !important; }
+  /* Ocultar menú coordinador en móvil — acceso desde la app */
+  #coord-menu-wrap { display:none !important; }
   /* Mantener solo sync indicator */
   #sync-indicator{ font-size:.52rem; }
 }
@@ -2129,6 +2131,16 @@ html.tema-claro .rep-card-hdr { color: #1a7a45; }
 }
 
 </style>
+
+/* ══ BODY OSCURO EN MÓVIL — override explícito ══════════════ */
+@media (max-width:640px) {
+  html:not(.tema-claro) body {
+    background: #0a1610 !important;
+    background-image:
+      radial-gradient(ellipse 90% 40% at 50% 100%, rgba(15,80,35,.3) 0%, transparent 55%),
+      radial-gradient(ellipse 60% 30% at 85% 5%, rgba(40,140,180,.06) 0%, transparent 45%) !important;
+  }
+}
 
 /* ═══════════════════════════════════════════════════════
    MOBILE REDESIGN — Slide 1 App Nativa
