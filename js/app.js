@@ -159,7 +159,7 @@ function guardarSalon() {
     const idx = salones.findIndex(s=>s.id===id);
     salones[idx] = {...salones[idx], nombre, cap, tipo, desc, clases};
   } else {
-    salones.push({id:Math.max(...salones.map(s=>s.id),0)+1, nombre, cap, tipo, desc, clases});
+    salones.push({id:salones.reduce((m,s)=>Math.max(m,s.id||0),0)+1, nombre, cap, tipo, desc, clases});
   }
   localStorage.setItem('fc_salones', JSON.stringify(salones));
   cerrarModal('m-salon');

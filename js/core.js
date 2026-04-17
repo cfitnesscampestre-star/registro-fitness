@@ -97,7 +97,7 @@ function statsInst(inst){
   const recs=registros.filter(r=>r.inst_id===inst.id);
   const imp=recs.filter(r=>r.estado==='ok'||r.estado==='sub');
   const faltas=recs.filter(r=>r.estado==='falta').length;
-  const horas=(imp.length*1).toFixed(1);
+  const horas=(imp.reduce((a,r)=>a+(parseInt(r.dur)||60)/60,0)).toFixed(1);
   const afoRecs=imp.filter(r=>parseInt(r.cap||0)>0);
   const aforo=afoRecs.length>0?Math.round(afoRecs.reduce((a,r)=>a+(parseInt(r.asistentes)||0)/parseInt(r.cap)*100,0)/afoRecs.length):0;
   const totalAsis=imp.reduce((a,r)=>a+(parseInt(r.asistentes)||0),0);
@@ -158,6 +158,15 @@ function abrirModal(id){
   }
   if(id==='m-falta'){
     document.getElementById('rf-inst').innerHTML=opts;
+    // Inicializar fecha con hoy — el usuario puede cambiarlo a días anteriores
+    const rfFecha = document.getElementById('rf-fecha');
+    if(rfFecha){
+      rfFecha.value = fechaLocalStr(hoy);
+      // Límite: no más de 30 días atrás, no futuro
+      const minDate = new Date(hoy); minDate.setDate(hoy.getDate()-30);
+      rfFecha.min = fechaLocalStr(minDate);
+      rfFecha.max = fechaLocalStr(hoy);
+    }
     cargarClasesInst('rf');
   }
   if(id==='m-suplencias'){
@@ -300,7 +309,7 @@ function abrirModalInstructor(id){
   actualizarSelectoresClase();
   if(id){
     const inst=instructores.find(i=>String(i.id)===String(id));
-    document.getElementById('mi-ttl').textContent='<svg class="ico" viewBox="0 0 20 20"><path d="M13.5 3.5 L16.5 6.5 L8 15 L4 16 L5 12 Z" stroke="currentColor" stroke-width="1.4" fill="none" stroke-linejoin="round"/><line x1="12" y1="5" x2="15" y2="8" stroke="currentColor" stroke-width="1.3"/></svg> Editar Instructor';
+    document.getElementById('mi-ttl').innerHTML='<svg class="ico" viewBox="0 0 20 20"><path d="M13.5 3.5 L16.5 6.5 L8 15 L4 16 L5 12 Z" stroke="currentColor" stroke-width="1.4" fill="none" stroke-linejoin="round"/><line x1="12" y1="5" x2="15" y2="8" stroke="currentColor" stroke-width="1.3"/></svg> Editar Instructor';
     document.getElementById('mi-id').value=id;
     document.getElementById('mi-nombre').value=inst.nombre;
     document.getElementById('mi-tipo').value=inst.tipo;
@@ -385,7 +394,7 @@ function guardarInstructor(){
     turno:document.getElementById('mi-turno').value,
     esp:document.getElementById('mi-esp').value.trim(),horario:[...tmpSlots]};
   if(id){ const idx=instructores.findIndex(i=>String(i.id)===String(id)); if(idx>=0) instructores[idx]={...instructores[idx],...data}; else{ showToast('No se encontró el instructor. Intenta de nuevo.','err'); return; } }
-  else{ const nid=Math.max(...instructores.map(i=>i.id),0)+1; instructores.push({id:nid,...data}); }
+  else{ const nid=instructores.reduce((m,i)=>Math.max(m,i.id||0),0)+1; instructores.push({id:nid,...data}); }
   cerrarModal('m-instructor');renderAll();
   registrarLog('instructor', `${id?'Editado':'Nuevo'}: ${nombre} · ${data.tipo}`);
   showToast(`Instructor ${id?'actualizado':'agregado'}`,'ok');

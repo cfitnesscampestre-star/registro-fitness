@@ -450,7 +450,7 @@ function guardarRecorrido(){
       ex.cap=cap;
       ex.updatedAt=Date.now();
     } else {
-      const maxId=registros.length>0?Math.max(...registros.map(r=>parseInt(r.id)||0)):0;
+      const maxId=registros.reduce((m,r)=>Math.max(m,parseInt(r.id)||0),0);
       registros.push({
         id:maxId+1,
         inst_id:instIdNum,
@@ -604,7 +604,7 @@ function guardarClase(){
   }
   if(!ok) return;
 
-  const nuevoIdClase=(registros.length>0?Math.max(...registros.map(r=>parseInt(r.id)||0)):0)+1;
+  const nuevoIdClase=(registros.reduce((m,r)=>Math.max(m,parseInt(r.id)||0),0))+1;
   registros.push({id:nuevoIdClase,inst_id:instId,
     dia:diaVal, clase:claseNombre, hora:horaVal,
     asistentes:asisVal, cap:capInput,
@@ -635,7 +635,7 @@ function guardarFalta(){
     if(yaTieneFalta) showToast(`${inst.nombre} ya tiene falta registrada para ${claseVal} este día`,'warn');
   }
   if(!ok) return;
-  const nuevoIdFalta=(registros.length>0?Math.max(...registros.map(r=>parseInt(r.id)||0)):0)+1;
+  const nuevoIdFalta=(registros.reduce((m,r)=>Math.max(m,parseInt(r.id)||0),0))+1;
   registros.push({id:nuevoIdFalta,inst_id:instId,dia:diaVal,
     clase:claseVal,hora:'00:00',asistentes:0,cap:0,dur:0,estado:'falta',
     fecha:fechaLocalStr(hoy),tipo:'falta',

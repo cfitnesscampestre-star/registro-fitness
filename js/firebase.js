@@ -215,7 +215,7 @@ async function inicializarFirebase(){
 // ── Limpiar todos los datos ───────────────────
 async function confirmarLimpiezaTotal(){
   const resp = prompt('⚠ ADVERTENCIA: Esta acción es irreversible.\nEscribe BORRAR para confirmar:');
-  if(resp !== 'BORRAR'){ toast('Operación cancelada','info'); return; }
+  if(resp !== 'BORRAR'){ showToast('Operación cancelada','info'); return; }
 
   instructores    = [];
   registros       = [];
@@ -239,7 +239,7 @@ async function confirmarLimpiezaTotal(){
   renderAll();
   renderRecorridos();
   renderCal();
-  toast('Todos los datos han sido eliminados. El sistema está limpio.','ok',5000);
+  showToast('Todos los datos han sido eliminados. El sistema está limpio.','ok');
 }
 
 // ── Helpers ───────────────────────────────────

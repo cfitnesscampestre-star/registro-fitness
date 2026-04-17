@@ -50,7 +50,7 @@ function guardarClase(){
   }
   if(!ok) return;
 
-  const nuevoIdClase=(registros.length>0?Math.max(...registros.map(r=>parseInt(r.id)||0)):0)+1;
+  const nuevoIdClase=(registros.reduce((m,r)=>Math.max(m,parseInt(r.id)||0),0))+1;
   registros.push({id:nuevoIdClase,inst_id:instId,
     dia:diaVal, clase:claseNombre, hora:horaVal,
     asistentes:asisVal, cap:capInput,
@@ -63,33 +63,40 @@ function guardarClase(){
   showToast(`Clase registrada para ${inst.nombre}`,'ok');
 }
 function guardarFalta(){
-  _vClearAll(['rf-inst','rf-dia','rf-clase']);
+  _vClearAll(['rf-inst','rf-dia','rf-clase','rf-fecha']);
   const instId=parseInt(document.getElementById('rf-inst').value);
   const inst=instructores.find(i=>i.id===instId);
   const diaVal=document.getElementById('rf-dia').value;
   const claseVal=document.getElementById('rf-clase').value;
+  // Leer fecha del campo — permite registrar faltas de días anteriores (max 30 días)
+  const fechaElInput=document.getElementById('rf-fecha');
+  const fechaVal=fechaElInput&&fechaElInput.value ? fechaElInput.value : fechaLocalStr(hoy);
   let ok=true;
   if(!inst){ showToast('Selecciona un instructor','err'); ok=false; }
   if(!diaVal){ _vErr('rf-dia','Selecciona el día'); showToast('Indica el día de la falta','err'); ok=false; }
   if(!claseVal){ _vErr('rf-clase','Selecciona la clase'); showToast('Indica la clase afectada','err'); ok=false; }
-  // Detectar falta duplicada
+  if(!fechaVal){ _vErr('rf-fecha','La fecha es requerida'); showToast('Indica la fecha de la falta','err'); ok=false; }
+  if(ok && fechaVal > fechaLocalStr(hoy)){
+    _vErr('rf-fecha','No puede ser fecha futura');
+    showToast('La fecha no puede ser futura','warn'); ok=false;
+  }
   if(ok && inst){
     const yaTieneFalta=registros.find(r=>
       r.inst_id===instId && r.dia===diaVal && r.clase===claseVal &&
-      r.estado==='falta' && r.fecha===fechaLocalStr(hoy)
+      r.estado==='falta' && r.fecha===fechaVal
     );
-    if(yaTieneFalta) showToast(`${inst.nombre} ya tiene falta registrada para ${claseVal} este día`,'warn');
+    if(yaTieneFalta) showToast(`${inst.nombre} ya tiene falta registrada para ${claseVal} el ${fechaVal}`,'warn');
   }
   if(!ok) return;
-  const nuevoIdFalta=(registros.length>0?Math.max(...registros.map(r=>parseInt(r.id)||0)):0)+1;
+  const nuevoIdFalta=(registros.reduce((m,r)=>Math.max(m,parseInt(r.id)||0),0))+1;
   registros.push({id:nuevoIdFalta,inst_id:instId,dia:diaVal,
     clase:claseVal,hora:'00:00',asistentes:0,cap:0,dur:0,estado:'falta',
-    fecha:fechaLocalStr(hoy),tipo:'falta',
+    fecha:fechaVal,tipo:'falta',
     tipo_falta:document.getElementById('rf-tipo').value,
     nota:document.getElementById('rf-nota').value,suplente_id:null,
     updatedAt:Date.now()});
   cerrarModal('m-falta');renderAll();
-  registrarLog('falta', `${inst.nombre} · ${claseVal} · ${diaVal} · ${document.getElementById('rf-tipo').value}`);
+  registrarLog('falta', `${inst.nombre} · ${claseVal} · ${diaVal} · ${fechaVal} · ${document.getElementById('rf-tipo').value}`);
   showToast(`Falta registrada para ${inst.nombre}`,'warn');
 }
 
