@@ -42,7 +42,7 @@
   document.head.appendChild(link);
 })();
 </script>
-<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Outfit:wght@400;500;600&family=DM+Mono&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:ital,wght@0,400;0,600;0,700;1,600&family=Bebas+Neue&family=Outfit:wght@400;500;600&family=DM+Mono&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
@@ -75,6 +75,7 @@ window._cargarFflate=function(){
 
 <!-- ═══ ESTILOS ═══ -->
 <link rel="stylesheet" href="css/fitness.css">
+<link rel="stylesheet" href="css/app-mobile.css">
 
 </head>
 
@@ -2247,13 +2248,8 @@ window._cargarFflate=function(){
       <select id="rf-tipo"><option value="injustificada">Injustificada</option><option value="justificada">Justificada</option><option value="permiso">Permiso</option></select>
     </div>
   </div>
-  <div class="fr">
-    <div class="fg"><label>Día</label>
-      <select id="rf-dia"><option>Lunes</option><option>Martes</option><option>Miércoles</option><option>Jueves</option><option>Viernes</option><option>Sábado</option><option>Domingo</option></select>
-    </div>
-    <div class="fg"><label>Fecha</label>
-      <input type="date" id="rf-fecha" title="Puedes registrar faltas de días anteriores (máx. 30 días)">
-    </div>
+  <div class="fg"><label>Día</label>
+    <select id="rf-dia"><option>Lunes</option><option>Martes</option><option>Miércoles</option><option>Jueves</option><option>Viernes</option><option>Sábado</option><option>Domingo</option></select>
   </div>
   <div class="fg"><label>Nota</label><textarea id="rf-nota" placeholder="Motivo..."></textarea></div>
   <button class="bsave" onclick="guardarFalta()">Guardar</button>
