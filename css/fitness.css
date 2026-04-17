@@ -2198,3 +2198,613 @@ html.tema-claro .rep-card-hdr { color: #1a7a45; }
 }
 
 </style>
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   ██████████  APP-NATIVE MOBILE OVERRIDES  ██████████
+   Bloque final — sobreescribe TODO lo anterior en pantallas ≤640px
+   Objetivo: que se vea y sienta como app nativa (iOS/Android)
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* Barlow Condensed para etiquetas y nav */
+:root { --safe-b: env(safe-area-inset-bottom,0px); --nav-h: 66px; }
+
+/* ── BODY & FONDO ─────────────────────────────────────────────── */
+@media (max-width:640px) {
+  body {
+    background: #070d09 !important;
+    background-image:
+      radial-gradient(ellipse 100% 40% at 50% 100%, rgba(20,90,45,.35) 0%, transparent 60%),
+      radial-gradient(ellipse 60% 30% at 90% 5%, rgba(50,160,210,.07) 0%, transparent 50%) !important;
+  }
+  html.tema-claro body {
+    background: #edf5ee !important;
+    background-image: none !important;
+  }
+}
+
+/* ── HEADER — ultra compacto ─────────────────────────────────────── */
+@media (max-width:640px) {
+  #hdr {
+    height: 54px !important;
+    padding: 0 14px !important;
+    background: rgba(5,10,7,.98) !important;
+    flex-wrap: nowrap !important;
+    gap: 8px !important;
+    border-bottom: none !important;
+    position: sticky !important;
+    top: 0 !important;
+    z-index: 90 !important;
+  }
+  /* Línea neon sutil abajo */
+  #hdr::after {
+    content: '' !important;
+    position: absolute !important;
+    bottom: 0 !important; left: 0 !important; right: 0 !important;
+    height: 1px !important;
+    background: linear-gradient(90deg, transparent 0%, rgba(94,255,160,.3) 40%, rgba(94,255,160,.3) 60%, transparent 100%) !important;
+    display: block !important;
+  }
+  html.tema-claro #hdr {
+    background: rgba(255,255,255,.99) !important;
+    box-shadow: 0 1px 0 rgba(26,122,69,.15), 0 2px 12px rgba(26,122,69,.06) !important;
+  }
+  html.tema-claro #hdr::after { background: linear-gradient(90deg, transparent, rgba(26,122,69,.3) 40%, rgba(26,122,69,.3) 60%, transparent) !important; }
+  .hsub { display: none !important; }
+  .hr   { display: none !important; }
+  .htit { font-size: 1rem !important; letter-spacing: 3px !important; }
+  .hico { width: 33px !important; height: 33px !important; border-radius: 10px !important; }
+  #sync-indicator {
+    font-family: 'DM Mono', monospace !important;
+    font-size: .56rem !important;
+    opacity: .75 !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    max-width: 130px !important;
+  }
+}
+
+/* ── BOTTOM NAV — estilo app nativa ──────────────────────────────── */
+@media (max-width:640px) {
+  #bottom-nav {
+    display: flex !important;
+    position: fixed !important;
+    bottom: 0 !important; left: 0 !important; right: 0 !important;
+    height: calc(var(--nav-h) + var(--safe-b)) !important;
+    padding-bottom: var(--safe-b) !important;
+    padding-top: 0 !important;
+    background: rgba(5,10,7,.97) !important;
+    border-top: 1px solid rgba(255,255,255,.07) !important;
+    backdrop-filter: blur(28px) saturate(200%) !important;
+    -webkit-backdrop-filter: blur(28px) saturate(200%) !important;
+    z-index: 300 !important;
+    justify-content: space-around !important;
+    align-items: flex-start !important;
+    box-shadow: none !important;
+  }
+  html.tema-claro #bottom-nav {
+    background: rgba(255,255,255,.97) !important;
+    border-top-color: rgba(26,122,69,.12) !important;
+    box-shadow: 0 -2px 16px rgba(26,122,69,.08) !important;
+  }
+
+  .bnav-item {
+    flex: 1 !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    gap: 4px !important;
+    padding: 10px 4px 4px !important;
+    color: rgba(80,130,95,.55) !important;
+    font-family: 'Barlow Condensed', sans-serif !important;
+    font-size: .6rem !important;
+    font-weight: 700 !important;
+    letter-spacing: 1px !important;
+    text-transform: uppercase !important;
+    transition: color .15s !important;
+    border-radius: 0 !important;
+    position: relative !important;
+    cursor: pointer !important;
+    -webkit-tap-highlight-color: transparent !important;
+  }
+
+  /* Indicador activo — barra arriba */
+  .bnav-item.on {
+    color: #5effa0 !important;
+  }
+  .bnav-item.on::before {
+    content: '' !important;
+    position: absolute !important;
+    top: 0 !important; left: 50% !important;
+    transform: translateX(-50%) !important;
+    width: 32px !important; height: 3px !important;
+    background: #5effa0 !important;
+    border-radius: 0 0 4px 4px !important;
+    display: block !important;
+  }
+  html.tema-claro .bnav-item { color: rgba(26,90,45,.4) !important; }
+  html.tema-claro .bnav-item.on { color: #1a7a45 !important; }
+  html.tema-claro .bnav-item.on::before { background: #1a7a45 !important; }
+
+  .bnav-item svg { width: 22px !important; height: 22px !important; }
+  .bnav-item.on svg { stroke-width: 2 !important; }
+  .bnav-dot {
+    position: absolute !important;
+    top: 6px !important; right: calc(50% - 16px) !important;
+    width: 7px !important; height: 7px !important;
+    border: 2px solid rgba(5,10,7,.97) !important;
+  }
+
+  main { padding-bottom: calc(var(--nav-h) + var(--safe-b) + 6px) !important; }
+  #fab-clase, #fab-menu, #fab-overlay { display: none !important; }
+}
+
+/* ── LOGIN — sheet desde abajo ───────────────────────────────────── */
+@media (max-width:640px) {
+  #login-screen {
+    position: fixed !important;
+    inset: 0 !important;
+    background: #050c07 !important;
+    background-image:
+      radial-gradient(ellipse 110% 55% at 50% 105%, rgba(20,100,50,.4) 0%, transparent 58%),
+      radial-gradient(ellipse 50% 25% at 88% 2%, rgba(50,170,210,.08) 0%, transparent 45%) !important;
+    display: flex !important;
+    align-items: flex-end !important;
+    justify-content: center !important;
+    padding: 0 !important;
+    z-index: 9999 !important;
+  }
+  html.tema-claro #login-screen {
+    background: linear-gradient(165deg, #d8eedc 0%, #edf8ef 55%, #e0f0e4 100%) !important;
+    align-items: center !important;
+    padding: 20px !important;
+  }
+
+  .login-box {
+    width: 100% !important;
+    max-width: 100% !important;
+    border-radius: 26px 26px 0 0 !important;
+    border: none !important;
+    border-top: 1px solid rgba(255,255,255,.12) !important;
+    padding: 8px 22px calc(28px + var(--safe-b)) !important;
+    background: rgba(8,16,10,.97) !important;
+    box-shadow: 0 -24px 60px rgba(0,0,0,.7), 0 0 0 1px rgba(94,255,160,.06) !important;
+    animation: nativeSheetUp .36s cubic-bezier(.16,1,.3,1) !important;
+  }
+
+  @keyframes nativeSheetUp {
+    from { transform: translateY(100%); }
+    to   { transform: translateY(0); }
+  }
+
+  /* Handle bar */
+  .login-box::before {
+    content: '' !important;
+    display: block !important;
+    width: 36px !important; height: 4px !important;
+    background: rgba(255,255,255,.2) !important;
+    border-radius: 2px !important;
+    margin: 0 auto 18px !important;
+  }
+
+  html.tema-claro .login-box {
+    border-radius: 22px !important;
+    border: 1px solid rgba(26,122,69,.18) !important;
+    background: #fff !important;
+    box-shadow: 0 12px 48px rgba(26,122,69,.18) !important;
+    animation: nativePopIn .3s cubic-bezier(.16,1,.3,1) !important;
+    padding: 22px 22px 26px !important;
+  }
+  html.tema-claro .login-box::before { background: rgba(26,122,69,.15) !important; }
+
+  @keyframes nativePopIn {
+    from { transform: scale(.95) translateY(20px); opacity: 0; }
+    to   { transform: scale(1) translateY(0); opacity: 1; }
+  }
+
+  .login-logo { margin-bottom: 16px !important; gap: 12px !important; }
+  .hico { width: 42px !important; height: 42px !important; border-radius: 13px !important;
+    box-shadow: 0 0 18px rgba(94,255,160,.28) !important; }
+  .login-title { font-size: 1.55rem !important; letter-spacing: 3.5px !important;
+    text-shadow: 0 0 22px rgba(94,255,160,.35) !important; }
+  html.tema-claro .login-title { color: #1a7a45 !important; text-shadow: none !important; }
+  .login-sub { font-family: 'Barlow Condensed', sans-serif !important;
+    font-size: .63rem !important; letter-spacing: 2.5px !important; }
+
+  /* Roles — pills horizontales */
+  .login-role-btns {
+    display: flex !important;
+    gap: 0 !important;
+    background: rgba(255,255,255,.07) !important;
+    border: 1px solid rgba(255,255,255,.08) !important;
+    border-radius: 14px !important;
+    padding: 4px !important;
+    margin-bottom: 16px !important;
+  }
+  html.tema-claro .login-role-btns {
+    background: #f0f7f2 !important;
+    border-color: rgba(26,122,69,.12) !important;
+  }
+  .role-btn {
+    flex: 1 !important;
+    border: none !important;
+    border-radius: 10px !important;
+    background: transparent !important;
+    padding: 10px 4px !important;
+    transition: all .18s !important;
+  }
+  .role-btn.selected {
+    background: #1a7a45 !important;
+    border: none !important;
+    box-shadow: 0 4px 16px rgba(26,122,69,.5) !important;
+  }
+  html.tema-claro .role-btn { background: transparent !important; }
+  html.tema-claro .role-btn.selected {
+    background: #1a7a45 !important;
+    box-shadow: 0 4px 14px rgba(26,122,69,.3) !important;
+  }
+  .role-btn .role-icon { font-size: 1.2rem !important; margin-bottom: 2px !important; }
+  .role-btn .role-name {
+    font-family: 'Barlow Condensed', sans-serif !important;
+    font-size: .75rem !important; font-weight: 700 !important;
+    letter-spacing: .5px !important; text-transform: uppercase !important;
+    color: rgba(200,230,210,.7) !important;
+  }
+  .role-btn.selected .role-name { color: #fff !important; }
+  html.tema-claro .role-btn .role-name { color: rgba(26,80,45,.6) !important; }
+  html.tema-claro .role-btn.selected .role-name { color: #fff !important; }
+  .role-btn .role-desc { font-size: .57rem !important; color: rgba(150,190,160,.45) !important; }
+  .role-btn.selected .role-desc { color: rgba(255,255,255,.65) !important; }
+
+  /* Campos */
+  .login-field label {
+    font-family: 'Barlow Condensed', sans-serif !important;
+    font-size: .7rem !important; letter-spacing: 2px !important;
+    text-transform: uppercase !important; font-weight: 700 !important;
+    color: rgba(100,150,115,.8) !important;
+  }
+  html.tema-claro .login-field label { color: rgba(26,90,45,.6) !important; }
+  .login-field input, .login-field select {
+    background: rgba(255,255,255,.07) !important;
+    border: 1px solid rgba(255,255,255,.12) !important;
+    border-radius: 13px !important;
+    padding: 13px 15px !important;
+    font-size: .92rem !important;
+    color: #e8f5ec !important;
+  }
+  .login-field input:focus, .login-field select:focus {
+    border-color: #5effa0 !important;
+    background: rgba(94,255,160,.06) !important;
+    box-shadow: 0 0 0 4px rgba(94,255,160,.1) !important;
+    outline: none !important;
+  }
+  html.tema-claro .login-field input,
+  html.tema-claro .login-field select {
+    background: #f5faf5 !important;
+    border-color: rgba(26,122,69,.2) !important;
+    color: #0d1f14 !important;
+  }
+  html.tema-claro .login-field input:focus,
+  html.tema-claro .login-field select:focus {
+    border-color: #1a7a45 !important;
+    box-shadow: 0 0 0 4px rgba(26,122,69,.1) !important;
+  }
+
+  .login-error {
+    background: rgba(200,48,48,.15) !important;
+    border: 1px solid rgba(200,48,48,.3) !important;
+    border-radius: 10px !important;
+    font-size: .78rem !important;
+  }
+
+  /* Botón entrar */
+  .login-btn {
+    border-radius: 14px !important;
+    padding: 15px !important;
+    font-family: 'Barlow Condensed', sans-serif !important;
+    font-size: 1.05rem !important; letter-spacing: 3px !important;
+    font-weight: 700 !important; text-transform: uppercase !important;
+    background: #1a7a45 !important;
+    box-shadow: 0 6px 22px rgba(26,122,69,.5) !important;
+    margin-top: 4px !important;
+  }
+  .login-btn:active { transform: scale(.97) !important; box-shadow: 0 3px 12px rgba(26,122,69,.35) !important; }
+  .login-info { font-size: .6rem !important; margin-top: .6rem !important; }
+}
+
+/* ── BARRA REGRESO ───────────────────────────────────────────────── */
+@media (max-width:640px) {
+  #mob-back-bar {
+    background: rgba(5,10,7,.98) !important;
+    border-bottom: 1px solid rgba(255,255,255,.07) !important;
+    padding: 0 14px !important;
+    height: 44px !important;
+    display: flex !important; align-items: center !important; gap: 8px !important;
+    position: sticky !important; top: 54px !important; z-index: 80 !important;
+  }
+  html.tema-claro #mob-back-bar {
+    background: rgba(255,255,255,.98) !important;
+    border-bottom-color: rgba(26,122,69,.12) !important;
+  }
+  .mob-back-btn {
+    font-family: 'Barlow Condensed', sans-serif !important;
+    font-size: .78rem !important; font-weight: 700 !important;
+    letter-spacing: 1px !important; text-transform: uppercase !important;
+    color: #5effa0 !important;
+    background: none !important; border: none !important; cursor: pointer !important;
+    display: flex !important; align-items: center !important; gap: 4px !important;
+    padding: 4px 6px !important; border-radius: 8px !important;
+    -webkit-tap-highlight-color: transparent !important;
+  }
+  html.tema-claro .mob-back-btn { color: #1a7a45 !important; }
+  .mob-back-section {
+    font-family: 'Barlow Condensed', sans-serif !important;
+    font-size: .85rem !important; font-weight: 700 !important;
+    letter-spacing: 1.5px !important; text-transform: uppercase !important;
+    color: rgba(180,220,195,.65) !important;
+  }
+  html.tema-claro .mob-back-section { color: rgba(26,80,45,.5) !important; }
+}
+
+/* ── MOBILE HOME — pantalla principal ───────────────────────────── */
+@media (max-width:640px) {
+  #mobile-home.on {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 0 !important;
+    padding: 0 !important;
+    background: transparent !important;
+    padding-bottom: calc(var(--nav-h) + var(--safe-b) + 4px) !important;
+  }
+
+  /* Padding del contenedor interno */
+  #mobile-home > div:first-child {
+    padding: 10px 13px 0 !important;
+  }
+
+  /* Buscador */
+  #mob-search-bar {
+    background: rgba(255,255,255,.07) !important;
+    border: 1px solid rgba(255,255,255,.1) !important;
+    border-radius: 14px !important;
+    padding: 11px 14px !important;
+    box-shadow: none !important;
+  }
+  #mob-search-bar:focus-within {
+    border-color: rgba(94,255,160,.45) !important;
+    background: rgba(94,255,160,.05) !important;
+  }
+  html.tema-claro #mob-search-bar {
+    background: rgba(255,255,255,.9) !important;
+    border-color: rgba(26,122,69,.15) !important;
+    box-shadow: 0 2px 10px rgba(0,0,0,.06) !important;
+  }
+  #mob-search-input { font-size: .88rem !important; }
+
+  /* Dots carrusel */
+  .mob-dot {
+    width: 6px !important; height: 6px !important;
+    background: rgba(255,255,255,.18) !important;
+    border-radius: 3px !important;
+    transition: all .25s !important;
+  }
+  .mob-dot.on {
+    width: 22px !important;
+    background: #5effa0 !important;
+    border-radius: 3px !important;
+  }
+  html.tema-claro .mob-dot { background: rgba(26,122,69,.2) !important; }
+  html.tema-claro .mob-dot.on { background: #1a7a45 !important; }
+
+  /* ── Botón RECORRIDO ── */
+  .mob-btn-rec {
+    background: linear-gradient(140deg, #185e38 0%, #0e4022 55%, #09301a 100%) !important;
+    border-radius: 22px !important;
+    padding: 18px 16px 14px !important;
+    box-shadow: 0 8px 28px rgba(10,60,30,.65), inset 0 1px 0 rgba(255,255,255,.1) !important;
+    border: none !important;
+    position: relative !important;
+    overflow: hidden !important;
+  }
+  .mob-btn-rec::before {
+    content: '' !important;
+    position: absolute !important; top: -30px !important; right: -20px !important;
+    width: 90px !important; height: 90px !important; border-radius: 50% !important;
+    background: radial-gradient(circle, rgba(94,255,160,.12) 0%, transparent 70%) !important;
+    pointer-events: none !important;
+  }
+  .mob-rec-sub {
+    font-family: 'Barlow Condensed', sans-serif !important;
+    font-size: .6rem !important; letter-spacing: 3.5px !important;
+    text-transform: uppercase !important; color: rgba(255,255,255,.45) !important;
+  }
+  .mob-rec-title {
+    font-size: 2rem !important; letter-spacing: 2px !important;
+    text-shadow: 0 0 24px rgba(94,255,160,.25) !important;
+  }
+  .mob-mode-tag {
+    font-family: 'Barlow Condensed', sans-serif !important;
+    font-size: .62rem !important; font-weight: 700 !important;
+    letter-spacing: 1px !important; padding: 4px 11px !important;
+    border-radius: 20px !important;
+  }
+  .mob-mode-tag.turbo  { background: rgba(94,255,160,.18) !important; color: #b6ffda !important; }
+  .mob-mode-tag.normal { background: rgba(255,255,255,.1) !important; color: rgba(255,255,255,.6) !important; }
+
+  /* Botones pequeños de acción */
+  .mob-btn-sm {
+    background: rgba(255,255,255,.05) !important;
+    border: 1px solid rgba(255,255,255,.1) !important;
+    border-radius: 18px !important;
+    padding: 12px 4px !important;
+    transition: background .12s, transform .1s !important;
+  }
+  .mob-btn-sm:active { transform: scale(.91) !important; background: rgba(255,255,255,.1) !important; }
+  html.tema-claro .mob-btn-sm {
+    background: rgba(255,255,255,.9) !important;
+    border-color: rgba(26,122,69,.14) !important;
+    box-shadow: 0 2px 8px rgba(0,0,0,.06) !important;
+  }
+  .mob-sm-icon { width: 34px !important; height: 34px !important; border-radius: 12px !important; }
+  .mob-sm-lbl {
+    font-family: 'Barlow Condensed', sans-serif !important;
+    font-size: .63rem !important; font-weight: 700 !important;
+    letter-spacing: .5px !important; text-transform: uppercase !important;
+  }
+
+  /* Agenda */
+  .mob-btn-agenda-row {
+    border-radius: 16px !important;
+    padding: 13px 15px !important;
+    background: rgba(232,184,75,.07) !important;
+    border: 1px solid rgba(232,184,75,.18) !important;
+  }
+  html.tema-claro .mob-btn-agenda-row {
+    background: rgba(232,184,75,.08) !important;
+    border-color: rgba(200,150,10,.25) !important;
+  }
+
+  /* KPIs del día */
+  .mob-kpi {
+    background: rgba(255,255,255,.05) !important;
+    border: 1px solid rgba(255,255,255,.09) !important;
+    border-radius: 18px !important;
+    padding: 14px 8px 12px !important;
+  }
+  .mob-kpi::after { height: 2px !important; border-radius: 18px 18px 0 0 !important; }
+  .mob-kpi-val { font-size: 1.9rem !important; }
+  .mob-kpi-lbl {
+    font-family: 'Barlow Condensed', sans-serif !important;
+    font-size: .6rem !important; letter-spacing: 1.5px !important;
+    text-transform: uppercase !important;
+  }
+  html.tema-claro .mob-kpi {
+    background: rgba(255,255,255,.95) !important;
+    border-color: rgba(26,122,69,.1) !important;
+    box-shadow: 0 2px 10px rgba(0,0,0,.05) !important;
+  }
+
+  /* Etiqueta sección */
+  .mob-sec-lbl {
+    font-family: 'Barlow Condensed', sans-serif !important;
+    font-size: .63rem !important; letter-spacing: 2.5px !important;
+    color: rgba(100,155,115,.65) !important; text-transform: uppercase !important;
+  }
+  html.tema-claro .mob-sec-lbl { color: rgba(26,90,45,.45) !important; }
+
+  /* Lista de clases */
+  .mob-clase-item {
+    background: rgba(255,255,255,.05) !important;
+    border: 1px solid rgba(255,255,255,.09) !important;
+    border-radius: 16px !important;
+    padding: 13px 14px !important;
+    margin-bottom: 6px !important;
+    transition: transform .1s !important;
+  }
+  .mob-clase-item:active { transform: scale(.98) !important; }
+  .mob-clase-item.pendiente {
+    background: rgba(220,70,70,.07) !important;
+    border-color: rgba(220,70,70,.22) !important;
+    border-left: 3px solid var(--red2) !important;
+  }
+  .mob-clase-item.registrada { border-left: 3px solid #52c97d !important; }
+  .mob-c-hora { font-size: .73rem !important; min-width: 40px !important; }
+  .mob-c-nombre { font-size: .88rem !important; font-weight: 700 !important; letter-spacing: .2px !important; }
+  .mob-c-inst {
+    font-family: 'Barlow Condensed', sans-serif !important;
+    font-size: .67rem !important; letter-spacing: .8px !important;
+    text-transform: uppercase !important;
+  }
+  html.tema-claro .mob-clase-item {
+    background: rgba(255,255,255,.95) !important;
+    border-color: rgba(26,122,69,.1) !important;
+    box-shadow: 0 2px 8px rgba(0,0,0,.04) !important;
+  }
+  html.tema-claro .mob-clase-item.pendiente {
+    background: #fff5f5 !important; border-color: rgba(200,48,48,.2) !important;
+  }
+}
+
+/* ── MODALES — sheets desde abajo ────────────────────────────────── */
+@media (max-width:640px) {
+  .ov {
+    align-items: flex-end !important;
+    background: rgba(0,0,0,.78) !important;
+    backdrop-filter: blur(8px) !important;
+    -webkit-backdrop-filter: blur(8px) !important;
+  }
+  .modal, .modal.wide, .modal.narrow {
+    width: 100% !important; max-width: 100% !important;
+    border-radius: 24px 24px 0 0 !important;
+    border: none !important;
+    border-top: 1px solid rgba(255,255,255,.1) !important;
+    padding: 6px 20px calc(20px + var(--safe-b)) !important;
+    max-height: 93dvh !important;
+    animation: nativeSheetUp .28s cubic-bezier(.16,1,.3,1) !important;
+    background-image: radial-gradient(ellipse 38px 4px at 50% 10px, rgba(255,255,255,.18) 0%, transparent 100%) !important;
+  }
+  .mttl { font-size: 1.1rem !important; letter-spacing: 2px !important; margin-top: 8px !important; }
+  .fg input, .fg select, .fg textarea {
+    padding: 12px 13px !important; border-radius: 12px !important; font-size: .88rem !important;
+  }
+  .fr, .fr3 { grid-template-columns: 1fr !important; }
+  .bsave {
+    padding: 14px !important; border-radius: 14px !important;
+    font-family: 'Barlow Condensed', sans-serif !important;
+    font-size: 1rem !important; letter-spacing: 2px !important;
+    font-weight: 700 !important; text-transform: uppercase !important;
+    box-shadow: 0 6px 22px rgba(26,122,69,.45) !important;
+  }
+  .bdel {
+    padding: 13px !important; border-radius: 14px !important;
+    font-family: 'Barlow Condensed', sans-serif !important;
+    font-size: .95rem !important; letter-spacing: 2px !important;
+    font-weight: 700 !important; text-transform: uppercase !important;
+  }
+}
+
+/* ── TOASTS ──────────────────────────────────────────────────────── */
+@media (max-width:640px) {
+  #toast-container { bottom: calc(var(--nav-h) + var(--safe-b) + 8px) !important; padding: 0 12px !important; }
+  .toast { border-radius: 14px !important; padding: 11px 15px !important; font-size: .82rem !important; }
+}
+
+/* ── PANELES Y TARJETAS EN VISTAS ────────────────────────────────── */
+@media (max-width:640px) {
+  .panel {
+    border-radius: 18px !important;
+    background: rgba(255,255,255,.05) !important;
+    border-color: rgba(255,255,255,.09) !important;
+  }
+  html.tema-claro .panel {
+    background: rgba(255,255,255,.95) !important;
+    border-color: rgba(26,122,69,.1) !important;
+    box-shadow: 0 2px 12px rgba(0,0,0,.05) !important;
+  }
+  .kpi { border-radius: 18px !important; background: rgba(255,255,255,.05) !important; border-color: rgba(255,255,255,.09) !important; }
+  html.tema-claro .kpi { background: rgba(255,255,255,.95) !important; border-color: rgba(26,122,69,.1) !important; box-shadow: 0 2px 8px rgba(0,0,0,.04) !important; }
+  .kval { font-size: 1.7rem !important; }
+  .pttl { font-family: 'Bebas Neue', sans-serif !important; letter-spacing: 2.5px !important; font-size: .92rem !important; }
+  thead th {
+    font-family: 'Barlow Condensed', sans-serif !important;
+    font-size: .63rem !important; letter-spacing: 1.8px !important;
+    padding: 8px 10px !important;
+  }
+  tbody td { padding: 9px 10px !important; }
+  table { font-size: .75rem !important; }
+  .chip {
+    font-family: 'Barlow Condensed', sans-serif !important;
+    font-size: .7rem !important; font-weight: 700 !important;
+    letter-spacing: .5px !important; border-radius: 6px !important;
+    padding: 3px 8px !important;
+  }
+}
+
+/* ── RECORRIDO ───────────────────────────────────────────────────── */
+@media (max-width:640px) {
+  .rec-card { border-radius: 18px !important; background: rgba(255,255,255,.05) !important; border-color: rgba(255,255,255,.09) !important; padding: 14px !important; }
+  html.tema-claro .rec-card { background: rgba(255,255,255,.95) !important; border-color: rgba(26,122,69,.1) !important; box-shadow: 0 2px 10px rgba(0,0,0,.05) !important; }
+  .rec-num { font-size: 3.8rem !important; letter-spacing: 3px !important; }
+  .num-btn { width: 52px !important; height: 52px !important; font-size: 1.8rem !important; }
+  .num-inp { font-size: 3rem !important; width: 108px !important; border-radius: 16px !important; }
+}
