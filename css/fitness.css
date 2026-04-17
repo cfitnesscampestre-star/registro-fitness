@@ -1862,76 +1862,7 @@ html.tema-claro .ag-preview-fecha{color:var(--verde);}
 .nota-pri-media { border-left-color: var(--gold2) !important; }
 .nota-pri-baja  { border-left-color: var(--blue) !important; }
 
-/* ═══ TEMA CLARO FORZADO EN MÓVIL ═══════════════════════════════ */
-/* En pantallas ≤640px siempre tema claro, independientemente de JS */
-@media (max-width: 640px) {
-  :root {
-    --bg:#f0f5f0 !important;
-    --panel:#ffffff !important;
-    --panel2:#f2f7f2 !important;
-    --border:#c2d8c2 !important;
-    --verde:#1a7a45 !important;
-    --v2:#2e9c5e !important;
-    --v3:#3db870 !important;
-    --neon:#1a7a45 !important;
-    --gold:#b8940a !important;
-    --gold2:#9a7800 !important;
-    --red:#c0392b !important;
-    --red2:#c0392b !important;
-    --blue:#1a5fa3 !important;
-    --txt:#1a2a1e !important;
-    --txt2:#2d5a3a !important;
-    --txt3:#6aaa7a !important;
-    --w:#ffffff !important;
-    --shadow:0 2px 16px rgba(26,122,69,.12) !important;
-  }
-  /* Fondo del body */
-  body {
-    background: #f0f5f0 !important;
-    background-image: radial-gradient(ellipse at 20% 20%, rgba(26,122,69,.06) 0%, transparent 55%),
-                      radial-gradient(ellipse at 80% 80%, rgba(26,122,69,.04) 0%, transparent 50%) !important;
-  }
-  /* Eliminar glassmorphism en móvil (no funciona bien en tema claro) */
-  .panel, .kpi, .modal, .rec-card, .diag-card, .sch-slot, .alert-card {
-    backdrop-filter: none !important;
-    -webkit-backdrop-filter: none !important;
-  }
-  /* Fila de tabla hover */
-  tbody tr:hover { background: #e8f5ec !important; }
-  /* Bottom nav */
-  #bottom-nav { background: rgba(255,255,255,.96) !important; border-top-color: #d4e8d4 !important; }
-  /* Header */
-  #hdr { background: linear-gradient(90deg,#ffffff,#f5f8f5) !important; border-bottom: 2px solid #1a7a45 !important; }
-  .htit { color: #1a7a45 !important; }
-  /* Inputs */
-  .ctrl { background: #ffffff !important; border-color: #c2d8c2 !important; color: #1a2a1e !important; }
-  .fg input, .fg select, .fg textarea { background: #fff !important; border-color: #c2d8c2 !important; color: #1a2a1e !important; }
-  /* Kval */
-  .kval { color: #1a7a45 !important; }
-  /* Chips */
-  .chip.cpl { background: #e0f5ea !important; color: #1a7a45 !important; }
-  .chip.cho { background: #fef9e0 !important; color: #9a7800 !important; }
-  .chip.cok { background: #e0f5ea !important; color: #1a7a45 !important; }
-  .chip.cwn { background: #fef9e0 !important; color: #9a7800 !important; }
-  .chip.cbd { background: #fde8e8 !important; color: #c0392b !important; }
-  /* Login */
-  #login-screen { background: #f0f5f0 !important; }
-  .login-box { background: #fff !important; border-color: #1a7a45 !important; }
-  .role-btn { background: #f5faf5 !important; border-color: #c2d8c2 !important; }
-  .role-btn.selected { background: #e0f5ea !important; border-color: #1a7a45 !important; }
-  .login-field input { background: #fff !important; border-color: #c2d8c2 !important; color: #1a2a1e !important; }
-  /* Mobile home items */
-  .mob-clase-item { background: #fff !important; border-color: #d4e4d4 !important; }
-  .mob-kpi { background: #fff !important; border-color: #c8dcc8 !important; }
-  .mob-rank-item { background: #fff !important; border-color: #d4e4d4 !important; }
-  /* Mob back bar */
-  #mob-back-bar { background: #f0f5f0 !important; border-bottom-color: #c2d8c2 !important; }
-  /* Toasts */
-  .toast-ok { background: #e0f5ea !important; border-color: #1a7a45 !important; color: #1a5a30 !important; }
-  .toast-err { background: #fde8e8 !important; border-color: #c0392b !important; color: #8b0000 !important; }
-  .toast-warn { background: #fef9e0 !important; border-color: #b8940a !important; color: #7a5c00 !important; }
-  .toast-info { background: #e8f4fb !important; border-color: #1a5fa3 !important; color: #0d3b6e !important; }
-}
+
 
 /* ═══ BLOQUEO DE ROTACIÓN EN MÓVIL ════════════════════════════ */
 @media (max-width: 640px) and (orientation: landscape) {
@@ -2217,7 +2148,9 @@ html.tema-claro .rep-card-hdr { color: #1a7a45; }
   -webkit-tap-highlight-color: transparent;
   transition: transform .12s;
   padding: 0;
-  background: transparent;
+  /* Fondo directo — no depende de mob-hero-bg */
+  background: linear-gradient(135deg, #0d4825 0%, #0a3018 45%, #061c0f 100%);
+  box-shadow: 0 6px 24px rgba(0,0,0,.45), inset 0 1px 0 rgba(94,255,160,.15);
 }
 .mob-hero-rec:active { transform: scale(.97); }
 
@@ -2308,8 +2241,8 @@ html.tema-claro .mob-hero-bg::before {
   gap: 8px;
   padding: 14px 6px 12px;
   border-radius: 18px;
-  background: rgba(255,255,255,.05);
-  border: 1px solid rgba(255,255,255,.09);
+  background: #0e2418;
+  border: 1px solid rgba(94,255,160,.12);
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
   transition: transform .1s, background .12s;
@@ -2353,8 +2286,8 @@ html.tema-claro .mob-ac-lbl { color: rgba(26,70,42,.6); }
   display: flex; align-items: center; gap: 12px;
   padding: 12px 14px;
   border-radius: 16px;
-  background: rgba(232,184,75,.07);
-  border: 1px solid rgba(232,184,75,.17);
+  background: rgba(30,22,5,.85);
+  border: 1px solid rgba(232,184,75,.22);
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
   transition: background .15s, transform .1s;
@@ -2382,8 +2315,8 @@ html.tema-claro .mob-agenda-card { background: rgba(232,184,75,.08); border-colo
 /* DATE BAR */
 .mob-date-bar {
   display: flex; align-items: center; gap: 4px;
-  background: rgba(255,255,255,.05);
-  border: 1px solid rgba(255,255,255,.09);
+  background: #0e2418;
+  border: 1px solid rgba(94,255,160,.12);
   border-radius: 14px;
   padding: 8px 12px;
 }
@@ -2421,8 +2354,8 @@ html.tema-claro .mob-date-nav   { color: #1a7a45; }
 /* KPIs en oscuro */
 @media (max-width:640px) {
   .mob-kpi {
-    background: rgba(255,255,255,.05) !important;
-    border: 1px solid rgba(255,255,255,.09) !important;
+    background: #0e2418 !important;
+    border: 1px solid rgba(94,255,160,.12) !important;
     border-radius: 16px !important;
     padding: 14px 8px 12px !important;
   }
@@ -2433,7 +2366,7 @@ html.tema-claro .mob-date-nav   { color: #1a7a45; }
   html.tema-claro .mob-kpi-lbl { color: rgba(26,80,45,.5) !important; }
 
   /* Clases lista */
-  .mob-clase-item { background: rgba(255,255,255,.05) !important; border: 1px solid rgba(255,255,255,.09) !important; border-radius: 15px !important; padding: 13px 14px !important; margin-bottom: 6px !important; }
+  .mob-clase-item { background: #0e2418 !important; border: 1px solid rgba(94,255,160,.1) !important; border-radius: 15px !important; padding: 13px 14px !important; margin-bottom: 6px !important; }
   .mob-clase-item.pendiente { background: rgba(200,48,48,.07) !important; border-color: rgba(200,48,48,.22) !important; border-left: 3px solid var(--red2) !important; }
   .mob-clase-item.registrada { border-left: 3px solid #52c97d !important; }
   .mob-clase-item:active { transform: scale(.98) !important; }
