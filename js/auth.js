@@ -296,8 +296,17 @@ function aplicarRol(rol) {
 function cerrarSesion() {
   if (!confirm('¿Cerrar sesión?')) return;
   if (typeof instPararPoll === 'function') instPararPoll();
-  rolActual = null;
+
+  // ── Limpiar datos en memoria para que el siguiente usuario empiece limpio ──
+  // IMPORTANTE: no borramos localStorage (los datos persisten para el próximo login),
+  // solo reseteamos las variables en memoria que podrían "filtrar" info entre sesiones.
+  rolActual    = null;
   instActualId = null;
+  // Cancelar timer de sincronización pendiente si lo hay
+  if (typeof renderAll._timer !== 'undefined' && renderAll._timer) {
+    clearTimeout(renderAll._timer);
+    renderAll._timer = null;
+  }
   sessionStorage.removeItem('fc_rol');
   sessionStorage.removeItem('fc_inst_id');
   localStorage.removeItem('fc_ses_rol');
