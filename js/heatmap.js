@@ -121,30 +121,21 @@ function renderHeatmap() {
 
   function cellColor(val) {
     if(val===0) return 'var(--panel2)';
-    const pct = val/maxVal;
-    const isDark = temaActual !== 'claro';
-    if(isDark){
-      if(pct<0.25)return'rgba(26,122,69,.12)';
-      if(pct<0.45)return'rgba(26,122,69,.30)';
-      if(pct<0.65)return'rgba(26,122,69,.55)';
-      if(pct<0.80)return'rgba(26,122,69,.80)';
-      return'#5effa0';
-    } else {
-      if(pct<0.25)return'#d4eedd';
-      if(pct<0.45)return'#a8d8b8';
-      if(pct<0.65)return'#6db990';
-      if(pct<0.80)return'#3a9a68';
-      return'#1a7a45';
-    }
+    // Usar valor absoluto si es aforo (0-100), relativo si es otro metric
+    const pct = metric==='aforo' ? val/100 : val/maxVal;
+    // Paleta semáforo vibrante: rojo → naranja → amarillo → verde
+    if(pct < 0.20) return '#e53935';   // rojo intenso
+    if(pct < 0.35) return '#ef6c00';   // naranja
+    if(pct < 0.50) return '#f9a825';   // amarillo ámbar
+    if(pct < 0.65) return '#7cb342';   // verde lima
+    if(pct < 0.80) return '#2e7d32';   // verde medio
+    return '#00c853';                   // verde brillante (estrella)
   }
   function cellTextColor(val){
     if(val===0) return 'var(--txt3)';
-    const _dark = temaActual !== 'claro';
-    if(!_dark) return val/maxVal < 0.25 ? 'var(--txt3)' : '#0a1f12';
-    const pct = val/maxVal;
-    if(pct === 0) return 'var(--txt3)';
-    if(pct < 0.25) return 'var(--txt3)';
-    if(pct >= 0.80) return '#071a0f';   // dark text on bright neon green
+    const pct = metric==='aforo' ? val/100 : val/maxVal;
+    // Texto oscuro sobre colores claros (amarillo/lima), blanco sobre oscuros
+    if(pct >= 0.35 && pct < 0.65) return '#1a1a00';
     return '#fff';
   }
 
