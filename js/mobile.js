@@ -1029,6 +1029,10 @@ function renderMobileHome() {
   if(el('mob-k-pend'))  el('mob-k-pend').textContent  = pendientes;
   if(el('mob-k-aforo')) el('mob-k-aforo').textContent = aforoProm ? aforoProm+'%' : '—';
 
+  // Métricas premium
+  const afoBar2 = el('mob-aforo-bar');
+  if(afoBar2) afoBar2.style.width = Math.min(aforoProm, 100) + '%';
+
   // ── Métricas premium ──
   // Barra de aforo
   const afoBar = el('mob-aforo-bar');
