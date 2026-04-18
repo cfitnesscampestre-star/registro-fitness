@@ -1221,7 +1221,6 @@ window._cargarFflate=function(){
         <button class="mob-hero-rec solo-admin" onclick="iniciarRecorrido()">
           <div class="mob-hero-bg"></div>
           <div class="mob-hero-bg-overlay"></div>
-          <!-- Mapa premium con ruta dorada -->
           <div class="mob-hero-map-layer">
             <svg viewBox="0 0 340 140" fill="none" xmlns="http://www.w3.org/2000/svg" style="position:absolute;inset:0;width:100%;height:100%">
               <defs>
@@ -1266,7 +1265,6 @@ window._cargarFflate=function(){
           </div>
           <div class="mob-hero-content">
             <div class="mob-hero-left">
-              <!-- Corredor premium dorado -->
               <div class="mob-hero-runner-wrap">
                 <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" width="64" height="64">
                   <defs>
@@ -1305,34 +1303,49 @@ window._cargarFflate=function(){
                 </div>
               </div>
             </div>
-            <!-- Botón INICIAR CARRERA dorado -->
-            <div class="mob-hero-cta">
-              INICIAR<br>CARRERA
-            </div>
+            <div class="mob-hero-cta">INICIAR<br>CARRERA</div>
           </div>
         </button>
 
-        <!-- ══ LAYOUT PRINCIPAL: MÉTRICAS + MENÚ RADIAL ══ -->
+        <!-- ══ AGENDA — ancho completo, justo después del hero ══ -->
+        <div class="mob-agenda-card" onclick="abrirAgendaMob()" style="margin-top:8px">
+          <div class="mob-ag-icon">
+            <svg viewBox="0 0 28 28" fill="none" width="22" height="22">
+              <rect x="3" y="5" width="22" height="20" rx="3.5" fill="rgba(212,168,67,.12)" stroke="rgba(212,168,67,.4)" stroke-width="1.2"/>
+              <line x1="8" y1="4" x2="8" y2="7" stroke="#d4a843" stroke-width="2" stroke-linecap="round"/>
+              <line x1="20" y1="4" x2="20" y2="7" stroke="#d4a843" stroke-width="2" stroke-linecap="round"/>
+              <line x1="8" y1="14" x2="16" y2="14" stroke="rgba(212,168,67,.7)" stroke-width="1.5" stroke-linecap="round"/>
+              <line x1="8" y1="18" x2="13" y2="18" stroke="rgba(212,168,67,.45)" stroke-width="1.5" stroke-linecap="round"/>
+            </svg>
+          </div>
+          <div class="mob-ag-text">
+            <div class="mob-ag-title">Agenda</div>
+            <div class="mob-ag-sub">Notas y recordatorios</div>
+          </div>
+          <div class="mob-agenda-badge" id="mob-agenda-badge" style="display:none">0</div>
+          <svg viewBox="0 0 20 20" fill="none" width="14" height="14" style="opacity:.4;flex-shrink:0">
+            <polyline points="7,4 13,10 7,16" stroke="#d4a843" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
+
+        <!-- ══ FECHA ══ -->
+        <div class="mob-date-bar" style="margin-top:8px">
+          <button class="mob-date-nav" onclick="cambiarVistaFecha(-1)">‹</button>
+          <div style="flex:1;text-align:center">
+            <input type="date" id="mob-date-picker" class="mob-date-input" onchange="setVistaFecha(this.value)">
+          </div>
+          <button class="mob-date-nav" onclick="cambiarVistaFecha(1)">›</button>
+          <button id="mob-btn-hoy" class="mob-date-today" onclick="resetVistaFecha()">Hoy</button>
+        </div>
+
+        <!-- ══ LAYOUT: MÉTRICAS + MENÚ RADIAL ══ -->
         <div class="mob-premium-layout">
 
-          <!-- Panel izquierdo: métricas + agenda + fecha -->
+          <!-- Panel izquierdo: KPIs -->
           <div class="mob-metrics-panel">
-
-            <!-- Fecha -->
-            <div class="mob-date-bar" style="margin-bottom:8px">
-              <button class="mob-date-nav" onclick="cambiarVistaFecha(-1)">‹</button>
-              <div style="flex:1;text-align:center">
-                <input type="date" id="mob-date-picker" class="mob-date-input" onchange="setVistaFecha(this.value)">
-              </div>
-              <button class="mob-date-nav" onclick="cambiarVistaFecha(1)">›</button>
-              <button id="mob-btn-hoy" class="mob-date-today" onclick="resetVistaFecha()">Hoy</button>
-            </div>
-
-            <!-- Card Resumen glassmorphism -->
             <div class="mob-glass-card">
               <div class="mob-gc-title">RESUMEN HOY</div>
 
-              <!-- Clases registradas + sparkline -->
               <div class="mob-gc-metric">
                 <span class="mob-gc-lbl">Clases Registradas</span>
                 <div class="mob-gc-row">
@@ -1341,7 +1354,6 @@ window._cargarFflate=function(){
                 </div>
               </div>
 
-              <!-- Tareas pendientes + dots compactos -->
               <div class="mob-gc-metric">
                 <span class="mob-gc-lbl">Tareas Pendientes</span>
                 <div class="mob-gc-row">
@@ -1350,7 +1362,6 @@ window._cargarFflate=function(){
                 </div>
               </div>
 
-              <!-- Aforo — barra + número derecha -->
               <div class="mob-gc-metric" style="margin-bottom:4px">
                 <span class="mob-gc-lbl">Aforo</span>
                 <div style="display:flex;align-items:center;gap:8px;margin-top:2px">
@@ -1363,31 +1374,9 @@ window._cargarFflate=function(){
 
               <div class="mob-gc-sub">Clases<br>y Tareas</div>
             </div>
+          </div>
 
-            <!-- Agenda -->
-            <div class="mob-agenda-card" onclick="abrirAgendaMob()" style="margin-top:8px">
-              <div class="mob-ag-icon">
-                <svg viewBox="0 0 28 28" fill="none" width="22" height="22">
-                  <rect x="3" y="5" width="22" height="20" rx="3.5" fill="rgba(212,168,67,.12)" stroke="rgba(212,168,67,.4)" stroke-width="1.2"/>
-                  <line x1="8" y1="4" x2="8" y2="7" stroke="#d4a843" stroke-width="2" stroke-linecap="round"/>
-                  <line x1="20" y1="4" x2="20" y2="7" stroke="#d4a843" stroke-width="2" stroke-linecap="round"/>
-                  <line x1="8" y1="14" x2="16" y2="14" stroke="rgba(212,168,67,.7)" stroke-width="1.5" stroke-linecap="round"/>
-                  <line x1="8" y1="18" x2="13" y2="18" stroke="rgba(212,168,67,.45)" stroke-width="1.5" stroke-linecap="round"/>
-                </svg>
-              </div>
-              <div class="mob-ag-text">
-                <div class="mob-ag-title">Agenda</div>
-                <div class="mob-ag-sub">Notas y recordatorios</div>
-              </div>
-              <div class="mob-agenda-badge" id="mob-agenda-badge" style="display:none">0</div>
-              <svg viewBox="0 0 20 20" fill="none" width="14" height="14" style="opacity:.4;flex-shrink:0">
-                <polyline points="7,4 13,10 7,16" stroke="#d4a843" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
-              </svg>
-            </div>
-
-          </div><!-- /mob-metrics-panel -->
-
-          <!-- Menú radial derecho: 3 círculos dorados -->
+          <!-- Menú radial derecho -->
           <div class="mob-radial-menu solo-admin">
 
             <div class="mob-radial-btn" onclick="abrirModal('m-clase')">
@@ -1431,11 +1420,10 @@ window._cargarFflate=function(){
               <span id="mob-firmas-badge" style="display:none;position:absolute;top:4px;right:4px;background:var(--red2);color:#fff;font-size:.5rem;font-weight:700;border-radius:8px;padding:1px 5px;line-height:14px;min-width:16px;text-align:center;"></span>
             </div>
 
-          </div><!-- /mob-radial-menu -->
-
+          </div>
         </div><!-- /mob-premium-layout -->
 
-        <!-- KPI hidden (para compatibilidad JS) -->
+        <!-- KPI hidden (compatibilidad JS) -->
         <div style="display:none">
           <div id="mob-kpi-arc-reg"></div>
           <div id="mob-kpi-arc-pend"></div>
