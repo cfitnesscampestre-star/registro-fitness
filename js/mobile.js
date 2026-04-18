@@ -1057,10 +1057,11 @@ function renderMobileHome() {
     const maxDots = 10;
     const filled  = Math.min(pendientes, maxDots);
     // Color según urgencia: verde(1-3) → amarillo(4-6) → naranja(7-8) → rojo(9-10)
-    const dotColor = filled <= 3 ? '#5effa0'
-                   : filled <= 6 ? '#d4a843'
-                   : filled <= 8 ? '#e08030'
-                   :               '#e05050';
+    // Colores tema claro — alto contraste bajo el sol
+    const dotColor = filled <= 3 ? '#2da05a'
+                   : filled <= 6 ? '#e08c00'
+                   : filled <= 8 ? '#d45000'
+                   :               '#c0392b';
     dotsEl.innerHTML = Array.from({length: maxDots}, (_, i) =>
       i < filled
         ? `<div class="mob-dot-item" style="background:${dotColor};box-shadow:0 0 4px ${dotColor}88"></div>`
