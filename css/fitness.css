@@ -2897,20 +2897,21 @@ html.tema-claro .rep-card-hdr { color: #1a7a45; }
   flex: 1;
   display: flex;
   flex-wrap: nowrap;
-  gap: 3px;
+  gap: 4px;
   align-items: center;
   overflow: hidden;
 }
 .mob-dot-item {
-  width: 7px; height: 7px;
+  width: 8px; height: 8px;
   border-radius: 50%;
-  background: #d4a843;
   flex-shrink: 0;
-  box-shadow: 0 0 4px rgba(212,168,67,.5);
+  /* mismo tamaño siempre — color se asigna via JS inline */
+  background: #d4a843;
 }
 .mob-dot-item.empty {
-  background: transparent;
-  border: 1px solid rgba(212,168,67,.25);
+  /* mismo tamaño: fondo oscuro semitransparente sin borde extra */
+  background: rgba(212,168,67,.15) !important;
+  box-shadow: none !important;
 }
 
 /* Barra aforo */
@@ -2939,10 +2940,12 @@ html.tema-claro .rep-card-hdr { color: #1a7a45; }
 .mob-radial-menu {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 10px;
   flex-shrink: 0;
   width: 96px;
-  padding-top: 2px;
+  padding-top: 0;
+  justify-content: space-between;
+  align-self: stretch;
 }
 .mob-radial-btn {
   display: flex; flex-direction: column;
@@ -2983,6 +2986,60 @@ html.tema-claro .rep-card-hdr { color: #1a7a45; }
   color: rgba(212,168,67,.8);
   text-align: center; line-height: 1.2;
   text-transform: uppercase; letter-spacing: .8px;
+}
+
+/* Fecha integrada dentro de la glass card */
+.mob-gc-date-row {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-bottom: 0;
+  padding-bottom: 0;
+}
+.mob-gc-date-nav {
+  background: rgba(212,168,67,.12);
+  border: 1px solid rgba(212,168,67,.2);
+  border-radius: 8px;
+  color: #d4a843;
+  font-size: .9rem; font-weight: 700;
+  width: 26px; height: 26px;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; flex-shrink: 0;
+  -webkit-tap-highlight-color: transparent;
+  transition: background .12s;
+}
+.mob-gc-date-nav:active { background: rgba(212,168,67,.25); }
+.mob-gc-date-input {
+  background: none !important;
+  border: none !important;
+  outline: none !important;
+  box-shadow: none !important;
+  color: #f1e5ac !important;
+  font-family: 'DM Mono', monospace !important;
+  font-size: .82rem !important;
+  text-align: center !important;
+  width: 100% !important;
+  padding: 0 !important;
+  cursor: pointer;
+}
+.mob-gc-date-input::-webkit-calendar-picker-indicator {
+  display: none;
+}
+.mob-gc-date-today {
+  background: linear-gradient(135deg, #1a5c35, #0d3320);
+  border: 1px solid rgba(94,255,160,.35);
+  border-radius: 8px;
+  color: #5effa0;
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: .68rem; font-weight: 700; letter-spacing: 1px;
+  padding: 4px 8px;
+  cursor: pointer; flex-shrink: 0;
+  -webkit-tap-highlight-color: transparent;
+}
+.mob-gc-divider {
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(212,168,67,.25), transparent);
+  margin: 8px 0;
 }
 
 /* Tema claro — mantener oscuridad premium en la card */
