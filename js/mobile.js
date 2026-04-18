@@ -1062,10 +1062,11 @@ function renderMobileHome() {
                    : filled <= 6 ? '#e08c00'
                    : filled <= 8 ? '#d45000'
                    :               '#c0392b';
+    const DS='width:8px;height:8px;min-width:8px;max-width:8px;min-height:8px;max-height:8px;border-radius:50%;flex:0 0 8px;flex-grow:0;flex-shrink:0;display:block';
     dotsEl.innerHTML = Array.from({length: maxDots}, (_, i) =>
       i < filled
-        ? `<div class="mob-dot-item" style="background:${dotColor};box-shadow:0 0 4px ${dotColor}88"></div>`
-        : `<div class="mob-dot-item empty"></div>`
+        ? `<div class="mob-dot-item" style="${DS};background:${dotColor};box-shadow:0 0 4px ${dotColor}88"></div>`
+        : `<div class="mob-dot-item empty" style="${DS};background:rgba(26,122,69,.15)"></div>`
     ).join('');
   }
 
