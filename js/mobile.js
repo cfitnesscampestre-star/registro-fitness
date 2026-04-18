@@ -1074,13 +1074,20 @@ function renderMobileHome() {
   if(snavBadge){ snavBadge.style.display=pendientes>0?'inline':'none'; snavBadge.textContent=pendientes; }
   if(bnavDot)  { bnavDot.classList.toggle('on', pendientes>0); }
 
-  // Lista clases
   const lbl = el('mob-lista-lbl');
   if(lbl) {
     if(!esHoyReal) {
       lbl.textContent = `${diaHoy} ${hoyStr}`;
+      lbl.classList.remove('pildora');
+    } else if(pendientes > 0) {
+      lbl.textContent = `⚠ ${pendientes} PENDIENTE${pendientes>1?'S':''} HOY`;
+      lbl.classList.add('pildora');
     } else {
-      lbl.textContent = pendientes>0 ? `${pendientes} pendiente(s) hoy` : 'Todo registrado hoy ✔';
+      lbl.textContent = '✔ TODO REGISTRADO HOY';
+      lbl.classList.add('pildora');
+      lbl.style.borderColor = 'rgba(94,255,160,.3)';
+      lbl.style.color = '#5effa0';
+      lbl.style.background = 'rgba(94,255,160,.08)';
     }
   }
 
