@@ -1250,21 +1250,21 @@ window._cargarFflate=function(){
               <div class="mob-hero-runner-wrap">
                 <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" width="64" height="64">
                   <defs>
-                    <linearGradient id="runnerGold" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#f1e5ac"/><stop offset="100%" stop-color="#b8882a"/></linearGradient>
-                    <linearGradient id="runnerBody" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#d4a843"/><stop offset="100%" stop-color="#8a5f1a"/></linearGradient>
-                    <filter id="runnerGlow"><feGaussianBlur stdDeviation="1.8" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+                    <linearGradient id="runnerW1" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#ffffff"/><stop offset="100%" stop-color="#c8f0d8"/></linearGradient>
+                    <linearGradient id="runnerW2" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#ffffff"/><stop offset="100%" stop-color="#a8dfc0"/></linearGradient>
+                    <filter id="runnerGlowW"><feGaussianBlur stdDeviation="1.5" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
                   </defs>
-                  <circle cx="32" cy="32" r="30" fill="rgba(212,168,67,.06)" stroke="rgba(241,229,172,.2)" stroke-width="1"/>
-                  <circle cx="32" cy="32" r="25" fill="rgba(212,168,67,.04)" stroke="rgba(241,229,172,.1)" stroke-width="1" stroke-dasharray="3 5"/>
-                  <path d="M8 25 Q5 32 8 39" stroke="rgba(212,168,67,.5)" stroke-width="2.2" stroke-linecap="round" fill="none"/>
-                  <path d="M12 21 Q8 32 12 43" stroke="rgba(212,168,67,.25)" stroke-width="1.5" stroke-linecap="round" fill="none"/>
-                  <circle cx="42" cy="14" r="6" fill="url(#runnerGold)" filter="url(#runnerGlow)"/>
-                  <path d="M40 20 L35 31" stroke="url(#runnerBody)" stroke-width="4" stroke-linecap="round"/>
-                  <path d="M39 23 L28 28" stroke="#d4a843" stroke-width="3.2" stroke-linecap="round"/>
-                  <path d="M41 24 L51 20" stroke="rgba(212,168,67,.7)" stroke-width="3" stroke-linecap="round"/>
-                  <path d="M35 31 L30 41 L25 49" stroke="url(#runnerBody)" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/>
-                  <path d="M36 32 L44 39 L50 36" stroke="rgba(212,168,67,.65)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
-                  <ellipse cx="34" cy="53" rx="8" ry="2.2" fill="rgba(212,168,67,.22)"/>
+                  <circle cx="32" cy="32" r="30" fill="rgba(255,255,255,.1)" stroke="rgba(255,255,255,.25)" stroke-width="1"/>
+                  <circle cx="32" cy="32" r="25" fill="rgba(255,255,255,.06)" stroke="rgba(255,255,255,.15)" stroke-width="1" stroke-dasharray="3 5"/>
+                  <path d="M8 25 Q5 32 8 39" stroke="rgba(255,255,255,.5)" stroke-width="2.2" stroke-linecap="round" fill="none"/>
+                  <path d="M12 21 Q8 32 12 43" stroke="rgba(255,255,255,.25)" stroke-width="1.5" stroke-linecap="round" fill="none"/>
+                  <circle cx="42" cy="14" r="6" fill="url(#runnerW1)" filter="url(#runnerGlowW)"/>
+                  <path d="M40 20 L35 31" stroke="url(#runnerW2)" stroke-width="4" stroke-linecap="round"/>
+                  <path d="M39 23 L28 28" stroke="#ffffff" stroke-width="3.2" stroke-linecap="round"/>
+                  <path d="M41 24 L51 20" stroke="rgba(255,255,255,.7)" stroke-width="3" stroke-linecap="round"/>
+                  <path d="M35 31 L30 41 L25 49" stroke="url(#runnerW2)" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/>
+                  <path d="M36 32 L44 39 L50 36" stroke="rgba(255,255,255,.65)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+                  <ellipse cx="34" cy="53" rx="8" ry="2.2" fill="rgba(255,255,255,.25)"/>
                 </svg>
               </div>
               <div class="mob-hero-text-block">
@@ -1284,11 +1284,11 @@ window._cargarFflate=function(){
         <div class="mob-agenda-card" onclick="abrirAgendaMob()" style="margin-top:8px">
           <div class="mob-ag-icon">
             <svg viewBox="0 0 28 28" fill="none" width="22" height="22">
-              <rect x="3" y="5" width="22" height="20" rx="3.5" fill="rgba(212,168,67,.12)" stroke="rgba(212,168,67,.45)" stroke-width="1.2"/>
-              <line x1="8" y1="4" x2="8" y2="7" stroke="#d4a843" stroke-width="2" stroke-linecap="round"/>
-              <line x1="20" y1="4" x2="20" y2="7" stroke="#d4a843" stroke-width="2" stroke-linecap="round"/>
-              <line x1="8" y1="14" x2="16" y2="14" stroke="rgba(212,168,67,.75)" stroke-width="1.5" stroke-linecap="round"/>
-              <line x1="8" y1="18" x2="13" y2="18" stroke="rgba(212,168,67,.5)" stroke-width="1.5" stroke-linecap="round"/>
+              <rect x="3" y="5" width="22" height="20" rx="3.5" fill="rgba(26,122,69,.12)" stroke="rgba(26,122,69,.4)" stroke-width="1.2"/>
+              <line x1="8" y1="4" x2="8" y2="7" stroke="#1a7a45" stroke-width="2" stroke-linecap="round"/>
+              <line x1="20" y1="4" x2="20" y2="7" stroke="#1a7a45" stroke-width="2" stroke-linecap="round"/>
+              <line x1="8" y1="14" x2="16" y2="14" stroke="rgba(26,122,69,.8)" stroke-width="1.5" stroke-linecap="round"/>
+              <line x1="8" y1="18" x2="13" y2="18" stroke="rgba(26,122,69,.55)" stroke-width="1.5" stroke-linecap="round"/>
             </svg>
           </div>
           <div class="mob-ag-text">
@@ -1297,7 +1297,7 @@ window._cargarFflate=function(){
           </div>
           <div class="mob-agenda-badge" id="mob-agenda-badge" style="display:none">0</div>
           <svg viewBox="0 0 20 20" fill="none" width="14" height="14" style="opacity:.4;flex-shrink:0">
-            <polyline points="7,4 13,10 7,16" stroke="rgba(212,168,67,.5)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+            <polyline points="7,4 13,10 7,16" stroke="rgba(26,122,69,.4)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
           </svg>
         </div>
 
@@ -1354,10 +1354,10 @@ window._cargarFflate=function(){
             <div class="mob-radial-btn primary" onclick="abrirModal('m-clase')">
               <div class="mob-radial-circle">
                 <svg viewBox="0 0 44 44" fill="none" width="36" height="36">
-                  <rect x="9" y="11" width="26" height="26" rx="4" fill="rgba(212,168,67,.1)" stroke="rgba(212,168,67,.5)" stroke-width="1.3"/>
-                  <rect x="15" y="8" width="14" height="7" rx="3" fill="rgba(212,168,67,.25)" stroke="rgba(212,168,67,.6)" stroke-width="1"/>
-                  <line x1="22" y1="19" x2="22" y2="30" stroke="#d4a843" stroke-width="2.8" stroke-linecap="round"/>
-                  <line x1="16" y1="24.5" x2="28" y2="24.5" stroke="#d4a843" stroke-width="2.8" stroke-linecap="round"/>
+                  <rect x="9" y="11" width="26" height="26" rx="4" fill="rgba(26,122,69,.1)" stroke="rgba(26,122,69,.45)" stroke-width="1.3"/>
+                  <rect x="15" y="8" width="14" height="7" rx="3" fill="rgba(26,122,69,.2)" stroke="rgba(26,122,69,.5)" stroke-width="1"/>
+                  <line x1="22" y1="19" x2="22" y2="30" stroke="#ffffff" stroke-width="2.8" stroke-linecap="round"/>
+                  <line x1="16" y1="24.5" x2="28" y2="24.5" stroke="#ffffff" stroke-width="2.8" stroke-linecap="round"/>
                 </svg>
               </div>
               <span class="mob-radial-lbl">+&thinsp;Clase</span>
@@ -1366,13 +1366,13 @@ window._cargarFflate=function(){
             <div class="mob-radial-btn" onclick="abrirSupPlanner()">
               <div class="mob-radial-circle">
                 <svg viewBox="0 0 44 44" fill="none" width="36" height="36">
-                  <defs><linearGradient id="sup-g" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#f1e5ac"/><stop offset="100%" stop-color="#8a6020"/></linearGradient></defs>
-                  <circle cx="14" cy="14" r="5.5" fill="url(#sup-g)" opacity=".9"/>
-                  <path d="M6 34 Q6 25 14 25 Q17 25 19 27" stroke="#d4a843" stroke-width="2.5" stroke-linecap="round" fill="none"/>
-                  <circle cx="30" cy="14" r="5.5" fill="url(#sup-g)" opacity=".7"/>
-                  <path d="M24 27 Q26 25 30 25 Q38 25 38 34" stroke="rgba(212,168,67,.7)" stroke-width="2.3" stroke-linecap="round" fill="none"/>
-                  <path d="M18 20 L26 20" stroke="#d4a843" stroke-width="2" stroke-linecap="round"/>
-                  <polyline points="24,18 26,20 24,22" stroke="#d4a843" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                  <defs><linearGradient id="sup-g" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#3db870"/><stop offset="100%" stop-color="#1a7a45"/></linearGradient></defs>
+                  <circle cx="14" cy="14" r="5.5" fill="url(#sup-g)" opacity=".95"/>
+                  <path d="M6 34 Q6 25 14 25 Q17 25 19 27" stroke="#1a7a45" stroke-width="2.5" stroke-linecap="round" fill="none"/>
+                  <circle cx="30" cy="14" r="5.5" fill="url(#sup-g)" opacity=".8"/>
+                  <path d="M24 27 Q26 25 30 25 Q38 25 38 34" stroke="rgba(26,122,69,.8)" stroke-width="2.3" stroke-linecap="round" fill="none"/>
+                  <path d="M18 20 L26 20" stroke="#1a7a45" stroke-width="2" stroke-linecap="round"/>
+                  <polyline points="24,18 26,20 24,22" stroke="#1a7a45" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                 </svg>
               </div>
               <span class="mob-radial-lbl">Suplencia</span>
@@ -1381,11 +1381,11 @@ window._cargarFflate=function(){
             <div class="mob-radial-btn" onclick="abrirFirmasDigitalesDirecto()" style="position:relative">
               <div class="mob-radial-circle">
                 <svg viewBox="0 0 44 44" fill="none" width="36" height="36">
-                  <defs><linearGradient id="sig-g" x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stop-color="#f1e5ac"/><stop offset="100%" stop-color="#8a6020" stop-opacity=".5"/></linearGradient></defs>
-                  <path d="M11 7 L29 7 L36 13 L36 37 L11 37 Z" fill="rgba(212,168,67,.08)" stroke="rgba(212,168,67,.35)" stroke-width="1.3" stroke-linejoin="round"/>
-                  <path d="M29 7 L29 13 L36 13" fill="rgba(212,168,67,.12)" stroke="rgba(212,168,67,.35)" stroke-width="1" stroke-linejoin="round"/>
+                  <defs><linearGradient id="sig-g" x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stop-color="#1a7a45"/><stop offset="100%" stop-color="#3db870" stop-opacity=".6"/></linearGradient></defs>
+                  <path d="M11 7 L29 7 L36 13 L36 37 L11 37 Z" fill="rgba(26,122,69,.08)" stroke="rgba(26,122,69,.35)" stroke-width="1.3" stroke-linejoin="round"/>
+                  <path d="M29 7 L29 13 L36 13" fill="rgba(26,122,69,.12)" stroke="rgba(26,122,69,.35)" stroke-width="1" stroke-linejoin="round"/>
                   <path d="M16 25 Q18 21 20 24 Q22 27 25 21 Q26 18 28 19" stroke="url(#sig-g)" stroke-width="2.5" stroke-linecap="round" fill="none"/>
-                  <line x1="14" y1="30" x2="28" y2="30" stroke="rgba(212,168,67,.35)" stroke-width="1.5" stroke-linecap="round"/>
+                  <line x1="14" y1="30" x2="28" y2="30" stroke="rgba(26,122,69,.35)" stroke-width="1.5" stroke-linecap="round"/>
                 </svg>
               </div>
               <span class="mob-radial-lbl">Firmas</span>
