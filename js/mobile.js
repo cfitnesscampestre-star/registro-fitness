@@ -1029,6 +1029,31 @@ function renderMobileHome() {
   if(el('mob-k-pend'))  el('mob-k-pend').textContent  = pendientes;
   if(el('mob-k-aforo')) el('mob-k-aforo').textContent = aforoProm ? aforoProm+'%' : '—';
 
+  // ── Métricas premium ──
+  // Barra de aforo
+  const afoBar = el('mob-aforo-bar');
+  if(afoBar) afoBar.style.width = Math.min(aforoProm, 100) + '%';
+
+  // Sparkline de clases registradas (últimos 7 días)
+  const sparkEl = el('mob-sparkline-reg');
+  if(sparkEl) {
+    const hoy7 = [];
+    for(let i=6;i>=0;i--){
+      const d=new Date(); d.setDate(d.getDate()-i);
+      const ds=d.toISOString().slice(0,10);
+      hoy7.push(registros.filter(r=>r.fecha===ds&&(r.estado==='ok'||r.estado==='sub')).length);
+    }
+    const maxS=Math.max(...hoy7,1);
+    sparkEl.innerHTML=hoy7.map((v,i)=>`<div class="mob-sparkline-bar${i===6?' active':''}" style="height:${Math.max(15,Math.round(v/maxS*100))}%"></div>`).join('');
+  }
+
+  // Dots de pendientes (máx 10)
+  const dotsEl = el('mob-dots-pend');
+  if(dotsEl) {
+    const maxDots=10, filled=Math.min(pendientes,maxDots);
+    dotsEl.innerHTML=Array.from({length:maxDots},(_,i)=>`<div class="mob-dot-item${i<filled?'':' empty'}"></div>`).join('');
+  }
+
   // Pendientes badge en tab
   const badge = el('mob-agenda-badge');
   const agendaPend = agendaNotas.filter(n=>!n.resuelta).length;
