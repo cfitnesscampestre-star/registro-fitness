@@ -821,29 +821,44 @@ html.tema-claro .srch-item { background: #fff; border-color: #d4e4d4; }
 .mob-kpi {
   background: var(--panel2);
   border: 1px solid var(--border);
-  border-radius: 14px;
-  padding: 10px 8px 9px;
+  border-radius: 18px;
+  padding: 14px 6px 12px;
   text-align: center;
   position: relative;
   overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
 }
-.mob-kpi::after {
-  content: '';
-  position: absolute; top: 0; left: 0; right: 0; height: 2px;
-  background: var(--v3);
+/* Círculo SVG gauge — inyectado por JS o via before/after */
+.mob-kpi-circle {
+  position: relative;
+  width: 70px; height: 70px;
+  flex-shrink: 0;
+}
+.mob-kpi-circle svg {
+  position: absolute; inset: 0;
+  transform: rotate(-90deg);
+}
+.mob-kpi-circle-inner {
+  position: absolute; inset: 0;
+  display: flex; align-items: center; justify-content: center;
+  flex-direction: column;
 }
 .mob-kpi-val {
   font-family: 'Bebas Neue', sans-serif;
-  font-size: 1.75rem;
+  font-size: 1.6rem;
   line-height: 1;
 }
 .mob-kpi-lbl {
-  font-size: .57rem;
+  font-size: .55rem;
   color: var(--txt3);
-  margin-top: 3px;
+  margin-top: 1px;
   line-height: 1.3;
   text-transform: uppercase;
   letter-spacing: .8px;
+  text-align: center;
 }
 
 /* ── Etiqueta de sección ── */
@@ -860,49 +875,83 @@ html.tema-claro .srch-item { background: #fff; border-color: #d4e4d4; }
 
 /* ── Lista clases ── */
 .mob-clase-item {
-  display: flex; align-items: center; gap: 10px;
+  display: flex; flex-direction: column;
   background: var(--panel2);
   border: 1px solid var(--border);
-  border-radius: 14px;
-  padding: 11px 13px;
-  margin-bottom: 5px;
+  border-radius: 16px;
+  padding: 11px 14px 9px;
+  margin-bottom: 6px;
   cursor: pointer;
   transition: border-color .15s, transform .1s;
   -webkit-tap-highlight-color: transparent;
+  overflow: hidden;
+  position: relative;
 }
-.mob-clase-item:active { transform: scale(.99); background: var(--panel); }
-.mob-clase-item.pendiente {
-  border-left: 3px solid var(--red2);
-  background: rgba(224,80,80,.04);
+.mob-clase-item:active { transform: scale(.99); }
+/* Franja lateral de color según estado */
+.mob-clase-item::before {
+  content: '';
+  position: absolute; left: 0; top: 0; bottom: 0; width: 3px;
+  border-radius: 16px 0 0 16px;
+  background: var(--border);
 }
-.mob-clase-item.registrada {
-  border-left: 3px solid var(--v3);
+.mob-clase-item.pendiente::before { background: var(--red2); }
+.mob-clase-item.registrada::before { background: var(--v3); }
+/* Fila superior */
+.mob-ci-top {
+  display: flex; align-items: center; gap: 10px;
+  padding-left: 6px;
 }
 .mob-c-hora {
   font-family: 'DM Mono', monospace;
-  font-size: .7rem;
+  font-size: .72rem;
   color: var(--gold2);
   min-width: 38px;
   font-weight: 600;
+  flex-shrink: 0;
 }
+.mob-c-info { flex: 1; min-width: 0; }
 .mob-c-nombre {
-  font-size: .82rem;
+  font-size: .84rem;
   font-weight: 700;
-  flex: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  line-height: 1.2;
 }
 .mob-c-inst {
-  font-size: .63rem;
+  font-size: .62rem;
   color: var(--txt3);
   display: block;
   margin-top: 2px;
   font-weight: 400;
+  text-transform: uppercase;
+  letter-spacing: .5px;
+}
+.mob-ci-right {
+  display: flex; align-items: center; gap: 7px;
+  flex-shrink: 0;
 }
 .mob-c-asis {
   font-family: 'DM Mono', monospace;
-  font-size: .74rem;
+  font-size: .78rem;
   font-weight: 700;
-  min-width: 32px;
+  min-width: 34px;
   text-align: right;
+}
+/* Barra de progreso de aforo */
+.mob-ci-bar {
+  margin-top: 7px;
+  padding-left: 6px;
+  height: 3px;
+  border-radius: 3px;
+  background: var(--border);
+  overflow: hidden;
+}
+.mob-ci-bar-fill {
+  height: 100%;
+  border-radius: 3px;
+  transition: width .4s ease;
 }
 
 /* ── Filas tipo tarjeta (agenda, suplencias) ── */
@@ -2213,7 +2262,7 @@ html.tema-claro .rep-card-hdr { color: #1a7a45; }
 .mob-hero-rec {
   display: flex;
   width: 100%;
-  min-height: 100px;
+  min-height: 160px;
   border-radius: 20px;
   border: none;
   cursor: pointer;
@@ -2222,48 +2271,70 @@ html.tema-claro .rep-card-hdr { color: #1a7a45; }
   -webkit-tap-highlight-color: transparent;
   transition: transform .12s;
   padding: 0;
-  background: linear-gradient(135deg, #1a7a45 0%, #155e35 50%, #0e4025 100%);
-  box-shadow: 0 6px 20px rgba(26,122,69,.4);
+  background: linear-gradient(160deg, #0d3320 0%, #0a2518 40%, #071a10 100%);
+  box-shadow: 0 8px 28px rgba(0,0,0,.55), 0 0 0 1px rgba(94,255,160,.15);
 }
 .mob-hero-rec:active { transform: scale(.97); }
 .mob-hero-bg {
   position: absolute; inset: 0; z-index: 0;
-  background: linear-gradient(135deg, #1a7a45 0%, #155e35 50%, #0e4025 100%);
+  background: linear-gradient(160deg, #0d3320 0%, #0a2518 40%, #071a10 100%);
 }
+/* Mapa SVG de fondo */
 .mob-hero-bg::before {
   content: '';
-  position: absolute; top: -30%; left: -10%;
-  width: 60%; height: 170%;
-  background: radial-gradient(ellipse, rgba(255,255,255,.15) 0%, transparent 65%);
+  position: absolute; inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 360 160'%3E%3C!-- calles de fondo --%3E%3Cpath d='M0 40 L80 40 L120 60 L200 60 L240 80 L360 80' stroke='rgba(94,255,160,.06)' stroke-width='8' fill='none'/%3E%3Cpath d='M0 90 L60 90 L100 70 L180 70 L220 90 L300 90 L360 70' stroke='rgba(94,255,160,.05)' stroke-width='6' fill='none'/%3E%3Cpath d='M80 0 L80 40 L100 60 L100 160' stroke='rgba(94,255,160,.05)' stroke-width='6' fill='none'/%3E%3Cpath d='M200 0 L200 60 L220 80 L220 160' stroke='rgba(94,255,160,.05)' stroke-width='6' fill='none'/%3E%3Cpath d='M300 0 L300 90 L280 110 L280 160' stroke='rgba(94,255,160,.04)' stroke-width='5' fill='none'/%3E%3C!-- bloque parque/cancha --%3E%3Crect x='120' y='25' width='70' height='45' rx='6' fill='rgba(26,122,69,.18)' stroke='rgba(94,255,160,.1)' stroke-width='1'/%3E%3Crect x='230' y='50' width='55' height='35' rx='5' fill='rgba(26,122,69,.12)' stroke='rgba(94,255,160,.07)' stroke-width='1'/%3E%3C!-- ruta neón --%3E%3Cpath d='M60 130 Q80 110 100 90 Q120 70 140 60 Q160 50 185 48 Q210 46 230 55 Q250 64 260 80 Q270 96 255 110 Q240 124 220 118' stroke='%235effa0' stroke-width='2.5' fill='none' stroke-linecap='round' stroke-linejoin='round' stroke-dasharray='4 3' opacity='.7'/%3E%3C!-- pin inicio --%3E%3Ccircle cx='60' cy='130' r='6' fill='%235effa0' opacity='.9'/%3E%3Ccircle cx='60' cy='130' r='10' fill='none' stroke='%235effa0' stroke-width='1.5' opacity='.4'/%3E%3C!-- pin personaje en ruta --%3E%3Ccircle cx='220' cy='118' r='5' fill='%23fff' opacity='.95'/%3E%3Cpath d='M220 110 L220 115' stroke='%23fff' stroke-width='1.5' stroke-linecap='round'/%3E%3C/svg%3E");
+  background-size: cover;
+  background-position: center;
   pointer-events: none;
 }
 .mob-hero-bg::after {
   content: '';
-  position: absolute; top: 0; left: 0; right: 0; height: 1px;
-  background: linear-gradient(90deg, transparent, rgba(255,255,255,.35) 40%, rgba(255,255,255,.35) 60%, transparent);
+  position: absolute; bottom: 0; left: 0; right: 0; height: 60%;
+  background: linear-gradient(to top, rgba(7,26,16,.92) 0%, transparent 100%);
   pointer-events: none;
 }
 .mob-hero-content {
   position: relative; z-index: 1;
-  display: flex; align-items: center; justify-content: space-between;
-  width: 100%; padding: 14px 18px 14px 16px; gap: 10px;
+  display: flex; align-items: flex-end; justify-content: space-between;
+  width: 100%; padding: 14px 16px 16px 16px; gap: 10px;
 }
 .mob-hero-left { display: flex; align-items: center; gap: 12px; }
 .mob-hero-icon {
-  width: 52px; height: 52px; flex-shrink: 0;
-  filter: drop-shadow(0 3px 8px rgba(0,0,0,.2));
+  width: 44px; height: 44px; flex-shrink: 0;
+  filter: drop-shadow(0 0 8px rgba(94,255,160,.5));
 }
 .mob-hero-sup {
   font-family: 'Barlow Condensed', sans-serif;
   font-size: .58rem; font-weight: 700; letter-spacing: 4px;
-  text-transform: uppercase; color: rgba(255,255,255,.65); margin-bottom: 1px;
+  text-transform: uppercase; color: rgba(94,255,160,.6); margin-bottom: 1px;
 }
 .mob-hero-title {
   font-family: 'Bebas Neue', sans-serif;
-  font-size: 2rem; color: #fff; letter-spacing: 3px; line-height: 1;
-  text-shadow: 0 2px 8px rgba(0,0,0,.25);
+  font-size: 1.9rem; color: #fff; letter-spacing: 3px; line-height: 1;
+  text-shadow: 0 2px 12px rgba(0,0,0,.4);
 }
 .mob-hero-modes { display: flex; gap: 6px; margin-top: 6px; }
+/* Botón "Iniciar Recorrido >>" */
+.mob-hero-cta {
+  flex-shrink: 0;
+  background: rgba(94,255,160,.15);
+  border: 1.5px solid rgba(94,255,160,.5);
+  border-radius: 30px;
+  padding: 8px 14px;
+  display: flex; align-items: center; gap: 6px;
+  color: #5effa0;
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: .8rem; font-weight: 700; letter-spacing: 1px;
+  white-space: nowrap;
+  backdrop-filter: blur(6px);
+  box-shadow: 0 0 14px rgba(94,255,160,.2);
+  transition: background .15s, box-shadow .15s;
+}
+.mob-hero-rec:active .mob-hero-cta {
+  background: rgba(94,255,160,.28);
+  box-shadow: 0 0 22px rgba(94,255,160,.4);
+}
 .mob-hero-arrow {
   flex-shrink: 0;
   animation: arrowPulse 2.5s ease-in-out infinite;
@@ -2278,8 +2349,8 @@ html.tema-claro .rep-card-hdr { color: #1a7a45; }
   font-size: .62rem !important; font-weight: 700 !important;
   padding: 4px 11px !important; border-radius: 20px !important;
 }
-.mob-hero-modes .mob-mode-tag.turbo  { background: rgba(255,255,255,.25) !important; color: #fff !important; }
-.mob-hero-modes .mob-mode-tag.normal { background: rgba(255,255,255,.12) !important; color: rgba(255,255,255,.8) !important; }
+.mob-hero-modes .mob-mode-tag.turbo  { background: rgba(255,255,255,.2) !important; color: #fff !important; }
+.mob-hero-modes .mob-mode-tag.normal { background: rgba(94,255,160,.18) !important; color: #5effa0 !important; border: 1px solid rgba(94,255,160,.4) !important; }
 
 /* GRID 3 ACCIONES */
 .mob-actions-grid {
