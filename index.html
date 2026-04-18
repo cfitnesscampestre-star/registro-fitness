@@ -593,6 +593,20 @@ window._cargarFflate=function(){
         </button>
       </div>
     </div>
+    <!-- Accesos rápidos sutiles en header -->
+    <div class="no-print" style="display:flex;gap:2px;align-items:center;opacity:.7">
+      <button onclick="navegarA('reporte-dep')" style="display:flex;align-items:center;gap:3px;background:none;border:none;color:var(--txt3);font-family:'Outfit',sans-serif;font-size:.58rem;cursor:pointer;padding:2px 5px;border-radius:5px;-webkit-tap-highlight-color:transparent;transition:color .15s" onmouseover="this.style.color='var(--txt)'" onmouseout="this.style.color='var(--txt3)'" title="Reporte departamental">
+        <svg width="10" height="10" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><rect x="5" y="3" width="10" height="14" rx="2"/><rect x="8" y="2" width="4" height="2.5" rx="1"/><line x1="8" y1="9" x2="12" y2="9"/><line x1="8" y1="12" x2="13" y2="12"/></svg>Reporte
+      </button>
+      <span style="color:var(--txt3);opacity:.35;font-size:.6rem">·</span>
+      <button onclick="abrirModal('m-reports')" style="display:flex;align-items:center;gap:3px;background:none;border:none;color:var(--txt3);font-family:'Outfit',sans-serif;font-size:.58rem;cursor:pointer;padding:2px 5px;border-radius:5px;-webkit-tap-highlight-color:transparent;transition:color .15s" onmouseover="this.style.color='var(--txt)'" onmouseout="this.style.color='var(--txt3)'" title="Generar reporte">
+        <svg width="10" height="10" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><rect x="4" y="7" width="12" height="8" rx="1.5"/><path d="M6 7V4H14V7"/><circle cx="13.5" cy="10" r="1" fill="currentColor"/></svg>Generar
+      </button>
+      <span style="color:var(--txt3);opacity:.35;font-size:.6rem">·</span>
+      <button onclick="cerrarSesion()" style="display:flex;align-items:center;gap:3px;background:none;border:none;color:var(--txt3);font-family:'Outfit',sans-serif;font-size:.58rem;cursor:pointer;padding:2px 5px;border-radius:5px;-webkit-tap-highlight-color:transparent;transition:color .15s" onmouseover="this.style.color='var(--txt)'" onmouseout="this.style.color='var(--txt3)'" title="Cerrar sesión">
+        <svg width="10" height="10" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M8 10h8M13 7l3 3-3 3"/><path d="M12 4H5a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h7"/></svg>Salir
+      </button>
+    </div>
     <button class="btn no-print" style="background:var(--panel2);color:var(--txt2);border:1px solid var(--border)" onclick="cerrarSesion()" title="Cerrar sesión"><svg class="ico" viewBox="0 0 20 20"><rect x="4" y="2" width="12" height="16" rx="1" stroke="currentColor" stroke-width="1.4" fill="none"/><circle cx="13.5" cy="10" r="1" fill="currentColor"/></svg></button>
   </div>
 </div>
