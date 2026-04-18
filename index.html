@@ -1234,7 +1234,6 @@ window._cargarFflate=function(){
                   <path d="M26 15 L30 24 L35 32" stroke="url(#rb)" stroke-width="3.5" stroke-linecap="round" fill="none"/>
                   <path d="M24 18 L15 23" stroke="url(#ra)" stroke-width="3" stroke-linecap="round" fill="none"/>
                   <path d="M28 21 L37 19" stroke="url(#ra)" stroke-width="3" stroke-linecap="round" fill="none"/>
-                  <path d="M10 43 Q26 38 42 43" stroke="rgba(94,255,160,.25)" stroke-width="1.5" stroke-linecap="round" fill="none"/>
                 </svg>
               </div>
               <div>
@@ -1242,20 +1241,22 @@ window._cargarFflate=function(){
                 <div class="mob-hero-title">RECORRIDO</div>
                 <div class="mob-hero-modes">
                   <span class="mob-mode-tag turbo" onclick="event.stopPropagation();modoRecorrido='turbo';iniciarRecorrido()">⚡ Turbo</span>
-                  <span class="mob-mode-tag normal" onclick="event.stopPropagation();modoRecorrido='normal';iniciarRecorrido()">Normal</span>
+                  <span class="mob-mode-tag normal" onclick="event.stopPropagation();modoRecorrido='normal';iniciarRecorrido()">✓ Normal</span>
                 </div>
               </div>
             </div>
-            <div class="mob-hero-arrow">
-              <svg viewBox="0 0 24 24" fill="none" width="30" height="30">
-                <circle cx="12" cy="12" r="11" stroke="rgba(94,255,160,.35)" stroke-width="1.5"/>
-                <polyline points="9,7 15,12 9,17" stroke="#5effa0" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+            <div class="mob-hero-cta">
+              Iniciar Recorrido
+              <svg viewBox="0 0 20 20" fill="none" width="14" height="14">
+                <polyline points="5,5 12,10 5,15" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+                <polyline points="10,5 17,10 10,15" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
               </svg>
             </div>
           </div>
         </button>
 
         <!-- GRID 3 ACCIONES -->
+        <div class="mob-sec-lbl" style="margin-top:2px">Clases y Gestiones</div>
         <div class="mob-actions-grid solo-admin">
 
           <div class="mob-action-card" onclick="abrirModal('m-clase')">
@@ -1339,9 +1340,45 @@ window._cargarFflate=function(){
         </div>
 
         <div class="mob-kpi-row" id="mob-kpi-row">
-          <div class="mob-kpi"><div class="mob-kpi-val" style="color:var(--neon)" id="mob-k-reg">—</div><div class="mob-kpi-lbl">Registradas<br>hoy</div></div>
-          <div class="mob-kpi"><div class="mob-kpi-val" style="color:var(--red2)" id="mob-k-pend">—</div><div class="mob-kpi-lbl">Pendientes<br>hoy</div></div>
-          <div class="mob-kpi"><div class="mob-kpi-val" style="color:var(--blue)" id="mob-k-aforo">—</div><div class="mob-kpi-lbl">Aforo<br>promedio</div></div>
+          <div class="mob-kpi">
+            <div class="mob-kpi-circle" id="mob-kpi-circle-reg">
+              <svg viewBox="0 0 70 70" width="70" height="70">
+                <circle cx="35" cy="35" r="28" fill="none" stroke="rgba(94,255,160,.12)" stroke-width="5"/>
+                <circle cx="35" cy="35" r="28" fill="none" stroke="#5effa0" stroke-width="5"
+                  stroke-dasharray="176" stroke-dashoffset="44" stroke-linecap="round"/>
+              </svg>
+              <div class="mob-kpi-circle-inner">
+                <div class="mob-kpi-val" style="color:var(--neon)" id="mob-k-reg">—</div>
+              </div>
+            </div>
+            <div class="mob-kpi-lbl">Clases</div>
+          </div>
+          <div class="mob-kpi">
+            <div class="mob-kpi-circle" id="mob-kpi-circle-pend">
+              <svg viewBox="0 0 70 70" width="70" height="70">
+                <circle cx="35" cy="35" r="28" fill="none" stroke="rgba(224,80,80,.12)" stroke-width="5"/>
+                <circle cx="35" cy="35" r="28" fill="none" stroke="var(--red2)" stroke-width="5"
+                  stroke-dasharray="176" stroke-dashoffset="88" stroke-linecap="round"/>
+              </svg>
+              <div class="mob-kpi-circle-inner">
+                <div class="mob-kpi-val" style="color:var(--red2)" id="mob-k-pend">—</div>
+              </div>
+            </div>
+            <div class="mob-kpi-lbl">Tareas</div>
+          </div>
+          <div class="mob-kpi">
+            <div class="mob-kpi-circle" id="mob-kpi-circle-aforo">
+              <svg viewBox="0 0 70 70" width="70" height="70">
+                <circle cx="35" cy="35" r="28" fill="none" stroke="rgba(77,184,232,.12)" stroke-width="5"/>
+                <circle cx="35" cy="35" r="28" fill="none" stroke="var(--blue)" stroke-width="5"
+                  stroke-dasharray="176" stroke-dashoffset="106" stroke-linecap="round"/>
+              </svg>
+              <div class="mob-kpi-circle-inner">
+                <div class="mob-kpi-val" style="color:var(--blue)" id="mob-k-aforo">—</div>
+              </div>
+            </div>
+            <div class="mob-kpi-lbl">Aforo</div>
+          </div>
         </div>
 
         <div class="mob-sec-lbl" id="mob-lista-lbl">Clases del día</div>
