@@ -1360,6 +1360,17 @@ window._cargarFflate=function(){
           <button id="mob-heat-btn-asis" class="comp-tipo-btn" style="flex:1;padding:5px 4px;font-size:.68rem" onclick="setMobHeatMetric('asis')">Asistentes</button>
           <button id="mob-heat-btn-ses" class="comp-tipo-btn" style="flex:1;padding:5px 4px;font-size:.68rem" onclick="setMobHeatMetric('ses')">Sesiones</button>
         </div>
+        <!-- Filtros instructor / clase -->
+        <div style="display:flex;gap:5px;margin-top:4px;">
+          <select id="mob-heat-inst" class="ctrl" style="flex:1;font-size:.68rem;padding:4px 6px" onchange="mobHeatFiltroChange()">
+            <option value="">👤 Todos</option>
+          </select>
+          <select id="mob-heat-clase" class="ctrl" style="flex:1;font-size:.68rem;padding:4px 6px" onchange="renderMobHeatmap()">
+            <option value="">📋 Todas las clases</option>
+          </select>
+        </div>
+        <!-- Banner filtro activo -->
+        <div id="mob-heat-banner" style="display:none;gap:5px;align-items:center;flex-wrap:wrap;padding:3px 0;"></div>
         <!-- Grid de temperatura -->
         <div id="mob-heat-grid" style="overflow-x:auto;"></div>
         <!-- Ranking horarios top + críticos -->
