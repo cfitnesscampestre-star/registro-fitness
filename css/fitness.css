@@ -2580,12 +2580,13 @@ html.tema-claro .rep-card-hdr { color: #1a7a45; }
   }
   .mob-ac-lbl { color: rgba(26,60,38,.7) !important; }
 
+  /* Agenda — siempre oscura en modo premium */
   .mob-agenda-card {
-    background: rgba(232,184,75,.1) !important;
-    border: 1px solid rgba(200,150,10,.22) !important;
+    background: linear-gradient(135deg, rgba(8,32,18,.82) 0%, rgba(4,18,10,.88) 100%) !important;
+    border: 1.5px solid rgba(94,255,160,.2) !important;
   }
-  .mob-ag-title { color: #8a6800 !important; }
-  .mob-ag-sub   { color: rgba(140,100,0,.5) !important; }
+  .mob-ag-title { color: #5effa0 !important; }
+  .mob-ag-sub   { color: rgba(94,255,160,.45) !important; }
 
   .mob-date-bar {
     background: #ffffff !important;
@@ -2605,11 +2606,11 @@ html.tema-claro .rep-card-hdr { color: #1a7a45; }
   .mob-kpi-lbl { color: rgba(26,80,45,.5) !important; font-family: 'Barlow Condensed', sans-serif !important; font-size: .6rem !important; letter-spacing: 1.5px !important; }
 
   .mob-clase-item {
-    background: #ffffff !important;
-    border: 1px solid rgba(26,122,69,.12) !important;
-    box-shadow: 0 2px 8px rgba(0,0,0,.04) !important;
+    background: rgba(255,255,255,.96) !important;
+    border: 1px solid rgba(26,122,69,.14) !important;
+    box-shadow: 0 2px 10px rgba(0,0,0,.06) !important;
     border-radius: 15px !important;
-    padding: 13px 14px !important;
+    padding: 11px 13px !important;
     margin-bottom: 6px !important;
   }
   .mob-clase-item.pendiente {
@@ -2716,20 +2717,21 @@ html.tema-claro .rep-card-hdr { color: #1a7a45; }
     border: 1.5px solid rgba(26,122,69,.18) !important;
   }
 
-  /* Agenda — más prominente */
+  /* Agenda — siempre oscura premium */
   .mob-agenda-card {
-    padding: 14px 16px !important;
+    padding: 13px 16px !important;
     border-radius: 18px !important;
-    background: linear-gradient(135deg, rgba(232,184,75,.12) 0%, rgba(232,184,75,.06) 100%) !important;
-    box-shadow: 0 3px 12px rgba(200,150,10,.1) !important;
-    border: 1.5px solid rgba(200,150,10,.22) !important;
+    background: linear-gradient(135deg, rgba(8,32,18,.82) 0%, rgba(4,18,10,.88) 100%) !important;
+    box-shadow: 0 6px 24px rgba(0,0,0,.35) !important;
+    border: 1.5px solid rgba(94,255,160,.2) !important;
   }
   .mob-ag-icon {
-    width: 44px !important; height: 44px !important;
+    width: 46px !important; height: 46px !important;
     border-radius: 14px !important;
-    box-shadow: 0 3px 10px rgba(200,150,10,.15) !important;
+    border: 1.5px solid rgba(94,255,160,.28) !important;
+    box-shadow: 0 4px 14px rgba(0,0,0,.45) !important;
   }
-  .mob-ag-title { font-size: .85rem !important; }
+  .mob-ag-title { font-size: .85rem !important; color: #5effa0 !important; }
 
   /* Date bar — borde más definido */
   .mob-date-bar {
@@ -3110,16 +3112,52 @@ html.tema-claro .rep-card-hdr { color: #1a7a45; }
     margin: 8px 0;
   }
 
-  /* Tema claro — mantener oscuridad premium en la card */
+  /* ── Todos los componentes premium siempre oscuros ── */
   html.tema-claro .mob-glass-card {
-    background: linear-gradient(160deg, rgba(8,28,18,.92) 0%, rgba(4,18,10,.95) 100%) !important;
-    border-color: rgba(212,168,67,.25) !important;
+    background: linear-gradient(160deg, rgba(8,28,18,.95) 0%, rgba(4,18,10,.97) 100%) !important;
+    border-color: rgba(212,168,67,.28) !important;
   }
+  html.tema-claro .mob-gc-title   { color: rgba(212,168,67,.65) !important; }
+  html.tema-claro .mob-gc-lbl     { color: rgba(241,229,172,.45) !important; }
+  html.tema-claro .mob-gc-val     { color: #f1e5ac !important; }
+  html.tema-claro .mob-gc-val.gold{ color: #d4a843 !important; }
+  html.tema-claro .mob-gc-sub     { color: rgba(212,168,67,.35) !important; }
+  html.tema-claro .mob-gc-date-input { color: #f1e5ac !important; background: transparent !important; }
+  html.tema-claro .mob-gc-date-nav   { color: #d4a843 !important; background: rgba(212,168,67,.12) !important; border-color: rgba(212,168,67,.2) !important; }
+  html.tema-claro .mob-gc-date-today { color: #5effa0 !important; }
+  html.tema-claro .mob-aforo-bar-wrap{ background: rgba(212,168,67,.1) !important; }
+  html.tema-claro .mob-sparkline-bar { background: rgba(212,168,67,.22) !important; }
+  html.tema-claro .mob-dots-track .mob-dot-item.empty { background: rgba(212,168,67,.12) !important; }
+  html.tema-claro .mob-gc-sub        { color: rgba(212,168,67,.35) !important; }
+
   html.tema-claro .mob-radial-circle {
-    background: radial-gradient(ellipse at 40% 30%, rgba(20,60,35,.92) 0%, rgba(6,20,12,.97) 100%) !important;
-    border-color: rgba(212,168,67,.4) !important;
+    background: radial-gradient(ellipse at 40% 30%, rgba(20,60,35,.95) 0%, rgba(6,20,12,.98) 100%) !important;
+    border-color: rgba(212,168,67,.42) !important;
   }
-  html.tema-claro .mob-radial-lbl { color: rgba(212,168,67,.85) !important; }
+  html.tema-claro .mob-radial-lbl    { color: rgba(212,168,67,.85) !important; }
+  html.tema-claro .mob-radial-btn.primary .mob-radial-circle {
+    border-color: rgba(212,168,67,.6) !important;
+    box-shadow: 0 8px 28px rgba(0,0,0,.55), 0 0 20px rgba(212,168,67,.25) !important;
+  }
+
   html.tema-claro .mob-hero-rec { background: linear-gradient(170deg,#0d3320,#071a10,#041008) !important; }
+
+  html.tema-claro .mob-agenda-card {
+    background: linear-gradient(135deg, rgba(8,32,18,.88) 0%, rgba(4,18,10,.92) 100%) !important;
+    border-color: rgba(94,255,160,.22) !important;
+  }
+  html.tema-claro .mob-ag-title  { color: #5effa0 !important; }
+  html.tema-claro .mob-ag-sub    { color: rgba(94,255,160,.45) !important; }
+  html.tema-claro .mob-ag-icon   {
+    background: radial-gradient(ellipse at 40% 30%, rgba(20,70,38,.97) 0%, rgba(6,24,12,.99) 100%) !important;
+    border-color: rgba(94,255,160,.3) !important;
+  }
+
+  /* Píldora de pendientes */
+  html.tema-claro .mob-sec-lbl.pildora {
+    background: rgba(212,168,67,.12) !important;
+    border-color: rgba(212,168,67,.3) !important;
+    color: #b8922a !important;
+  }
 
 }
