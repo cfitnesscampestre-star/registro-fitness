@@ -1047,11 +1047,14 @@ function renderMobileHome() {
     sparkEl.innerHTML=hoy7.map((v,i)=>`<div class="mob-sparkline-bar${i===6?' active':''}" style="height:${Math.max(15,Math.round(v/maxS*100))}%"></div>`).join('');
   }
 
-  // Dots de pendientes (máx 10)
+  // Dots de pendientes — compactos, máx 10 en fila única
   const dotsEl = el('mob-dots-pend');
   if(dotsEl) {
-    const maxDots=10, filled=Math.min(pendientes,maxDots);
-    dotsEl.innerHTML=Array.from({length:maxDots},(_,i)=>`<div class="mob-dot-item${i<filled?'':' empty'}"></div>`).join('');
+    const maxDots = 10;
+    const filled = Math.min(pendientes, maxDots);
+    dotsEl.innerHTML = Array.from({length: maxDots}, (_, i) =>
+      `<div class="mob-dot-item${i < filled ? '' : ' empty'}"></div>`
+    ).join('');
   }
 
   // Pendientes badge en tab
