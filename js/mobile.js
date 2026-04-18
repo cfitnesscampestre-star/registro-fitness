@@ -1052,19 +1052,21 @@ function renderMobileHome() {
   if(!el('mob-clases-lista')) return;
   if(total===0){ el('mob-clases-lista').innerHTML='<div class="empty" style="font-size:.78rem">No hay clases programadas hoy.</div>'; return; }
 
-  // Actualizar stroke-dashoffset de los KPI circles dinámicamente
-  const regN = parseInt(el('mob-k-reg')?.textContent)||0;
-  const pendN = parseInt(el('mob-k-pend')?.textContent)||0;
-  const afoStr = el('mob-k-aforo')?.textContent||'—';
-  const afoN = parseInt(afoStr)||0;
-  const circ = 2 * Math.PI * 28; // r=28 → ~175.9
-  function setGauge(circleId, pct) {
-    const svg = document.querySelector(`#${circleId} svg circle:last-child`);
-    if(svg) svg.setAttribute('stroke-dashoffset', circ * (1 - Math.min(pct,1)));
+  // Actualizar gauge circles dinámicamente
+  const circ = 2 * Math.PI * 20; // r=20 → ~125.7
+  function setArc(id, pct) {
+    const arc = document.getElementById(id);
+    if(arc) arc.setAttribute('stroke-dashoffset', circ * (1 - Math.max(0, Math.min(pct, 1))));
   }
-  if(total>0) setGauge('mob-kpi-circle-reg', regN/total);
-  if(total>0) setGauge('mob-kpi-circle-pend', pendN/total);
-  setGauge('mob-kpi-circle-aforo', afoN/100);
+  // reg: % de clases registradas vs total del día
+  const regN  = parseInt(el('mob-k-reg')?.textContent) || 0;
+  const pendN = parseInt(el('mob-k-pend')?.textContent) || 0;
+  const afoStr = el('mob-k-aforo')?.textContent || '0';
+  const afoN  = parseInt(afoStr) || 0;
+  const totalDia = regN + pendN;
+  setArc('mob-kpi-arc-reg',   totalDia > 0 ? regN / totalDia : 0);
+  setArc('mob-kpi-arc-pend',  totalDia > 0 ? pendN / totalDia : 0);
+  setArc('mob-kpi-arc-aforo', afoN / 100);
 
   el('mob-clases-lista').innerHTML = clasesHoy.map(({inst,slot,reg}) => {
     const est     = reg ? reg.estado : 'pendiente';
