@@ -945,10 +945,12 @@ html.tema-claro .srch-item { background: #fff; border-color: #d4e4d4; }
   align-items: flex-end;
   gap: 3px;
   flex-shrink: 0;
-  min-width: 80px;
+  width: 90px;
+  max-width: 90px;
 }
 .mob-ci-right-top {
-  display: flex; align-items: center; gap: 6px;
+  display: flex; align-items: center; gap: 5px; width: 100%;
+  justify-content: flex-end;
 }
 .mob-c-asis {
   font-family: 'DM Mono', monospace;
@@ -962,9 +964,9 @@ html.tema-claro .srch-item { background: #fff; border-color: #d4e4d4; }
   width: 100%;
   height: 3px;
   border-radius: 3px;
-  background: var(--border);
+  background: rgba(0,0,0,.12);
   overflow: hidden;
-  margin-top: 3px;
+  margin-top: 1px;
 }
 .mob-ci-bar-fill {
   height: 100%;
@@ -2418,11 +2420,11 @@ html.tema-claro .rep-card-hdr { color: #1a7a45; }
   .mob-agenda-card {
     display: flex; align-items: center; gap: 14px;
     padding: 13px 16px; border-radius: 18px;
-    background: linear-gradient(135deg, rgba(10,37,24,.82) 0%, rgba(4,18,10,.88) 100%);
+    background: linear-gradient(135deg, rgba(8,32,18,.78) 0%, rgba(4,18,10,.84) 100%);
     backdrop-filter: blur(14px);
     -webkit-backdrop-filter: blur(14px);
-    border: 1.5px solid rgba(212,168,67,.28);
-    box-shadow: 0 6px 24px rgba(0,0,0,.4), inset 0 1px 0 rgba(212,168,67,.1);
+    border: 1.5px solid rgba(94,255,160,.2);
+    box-shadow: 0 6px 24px rgba(0,0,0,.35), inset 0 1px 0 rgba(94,255,160,.07);
     cursor: pointer; -webkit-tap-highlight-color: transparent;
     transition: transform .12s, box-shadow .15s;
     position: relative; overflow: hidden;
@@ -2430,31 +2432,31 @@ html.tema-claro .rep-card-hdr { color: #1a7a45; }
   .mob-agenda-card::before {
     content: '';
     position: absolute; top: 0; left: 0; right: 0; height: 1px;
-    background: linear-gradient(90deg, transparent, rgba(212,168,67,.45), transparent);
+    background: linear-gradient(90deg, transparent, rgba(94,255,160,.3), transparent);
   }
-  .mob-agenda-card:active { transform: scale(.98); box-shadow: 0 2px 12px rgba(0,0,0,.4), 0 0 16px rgba(212,168,67,.2); }
-  /* Ícono agenda — mismo acabado que radial-circle */
+  .mob-agenda-card:active { transform: scale(.98); box-shadow: 0 2px 12px rgba(0,0,0,.4), 0 0 14px rgba(94,255,160,.15); }
+  /* Ícono agenda — tono verde */
   .mob-ag-icon {
-    width: 46px; height: 46px; border-radius: 50%;
-    background: radial-gradient(ellipse at 40% 30%, rgba(20,60,35,.92) 0%, rgba(6,20,12,.97) 100%);
-    border: 1.5px solid rgba(212,168,67,.38);
-    box-shadow: 0 4px 14px rgba(0,0,0,.5), inset 0 1px 0 rgba(212,168,67,.15);
+    width: 46px; height: 46px; border-radius: 14px;
+    background: radial-gradient(ellipse at 40% 30%, rgba(20,70,38,.95) 0%, rgba(6,24,12,.98) 100%);
+    border: 1.5px solid rgba(94,255,160,.28);
+    box-shadow: 0 4px 14px rgba(0,0,0,.45), inset 0 1px 0 rgba(94,255,160,.1);
     display: flex; align-items: center; justify-content: center; flex-shrink: 0;
     position: relative; overflow: hidden;
   }
   .mob-ag-icon::before {
     content: '';
     position: absolute; top: 4px; left: 20%; right: 20%; height: 28%;
-    background: radial-gradient(ellipse, rgba(212,168,67,.2) 0%, transparent 70%);
+    background: radial-gradient(ellipse, rgba(94,255,160,.12) 0%, transparent 70%);
     border-radius: 50%;
   }
   .mob-ag-text { flex: 1; }
   .mob-ag-title {
     font-family: 'Barlow Condensed', sans-serif;
     font-size: .85rem; font-weight: 700; letter-spacing: 1px;
-    text-transform: uppercase; color: #d4a843;
+    text-transform: uppercase; color: #5effa0;
   }
-  .mob-ag-sub { font-size: .62rem; color: rgba(212,168,67,.5); margin-top: 2px; letter-spacing: .3px; }
+  .mob-ag-sub { font-size: .62rem; color: rgba(94,255,160,.45); margin-top: 2px; letter-spacing: .3px; }
 
   /* DATE BAR */
   .mob-date-bar {
