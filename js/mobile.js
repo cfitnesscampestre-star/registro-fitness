@@ -1052,6 +1052,20 @@ function renderMobileHome() {
   if(!el('mob-clases-lista')) return;
   if(total===0){ el('mob-clases-lista').innerHTML='<div class="empty" style="font-size:.78rem">No hay clases programadas hoy.</div>'; return; }
 
+  // Actualizar stroke-dashoffset de los KPI circles dinámicamente
+  const regN = parseInt(el('mob-k-reg')?.textContent)||0;
+  const pendN = parseInt(el('mob-k-pend')?.textContent)||0;
+  const afoStr = el('mob-k-aforo')?.textContent||'—';
+  const afoN = parseInt(afoStr)||0;
+  const circ = 2 * Math.PI * 28; // r=28 → ~175.9
+  function setGauge(circleId, pct) {
+    const svg = document.querySelector(`#${circleId} svg circle:last-child`);
+    if(svg) svg.setAttribute('stroke-dashoffset', circ * (1 - Math.min(pct,1)));
+  }
+  if(total>0) setGauge('mob-kpi-circle-reg', regN/total);
+  if(total>0) setGauge('mob-kpi-circle-pend', pendN/total);
+  setGauge('mob-kpi-circle-aforo', afoN/100);
+
   el('mob-clases-lista').innerHTML = clasesHoy.map(({inst,slot,reg}) => {
     const est     = reg ? reg.estado : 'pendiente';
     const asis    = reg ? (parseInt(reg.asistentes)||0) : '—';
@@ -1059,20 +1073,26 @@ function renderMobileHome() {
     const afoP    = reg && capN>0 ? Math.round((parseInt(reg.asistentes)||0)/capN*100) : null;
     const colorAf = afoP!==null ? pctCol(afoP) : 'var(--txt3)';
     const cls     = est==='pendiente' ? 'pendiente' : 'registrada';
+    const barW    = afoP!==null ? Math.min(afoP,100) : 0;
     const estadoTag = {
-      ok:    `<span class="chip cok" style="font-size:.58rem">Ok</span>`,
-      sub:   `<span class="chip cpl" style="font-size:.58rem">Sub</span>`,
-      falta: `<span class="chip cbd" style="font-size:.58rem">Falta</span>`,
-      pendiente: `<span class="chip cwn" style="font-size:.58rem">Pendiente</span>`
+      ok:    `<span class="chip cok" style="font-size:.58rem;padding:3px 8px">✓ Ok</span>`,
+      sub:   `<span class="chip cpl" style="font-size:.58rem;padding:3px 8px">Sub</span>`,
+      falta: `<span class="chip cbd" style="font-size:.58rem;padding:3px 8px">⚠ Falta</span>`,
+      pendiente: `<span class="chip cwn" style="font-size:.58rem;padding:3px 8px">Pendiente</span>`
     }[est] || '';
     return `<div class="mob-clase-item ${cls}" onclick="abrirRegistroDesdeCalendario(${inst.id},'${slot.dia}','${slot.hora}','${slot.clase}','${hoyStr}')">
-      <span class="mob-c-hora">${slot.hora}</span>
-      <div style="flex:1;min-width:0">
-        <div class="mob-c-nombre" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${slot.clase}</div>
-        <span class="mob-c-inst">${inst.nombre.split(' ')[0]}</span>
+      <div class="mob-ci-top">
+        <span class="mob-c-hora">${slot.hora}</span>
+        <div class="mob-c-info">
+          <div class="mob-c-nombre">${slot.clase}</div>
+          <span class="mob-c-inst">${inst.nombre.split(' ').slice(0,2).join(' ')}</span>
+        </div>
+        <div class="mob-ci-right">
+          ${estadoTag}
+          <span class="mob-c-asis" style="color:${colorAf}">${afoP!==null ? afoP+'%' : asis}</span>
+        </div>
       </div>
-      ${estadoTag}
-      <span class="mob-c-asis" style="color:${colorAf}">${afoP!==null ? afoP+'%' : asis}</span>
+      ${afoP!==null ? `<div class="mob-ci-bar"><div class="mob-ci-bar-fill" style="width:${barW}%;background:${colorAf}"></div></div>` : ''}
     </div>`;
   }).join('');
 }
