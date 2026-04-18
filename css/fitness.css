@@ -873,7 +873,7 @@ html.tema-claro .srch-item { background: #fff; border-color: #d4e4d4; }
 
 /* ── Lista clases ── */
 .mob-clase-item {
-  display: flex; flex-direction: column;
+  display: flex; flex-direction: row; align-items: center;
   background: var(--panel2);
   border: 1px solid var(--border);
   border-radius: 16px;
@@ -927,8 +927,15 @@ html.tema-claro .srch-item { background: #fff; border-color: #d4e4d4; }
   letter-spacing: .5px;
 }
 .mob-ci-right {
-  display: flex; align-items: center; gap: 7px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 3px;
   flex-shrink: 0;
+  min-width: 80px;
+}
+.mob-ci-right-top {
+  display: flex; align-items: center; gap: 6px;
 }
 .mob-c-asis {
   font-family: 'DM Mono', monospace;
@@ -937,14 +944,14 @@ html.tema-claro .srch-item { background: #fff; border-color: #d4e4d4; }
   min-width: 34px;
   text-align: right;
 }
-/* Barra de progreso de aforo */
-.mob-ci-bar {
-  margin-top: 7px;
-  padding-left: 6px;
+/* Barra de aforo — solo bajo el badge+% en el lado derecho */
+.mob-ci-bar-right {
+  width: 100%;
   height: 3px;
   border-radius: 3px;
   background: var(--border);
   overflow: hidden;
+  margin-top: 3px;
 }
 .mob-ci-bar-fill {
   height: 100%;
