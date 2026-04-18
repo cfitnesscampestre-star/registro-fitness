@@ -846,7 +846,7 @@ html.tema-claro .srch-item { background: #fff; border-color: #d4e4d4; }
 }
 .mob-kpi-val {
   font-family: 'Bebas Neue', sans-serif;
-  font-size: 1.35rem;
+  font-size: 1.05rem;
   line-height: 1;
 }
 .mob-kpi-lbl {
@@ -2277,23 +2277,36 @@ html.tema-claro .rep-card-hdr { color: #1a7a45; }
   position: absolute; inset: 0; z-index: 0;
   background: linear-gradient(160deg, #0d3320 0%, #0a2518 40%, #071a10 100%);
 }
+/* Gradiente de legibilidad — sobre el mapa */
+.mob-hero-bg-overlay {
+  position: absolute; inset: 0; z-index: 1;
+  background: linear-gradient(100deg, rgba(7,26,16,.75) 30%, transparent 80%),
+              linear-gradient(to top, rgba(7,26,16,.85) 0%, transparent 60%);
+  pointer-events: none;
+}
 /* Mapa SVG de fondo */
 .mob-hero-bg::before {
   content: '';
   position: absolute; inset: 0;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 360 160'%3E%3C!-- calles de fondo --%3E%3Cpath d='M0 40 L80 40 L120 60 L200 60 L240 80 L360 80' stroke='rgba(94,255,160,.06)' stroke-width='8' fill='none'/%3E%3Cpath d='M0 90 L60 90 L100 70 L180 70 L220 90 L300 90 L360 70' stroke='rgba(94,255,160,.05)' stroke-width='6' fill='none'/%3E%3Cpath d='M80 0 L80 40 L100 60 L100 160' stroke='rgba(94,255,160,.05)' stroke-width='6' fill='none'/%3E%3Cpath d='M200 0 L200 60 L220 80 L220 160' stroke='rgba(94,255,160,.05)' stroke-width='6' fill='none'/%3E%3Cpath d='M300 0 L300 90 L280 110 L280 160' stroke='rgba(94,255,160,.04)' stroke-width='5' fill='none'/%3E%3C!-- bloque parque/cancha --%3E%3Crect x='120' y='25' width='70' height='45' rx='6' fill='rgba(26,122,69,.18)' stroke='rgba(94,255,160,.1)' stroke-width='1'/%3E%3Crect x='230' y='50' width='55' height='35' rx='5' fill='rgba(26,122,69,.12)' stroke='rgba(94,255,160,.07)' stroke-width='1'/%3E%3C!-- ruta neón --%3E%3Cpath d='M60 130 Q80 110 100 90 Q120 70 140 60 Q160 50 185 48 Q210 46 230 55 Q250 64 260 80 Q270 96 255 110 Q240 124 220 118' stroke='%235effa0' stroke-width='2.5' fill='none' stroke-linecap='round' stroke-linejoin='round' stroke-dasharray='4 3' opacity='.7'/%3E%3C!-- pin inicio --%3E%3Ccircle cx='60' cy='130' r='6' fill='%235effa0' opacity='.9'/%3E%3Ccircle cx='60' cy='130' r='10' fill='none' stroke='%235effa0' stroke-width='1.5' opacity='.4'/%3E%3C!-- pin personaje en ruta --%3E%3Ccircle cx='220' cy='118' r='5' fill='%23fff' opacity='.95'/%3E%3Cpath d='M220 110 L220 115' stroke='%23fff' stroke-width='1.5' stroke-linecap='round'/%3E%3C/svg%3E");
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 360 160'%3E%3C!-- calles fondo --%3E%3Cpath d='M0 55 L70 55 L110 75 L190 75 L230 95 L360 95' stroke='rgba(94,255,160,.07)' stroke-width='10' fill='none'/%3E%3Cpath d='M0 105 L50 105 L90 85 L170 85 L210 105 L290 105 L360 85' stroke='rgba(94,255,160,.05)' stroke-width='7' fill='none'/%3E%3Cpath d='M95 0 L95 55 L115 75 L115 160' stroke='rgba(94,255,160,.05)' stroke-width='7' fill='none'/%3E%3Cpath d='M210 0 L210 75 L230 95 L230 160' stroke='rgba(94,255,160,.05)' stroke-width='7' fill='none'/%3E%3Cpath d='M310 0 L310 95 L290 115 L290 160' stroke='rgba(94,255,160,.04)' stroke-width='6' fill='none'/%3E%3C!-- bloques manzanas --%3E%3Crect x='120' y='20' width='78' height='48' rx='7' fill='rgba(26,122,69,.2)' stroke='rgba(94,255,160,.1)' stroke-width='1'/%3E%3Crect x='235' y='45' width='60' height='38' rx='6' fill='rgba(26,122,69,.15)' stroke='rgba(94,255,160,.07)' stroke-width='1'/%3E%3Crect x='20' y='20' width='60' height='28' rx='5' fill='rgba(26,122,69,.12)' stroke='rgba(94,255,160,.06)' stroke-width='1'/%3E%3C!-- ruta neón punteada --%3E%3Cpath d='M30 138 Q55 118 80 100 Q105 82 135 70 Q162 60 192 58 Q218 56 240 66 Q262 76 272 92 Q282 108 266 122 Q250 136 228 130' stroke='%235effa0' stroke-width='2.8' fill='none' stroke-linecap='round' stroke-linejoin='round' stroke-dasharray='5 3.5' opacity='.75'/%3E%3C!-- pin inicio --%3E%3Ccircle cx='30' cy='138' r='5' fill='%235effa0' opacity='.9'/%3E%3Ccircle cx='30' cy='138' r='9' fill='none' stroke='%235effa0' stroke-width='1.5' opacity='.35'/%3E%3Ccircle cx='30' cy='138' r='14' fill='none' stroke='%235effa0' stroke-width='1' opacity='.15'/%3E%3C!-- pin destino personaje --%3E%3Ccircle cx='228' cy='130' r='5' fill='%23fff' opacity='.9'/%3E%3Ccircle cx='228' cy='130' r='9' fill='none' stroke='%23fff' stroke-width='1.2' opacity='.3'/%3E%3C/svg%3E");
   background-size: cover;
-  background-position: center;
+  background-position: center top;
   pointer-events: none;
 }
+/* Ícono padre grande fantasma */
 .mob-hero-bg::after {
   content: '';
-  position: absolute; bottom: 0; left: 0; right: 0; height: 60%;
-  background: linear-gradient(to top, rgba(7,26,16,.92) 0%, transparent 100%);
+  position: absolute;
+  right: -10px; top: -8px;
+  width: 130px; height: 130px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 120' fill='none'%3E%3C!-- cabeza --%3E%3Ccircle cx='60' cy='22' r='13' stroke='rgba(94,255,160,.18)' stroke-width='3'/%3E%3C!-- torso --%3E%3Cpath d='M60 35 L55 60 L45 90' stroke='rgba(94,255,160,.18)' stroke-width='5' stroke-linecap='round'/%3E%3Cpath d='M60 35 L66 58 L76 85' stroke='rgba(94,255,160,.18)' stroke-width='5' stroke-linecap='round'/%3E%3C!-- brazos --%3E%3Cpath d='M57 43 L38 52' stroke='rgba(94,255,160,.15)' stroke-width='4.5' stroke-linecap='round'/%3E%3Cpath d='M63 46 L82 42' stroke='rgba(94,255,160,.15)' stroke-width='4.5' stroke-linecap='round'/%3E%3C!-- punto de movimiento --%3E%3Ccircle cx='60' cy='62' r='3' fill='rgba(94,255,160,.2)'/%3E%3C/svg%3E");
+  background-size: contain;
+  background-repeat: no-repeat;
   pointer-events: none;
+  opacity: .6;
 }
 .mob-hero-content {
-  position: relative; z-index: 1;
+  position: relative; z-index: 2;
   display: flex; align-items: flex-end; justify-content: space-between;
   width: 100%; padding: 14px 16px 16px 16px; gap: 10px;
 }
@@ -2444,7 +2457,7 @@ html.tema-claro .rep-card-hdr { color: #1a7a45; }
     padding: 14px 8px 12px !important;
   }
   .mob-kpi::after { height: 2px !important; border-radius: 16px 16px 0 0 !important; }
-  .mob-kpi-val { font-size: 1.9rem !important; }
+  .mob-kpi-val { font-size: 1.05rem !important; }
   .mob-kpi-lbl {
     font-family: 'Barlow Condensed', sans-serif !important;
     font-size: .6rem !important; letter-spacing: 1.5px !important;
@@ -2683,7 +2696,7 @@ html.tema-claro .rep-card-hdr { color: #1a7a45; }
     box-shadow: 0 3px 14px rgba(26,122,69,.1) !important;
     border-radius: 18px !important;
   }
-  .mob-kpi-val { font-size: 2rem !important; font-weight: 600 !important; }
+  .mob-kpi-val { font-size: 1.05rem !important; font-weight: 700 !important; }
 
   /* Clases — más definidas */
   .mob-clase-item {
