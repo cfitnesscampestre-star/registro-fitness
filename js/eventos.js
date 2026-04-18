@@ -120,6 +120,8 @@ function evtCargarDatos(){
 }
 function evtGuardarDatos(arr){
   localStorage.setItem(EVT_KEY, JSON.stringify(arr));
+  // Sincronizar con Firebase para que otros dispositivos lo vean
+  if(typeof sincronizarFirebase === 'function') setTimeout(sincronizarFirebase, 600);
 }
 function evtId(){
   return 'evt_'+Date.now()+'_'+Math.random().toString(36).slice(2,7);
@@ -626,6 +628,7 @@ function guardarEvento(){
     resultados:   JSON.parse(JSON.stringify(_evtResultados)),
     creadoEn:     _evtEditing ? undefined : new Date().toISOString(),
     modificadoEn: new Date().toISOString(),
+    updatedAt:    Date.now(),
   };
 
   let ev = evtCargarDatos();

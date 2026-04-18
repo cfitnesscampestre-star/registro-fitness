@@ -1826,7 +1826,10 @@ function toggleVozBusqueda2() { _toggleVoz('mob-mic-btn2', val => { const i=docu
 // ── AGENDA ───────────────────────────────────────────
 let agendaNotas = JSON.parse(localStorage.getItem('fc_agenda')||'[]');
 
-function _guardarAgenda() { try{ localStorage.setItem('fc_agenda', JSON.stringify(agendaNotas)); }catch(e){} }
+function _guardarAgenda() {
+  try{ localStorage.setItem('fc_agenda', JSON.stringify(agendaNotas)); }catch(e){}
+  if(typeof sincronizarFirebase === 'function') setTimeout(sincronizarFirebase, 600);
+}
 
 function abrirAgendaMob() {
   _agCalYear  = new Date().getFullYear();
@@ -2042,8 +2045,9 @@ function guardarNotaMob() {
   if(!texto){ _vErr('mob-nota-nueva','Escribe algo primero'); showToast('Escribe algo primero','warn'); return; }
   if(texto.length < 3){ showToast('La nota es demasiado corta','warn'); return; }
   agendaNotas.push({
-    id: Date.now(),
+    id: 'nota_' + Date.now() + '_' + Math.random().toString(36).slice(2,6),
     ts: new Date().toISOString(),
+    updatedAt: Date.now(),
     texto,
     prioridad: _agendaPriActual,
     resuelta: false
@@ -2058,7 +2062,7 @@ function guardarNotaMob() {
 }
 
 function resolverNota(idx) {
-  if(agendaNotas[idx]) agendaNotas[idx].resuelta = true;
+  if(agendaNotas[idx]) { agendaNotas[idx].resuelta = true; agendaNotas[idx].updatedAt = Date.now(); }
   _guardarAgenda();
   renderAgendaCal();
   renderAgendaMob();

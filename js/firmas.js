@@ -790,6 +790,59 @@ async function inicializarFirebase(){
         if(data.solicitudes)
           solicitudesInst = Object.values(data.solicitudes);
 
+        // ── Sincronizar Agenda (notas) desde Firebase ─────────────────────
+        if(Array.isArray(data.agendaNotas) && data.agendaNotas.length > 0) {
+          try {
+            const localAg   = JSON.parse(localStorage.getItem('fc_agenda') || '[]');
+            // Merge por id: gana la nota con ts más reciente
+            const mapaAg = {};
+            localAg.forEach(n => { if(n.id) mapaAg[n.id] = n; });
+            data.agendaNotas.forEach(n => {
+              if(!n.id) return;
+              if(!mapaAg[n.id]) {
+                mapaAg[n.id] = n;
+              } else {
+                const tsL = parseInt(mapaAg[n.id].updatedAt || mapaAg[n.id].ts || 0);
+                const tsF = parseInt(n.updatedAt || n.ts || 0);
+                if(tsF > tsL) mapaAg[n.id] = n;
+              }
+            });
+            const mergedAg = Object.values(mapaAg);
+            localStorage.setItem('fc_agenda', JSON.stringify(mergedAg));
+            // Actualizar variable global si existe
+            if(typeof agendaNotas !== 'undefined') {
+              agendaNotas = mergedAg;
+              if(typeof renderAgendaMob === 'function') renderAgendaMob();
+            }
+          } catch(e) { console.warn('Merge agenda:', e); }
+        }
+
+        // ── Sincronizar Eventos Deportivos desde Firebase ─────────────────
+        if(Array.isArray(data.eventos) && data.eventos.length > 0) {
+          try {
+            const localEv = JSON.parse(localStorage.getItem('fitness_eventos_v1') || '[]');
+            // Merge por id: gana el evento con updatedAt más reciente
+            const mapaEv = {};
+            localEv.forEach(e => { if(e.id) mapaEv[e.id] = e; });
+            data.eventos.forEach(e => {
+              if(!e.id) return;
+              if(!mapaEv[e.id]) {
+                mapaEv[e.id] = e;
+              } else {
+                const tsL = parseInt(mapaEv[e.id].updatedAt || 0);
+                const tsF = parseInt(e.updatedAt || 0);
+                if(tsF > tsL) mapaEv[e.id] = e;
+              }
+            });
+            const mergedEv = Object.values(mapaEv);
+            localStorage.setItem('fitness_eventos_v1', JSON.stringify(mergedEv));
+            // Re-renderizar vista de eventos si está activa
+            if(typeof evtRenderAll === 'function') {
+              try { evtRenderAll(); } catch(ex){}
+            }
+          } catch(e) { console.warn('Merge eventos:', e); }
+        }
+
         // ── Sincronizar hoja de firmas activa desde Firebase ──────────────
         // Esto permite que cuando el coordinador publica una hoja,
         // los instructores en otros dispositivos la vean inmediatamente

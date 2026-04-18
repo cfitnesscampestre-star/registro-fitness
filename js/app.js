@@ -977,6 +977,12 @@ async function sincronizarFirebase(){
     // Incluir hoja de firmas activa para que instructores en otros dispositivos la vean
     let _hojaFirmas = null;
     try { _hojaFirmas = JSON.parse(localStorage.getItem('fc_hoja_firmas_activa') || 'null'); } catch(e){}
+    // Leer agenda y eventos frescos de localStorage para la subida
+    let _agendaNotas = [];
+    try { _agendaNotas = JSON.parse(localStorage.getItem('fc_agenda') || '[]'); } catch(e){}
+    let _eventos = [];
+    try { _eventos = JSON.parse(localStorage.getItem('fitness_eventos_v1') || '[]'); } catch(e){}
+
     const payload = {
       instructores,
       registros:   registros.reduce((a,r)=>{ a[String(r.id)]=r; return a; },{}),
@@ -985,6 +991,8 @@ async function sincronizarFirebase(){
       suplencias:  suplenciasPlan.reduce((a,s)=>{ a[String(s.id)]=s; return a; },{}),
       solicitudes: solicitudesInst.reduce((a,s)=>{ a[String(s.id)]=s; return a; },{}),
       hojaFirmasActiva: _hojaFirmas,
+      agendaNotas: _agendaNotas,
+      eventos:     _eventos,
       ts
     };
     await fbDb.ref('fitness').set(payload);
