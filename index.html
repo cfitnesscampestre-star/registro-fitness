@@ -1332,6 +1332,7 @@ window._cargarFflate=function(){
             <div class="mob-glass-card">
               <div class="mob-gc-title">RESUMEN HOY</div>
 
+              <!-- Clases registradas + sparkline -->
               <div class="mob-gc-metric">
                 <span class="mob-gc-lbl">Clases Registradas</span>
                 <div class="mob-gc-row">
@@ -1340,21 +1341,23 @@ window._cargarFflate=function(){
                 </div>
               </div>
 
+              <!-- Tareas pendientes + dots compactos -->
               <div class="mob-gc-metric">
                 <span class="mob-gc-lbl">Tareas Pendientes</span>
                 <div class="mob-gc-row">
-                  <span class="mob-gc-val" style="color:#e05050" id="mob-k-pend">—</span>
+                  <span class="mob-gc-val" style="color:#e05050;font-size:1.5rem" id="mob-k-pend">—</span>
                   <div class="mob-dots-track" id="mob-dots-pend"></div>
                 </div>
               </div>
 
-              <div class="mob-gc-metric">
+              <!-- Aforo — barra + número derecha -->
+              <div class="mob-gc-metric" style="margin-bottom:4px">
                 <span class="mob-gc-lbl">Aforo</span>
-                <div class="mob-gc-row">
-                  <div class="mob-aforo-bar-wrap">
+                <div style="display:flex;align-items:center;gap:8px;margin-top:2px">
+                  <div class="mob-aforo-bar-wrap" style="flex:1">
                     <div class="mob-aforo-bar" id="mob-aforo-bar"></div>
                   </div>
-                  <span class="mob-gc-val gold" id="mob-k-aforo">—</span>
+                  <span class="mob-gc-val gold" style="font-size:1.4rem;min-width:42px;text-align:right" id="mob-k-aforo">—</span>
                 </div>
               </div>
 
