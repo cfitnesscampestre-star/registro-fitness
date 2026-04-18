@@ -1047,13 +1047,20 @@ function renderMobileHome() {
     sparkEl.innerHTML=hoy7.map((v,i)=>`<div class="mob-sparkline-bar${i===6?' active':''}" style="height:${Math.max(15,Math.round(v/maxS*100))}%"></div>`).join('');
   }
 
-  // Dots de pendientes — compactos, máx 10 en fila única
+  // Dots de pendientes — siempre 10, color cambia según cuántos faltan
   const dotsEl = el('mob-dots-pend');
   if(dotsEl) {
     const maxDots = 10;
-    const filled = Math.min(pendientes, maxDots);
+    const filled  = Math.min(pendientes, maxDots);
+    // Color según urgencia: verde(1-3) → amarillo(4-6) → naranja(7-8) → rojo(9-10)
+    const dotColor = filled <= 3 ? '#5effa0'
+                   : filled <= 6 ? '#d4a843'
+                   : filled <= 8 ? '#e08030'
+                   :               '#e05050';
     dotsEl.innerHTML = Array.from({length: maxDots}, (_, i) =>
-      `<div class="mob-dot-item${i < filled ? '' : ' empty'}"></div>`
+      i < filled
+        ? `<div class="mob-dot-item" style="background:${dotColor};box-shadow:0 0 4px ${dotColor}88"></div>`
+        : `<div class="mob-dot-item empty"></div>`
     ).join('');
   }
 
@@ -1118,11 +1125,13 @@ function renderMobileHome() {
           <span class="mob-c-inst">${inst.nombre.split(' ').slice(0,2).join(' ')}</span>
         </div>
         <div class="mob-ci-right">
-          ${estadoTag}
-          <span class="mob-c-asis" style="color:${colorAf}">${afoP!==null ? afoP+'%' : asis}</span>
+          <div class="mob-ci-right-top">
+            ${estadoTag}
+            <span class="mob-c-asis" style="color:${colorAf}">${afoP!==null ? afoP+'%' : asis}</span>
+          </div>
+          ${afoP!==null ? `<div class="mob-ci-bar-right"><div class="mob-ci-bar-fill" style="width:${barW}%;background:${colorAf}"></div></div>` : ''}
         </div>
       </div>
-      ${afoP!==null ? `<div class="mob-ci-bar"><div class="mob-ci-bar-fill" style="width:${barW}%;background:${colorAf}"></div></div>` : ''}
     </div>`;
   }).join('');
 }
