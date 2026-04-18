@@ -1328,22 +1328,24 @@ window._cargarFflate=function(){
           </svg>
         </div>
 
-        <!-- ══ FECHA ══ -->
-        <div class="mob-date-bar" style="margin-top:8px">
-          <button class="mob-date-nav" onclick="cambiarVistaFecha(-1)">‹</button>
-          <div style="flex:1;text-align:center">
-            <input type="date" id="mob-date-picker" class="mob-date-input" onchange="setVistaFecha(this.value)">
-          </div>
-          <button class="mob-date-nav" onclick="cambiarVistaFecha(1)">›</button>
-          <button id="mob-btn-hoy" class="mob-date-today" onclick="resetVistaFecha()">Hoy</button>
-        </div>
-
         <!-- ══ LAYOUT: MÉTRICAS + MENÚ RADIAL ══ -->
-        <div class="mob-premium-layout">
+        <div class="mob-premium-layout" style="margin-top:8px">
 
-          <!-- Panel izquierdo: KPIs -->
+          <!-- Panel izquierdo: KPIs + fecha integrada -->
           <div class="mob-metrics-panel">
             <div class="mob-glass-card">
+
+              <!-- Fecha integrada en el recuadro -->
+              <div class="mob-gc-date-row">
+                <button class="mob-gc-date-nav" onclick="cambiarVistaFecha(-1)">‹</button>
+                <div style="flex:1;text-align:center">
+                  <input type="date" id="mob-date-picker" class="mob-date-input mob-gc-date-input" onchange="setVistaFecha(this.value)">
+                </div>
+                <button class="mob-gc-date-nav" onclick="cambiarVistaFecha(1)">›</button>
+                <button id="mob-btn-hoy" class="mob-gc-date-today" onclick="resetVistaFecha()">Hoy</button>
+              </div>
+
+              <div class="mob-gc-divider"></div>
               <div class="mob-gc-title">RESUMEN HOY</div>
 
               <div class="mob-gc-metric">
