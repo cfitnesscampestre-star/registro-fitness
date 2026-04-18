@@ -2326,27 +2326,24 @@ html.tema-claro .rep-card-hdr { color: #1a7a45; }
   text-shadow: 0 2px 12px rgba(0,0,0,.4);
 }
 .mob-hero-modes { display: flex; gap: 6px; margin-top: 6px; }
-/* Botón "Iniciar Recorrido >>" */
+/* Botón START RUN — oval oscuro estilo imagen */
 .mob-hero-cta {
   flex-shrink: 0;
-  background: #5effa0;
-  border: none;
-  border-radius: 30px;
-  padding: 10px 16px;
-  display: flex; align-items: center; gap: 5px;
-  color: #071a0f;
-  font-family: 'Barlow Condensed', sans-serif;
-  font-size: .85rem; font-weight: 800; letter-spacing: .5px;
+  background: linear-gradient(160deg, #1c6640 0%, #0d3320 100%);
+  border: 1.5px solid rgba(94,255,160,.25);
+  border-radius: 40px;
+  padding: 11px 18px;
+  display: flex; align-items: center; gap: 8px;
+  color: #ffffff;
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 1.05rem; letter-spacing: 2px;
   white-space: nowrap;
-  box-shadow: 0 4px 18px rgba(94,255,160,.45);
-  animation: ctaPulse 2.8s ease-in-out infinite;
-}
-@keyframes ctaPulse {
-  0%,100% { box-shadow: 0 4px 18px rgba(94,255,160,.45); }
-  50%      { box-shadow: 0 4px 28px rgba(94,255,160,.7); }
+  box-shadow: 0 5px 22px rgba(0,0,0,.5), inset 0 1px 0 rgba(255,255,255,.07);
+  transition: transform .1s;
 }
 .mob-hero-rec:active .mob-hero-cta {
-  transform: scale(.95);
+  transform: scale(.94);
+  background: linear-gradient(160deg, #236e48 0%, #0d3320 100%);
 }
 .mob-hero-arrow {
   flex-shrink: 0;
