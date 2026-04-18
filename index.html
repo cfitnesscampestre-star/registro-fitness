@@ -1223,49 +1223,51 @@ window._cargarFflate=function(){
           <div class="mob-hero-bg-overlay"></div>
           <div class="mob-hero-content">
             <div class="mob-hero-left">
-              <div class="mob-hero-icon">
-                <svg viewBox="0 0 56 56" fill="none" xmlns="http://www.w3.org/2000/svg" width="48" height="48">
+              <!-- Corredor dinámico con círculo de estela -->
+              <div style="width:60px;height:60px;flex-shrink:0;position:relative">
+                <svg viewBox="0 0 60 60" fill="none" xmlns="http://www.w3.org/2000/svg" width="60" height="60">
                   <defs>
-                    <linearGradient id="rh2" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#c0ffe0"/><stop offset="100%" stop-color="#3ecf7a"/></linearGradient>
-                    <linearGradient id="rb2" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#5effa0"/><stop offset="100%" stop-color="#1a9a55"/></linearGradient>
-                    <filter id="glow2"><feGaussianBlur stdDeviation="1.2" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+                    <linearGradient id="rh3" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#d4ffe8"/><stop offset="100%" stop-color="#3ecf7a"/></linearGradient>
+                    <linearGradient id="rb3" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#7fffbe"/><stop offset="100%" stop-color="#1a9a55"/></linearGradient>
+                    <filter id="glow3"><feGaussianBlur stdDeviation="1.4" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
                   </defs>
-                  <!-- estela de movimiento -->
-                  <path d="M4 30 L14 29" stroke="rgba(94,255,160,.25)" stroke-width="2.5" stroke-linecap="round"/>
-                  <path d="M6 36 L13 34" stroke="rgba(94,255,160,.18)" stroke-width="2" stroke-linecap="round"/>
-                  <path d="M5 24 L12 24" stroke="rgba(94,255,160,.18)" stroke-width="1.8" stroke-linecap="round"/>
+                  <!-- círculos de estela -->
+                  <circle cx="30" cy="30" r="28" fill="rgba(94,255,160,.07)" stroke="rgba(94,255,160,.2)" stroke-width="1"/>
+                  <circle cx="30" cy="30" r="23" fill="rgba(94,255,160,.05)" stroke="rgba(94,255,160,.12)" stroke-width="1" stroke-dasharray="3 4"/>
+                  <!-- arcos velocidad izquierda -->
+                  <path d="M7 23 Q4 30 7 37" stroke="rgba(94,255,160,.4)" stroke-width="2.2" stroke-linecap="round" fill="none"/>
+                  <path d="M10 20 Q6 30 10 40" stroke="rgba(94,255,160,.2)" stroke-width="1.5" stroke-linecap="round" fill="none"/>
                   <!-- cabeza -->
-                  <circle cx="36" cy="10" r="6" fill="url(#rh2)" filter="url(#glow2)"/>
-                  <!-- torso corriendo -->
-                  <path d="M36 16 L32 26 L26 36" stroke="url(#rb2)" stroke-width="3.8" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
-                  <path d="M36 16 L42 24 L48 32" stroke="url(#rb2)" stroke-width="3.8" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
-                  <!-- brazo adelante -->
-                  <path d="M34 20 L24 17" stroke="#5effa0" stroke-width="3.2" stroke-linecap="round"/>
-                  <!-- brazo atrás -->
-                  <path d="M38 22 L46 19" stroke="rgba(94,255,160,.7)" stroke-width="3" stroke-linecap="round"/>
+                  <circle cx="38" cy="13" r="5.5" fill="url(#rh3)" filter="url(#glow3)"/>
+                  <!-- torso inclinado -->
+                  <path d="M36 19 L31 29" stroke="url(#rb3)" stroke-width="3.5" stroke-linecap="round"/>
+                  <!-- brazo adelante (hacia abajo-izq) -->
+                  <path d="M35 21 L26 26" stroke="#7fffbe" stroke-width="3" stroke-linecap="round"/>
+                  <!-- brazo atrás (hacia arriba-der) -->
+                  <path d="M37 22 L46 18" stroke="rgba(94,255,160,.7)" stroke-width="2.8" stroke-linecap="round"/>
                   <!-- pierna delantera -->
-                  <path d="M32 26 L28 36 L24 43" stroke="url(#rb2)" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/>
-                  <!-- pierna trasera -->
-                  <path d="M36 28 L42 35 L46 43" stroke="rgba(94,255,160,.65)" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/>
-                  <!-- punto de impacto suelo -->
-                  <ellipse cx="34" cy="47" rx="8" ry="2.5" fill="rgba(94,255,160,.15)"/>
+                  <path d="M31 29 L27 38 L22 45" stroke="url(#rb3)" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/>
+                  <!-- pierna trasera levantada -->
+                  <path d="M32 30 L39 36 L45 33" stroke="rgba(94,255,160,.65)" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"/>
+                  <!-- sombra suelo -->
+                  <ellipse cx="31" cy="49" rx="7" ry="2" fill="rgba(94,255,160,.2)"/>
                 </svg>
               </div>
               <div>
-                <div class="mob-hero-sup">INICIAR</div>
-                <div class="mob-hero-title">RECORRIDO</div>
+                <div class="mob-hero-sup">RECORRIDO</div>
+                <div class="mob-hero-title">START RUN</div>
                 <div class="mob-hero-modes">
                   <span class="mob-mode-tag turbo" onclick="event.stopPropagation();modoRecorrido='turbo';iniciarRecorrido()">⚡ Turbo</span>
                   <span class="mob-mode-tag normal" onclick="event.stopPropagation();modoRecorrido='normal';iniciarRecorrido()">✓ Normal</span>
                 </div>
               </div>
             </div>
+            <!-- Botón START RUN: oval oscuro estilo imagen -->
             <div class="mob-hero-cta">
-              Iniciar Recorrido
-              <svg viewBox="0 0 20 20" fill="none" width="14" height="14">
-                <polyline points="5,5 12,10 5,15" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
-                <polyline points="10,5 17,10 10,15" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+              <svg viewBox="0 0 16 16" fill="none" width="13" height="13" style="flex-shrink:0">
+                <polygon points="3,2 13,8 3,14" fill="currentColor"/>
               </svg>
+              START RUN
             </div>
           </div>
         </button>
