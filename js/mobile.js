@@ -687,6 +687,33 @@ function setMobHeatMetric(m){
   renderMobHeatmap();
 }
 
+function mobHeatFiltroChange(){
+  // Al cambiar instructor: repoblar clases y re-renderizar
+  const rawInst=document.getElementById('mob-heat-inst')?.value;
+  const instFil=rawInst?parseInt(rawInst):null;
+  const clasesSel=document.getElementById('mob-heat-clase');
+  if(clasesSel){
+    let regsBase=registros.filter(r=>r.estado==='ok'||r.estado==='sub');
+    if(instFil) regsBase=regsBase.filter(r=>r.inst_id===instFil);
+    const clsOpts=[...new Set(regsBase.map(r=>r.clase))].filter(Boolean).sort();
+    clasesSel.innerHTML='<option value="">📋 Todas las clases</option>'+
+      clsOpts.map(c=>`<option value="${c}">${c}</option>`).join('');
+  }
+  renderMobHeatmap();
+}
+
+function mobHeatPoblarInstructores(){
+  const sel=document.getElementById('mob-heat-inst');
+  if(!sel) return;
+  const cur=sel.value;
+  const idsConDatos=new Set(
+    registros.filter(r=>r.estado==='ok'||r.estado==='sub').map(r=>r.inst_id)
+  );
+  const lista=instructores.filter(i=>idsConDatos.has(i.id)).sort((a,b)=>a.nombre.localeCompare(b.nombre));
+  sel.innerHTML='<option value="">👤 Todos</option>'+
+    lista.map(i=>`<option value="${i.id}"${i.id===parseInt(cur)?' selected':''}>${i.nombre.split(' ').slice(0,2).join(' ')}</option>`).join('');
+}
+
 function renderMobHeatmap(){
   const grid=document.getElementById('mob-heat-grid');
   const topEl=document.getElementById('mob-heat-top');
@@ -697,10 +724,42 @@ function renderMobHeatmap(){
   const HORAS=['06:00','07:00','08:00','09:00','10:00','11:00','12:00','14:00','15:00','16:00','17:00','18:00','19:00','20:00'];
   const m=_mobHeatMetric;
 
+  // Poblar selector de instructores
+  mobHeatPoblarInstructores();
+
+  // Leer filtros
+  const rawInst=document.getElementById('mob-heat-inst')?.value;
+  const instFil=rawInst?parseInt(rawInst):null;
+  const claseFil=document.getElementById('mob-heat-clase')?.value||'';
+
+  // Poblar selector de clases según instructor elegido
+  const clasesSel=document.getElementById('mob-heat-clase');
+  if(clasesSel){
+    const curC=clasesSel.value;
+    let regsBase=registros.filter(r=>r.estado==='ok'||r.estado==='sub');
+    if(instFil) regsBase=regsBase.filter(r=>r.inst_id===instFil);
+    const clsOpts=[...new Set(regsBase.map(r=>r.clase))].filter(Boolean).sort();
+    clasesSel.innerHTML='<option value="">Todas las clases</option>'+
+      clsOpts.map(c=>`<option value="${c}"${c===curC?' selected':''}>${c}</option>`).join('');
+  }
+
+  // Banner filtro activo
+  const banner=document.getElementById('mob-heat-banner');
+  if(banner){
+    const instObj=instFil?instructores.find(i=>i.id===instFil):null;
+    if(instFil||claseFil){
+      banner.style.display='flex';
+      let t='';
+      if(instObj) t+=`<span style="background:rgba(94,255,160,.12);color:var(--neon);border-radius:6px;padding:1px 7px;font-size:.65rem">${instObj.nombre.split(' ')[0]}</span>`;
+      if(claseFil) t+=`<span style="background:rgba(77,184,232,.12);color:var(--blue);border-radius:6px;padding:1px 7px;font-size:.65rem">${claseFil}</span>`;
+      banner.innerHTML=t;
+    } else { banner.style.display='none'; banner.innerHTML=''; }
+  }
+
   const mat={};
   HORAS.forEach(h=>{ mat[h]={}; DIAS.forEach(d=>{ mat[h][d]={sum:0,cnt:0,ses:0}; }); });
 
-  registros.filter(r=>r.estado==='ok'||r.estado==='sub').forEach(r=>{
+  registros.filter(r=>{if(r.estado!=="ok"&&r.estado!=="sub")return false;if(instFil&&r.inst_id!==instFil)return false;if(claseFil&&r.clase!==claseFil)return false;return true;}).forEach(r=>{
     const hSlot=HORAS.reduce((best,h)=>Math.abs(horaToMin(r.hora)-horaToMin(h))<Math.abs(horaToMin(r.hora)-horaToMin(best))?h:best,HORAS[0]);
     const capN=parseInt(r.cap||0);
     if(mat[hSlot]&&mat[hSlot][r.dia]!==undefined){
@@ -725,28 +784,37 @@ function renderMobHeatmap(){
     if(v===0)return'var(--panel2)';
     const p=v/maxV;
     const dark=temaActual!=='claro';
-    if(m==='aforo'){
-      // semáforo verde/amarillo/rojo
-      const af=Math.round(v);
-      if(af>=75)return dark?'rgba(94,255,160,.85)':'#1a7a45';
-      if(af>=40)return dark?'rgba(232,184,75,.75)':'#c0880a';
-      return dark?'rgba(224,80,80,.75)':'#c0392b';
-    }
+    // Degradado de verdes oscuro→claro para todas las métricas
     if(dark){
-      if(p<.2)return'rgba(26,122,69,.1)';if(p<.4)return'rgba(26,122,69,.28)';
-      if(p<.6)return'rgba(26,122,69,.52)';if(p<.8)return'rgba(26,122,69,.78)';
+      if(p<.15)return'rgba(26,122,69,.10)';
+      if(p<.30)return'rgba(26,122,69,.25)';
+      if(p<.50)return'rgba(26,122,69,.45)';
+      if(p<.70)return'rgba(26,122,69,.68)';
+      if(p<.85)return'rgba(26,122,69,.88)';
       return'#5effa0';
     } else {
-      if(p<.2)return'#d4eedd';if(p<.4)return'#a8d8b8';
-      if(p<.6)return'#6db990';if(p<.8)return'#3a9a68';return'#1a7a45';
+      if(p<.15)return'#e8f5ee';
+      if(p<.30)return'#c6e8d4';
+      if(p<.50)return'#8ecfaa';
+      if(p<.70)return'#4dab77';
+      if(p<.85)return'#2a8c57';
+      return'#1a6b3f';
     }
   }
   function cellTxt(v){
     if(v===0)return'';
     const p=v/maxV;
-    if(m==='aforo') return v>=40?'#fff':'#fff';
-    if(temaActual!=='claro')return p>=.8?'#071a0f':'#fff';
-    return p<.2?'var(--txt3)':'#0a1f12';
+    const dark=temaActual!=='claro';
+    if(dark){
+      if(p<.15)return'var(--txt3)';
+      if(p<.50)return'rgba(180,255,210,.85)';
+      if(p>=.85)return'#071a0f';
+      return'#d0ffe8';
+    } else {
+      if(p<.15)return'var(--txt3)';
+      if(p<.30)return'#1a5c35';
+      return'#fff';
+    }
   }
 
   // Grid con tap para diagnóstico
