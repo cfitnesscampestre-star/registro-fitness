@@ -2414,7 +2414,8 @@ html.tema-claro .rep-card-hdr { color: #1a7a45; }
   .mob-hero-rec:active { transform: scale(.97); }
   .mob-hero-bg {
     position: absolute; inset: 0; z-index: 0;
-    background: linear-gradient(160deg, #0d3320 0%, #0a2518 40%, #071a10 100%);
+    background: transparent;
+    border-radius: 22px;
   }
   /* Gradiente de legibilidad — sobre el mapa */
   .mob-hero-bg-overlay {
@@ -2913,18 +2914,20 @@ html.tema-claro .rep-card-hdr { color: #1a7a45; }
   /* ── Hero Recorrido — fondo verde institucional ── */
   .mob-hero-rec {
     min-height: 175px !important;
-    background: linear-gradient(160deg, #1a7a45 0%, #145e35 50%, #0d4225 100%) !important;
-    box-shadow: 0 8px 24px rgba(26,122,69,.35), 0 0 0 1px rgba(26,122,69,.3) !important;
+    background: #0a1a10 !important;
+    box-shadow: 0 8px 32px rgba(0,0,0,.5), 0 0 0 1px rgba(94,255,160,.15) !important;
     border-radius: 22px !important;
   }
   .mob-hero-map-layer {
     position: absolute; inset: 0; z-index: 0;
     border-radius: 22px; overflow: hidden;
+    background-size: cover !important;
+    background-position: center top !important;
   }
   .mob-hero-bg-overlay {
     position: absolute; inset: 0; z-index: 1;
-    background: linear-gradient(100deg, rgba(13,66,37,.55) 25%, transparent 75%),
-                linear-gradient(to top, rgba(13,66,37,.7) 0%, transparent 55%);
+    background: linear-gradient(120deg, rgba(0,0,0,.45) 0%, rgba(0,20,8,.2) 60%, transparent 100%),
+                linear-gradient(to top, rgba(0,0,0,.6) 0%, transparent 50%);
     pointer-events: none;
   }
   .mob-hero-content {
@@ -2969,15 +2972,16 @@ html.tema-claro .rep-card-hdr { color: #1a7a45; }
   .mob-hero-cta {
     flex-shrink: 0 !important;
     background: #ffffff !important;
-    border: 2px solid rgba(255,255,255,.6) !important;
+    border: 2px solid rgba(255,255,255,.5) !important;
     border-radius: 14px !important;
-    padding: 10px 16px !important;
-    color: #1a7a45 !important;
+    padding: 10px 14px !important;
+    color: #0d4225 !important;
     font-family: 'Bebas Neue', sans-serif !important;
-    font-size: .95rem !important; letter-spacing: 2px !important;
-    text-align: center !important; line-height: 1.2 !important;
-    box-shadow: 0 4px 16px rgba(0,0,0,.2), inset 0 1px 0 rgba(255,255,255,.8) !important;
-    min-width: 90px !important;
+    font-size: .88rem !important; letter-spacing: 1.5px !important;
+    text-align: center !important; line-height: 1.25 !important;
+    box-shadow: 0 4px 18px rgba(0,0,0,.35), inset 0 1px 0 rgba(255,255,255,.9) !important;
+    min-width: 88px !important;
+    max-width: 100px !important;
   }
   .mob-hero-rec:active .mob-hero-cta {
     transform: scale(.94) !important;
