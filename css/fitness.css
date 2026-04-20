@@ -2922,7 +2922,8 @@ html.tema-claro .rep-card-hdr { color: #1a7a45; }
     position: absolute; inset: 0; z-index: 0;
     border-radius: 22px; overflow: hidden;
     background-size: cover !important;
-    background-position: center top !important;
+    background-position: center center !important;
+    background-repeat: no-repeat !important;
   }
   .mob-hero-bg-overlay {
     position: absolute; inset: 0; z-index: 1;
