@@ -405,60 +405,166 @@ td .ico{width:1em;height:1em;}
 }
 
 /* ═══ PANTALLA DE LOGIN ═══ */
+/* ═══ LOGIN — Diseño Clean ═══ */
 #login-screen{
-  position:fixed;inset:0;background:var(--bg);z-index:9999;
-  display:flex;align-items:center;justify-content:center;padding:1rem;
+  position:fixed;inset:0;z-index:9999;
+  background:#f0f5f0;
+  display:flex;align-items:center;justify-content:center;padding:1.2rem;
 }
 #login-screen.oculto{display:none;}
 .login-box{
-  background:var(--panel);border:1px solid var(--verde);border-radius:18px;
-  padding:1.8rem 2rem;width:360px;max-width:96vw;
-  box-shadow:0 8px 40px rgba(26,122,69,.25);animation:fadeUp .3s ease;
+  background:#ffffff;
+  border-radius:24px;
+  padding:2rem 1.8rem 1.6rem;
+  width:380px;max-width:96vw;
+  box-shadow:0 12px 40px rgba(26,122,69,.15);
+  animation:fadeUp .3s ease;
 }
-.login-logo{display:flex;align-items:center;gap:10px;margin-bottom:1.3rem;}
-.login-title{font-family:'Bebas Neue',sans-serif;font-size:1.4rem;letter-spacing:2px;color:var(--neon);line-height:1;}
-.login-sub{font-size:.62rem;color:var(--txt2);letter-spacing:1px;text-transform:uppercase;}
-.login-role-btns{display:grid;grid-template-columns:1fr 1fr;gap:.5rem;margin-bottom:.9rem;}
+
+/* Logo */
+.login-logo{
+  display:flex;align-items:center;gap:12px;margin-bottom:1.6rem;
+}
+.login-logo-icon{
+  width:52px;height:52px;border-radius:14px;
+  background:#1a7a45;
+  display:flex;align-items:center;justify-content:center;
+  flex-shrink:0;
+  box-shadow:0 4px 14px rgba(26,122,69,.35);
+}
+.login-title{
+  font-family:'Bebas Neue',sans-serif;
+  font-size:1.55rem;letter-spacing:2.5px;
+  color:#1a7a45;line-height:1.1;
+}
+.login-sub{
+  font-size:.62rem;color:#5a8a6a;
+  letter-spacing:.8px;text-transform:uppercase;
+  margin-top:2px;
+}
+
+/* Label selecciona perfil */
+.login-perfil-lbl{
+  font-size:.78rem;color:#2d5a3a;
+  margin-bottom:.65rem;
+  font-family:'Outfit',sans-serif;
+}
+
+/* Roles — fila de 3 */
+.login-role-btns{
+  display:grid;grid-template-columns:1fr 1fr 1fr;
+  gap:.5rem;margin-bottom:1.2rem;
+  background:#f0f7f2;border-radius:14px;padding:6px;
+}
 .role-btn{
-  background:var(--panel2);border:2px solid var(--border);border-radius:10px;
-  padding:.7rem .4rem;text-align:center;cursor:pointer;transition:all .2s;
+  border-radius:10px;padding:.75rem .3rem .65rem;
+  text-align:center;cursor:pointer;transition:all .18s;
+  border:2px solid transparent;
+  background:transparent;
 }
-.role-btn:hover{border-color:var(--v3);}
-.role-btn.selected{border-color:var(--verde);background:#0d2218;}
-.role-btn .role-icon{font-size:1.4rem;display:block;margin-bottom:2px;}
-.role-btn .role-name{font-size:.73rem;font-weight:600;color:var(--txt);}
-.role-btn .role-desc{font-size:.6rem;color:var(--txt2);margin-top:1px;}
-.login-field{margin-bottom:.75rem;}
-.login-field label{font-size:.63rem;text-transform:uppercase;letter-spacing:1px;color:var(--txt2);display:block;margin-bottom:3px;}
+.role-btn:hover{ background:rgba(26,122,69,.08); }
+.role-btn.selected{
+  background:#1a7a45;
+  border-color:#1a7a45;
+  box-shadow:0 4px 14px rgba(26,122,69,.3);
+}
+.role-btn .role-icon{
+  display:flex;align-items:center;justify-content:center;
+  margin-bottom:5px;
+  color:#1a7a45;
+}
+.role-btn.selected .role-icon{ color:#ffffff; }
+.role-btn .role-name{
+  font-size:.65rem;font-weight:700;
+  letter-spacing:.8px;color:#1a2a1e;
+  font-family:'Barlow Condensed',sans-serif;
+}
+.role-btn.selected .role-name{ color:#ffffff; }
+.role-btn .role-desc{
+  font-size:.58rem;color:#5a8a6a;margin-top:2px;
+}
+.role-btn.selected .role-desc{ color:rgba(255,255,255,.8); }
+
+/* Campos */
+.login-field{ margin-bottom:.9rem; }
+.login-field label{
+  font-size:.6rem;font-weight:700;
+  text-transform:uppercase;letter-spacing:1.2px;
+  color:#5a8a6a;display:block;margin-bottom:5px;
+  font-family:'Barlow Condensed',sans-serif;
+}
+.login-input,
+.login-select,
 .login-field input{
-  width:100%;background:var(--panel2);border:1px solid var(--border);border-radius:8px;
-  padding:9px 12px;color:var(--txt);font-family:'Outfit',sans-serif;font-size:.88rem;
-  outline:none;transition:border-color .2s;
+  width:100%;background:#ffffff;
+  border:1.5px solid #c8dcc8;border-radius:12px;
+  padding:11px 14px;color:#1a2a1e;
+  font-family:'Outfit',sans-serif;font-size:.9rem;
+  outline:none;transition:border-color .2s, box-shadow .2s;
+  box-sizing:border-box;
 }
-.login-field input:focus{border-color:var(--v3);}
-.login-error{color:var(--red2);font-size:.73rem;margin-bottom:.6rem;display:none;padding:.4rem .7rem;background:#1a0505;border-radius:6px;}
+.login-input:focus,
+.login-select:focus,
+.login-field input:focus{
+  border-color:#1a7a45;
+  box-shadow:0 0 0 3px rgba(26,122,69,.1);
+}
+
+/* Error */
+.login-error{
+  display:none;align-items:center;gap:7px;
+  color:#fff;font-size:.75rem;
+  margin-bottom:.75rem;
+  padding:.5rem .85rem;
+  background:#1a1a1a;border-radius:10px;
+  font-family:'Outfit',sans-serif;
+}
+
+/* Botón entrar */
 .login-btn{
-  width:100%;background:var(--v2);color:#fff;border:none;border-radius:10px;
-  padding:10px;font-family:'Outfit',sans-serif;font-weight:600;font-size:.9rem;
-  cursor:pointer;transition:background .2s;
+  width:100%;background:#1a7a45;color:#fff;
+  border:none;border-radius:14px;
+  padding:14px;
+  font-family:'Bebas Neue',sans-serif;
+  font-size:1.1rem;letter-spacing:3px;
+  cursor:pointer;transition:background .18s, transform .1s;
+  box-shadow:0 4px 16px rgba(26,122,69,.35);
+  margin-bottom:.2rem;
 }
-.login-btn:hover{background:var(--v3);}
-.login-info{font-size:.63rem;color:var(--txt3);text-align:center;margin-top:.75rem;line-height:1.5;}
+.login-btn:hover{ background:#2a9e5a; }
+.login-btn:active{ transform:scale(.98); }
+
+.login-info{
+  font-size:.62rem;color:#7aaa8a;
+  text-align:center;margin-top:.85rem;line-height:1.6;
+}
+
+/* Badges de rol */
 .rol-badge{font-size:.58rem;padding:2px 7px;border-radius:10px;font-weight:600;display:inline-flex;align-items:center;gap:3px;}
-.rol-admin{background:#0d2218;color:var(--neon);border:1px solid var(--verde);}
-.rol-usuario{background:#0d2030;color:var(--blue);border:1px solid #1a5a8a;}
+.rol-admin{background:#e0f5ea;color:#1a7a45;border:1px solid #1a7a45;}
+.rol-usuario{background:#e8f4fb;color:#1a5fa3;border:1px solid #a0c8e8;}
 
 /* Ocultar controles de escritura para rol usuario */
 body.rol-usuario .solo-admin{display:none!important;}
 
-/* Login y roles en tema claro */
-html.tema-claro #login-screen{background:var(--bg);}
-html.tema-claro .login-box{background:#fff;border-color:#1a7a45;box-shadow:0 8px 40px rgba(26,122,69,.2);}
-html.tema-claro .role-btn{background:#f5faf5;border-color:#c2d8c2;}
-html.tema-claro .role-btn.selected{background:#e0f5ea;border-color:#1a7a45;}
-html.tema-claro .rol-admin{background:#e0f5ea;color:#1a7a45;border-color:#1a7a45;}
-html.tema-claro .rol-usuario{background:#e8f4fb;color:#1a5fa3;border-color:#a0c8e8;}
-html.tema-claro .login-field input{background:#fff;border-color:#c2d8c2;color:#1a2a1e;}
+/* Dark mode overrides */
+html:not(.tema-claro) #login-screen{ background:var(--bg); }
+html:not(.tema-claro) .login-box{ background:var(--panel);border:1px solid var(--verde); }
+html:not(.tema-claro) .login-title{ color:var(--neon); }
+html:not(.tema-claro) .login-sub{ color:var(--txt2); }
+html:not(.tema-claro) .login-perfil-lbl{ color:var(--txt2); }
+html:not(.tema-claro) .login-role-btns{ background:var(--panel2); }
+html:not(.tema-claro) .role-btn .role-name{ color:var(--txt); }
+html:not(.tema-claro) .role-btn .role-desc{ color:var(--txt2); }
+html:not(.tema-claro) .role-btn.selected{ background:var(--verde); }
+html:not(.tema-claro) .role-btn .role-icon{ color:var(--neon); }
+html:not(.tema-claro) .role-btn.selected .role-icon{ color:#fff; }
+html:not(.tema-claro) .login-field label{ color:var(--txt2); }
+html:not(.tema-claro) .login-input,
+html:not(.tema-claro) .login-select,
+html:not(.tema-claro) .login-field input{ background:var(--panel2);border-color:var(--border);color:var(--txt); }
+html:not(.tema-claro) .login-error{ background:#1a0505; }
+html:not(.tema-claro) .login-info{ color:var(--txt3); }
 
 /* ═══ FAB — BOTÓN FLOTANTE MÓVIL/TABLET ═══ */
 #fab-clase {
