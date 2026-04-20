@@ -1023,6 +1023,7 @@ html.tema-claro .srch-item { background: #fff; border-color: #d4e4d4; }
 .mob-ci-top {
   display: flex; align-items: center; gap: 10px;
   padding-left: 6px;
+  width: 100%;
 }
 .mob-c-hora {
   font-family: 'DM Mono', monospace;
@@ -1032,7 +1033,7 @@ html.tema-claro .srch-item { background: #fff; border-color: #d4e4d4; }
   font-weight: 600;
   flex-shrink: 0;
 }
-.mob-c-info { flex: 1; min-width: 0; }
+.mob-c-info { flex: 1; min-width: 0; overflow: hidden; }
 .mob-c-nombre {
   font-size: .84rem;
   font-weight: 700;
@@ -1049,6 +1050,9 @@ html.tema-claro .srch-item { background: #fff; border-color: #d4e4d4; }
   font-weight: 400;
   text-transform: uppercase;
   letter-spacing: .5px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 .mob-ci-right {
   display: flex;
@@ -1056,18 +1060,19 @@ html.tema-claro .srch-item { background: #fff; border-color: #d4e4d4; }
   align-items: flex-end;
   gap: 3px;
   flex-shrink: 0;
-  width: 82px;
-  max-width: 82px;
+  width: 90px;
+  min-width: 90px;
+  max-width: 90px;
 }
 .mob-ci-right-top {
-  display: flex; align-items: center; gap: 5px; width: 100%;
-  justify-content: flex-end;
+  display: flex; align-items: center; gap: 6px; width: 100%;
+  justify-content: flex-end; flex-wrap: nowrap;
 }
 .mob-c-asis {
   font-family: 'DM Mono', monospace;
-  font-size: .78rem;
+  font-size: .8rem;
   font-weight: 700;
-  min-width: 34px;
+  flex-shrink: 0;
   text-align: right;
 }
 /* Barra de aforo — solo bajo el badge+% en el lado derecho */
@@ -3232,20 +3237,20 @@ html.tema-claro .rep-card-hdr { color: #1a7a45; }
   }
   .mob-clase-item.pendiente::before { background: #e05050; }
   .mob-clase-item.registrada::before { background: #1a7a45; }
-  .mob-ci-top { display: flex; align-items: center; gap: 10px; padding-left: 6px; }
+  .mob-ci-top { display: flex; align-items: center; gap: 10px; padding-left: 6px; width: 100%; }
   .mob-c-hora {
     font-family: 'DM Mono', monospace; font-size: .72rem;
     color: #8a6200; min-width: 38px; font-weight: 600; flex-shrink: 0;
   }
-  .mob-c-info { flex: 1; min-width: 0; }
+  .mob-c-info { flex: 1; min-width: 0; overflow: hidden; }
   .mob-c-nombre { font-size: .84rem; font-weight: 700; color: #1a2a1e; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; line-height: 1.2; }
-  .mob-c-inst { font-size: .62rem; color: #5a8a6a; display: block; margin-top: 2px; text-transform: uppercase; letter-spacing: .5px; }
+  .mob-c-inst { font-size: .62rem; color: #5a8a6a; display: block; margin-top: 2px; text-transform: uppercase; letter-spacing: .5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .mob-ci-right {
     display: flex; flex-direction: column; align-items: flex-end;
-    gap: 3px; flex-shrink: 0; width: 82px; max-width: 82px;
+    gap: 3px; flex-shrink: 0; width: 90px; min-width: 90px; max-width: 90px;
   }
-  .mob-ci-right-top { display: flex; align-items: center; gap: 5px; width: 100%; justify-content: flex-end; }
-  .mob-c-asis { font-family: 'DM Mono', monospace; font-size: .78rem; font-weight: 700; }
+  .mob-ci-right-top { display: flex; align-items: center; gap: 6px; width: 100%; justify-content: flex-end; flex-wrap: nowrap; }
+  .mob-c-asis { font-family: 'DM Mono', monospace; font-size: .8rem; font-weight: 700; flex-shrink: 0; }
   .mob-ci-bar-right {
     width: 100%; height: 3px; border-radius: 3px;
     background: rgba(26,122,69,.1); overflow: hidden; margin-top: 1px;
