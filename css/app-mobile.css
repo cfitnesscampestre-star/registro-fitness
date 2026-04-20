@@ -551,6 +551,55 @@
     margin-bottom: 6px !important;
   }
 
+  .mob-ci-top {
+    display: flex !important;
+    align-items: center !important;
+    gap: 10px !important;
+    width: 100% !important;
+  }
+
+  .mob-c-info {
+    flex: 1 !important;
+    min-width: 0 !important;
+  }
+
+  .mob-ci-right {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: flex-end !important;
+    gap: 5px !important;
+    flex-shrink: 0 !important;
+    min-width: 80px !important;
+  }
+
+  .mob-ci-right-top {
+    display: flex !important;
+    align-items: center !important;
+    gap: 6px !important;
+    justify-content: flex-end !important;
+  }
+
+  .mob-c-asis {
+    font-family: 'DM Mono', monospace !important;
+    font-size: .8rem !important;
+    font-weight: 700 !important;
+    white-space: nowrap !important;
+  }
+
+  .mob-ci-bar-right {
+    width: 72px !important;
+    height: 3px !important;
+    background: var(--border) !important;
+    border-radius: 2px !important;
+    overflow: hidden !important;
+  }
+
+  .mob-ci-bar-fill {
+    height: 100% !important;
+    border-radius: 2px !important;
+    transition: width .3s !important;
+  }
+
   .mob-clase-item.pendiente {
     background: rgba(224,80,80,.06) !important;
     border-color: rgba(224,80,80,.2) !important;
