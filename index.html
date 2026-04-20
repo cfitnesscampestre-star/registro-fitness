@@ -76,6 +76,200 @@ window._cargarFflate=function(){
 <!-- ═══ ESTILOS ═══ -->
 <link rel="stylesheet" href="css/fitness.css">
 
+
+<style id="login-override">
+/* ══ LOGIN OVERRIDE — estilos inline que no pueden ser pisados ══ */
+#login-screen {
+  position: fixed !important;
+  inset: 0 !important;
+  z-index: 9999 !important;
+  background: #eef4ee !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  padding: 1.2rem !important;
+}
+#login-screen.oculto { display: none !important; }
+
+.login-box {
+  background: #ffffff !important;
+  border-radius: 24px !important;
+  padding: 2rem 1.8rem 1.6rem !important;
+  width: 380px !important;
+  max-width: 94vw !important;
+  box-shadow: 0 12px 48px rgba(26,122,69,.18) !important;
+  border: 1.5px solid rgba(26,122,69,.25) !important;
+}
+
+/* ── Logo: cuadrado verde + título derecha ── */
+.login-logo {
+  display: flex !important;
+  align-items: center !important;
+  gap: 13px !important;
+  margin-bottom: 1.6rem !important;
+}
+.login-logo-icon {
+  width: 52px !important;
+  height: 52px !important;
+  border-radius: 14px !important;
+  background: #1a7a45 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  flex-shrink: 0 !important;
+  box-shadow: 0 4px 14px rgba(26,122,69,.35) !important;
+}
+.login-title {
+  font-family: 'Bebas Neue', sans-serif !important;
+  font-size: 1.55rem !important;
+  letter-spacing: 2.5px !important;
+  color: #1a5c30 !important;
+  line-height: 1.1 !important;
+  display: block !important;
+}
+.login-sub {
+  font-size: .6rem !important;
+  color: #5a8a6a !important;
+  letter-spacing: .8px !important;
+  text-transform: uppercase !important;
+  margin-top: 3px !important;
+  display: block !important;
+}
+.login-perfil-lbl {
+  font-size: .82rem !important;
+  color: #1a2a1e !important;
+  margin-bottom: .7rem !important;
+  font-family: 'Outfit', sans-serif !important;
+}
+
+/* ── Roles: fila de 3 en cápsula gris ── */
+.login-role-btns {
+  display: grid !important;
+  grid-template-columns: 1fr 1fr 1fr !important;
+  gap: 5px !important;
+  margin-bottom: 1.2rem !important;
+  background: #f0f7f2 !important;
+  border-radius: 14px !important;
+  padding: 6px !important;
+}
+.role-btn {
+  border-radius: 10px !important;
+  padding: .8rem .3rem .7rem !important;
+  text-align: center !important;
+  cursor: pointer !important;
+  transition: all .18s !important;
+  border: 2px solid transparent !important;
+  background: transparent !important;
+  -webkit-tap-highlight-color: transparent !important;
+}
+.role-btn:hover {
+  background: rgba(26,122,69,.07) !important;
+}
+.role-btn.selected {
+  background: #1a7a45 !important;
+  border-color: #1a7a45 !important;
+  box-shadow: 0 4px 14px rgba(26,122,69,.3) !important;
+}
+.role-btn .role-icon {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  margin-bottom: 6px !important;
+  color: #1a7a45 !important;
+}
+.role-btn.selected .role-icon { color: #ffffff !important; }
+.role-btn .role-name {
+  font-size: .66rem !important;
+  font-weight: 700 !important;
+  letter-spacing: .8px !important;
+  color: #1a2a1e !important;
+  font-family: 'Barlow Condensed', sans-serif !important;
+  line-height: 1.2 !important;
+}
+.role-btn.selected .role-name { color: #ffffff !important; }
+.role-btn .role-desc {
+  font-size: .58rem !important;
+  color: #5a8a6a !important;
+  margin-top: 2px !important;
+}
+.role-btn.selected .role-desc { color: rgba(255,255,255,.8) !important; }
+
+/* ── Campos ── */
+.login-field { margin-bottom: .9rem !important; }
+.login-field label {
+  font-size: .6rem !important;
+  font-weight: 700 !important;
+  text-transform: uppercase !important;
+  letter-spacing: 1.2px !important;
+  color: #5a8a6a !important;
+  display: block !important;
+  margin-bottom: 5px !important;
+  font-family: 'Barlow Condensed', sans-serif !important;
+}
+.login-input,
+.login-select,
+.login-field input,
+.login-field select {
+  width: 100% !important;
+  background: #ffffff !important;
+  border: 1.5px solid #c8dcc8 !important;
+  border-radius: 12px !important;
+  padding: 11px 14px !important;
+  color: #1a2a1e !important;
+  font-family: 'Outfit', sans-serif !important;
+  font-size: .9rem !important;
+  outline: none !important;
+  box-sizing: border-box !important;
+  transition: border-color .2s !important;
+}
+.login-input:focus,
+.login-select:focus,
+.login-field input:focus {
+  border-color: #1a7a45 !important;
+  box-shadow: 0 0 0 3px rgba(26,122,69,.1) !important;
+}
+
+/* ── Error ── */
+.login-error {
+  display: none;
+  align-items: center !important;
+  gap: 7px !important;
+  color: #fff !important;
+  font-size: .75rem !important;
+  margin-bottom: .75rem !important;
+  padding: .55rem .9rem !important;
+  background: #1a1a1a !important;
+  border-radius: 10px !important;
+  font-family: 'Outfit', sans-serif !important;
+}
+
+/* ── Botón ENTRAR ── */
+.login-btn {
+  width: 100% !important;
+  background: #1a7a45 !important;
+  color: #fff !important;
+  border: none !important;
+  border-radius: 14px !important;
+  padding: 14px !important;
+  font-family: 'Bebas Neue', sans-serif !important;
+  font-size: 1.15rem !important;
+  letter-spacing: 3px !important;
+  cursor: pointer !important;
+  box-shadow: 0 4px 16px rgba(26,122,69,.35) !important;
+  margin-bottom: .2rem !important;
+  transition: background .18s !important;
+}
+.login-btn:hover { background: #2a9e5a !important; }
+.login-btn:active { transform: scale(.98) !important; }
+
+.login-info {
+  font-size: .62rem !important;
+  color: #7aaa8a !important;
+  text-align: center !important;
+  margin-top: .85rem !important;
+  line-height: 1.6 !important;
+}
+</style>
 </head>
 
 
