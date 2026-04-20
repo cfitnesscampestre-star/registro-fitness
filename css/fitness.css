@@ -418,6 +418,7 @@ td .ico{width:1em;height:1em;}
   padding:2rem 1.8rem 1.6rem;
   width:380px;max-width:96vw;
   box-shadow:0 12px 40px rgba(26,122,69,.15);
+  border:1.5px solid rgba(26,122,69,.2);
   animation:fadeUp .3s ease;
 }
 
@@ -457,12 +458,13 @@ td .ico{width:1em;height:1em;}
   background:#f0f7f2;border-radius:14px;padding:6px;
 }
 .role-btn{
-  border-radius:10px;padding:.75rem .3rem .65rem;
+  border-radius:10px;padding:.8rem .3rem .7rem;
   text-align:center;cursor:pointer;transition:all .18s;
   border:2px solid transparent;
   background:transparent;
+  -webkit-tap-highlight-color:transparent;
 }
-.role-btn:hover{ background:rgba(26,122,69,.08); }
+.role-btn:hover{ background:rgba(26,122,69,.07); }
 .role-btn.selected{
   background:#1a7a45;
   border-color:#1a7a45;
@@ -470,14 +472,15 @@ td .ico{width:1em;height:1em;}
 }
 .role-btn .role-icon{
   display:flex;align-items:center;justify-content:center;
-  margin-bottom:5px;
+  margin-bottom:6px;
   color:#1a7a45;
 }
 .role-btn.selected .role-icon{ color:#ffffff; }
 .role-btn .role-name{
-  font-size:.65rem;font-weight:700;
+  font-size:.66rem;font-weight:700;
   letter-spacing:.8px;color:#1a2a1e;
   font-family:'Barlow Condensed',sans-serif;
+  line-height:1.2;
 }
 .role-btn.selected .role-name{ color:#ffffff; }
 .role-btn .role-desc{
@@ -2093,10 +2096,14 @@ html.tema-claro .ag-preview-fecha{color:var(--verde);}
   .chip.cbd { background: #fde8e8 !important; color: #c0392b !important; }
   /* Login */
   #login-screen { background: #f0f5f0 !important; }
-  .login-box { background: #fff !important; border-color: #1a7a45 !important; }
-  .role-btn { background: #f5faf5 !important; border-color: #c2d8c2 !important; }
-  .role-btn.selected { background: #e0f5ea !important; border-color: #1a7a45 !important; }
-  .login-field input { background: #fff !important; border-color: #c2d8c2 !important; color: #1a2a1e !important; }
+  .login-box { background: #fff !important; border: none !important; box-shadow: 0 12px 40px rgba(26,122,69,.15) !important; }
+  .login-role-btns { background: #f0f7f2 !important; }
+  .role-btn { background: transparent !important; border: 2px solid transparent !important; }
+  .role-btn.selected { background: #1a7a45 !important; border-color: #1a7a45 !important; }
+  .role-btn.selected .role-name { color: #fff !important; }
+  .role-btn.selected .role-desc { color: rgba(255,255,255,.8) !important; }
+  .role-btn.selected .role-icon { color: #fff !important; }
+  .login-field input, .login-input, .login-select { background: #fff !important; border: 1.5px solid #c8dcc8 !important; color: #1a2a1e !important; }
   /* Mobile home items */
   .mob-clase-item { background: #fff !important; border-color: #d4e4d4 !important; }
   .mob-kpi { background: #fff !important; border-color: #c8dcc8 !important; }
