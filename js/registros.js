@@ -13,7 +13,8 @@ function guardarClase(){
   const capInput=parseInt(document.getElementById('rc-cap').value)||capDefault;
   const est=document.getElementById('rc-est').value;
   const supId=est==='sub'?parseInt(document.getElementById('rc-suplente').value)||null:null;
-  const motivoSup=est==='sub'?(document.getElementById('rc-motivo').value||'permiso'):null;
+  const motivoSup=est==='sub'?(document.getElementById('rc-motivo').value||'permiso_personal'):null;
+  const motivoFalta=est==='falta'?(document.getElementById('rc-falta-motivo').value||'injustificada'):null;
 
   // Validaciones
   let ok=true;
@@ -57,6 +58,7 @@ function guardarClase(){
     dur:parseInt(document.getElementById('rc-dur').value)||60,
     estado:est, fecha:fechaVal, tipo:'clase', suplente_id:supId,
     motivo_suplencia:motivoSup,
+    motivo_falta:motivoFalta,
     updatedAt:Date.now()});
   cerrarModal('m-clase');renderAll();
   registrarLog('clase', `${inst.nombre} · ${claseNombre} · ${diaVal} ${horaVal} · ${fechaVal} · ${est==='sub'?'Suplencia':'Ok'} · ${asisVal} asis.`);

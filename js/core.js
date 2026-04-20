@@ -154,6 +154,10 @@ function abrirModal(id){
     document.getElementById('rc-inst').innerHTML=opts;
     document.getElementById('rc-fecha').value=fechaLocalStr(hoy);
     document.getElementById('rc-suplente').innerHTML='<option value="">— Sin suplente —</option>'+opts;
+    document.getElementById('rc-est').value='ok';
+    document.getElementById('rc-suplente-row').style.display='none';
+    document.getElementById('rc-motivo-row').style.display='none';
+    document.getElementById('rc-falta-motivo-row').style.display='none';
     cargarHorariosInst();
   }
   if(id==='m-falta'){
@@ -287,8 +291,10 @@ function autoRellenarHorario(){
 function toggleSuplenteClase(){
   const v=document.getElementById('rc-est').value;
   const isSub=(v==='sub');
+  const isFalta=(v==='falta');
   document.getElementById('rc-suplente-row').style.display=isSub?'flex':'none';
   document.getElementById('rc-motivo-row').style.display=isSub?'flex':'none';
+  document.getElementById('rc-falta-motivo-row').style.display=isFalta?'flex':'none';
 }
 function toggleSuplenteRec(){
   const v=document.getElementById('rcc-pres').value;
