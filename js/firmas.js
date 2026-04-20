@@ -81,6 +81,22 @@ function abrirFirmasDigitales() {
         localStorage.removeItem('fc_hoja_firmas_activa');
         if(typeof coordActualizarHojaActiva === 'function') coordActualizarHojaActiva();
       }
+    } else {
+      // ── Sin hoja activa — pedir confirmación antes de crear una nueva ──
+      const _elI = document.getElementById('firmas-fecha-ini');
+      const _elF = document.getElementById('firmas-fecha-fin');
+      const _lun = new Date(lunesBase);
+      const _dom = new Date(_lun); _dom.setDate(_lun.getDate()+6);
+      const _iso = d => fechaLocalStr(d);
+      const _ini = (_elI && _elI.value) ? _elI.value : _iso(_lun);
+      const _fin = (_elF && _elF.value) ? _elF.value : _iso(_dom);
+      const _fmt = s => new Date(s+'T12:00:00').toLocaleDateString('es-MX',{day:'2-digit',month:'long',year:'numeric'});
+      const _ok = confirm(
+        `¿Crear una nueva hoja de firmas digitales?\n\n` +
+        `Periodo: ${_fmt(_ini)} al ${_fmt(_fin)}\n\n` +
+        `Al confirmar se publicará la hoja para que los instructores puedan firmar desde su portal.`
+      );
+      if(!_ok) return;
     }
   } catch(e){}
 
