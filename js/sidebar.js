@@ -2191,69 +2191,133 @@ function calsupSelDia(key) {
 // usando la semana actual como rango por defecto.
 // ═══════════════════════════════════════════════════════════════════
 function abrirFirmasDigitalesDirecto() {
-  // ── VERIFICACIÓN PREVIA: bloquear si hay hoja activa incompleta ──
-  // Esta verificación es idéntica a la de abrirFirmasDigitales()
-  // pero se ejecuta ANTES de abrir cualquier modal.
+  // ── Abrir el menú de gestión de firmas ──────────────────────────────
   try {
-    const hojaActiva = JSON.parse(localStorage.getItem('fc_hoja_firmas_activa') || 'null');
-    if(hojaActiva) {
-      const firmados  = Object.values(hojaActiva.firmas || {}).filter(f => f && f.data).length;
-      const semTxt    = hojaActiva.encabezado || `${hojaActiva.semIni} → ${hojaActiva.semFin}`;
-      const totalInst = typeof instructores !== 'undefined'
-        ? instructores.filter(i => (i.horario||[]).length > 0).length + 1 // +1 coordinador
-        : firmados;
+    const hoja = JSON.parse(localStorage.getItem('fc_hoja_firmas_activa') || 'null');
+    const estadoWrap   = document.getElementById('fm-estado-wrap');
+    const btnContinuar = document.getElementById('fm-btn-continuar');
+    const btnEliminar  = document.getElementById('fm-btn-eliminar');
+    const btnCrearLbl  = document.getElementById('fm-btn-crear-lbl');
+    const btnCrearSub  = document.getElementById('fm-btn-crear-sub');
+    const btnCrear     = document.getElementById('fm-btn-crear');
+
+    if(hoja) {
+      const firmados   = Object.values(hoja.firmas || {}).filter(f => f && f.data).length;
+      const semTxt     = hoja.encabezado || `${hoja.semIni} → ${hoja.semFin}`;
+      const totalInst  = typeof instructores !== 'undefined'
+        ? instructores.filter(i => (i.horario||[]).length > 0).length + 1
+        : Math.max(firmados, 1);
       const pendientes = Math.max(0, totalInst - firmados);
+      const completa   = pendientes === 0 && firmados > 0;
 
-      if(firmados > 0 && pendientes > 0) {
-        // BLOQUEO — no abrir nada
-        if(typeof showToast === 'function')
-          showToast(`🔒 Hoja activa con ${firmados}/${totalInst} firmas. Complétala primero.`, 'warn');
-        alert(
-          `🔒 NO SE PUEDE ABRIR UNA NUEVA HOJA
-
-` +
-          `Semana activa: ${semTxt}
-` +
-          `Firmas recibidas: ${firmados} de ${totalInst} (faltan ${pendientes})
-
-` +
-          `Opciones:
-` +
-          `  1. Espera a que los ${pendientes} instructor(es) restante(s) firmen.
-` +
-          `  2. Ve a "Cerrar hoja y generar nueva" para descartarla.
-
-` +
-          `⚠ Si cierras perderás las ${firmados} firma(s) ya guardadas.`
-        );
-        return; // BLOQUEO TOTAL — no continuar
+      if(estadoWrap) {
+        const color  = completa ? 'rgba(94,255,160,.08)' : firmados > 0 ? 'rgba(232,184,75,.08)' : 'rgba(94,255,160,.04)';
+        const border = completa ? 'rgba(94,255,160,.3)'  : firmados > 0 ? 'rgba(232,184,75,.3)'  : 'rgba(94,255,160,.15)';
+        const icono  = completa ? '\u2705' : firmados > 0 ? '\u23f3' : '\U0001f4cb';
+        estadoWrap.style.background = color;
+        estadoWrap.style.border = `1px solid ${border}`;
+        estadoWrap.style.color = 'var(--txt2)';
+        estadoWrap.innerHTML =
+          `<div style="font-weight:700;color:var(--txt);margin-bottom:3px">${icono} Hoja activa: ${semTxt}</div>` +
+          `<div>${firmados} de ${totalInst} firma${totalInst!==1?'s':''} recibida${firmados!==1?'s':''} \u00b7 ` +
+          (completa
+            ? `<span style="color:var(--neon)">Completa</span>`
+            : `<span style="color:var(--gold2)">${pendientes} pendiente${pendientes!==1?'s':''}</span>`) +
+          `</div>`;
+        estadoWrap.style.display = 'block';
       }
+      if(btnContinuar) {
+        btnContinuar.style.display = 'flex';
+        const subEl = document.getElementById('fm-btn-continuar-sub');
+        if(subEl) subEl.textContent = completa
+          ? 'Hoja completa \u2014 puedes generar el PDF'
+          : `Faltan ${pendientes} firma${pendientes!==1?'s':''}`;
+      }
+      if(btnEliminar) btnEliminar.style.display = 'flex';
+      if(btnCrearLbl) btnCrearLbl.textContent = 'Crear nueva hoja';
+      if(btnCrearSub) btnCrearSub.textContent = firmados > 0
+        ? `\u26a0 Se perder\u00e1n las ${firmados} firma${firmados!==1?'s':''} actuales`
+        : 'Reemplaza la hoja actual vac\u00eda';
+      if(btnCrear) btnCrear.style.background = firmados > 0 ? 'rgba(192,57,43,.75)' : '';
+    } else {
+      if(estadoWrap)   estadoWrap.style.display   = 'none';
+      if(btnContinuar) btnContinuar.style.display  = 'none';
+      if(btnEliminar)  btnEliminar.style.display   = 'none';
+      if(btnCrearLbl)  btnCrearLbl.textContent      = 'Crear nueva hoja';
+      if(btnCrearSub)  btnCrearSub.textContent      = 'Se publicar\u00e1 para que los instructores firmen';
+      if(btnCrear)     btnCrear.style.background    = '';
     }
   } catch(e) {}
 
-  // Sin bloqueo — precalcular semana y abrir el modal de reportes
-  const hoy  = new Date();
-  const dow  = hoy.getDay();
-  const diff = dow === 0 ? -6 : 1 - dow;
-  const lunes = new Date(hoy); lunes.setDate(hoy.getDate() + diff);
-  const dom   = new Date(lunes); dom.setDate(lunes.getDate() + 6);
-  const iso   = d => fechaLocalStr(d);
+  document.getElementById('m-firmas-menu').classList.add('on');
+}
 
-  const modal = document.getElementById('m-reports');
-  if(modal) modal.classList.add('on');
+// ── Acciones del menú de firmas ──────────────────────────────────────
+function fmAccion(accion) {
+  if(accion === 'continuar') {
+    cerrarModal('m-firmas-menu');
+    try {
+      const hoja = JSON.parse(localStorage.getItem('fc_hoja_firmas_activa') || 'null');
+      if(hoja) {
+        const elI = document.getElementById('firmas-fecha-ini');
+        const elF = document.getElementById('firmas-fecha-fin');
+        const elT = document.getElementById('firmas-semana-txt');
+        if(elI) elI.value = hoja.semIni || '';
+        if(elF) elF.value = hoja.semFin || '';
+        if(elT && hoja.encabezado) elT.value = hoja.encabezado;
+        if(typeof firmasActualizarLabel === 'function') firmasActualizarLabel();
+      }
+    } catch(e) {}
+    setTimeout(() => { if(typeof abrirFirmasDigitales === 'function') abrirFirmasDigitales(); }, 100);
+    return;
+  }
 
-  setTimeout(() => {
-    const elIni = document.getElementById('firmas-fecha-ini');
-    const elFin = document.getElementById('firmas-fecha-fin');
-    const elTxt = document.getElementById('firmas-semana-txt');
-    if(elIni && !elIni.value) elIni.value = iso(lunes);
-    if(elFin && !elFin.value) elFin.value = iso(dom);
-    if(elTxt && !elTxt.value && typeof firmasActualizarLabel === 'function')
-      firmasActualizarLabel();
+  if(accion === 'eliminar') {
+    const hoja = (() => { try { return JSON.parse(localStorage.getItem('fc_hoja_firmas_activa') || 'null'); } catch(e){ return null; } })();
+    if(!hoja) { if(typeof showToast==='function') showToast('No hay hoja activa', 'info'); return; }
+    const firmados = Object.values(hoja.firmas || {}).filter(f => f && f.data).length;
+    const semTxt   = hoja.encabezado || `${hoja.semIni} \u2192 ${hoja.semFin}`;
+    const msg = firmados > 0
+      ? `\u00bfEliminar la hoja "${semTxt}"?\n\nTiene ${firmados} firma${firmados!==1?'s':''} guardada${firmados!==1?'s':''}.\nEsta acci\u00f3n no se puede deshacer.`
+      : `\u00bfEliminar la hoja "${semTxt}"?`;
+    if(!confirm(msg)) return;
+    try { localStorage.removeItem('fc_hoja_firmas_activa'); } catch(e) {}
+    try {
+      if(typeof fbDb !== 'undefined' && fbDb)
+        fbDb.ref('fitness/hojaFirmasActiva').remove().catch(()=>{});
+    } catch(e) {}
+    if(typeof coordActualizarHojaActiva === 'function') coordActualizarHojaActiva();
+    if(typeof _syncFirmasBadge === 'function') _syncFirmasBadge();
+    cerrarModal('m-firmas-menu');
+    if(typeof showToast === 'function') showToast('Hoja de firmas eliminada', 'ok');
+    return;
+  }
 
-    // Llamar a abrirFirmasDigitales (que también tiene su propia verificación)
-    if(typeof abrirFirmasDigitales === 'function') abrirFirmasDigitales();
-  }, 150);
+  if(accion === 'crear') {
+    const hoja = (() => { try { return JSON.parse(localStorage.getItem('fc_hoja_firmas_activa') || 'null'); } catch(e){ return null; } })();
+    const firmados = hoja ? Object.values(hoja.firmas || {}).filter(f => f && f.data).length : 0;
+    if(firmados > 0) {
+      if(!confirm(`\u00bfCrear una nueva hoja?\n\nSe perder\u00e1n las ${firmados} firma${firmados!==1?'s':''} guardadas de la hoja actual.\nEsta acci\u00f3n no se puede deshacer.`)) return;
+      try { localStorage.removeItem('fc_hoja_firmas_activa'); } catch(e) {}
+    }
+    cerrarModal('m-firmas-menu');
+    const _hoy  = new Date();
+    const _dow  = _hoy.getDay();
+    const _diff = _dow === 0 ? -6 : 1 - _dow;
+    const _lun  = new Date(_hoy); _lun.setDate(_hoy.getDate() + _diff);
+    const _dom  = new Date(_lun); _dom.setDate(_lun.getDate() + 6);
+    const _iso  = d => (typeof fechaLocalStr === 'function') ? fechaLocalStr(d) : d.toISOString().slice(0,10);
+    const modal = document.getElementById('m-reports');
+    if(modal) modal.classList.add('on');
+    setTimeout(() => {
+      const elI = document.getElementById('firmas-fecha-ini');
+      const elF = document.getElementById('firmas-fecha-fin');
+      if(elI) elI.value = _iso(_lun);
+      if(elF) elF.value = _iso(_dom);
+      if(typeof firmasActualizarLabel === 'function') firmasActualizarLabel();
+      if(typeof abrirFirmasDigitales === 'function') abrirFirmasDigitales();
+    }, 150);
+  }
 }
 
 // ── Actualizar badge de Firmas en el sidebar ─────────────────────
