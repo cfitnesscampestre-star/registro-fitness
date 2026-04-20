@@ -2575,6 +2575,15 @@ window._cargarFflate=function(){
       <option value="sub">⇄ Con Suplente</option>
     </select>
   </div>
+  <div class="fg" id="rc-falta-motivo-row" style="display:none">
+    <label>Motivo de Falta</label>
+    <select id="rc-falta-motivo">
+      <option value="permiso_personal">Permiso Personal</option>
+      <option value="injustificada">Injustificada</option>
+      <option value="vacaciones">Vacaciones</option>
+      <option value="incapacidad">Incapacidad / Enfermedad</option>
+    </select>
+  </div>
   <div class="fg" id="rc-suplente-row" style="display:none">
     <label>Instructor Suplente</label>
     <select id="rc-suplente"><option value="">— Seleccionar suplente —</option></select>
@@ -2602,11 +2611,19 @@ window._cargarFflate=function(){
   <div class="fr">
     <div class="fg"><label>Clase</label><select id="rf-clase"></select></div>
     <div class="fg"><label>Tipo</label>
-      <select id="rf-tipo"><option value="injustificada">Injustificada</option><option value="justificada">Justificada</option><option value="permiso">Permiso</option></select>
+      <select id="rf-tipo">
+        <option value="permiso_personal">Permiso Personal</option>
+        <option value="injustificada">Injustificada</option>
+        <option value="vacaciones">Vacaciones</option>
+        <option value="incapacidad">Incapacidad / Enfermedad</option>
+      </select>
     </div>
   </div>
-  <div class="fg"><label>Día</label>
-    <select id="rf-dia"><option>Lunes</option><option>Martes</option><option>Miércoles</option><option>Jueves</option><option>Viernes</option><option>Sábado</option><option>Domingo</option></select>
+  <div class="fr">
+    <div class="fg"><label>Día</label>
+      <select id="rf-dia"><option>Lunes</option><option>Martes</option><option>Miércoles</option><option>Jueves</option><option>Viernes</option><option>Sábado</option><option>Domingo</option></select>
+    </div>
+    <div class="fg"><label>Fecha</label><input type="date" id="rf-fecha"></div>
   </div>
   <div class="fg"><label>Nota</label><textarea id="rf-nota" placeholder="Motivo..."></textarea></div>
   <button class="bsave" onclick="guardarFalta()">Guardar</button>
@@ -2750,9 +2767,9 @@ window._cargarFflate=function(){
           <option value="">— Seleccionar suplente —</option>
         </select>
         <select id="tc-motivo" style="width:100%;margin-top:.45rem;background:var(--panel2);border:1px solid var(--border);border-radius:8px;padding:7px 10px;color:var(--txt);font-family:'Outfit',sans-serif;font-size:.79rem;outline:none">
-          <option value="permiso">Permiso</option>
+          <option value="permiso_personal">Permiso Personal</option>
+          <option value="injustificada">Injustificada</option>
           <option value="vacaciones">Vacaciones</option>
-          <option value="falta">Falta / Ausencia</option>
           <option value="incapacidad">Incapacidad / Enfermedad</option>
           <option value="otro">Otro</option>
         </select>
@@ -3251,10 +3268,10 @@ window._cargarFflate=function(){
   <div class="fg">
     <label>Motivo</label>
     <select id="spl-motivo">
-      <option value="permiso">Permiso</option>
-      <option value="enfermedad">Enfermedad</option>
+      <option value="permiso_personal">Permiso Personal</option>
+      <option value="injustificada">Injustificada</option>
       <option value="vacaciones">Vacaciones</option>
-      <option value="emergencia">Emergencia</option>
+      <option value="incapacidad">Incapacidad / Enfermedad</option>
       <option value="otro">Otro</option>
     </select>
   </div>
@@ -3396,9 +3413,11 @@ window._cargarFflate=function(){
   </div>
   <div class="fg"><label>Motivo</label>
     <select id="nsup-motivo">
-      <option value="permiso">Permiso</option><option value="medico">Cita médica</option>
-      <option value="vacacion">Vacaciones</option><option value="capacitacion">Capacitación</option>
-      <option value="emergencia">Emergencia</option><option value="otro">Otro</option>
+      <option value="permiso_personal">Permiso Personal</option>
+      <option value="injustificada">Injustificada</option>
+      <option value="vacaciones">Vacaciones</option>
+      <option value="incapacidad">Incapacidad / Enfermedad</option>
+      <option value="otro">Otro</option>
     </select>
   </div>
   <div class="fg"><label>Nota (opcional)</label>
