@@ -276,39 +276,9 @@ function abrirRegistroDesdeCalendario(instId, dia, hora, clase, fechaStr) {
   }
 
   // No existe registro → abrir modal de CREACIÓN con datos precargados
-  // 1. Abrir el modal primero (reconstruye el innerHTML de rc-inst)
-  abrirModal('m-clase');
-
-  // 2. Ahora sobrescribir lo que abrirModal dejó: seleccionar el instructor
-  //    correcto y recargar sus horarios
-  setTimeout(() => {
-    const instSel = document.getElementById('rc-inst');
-    if(!instSel) return;
-    instSel.value = String(instId);
-
-    // Recargar horarios con el instructor correcto
-    cargarHorariosInst();
-
-    // Fecha
-    const fechaInp = document.getElementById('rc-fecha');
-    if(fechaInp) fechaInp.value = fechaStr;
-
-    // Encontrar el índice del slot y seleccionarlo
-    const inst = instructores.find(i => String(i.id) === String(instId));
-    if(!inst || !(inst.horario || []).length) return;
-
-    const ordenDias = ['Lunes','Martes','Miércoles','Jueves','Viernes','Sábado','Domingo'];
-    const slots = [...inst.horario].sort((a, b) => {
-      const di = ordenDias.indexOf(a.dia) - ordenDias.indexOf(b.dia);
-      return di !== 0 ? di : a.hora.localeCompare(b.hora);
-    });
-
-    const idx = slots.findIndex(s => s.dia === dia && s.hora === hora && s.clase === clase);
-    if(idx >= 0) {
-      const selHor = document.getElementById('rc-horario');
-      if(selHor) { selHor.value = String(idx); autoRellenarHorario(); }
-    }
-  }, 80);
+  if(typeof abrirModalClasePreloaded === 'function') {
+    abrirModalClasePreloaded(instId, dia, hora, clase, fechaStr);
+  }
 }
 
 
