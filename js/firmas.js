@@ -30,6 +30,26 @@ function _fdColor(id) {
 
 // ── Abrir el modal ────────────────────────────────────────────────────
 function abrirFirmasDigitales(modo) {
+  // ── Si viene desde "Continuar hoja activa", saltar toda verificación ──────────
+  if(modo === 'continuar') {
+    // Precargar fechas desde la hoja activa y abrir directo
+    try {
+      const hojaC = JSON.parse(localStorage.getItem('fc_hoja_firmas_activa') || 'null');
+      if(hojaC) {
+        const elI = document.getElementById('firmas-fecha-ini');
+        const elF = document.getElementById('firmas-fecha-fin');
+        const elT = document.getElementById('firmas-semana-txt');
+        if(elI) elI.value = hojaC.semIni || '';
+        if(elF) elF.value = hojaC.semFin || '';
+        if(elT && hojaC.encabezado) elT.value = hojaC.encabezado;
+        if(typeof firmasActualizarLabel === 'function') firmasActualizarLabel();
+      }
+    } catch(e) {}
+    // Saltar toda la verificación — ir directo a cargar y abrir
+    _abrirModalFirmasDirecto();
+    return;
+  }
+
   // ── Verificar si hay hoja activa ANTES de abrir ──────────────────────────────
   // El bloqueo se basa en el ESTADO de la hoja, no en las fechas seleccionadas.
   // Reglas:
@@ -200,6 +220,85 @@ function abrirFirmasDigitales(modo) {
     document.getElementById('fd-semana-lbl').textContent = _FD.semana;
   }, 60);
 }
+
+// ── Abrir modal de firmas directo (sin verificaciones) — usado por modo continuar ──
+function _abrirModalFirmasDirecto() {
+  const elI = document.getElementById('firmas-fecha-ini');
+  const elF = document.getElementById('firmas-fecha-fin');
+  const elT = document.getElementById('firmas-semana-txt');
+
+  const lun = new Date(lunesBase);
+  const dom = new Date(lun); dom.setDate(lun.getDate()+6);
+  const iso = d => fechaLocalStr(d);
+  _FD.fechaIni = (elI && elI.value) ? elI.value : iso(lun);
+  _FD.fechaFin = (elF && elF.value) ? elF.value : iso(dom);
+
+  const fmt2 = s => new Date(s+'T12:00:00').toLocaleDateString('es-MX',{day:'2-digit',month:'long'});
+  _FD.semana = (elT && elT.value.trim())
+    ? elT.value.trim()
+    : `${fmt2(_FD.fechaIni)} al ${fmt2(_FD.fechaFin)} ${_FD.fechaIni.slice(0,4)}`;
+
+  const regs = registros.filter(r => r.fecha >= _FD.fechaIni && r.fecha <= _FD.fechaFin);
+  if(!regs.length) { showToast('Sin registros en ese periodo', 'warn'); return; }
+
+  const DIAS_ORD = ['Lunes','Martes','Miércoles','Jueves','Viernes','Sábado','Domingo'];
+  const porInst  = {};
+  regs.forEach(r => {
+    const inst = instructores.find(i => String(i.id) === String(r.inst_id));
+    if(!inst) return;
+    if(!porInst[inst.id]) porInst[inst.id] = { inst, clases: [] };
+    const h = r.hora || '';
+    let horaFmt = h, horaMin = 0;
+    if(h && !h.includes('a.') && !h.includes('p.')) {
+      const [hh, mm] = h.split(':').map(Number);
+      if(!isNaN(hh)) {
+        const s = hh >= 12 ? 'p. m.' : 'a. m.';
+        const h12 = hh === 0 ? 12 : hh > 12 ? hh - 12 : hh;
+        horaFmt = `${h12}:${String(mm||0).padStart(2,'0')} ${s}`;
+        horaMin = hh * 60 + (mm || 0);
+      }
+    }
+    porInst[inst.id].clases.push({
+      dia: r.dia || '', hora: horaFmt, horaMin,
+      clase: (r.clase || '').toUpperCase(),
+      alumnos: r.asistentes !== undefined ? parseInt(r.asistentes) : null,
+      estado: r.estado || 'ok'
+    });
+  });
+
+  _FD.coordNombre = localStorage.getItem('fc_coord_nombre') || 'Coordinador';
+  const entradaCoord = { id:'coord', esCoord:true, inst:{ id:'coord', nombre:_FD.coordNombre }, clases:[] };
+
+  _FD.profesores = [entradaCoord, ...Object.values(porInst)
+    .sort((a,b) => a.inst.nombre.localeCompare(b.inst.nombre))
+    .map(p => {
+      const mapa = {};
+      p.clases.forEach(c => {
+        const k = `${c.dia}|${c.hora}|${c.clase}`;
+        const pri = {falta:2,sub:1,ok:0}[c.estado]||0;
+        if(!mapa[k] || pri > ({falta:2,sub:1,ok:0}[mapa[k].estado]||0)) mapa[k] = c;
+      });
+      const clases = Object.values(mapa).sort((a,b) => {
+        const di = DIAS_ORD.indexOf(a.dia) - DIAS_ORD.indexOf(b.dia);
+        return di !== 0 ? di : (a.horaMin||0) - (b.horaMin||0);
+      });
+      return { inst: p.inst, clases, id: p.inst.id };
+    })
+    .filter(p => p.clases.length > 0)];
+
+  _FD.profActivo = null;
+  _FD.firmas = {};
+  _fdCargarFirmasGuardadas();
+  // No publicar hoja nueva — solo abrir la existente
+  document.getElementById('m-firmas-digitales').classList.add('on');
+  setTimeout(() => {
+    _fdInicializarCanvas();
+    _fdRenderLista();
+    _fdActualizarProgreso();
+    document.getElementById('fd-semana-lbl').textContent = _FD.semana;
+  }, 60);
+}
+
 
 // ── Canvas: inicializar y eventos ─────────────────────────────────────
 function _fdInicializarCanvas() {
