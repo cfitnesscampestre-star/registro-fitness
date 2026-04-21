@@ -950,7 +950,7 @@ function _generarHojaFirmasCore(fechaIni, fechaFin, semana, firmasDigitales){
     doc.rect(leyX - 28, 9.5, 3.5, 3.5, 'F');
     doc.setFont('helvetica','normal');
     doc.setFontSize(6);
-    doc.setTextColor(255,200,200);
+    doc.setTextColor(...CV);
     doc.text('Rojo = Suplencia o Falta', leyX - 23, 12.5);
 
     // Número de página — pie
