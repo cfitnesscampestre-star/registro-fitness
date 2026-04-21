@@ -271,27 +271,33 @@ function abrirRegistroDesdeCalendario(instId, dia, hora, clase, fechaStr) {
     .sort((a, b) => (b.updatedAt || 0) - (a.updatedAt || 0))[0];
 
   if(regExistente) {
-    // Abrir el modal de edición con los datos del registro existente
-    if(typeof abrirEditarRegistro === 'function') {
-      abrirEditarRegistro(regExistente.id);
-    }
+    if(typeof abrirEditarRegistro === 'function') abrirEditarRegistro(regExistente.id);
     return;
   }
 
-  // No existe registro → abrir modal de CREACIÓN (comportamiento original)
+  // No existe registro → abrir modal de CREACIÓN con datos precargados
+  // 1. Setear instructor ANTES de llamar abrirModal, para que cargarHorariosInst
+  //    use el instructor correcto desde el primer momento
+  const opts = instructores.map(i=>`<option value="${i.id}">${i.nombre}</option>`).join('');
+  const instSel = document.getElementById('rc-inst');
+  if(instSel) {
+    instSel.innerHTML = opts;
+    instSel.value = String(instId);
+  }
+
+  // 2. Abrir el modal (que también llama cargarHorariosInst internamente,
+  //    pero ya tiene el instructor correcto seleccionado)
   abrirModal('m-clase');
 
+  // 3. En el siguiente tick, setear horario y fecha (el modal ya está abierto
+  //    y rc-horario ya tiene las opciones del instructor correcto)
   setTimeout(() => {
-    const instSel = document.getElementById('rc-inst');
-    if(!instSel) return;
-
-    instSel.value = String(instId);
-    cargarHorariosInst();
-
+    // Fecha
     const fechaInp = document.getElementById('rc-fecha');
     if(fechaInp) fechaInp.value = fechaStr;
 
-    const inst = instructores.find(i => i.id === instId);
+    // Encontrar el índice del slot
+    const inst = instructores.find(i => String(i.id) === String(instId));
     if(!inst || !(inst.horario || []).length) return;
 
     const ordenDias = ['Lunes','Martes','Miércoles','Jueves','Viernes','Sábado','Domingo'];
@@ -302,8 +308,8 @@ function abrirRegistroDesdeCalendario(instId, dia, hora, clase, fechaStr) {
 
     const idx = slots.findIndex(s => s.dia === dia && s.hora === hora && s.clase === clase);
     if(idx >= 0) {
-      document.getElementById('rc-horario').value = String(idx);
-      autoRellenarHorario();
+      const selHor = document.getElementById('rc-horario');
+      if(selHor) { selHor.value = String(idx); autoRellenarHorario(); }
     }
   }, 60);
 }
