@@ -284,70 +284,6 @@ function autoRellenarHorario(){
   if(sinMsg) sinMsg.style.display = 'none';
 }
 
-// ── Abrir modal de clase con datos precargados (desde tarjeta del día) ──
-function abrirModalClasePreloaded(instId, dia, hora, clase, fechaStr) {
-  const modal = document.getElementById('m-clase');
-  if(!modal) return;
-
-  const opts = instructores.map(i=>`<option value="${i.id}">${i.nombre}</option>`).join('');
-  document.getElementById('rc-inst').innerHTML = opts;
-  document.getElementById('rc-inst').value = String(instId);
-  document.getElementById('rc-suplente').innerHTML = '<option value="">— Sin suplente —</option>' + opts;
-  document.getElementById('rc-est').value = 'ok';
-  document.getElementById('rc-suplente-row').style.display = 'none';
-  document.getElementById('rc-motivo-row').style.display = 'none';
-  const fmr = document.getElementById('rc-falta-motivo-row');
-  if(fmr) fmr.style.display = 'none';
-
-  const inst = instructores.find(i => String(i.id) === String(instId));
-  const selHor = document.getElementById('rc-horario');
-  const preview = document.getElementById('rc-slot-preview');
-  const sinMsg  = document.getElementById('rc-sin-horarios');
-
-  if(!inst || !(inst.horario||[]).length) {
-    selHor.innerHTML = '<option value="">— Sin horarios asignados —</option>';
-    selHor.disabled = true;
-    if(sinMsg) sinMsg.style.display = 'block';
-  } else {
-    selHor.disabled = false;
-    const ordenDias = ['Lunes','Martes','Miércoles','Jueves','Viernes','Sábado','Domingo'];
-    const slots = [...inst.horario].sort((a,b) => {
-      const di = ordenDias.indexOf(a.dia) - ordenDias.indexOf(b.dia);
-      return di !== 0 ? di : a.hora.localeCompare(b.hora);
-    });
-    selHor.innerHTML = '<option value="">— Selecciona un horario —</option>' +
-      slots.map((s,i) => `<option value="${i}">${s.dia}  ·  ${s.hora}  —  ${s.clase}</option>`).join('');
-
-    const idx = slots.findIndex(s => s.dia === dia && s.hora === hora && s.clase === clase);
-    if(idx >= 0) {
-      selHor.value = String(idx);
-      const slot = slots[idx];
-      document.getElementById('rc-clase').value = slot.clase;
-      document.getElementById('rc-dia').value   = slot.dia;
-      document.getElementById('rc-hora').value  = slot.hora;
-      document.getElementById('rc-cap').value   = getCapClase(slot.clase);
-      if(preview) {
-        document.getElementById('rc-prev-clase').textContent = slot.clase;
-        document.getElementById('rc-prev-dia').textContent   = slot.dia;
-        document.getElementById('rc-prev-hora').textContent  = slot.hora;
-        preview.style.display = 'block';
-      }
-      if(sinMsg) sinMsg.style.display = 'none';
-    }
-  }
-
-  document.getElementById('rc-fecha').value = fechaStr;
-
-  // Pre-rellenar asistentes con el último valor usado para ese slot
-  const prevRegs = registros
-    .filter(r => String(r.inst_id)===String(instId) && r.dia===dia && r.hora===hora && r.estado!=='falta')
-    .sort((a,b) => (b.fecha||'').localeCompare(a.fecha||''));
-  document.getElementById('rc-asis').value = prevRegs.length > 0 ? (prevRegs[0].asistentes || 0) : 0;
-
-  modal.classList.add('on');
-}
-
-
 function toggleSuplenteClase(){
   const v=document.getElementById('rc-est').value;
   const isSub=(v==='sub');
@@ -368,6 +304,48 @@ function toggleSuplenteRec(){
 }
 
 // ═══ MODAL INSTRUCTOR ═══
+
+// ═══ FOTO DE INSTRUCTOR ═══════════════════════════════
+function miPrecargarFoto(input) {
+  const file = input.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    // Comprimir a max 200px usando canvas
+    const img = new Image();
+    img.onload = () => {
+      const MAX = 200;
+      const ratio = Math.min(MAX/img.width, MAX/img.height, 1);
+      const canvas = document.createElement('canvas');
+      canvas.width  = Math.round(img.width  * ratio);
+      canvas.height = Math.round(img.height * ratio);
+      canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
+      const data = canvas.toDataURL('image/jpeg', 0.82);
+      document.getElementById('mi-foto-data').value = data;
+      _miMostrarFotoPreview(data);
+    };
+    img.src = e.target.result;
+  };
+  reader.readAsDataURL(file);
+}
+function _miMostrarFotoPreview(data) {
+  const prev = document.getElementById('mi-foto-preview');
+  const del  = document.getElementById('mi-foto-del');
+  if(data) {
+    prev.innerHTML = `<img src="${data}" style="width:100%;height:100%;object-fit:cover;border-radius:50%">`;
+    if(del) del.style.display = 'inline';
+  } else {
+    prev.textContent = '?';
+    if(del) del.style.display = 'none';
+  }
+}
+function miQuitarFoto() {
+  document.getElementById('mi-foto-data').value = '';
+  document.getElementById('mi-foto-input').value = '';
+  _miMostrarFotoPreview(null);
+}
+// ════════════════════════════════════════════════════════
+
 function abrirModalInstructor(id){
   actualizarSelectoresClase();
   if(id){
@@ -378,6 +356,8 @@ function abrirModalInstructor(id){
     document.getElementById('mi-tipo').value=inst.tipo;
     document.getElementById('mi-turno').value=inst.turno;
     document.getElementById('mi-esp').value=inst.esp||'';
+    document.getElementById('mi-foto-data').value=inst.foto||'';
+    _miMostrarFotoPreview(inst.foto||null);
     tmpSlots=[...(inst.horario||[])];
     document.getElementById('mi-del').style.display='block';
   } else {
@@ -387,6 +367,9 @@ function abrirModalInstructor(id){
     document.getElementById('mi-tipo').value='planta';
     document.getElementById('mi-turno').value='ambos';
     document.getElementById('mi-esp').value='';
+    document.getElementById('mi-foto-data').value='';
+    document.getElementById('mi-foto-input').value='';
+    _miMostrarFotoPreview(null);
     tmpSlots=[];
     document.getElementById('mi-del').style.display='none';
   }
@@ -453,9 +436,11 @@ function guardarInstructor(){
   if(duplicado){ showToast(`Ya existe un instructor con el nombre "${nombre}"`, 'warn'); }
   // Mínimo 1 clase en horario si es nuevo
   if(!id && tmpSlots.length===0) showToast('Recuerda agregar el horario del instructor después','info');
+  const fotoData=document.getElementById('mi-foto-data').value||null;
   const data={nombre,tipo:document.getElementById('mi-tipo').value,
     turno:document.getElementById('mi-turno').value,
-    esp:document.getElementById('mi-esp').value.trim(),horario:[...tmpSlots]};
+    esp:document.getElementById('mi-esp').value.trim(),
+    foto:fotoData,horario:[...tmpSlots]};
   if(id){ const idx=instructores.findIndex(i=>String(i.id)===String(id)); if(idx>=0) instructores[idx]={...instructores[idx],...data}; else{ showToast('No se encontró el instructor. Intenta de nuevo.','err'); return; } }
   else{ const nid=instructores.reduce((m,i)=>Math.max(m,i.id||0),0)+1; instructores.push({id:nid,...data}); }
   cerrarModal('m-instructor');renderAll();

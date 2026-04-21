@@ -37,6 +37,23 @@ function abrirPortalInstructorLocal() {
   const nombreEl = document.getElementById('inst-portal-nombre');
   if(nombreEl) nombreEl.textContent = inst ? inst.nombre : 'Instructor';
 
+  // Foto en el avatar del header
+  const avatarRing = document.getElementById('inst-avatar-ring');
+  const avatarSvg  = document.getElementById('inst-avatar-svg');
+  const avatarImg  = document.getElementById('inst-avatar-img');
+  if(avatarImg && avatarSvg) {
+    if(inst && inst.foto) {
+      avatarImg.src = inst.foto;
+      avatarImg.style.display = 'block';
+      avatarSvg.style.display = 'none';
+      if(avatarRing) avatarRing.style.background = 'transparent';
+    } else {
+      avatarImg.style.display = 'none';
+      avatarSvg.style.display = '';
+      if(avatarRing) avatarRing.style.background = '';
+    }
+  }
+
   // Fecha de hoy en el datepicker
   const dp = document.getElementById('inst-date-picker');
   if(dp) dp.value = fechaLocalStr(new Date());
@@ -467,7 +484,15 @@ function instRenderFirmaTab() {
   const chipEl   = document.getElementById('inst-firma-chip');
 
   const iniciales = inst.nombre.split(' ').map(p=>p[0]).join('').slice(0,2).toUpperCase();
-  if(avatarEl) avatarEl.textContent = iniciales;
+  if(avatarEl) {
+    if(inst.foto) {
+      avatarEl.innerHTML = `<img src="${inst.foto}" style="width:100%;height:100%;object-fit:cover;border-radius:50%">`;
+      avatarEl.style.background = 'transparent';
+    } else {
+      avatarEl.textContent = iniciales;
+      avatarEl.style.background = '';
+    }
+  }
   if(nombreEl) nombreEl.textContent = inst.nombre;
 
   const firmas = _instFirmaHojaActiva.firmas || {};
