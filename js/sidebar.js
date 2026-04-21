@@ -2268,7 +2268,7 @@ function fmAccion(accion) {
         if(typeof firmasActualizarLabel === 'function') firmasActualizarLabel();
       }
     } catch(e) {}
-    setTimeout(() => { if(typeof abrirFirmasDigitales === 'function') abrirFirmasDigitales(); }, 100);
+    setTimeout(() => { if(typeof abrirFirmasDigitales === 'function') abrirFirmasDigitales('continuar'); }, 100);
     return;
   }
 

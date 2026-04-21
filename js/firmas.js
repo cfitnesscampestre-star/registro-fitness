@@ -29,7 +29,7 @@ function _fdColor(id) {
 }
 
 // ── Abrir el modal ────────────────────────────────────────────────────
-function abrirFirmasDigitales() {
+function abrirFirmasDigitales(modo) {
   // ── Verificar si hay hoja activa ANTES de abrir ──────────────────────────────
   // El bloqueo se basa en el ESTADO de la hoja, no en las fechas seleccionadas.
   // Reglas:
@@ -52,6 +52,8 @@ function abrirFirmasDigitales() {
       const pendientes = Math.max(0, totalConCoord - firmados);
 
       if(firmados > 0 && pendientes > 0) {
+        // ── Si viene desde "Continuar", abrir directo sin bloquear ──
+        if(modo === 'continuar') { /* caer al flujo normal */ } else {
         // ── BLOQUEO TOTAL: hoja activa con firmas incompletas ──
         showToast(
           `🔒 Hay una hoja activa con ${firmados}/${totalConCoord} firmas. Complétala primero.`,
@@ -67,6 +69,7 @@ function abrirFirmasDigitales() {
           `⚠ Si cierras perderás las ${firmados} firma(s) ya guardadas.`
         );
         return; // BLOQUEO — no seguir
+        } // fin else modo
       } else if(firmados > 0 && pendientes === 0) {
         // ── Todas firmadas — confirmar cierre ──
         const ok = confirm(
@@ -77,9 +80,11 @@ function abrirFirmasDigitales() {
         localStorage.removeItem('fc_hoja_firmas_activa');
         if(typeof coordActualizarHojaActiva === 'function') coordActualizarHojaActiva();
       } else {
-        // ── Sin firmas — reemplazar sin aviso ──
-        localStorage.removeItem('fc_hoja_firmas_activa');
-        if(typeof coordActualizarHojaActiva === 'function') coordActualizarHojaActiva();
+        // ── Sin firmas — reemplazar sin aviso (solo si no es modo continuar) ──
+        if(modo !== 'continuar') {
+          localStorage.removeItem('fc_hoja_firmas_activa');
+          if(typeof coordActualizarHojaActiva === 'function') coordActualizarHojaActiva();
+        }
       }
     } else {
       // ── Sin hoja activa — pedir confirmación antes de crear una nueva ──
