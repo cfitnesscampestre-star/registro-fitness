@@ -1,6 +1,18 @@
 // ═══ HISTORIAL DE CLASES ═══
 let histPagina=0;
 const HIST_POR_PAG=25;
+// Caché para no re-filtrar en cada cambio de página
+let _histCache=null;
+let _histCacheKey='';
+
+function _histCacheKeyActual(){
+  const ini=document.getElementById('hist-fecha-ini')?.value||'';
+  const fin=document.getElementById('hist-fecha-fin')?.value||'';
+  const inst=document.getElementById('hist-inst-fil')?.value||'';
+  const clase=document.getElementById('hist-clase-fil')?.value||'';
+  const estado=document.getElementById('hist-estado-fil')?.value||'';
+  return `${ini}|${fin}|${inst}|${clase}|${estado}|${registros.length}`;
+}
 
 function inicializarFiltrosHistorial(){
   // Solo pone fechas por defecto si los campos están vacíos (primera vez)
@@ -8,7 +20,7 @@ function inicializarFiltrosHistorial(){
   const finEl=document.getElementById('hist-fecha-fin');
   if(!iniEl.value&&!finEl.value){
     const fin=new Date();
-    const ini=new Date();ini.setDate(ini.getDate()-30);
+    const ini=new Date();ini.setDate(ini.getDate()-7);
     iniEl.value=fechaLocalStr(ini);
     finEl.value=fechaLocalStr(fin);
   }
@@ -29,6 +41,8 @@ function inicializarFiltrosHistorial(){
 }
 
 function filtrarRegistrosHistorial(){
+  const key=_histCacheKeyActual();
+  if(_histCache && key===_histCacheKey) return _histCache;
   const ini=document.getElementById('hist-fecha-ini').value;
   const fin=document.getElementById('hist-fecha-fin').value;
   const instId=document.getElementById('hist-inst-fil').value;
@@ -43,6 +57,9 @@ function filtrarRegistrosHistorial(){
     if(estado&&r.estado!==estado)return false;
     return true;
   }).sort((a,b)=>b.fecha.localeCompare(a.fecha)||b.hora.localeCompare(a.hora));
+  _histCache=result;
+  _histCacheKey=key;
+  return result;
 }
 
 function renderHistorial(){
@@ -99,29 +116,60 @@ function renderHistorial(){
     </tr>`;
   }).join('');
 
-  // Paginación
+  // ── Paginación inteligente: máximo 5 botones + anterior/siguiente ──
   const totalPags=Math.ceil(total/HIST_POR_PAG);
   if(totalPags>1){
-    let pags='';
-    for(let i=0;i<totalPags;i++){
-      pags+=`<button class="abtn" onclick="cambiarPagHist(${i})" style="${i===histPagina?'background:var(--verde);color:#fff;border-color:var(--verde)':''}">${i+1}</button> `;
+    const p=histPagina;
+    let start=Math.max(0,p-2);
+    let end=Math.min(totalPags-1,start+4);
+    if(end-start<4) start=Math.max(0,end-4);
+    let btns='';
+    btns+=`<button class="abtn" onclick="cambiarPagHist(${p-1})" ${p===0?'disabled':''} style="font-size:.8rem;padding:4px 9px">‹</button> `;
+    if(start>0){
+      btns+=`<button class="abtn" onclick="cambiarPagHist(0)" style="font-size:.75rem;padding:4px 8px">1</button>`;
+      if(start>1) btns+=`<span style="color:var(--txt3);font-size:.75rem;padding:0 3px">…</span>`;
     }
+    for(let i=start;i<=end;i++){
+      btns+=`<button class="abtn" onclick="cambiarPagHist(${i})" style="${i===p?'background:var(--verde);color:#fff;border-color:var(--verde);':''}font-size:.75rem;padding:4px 8px">${i+1}</button> `;
+    }
+    if(end<totalPags-1){
+      if(end<totalPags-2) btns+=`<span style="color:var(--txt3);font-size:.75rem;padding:0 3px">…</span>`;
+      btns+=`<button class="abtn" onclick="cambiarPagHist(${totalPags-1})" style="font-size:.75rem;padding:4px 8px">${totalPags}</button>`;
+    }
+    btns+=` <button class="abtn" onclick="cambiarPagHist(${p+1})" ${p===totalPags-1?'disabled':''} style="font-size:.8rem;padding:4px 9px">›</button>`;
     document.getElementById('hist-paginacion').innerHTML=
-      `<span style="font-size:.75rem;color:var(--txt2);margin-right:.5rem">Página ${histPagina+1} de ${totalPags} · ${total} registros</span>`+pags;
+      `<div style="display:flex;align-items:center;gap:4px;flex-wrap:wrap;margin-top:.5rem">`+
+      `<span style="font-size:.72rem;color:var(--txt2);margin-right:4px">Página ${p+1} de ${totalPags} · ${total} registros</span>`+
+      btns+`</div>`;
   } else {
     document.getElementById('hist-paginacion').innerHTML='';
   }
 }
 
-function cambiarPagHist(p){histPagina=p;renderHistorial();}
+function cambiarPagHist(p){
+  const lista=filtrarRegistrosHistorial();
+  const totalPags=Math.ceil(lista.length/HIST_POR_PAG);
+  if(p<0||p>=totalPags)return;
+  histPagina=p;
+  renderHistorial();
+  const el=document.getElementById('v-historial');
+  if(el) el.scrollTop=0;
+}
 function limpiarFiltrosHistorial(){
-  const fin=new Date();const ini=new Date();ini.setDate(ini.getDate()-30);
+  _histCache=null; _histCacheKey='';
+  const fin=new Date();const ini=new Date();ini.setDate(ini.getDate()-7);
   document.getElementById('hist-fecha-ini').value=fechaLocalStr(ini);
   document.getElementById('hist-fecha-fin').value=fechaLocalStr(fin);
   document.getElementById('hist-inst-fil').value='';
   document.getElementById('hist-clase-fil').value='';
   document.getElementById('hist-estado-fil').value='';
   histPagina=0;renderHistorial();
+}
+
+function filtroHistorialCambio(){
+  _histCache=null; _histCacheKey='';
+  histPagina=0;
+  renderHistorial();
 }
 
 // ═══ EDITAR REGISTRO ═══
