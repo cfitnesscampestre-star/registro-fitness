@@ -672,6 +672,11 @@ window._cargarFflate=function(){
       <svg class="ico tab-ico" viewBox="0 0 20 20" style="width:.9em;height:.9em"><path d="M4 14 Q6 10 8 12 Q10 14 12 8 Q13 5 15 6" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/><line x1="3" y1="17" x2="17" y2="17" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
       Firma Digital
     </button>
+    <button class="inst-tab-btn" onclick="instSwitchTab('suplencias')" data-t="suplencias" id="inst-tabn-suplencias" style="position:relative">
+      <svg class="ico tab-ico" viewBox="0 0 20 20" style="width:.9em;height:.9em" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><circle cx="7" cy="7" r="3"/><path d="M2 17 Q2 12 7 12 Q9.5 12 11 13.5"/><circle cx="15" cy="11" r="2.5"/><path d="M11 18 Q11 15 15 15 Q19 15 19 18"/><line x1="13.5" y1="8" x2="16.5" y2="8"/><line x1="15" y1="6.5" x2="15" y2="9.5"/></svg>
+      Suplencias
+      <span id="inst-sup-badge" style="display:none;position:absolute;top:4px;right:4px;min-width:16px;height:16px;border-radius:8px;background:var(--red2);color:#fff;font-size:.52rem;font-weight:700;align-items:center;justify-content:center;padding:0 4px;line-height:1"></span>
+    </button>
   </div>
 
   <!-- Contenido del portal (scrollable) -->
@@ -788,6 +793,57 @@ window._cargarFflate=function(){
         </button>
       </div>
     </div>
+
+    <!-- ── TAB: Firma de Suplencias ── -->
+    <div id="inst-panel-suplencias" class="inst-panel" style="display:none">
+
+      <div id="inst-sup-sin-hoja" class="inst-empty-state">
+        <div class="inst-empty-icon">
+          <svg width="28" height="28" viewBox="0 0 52 52" fill="none" stroke="var(--blue)" stroke-width="1.8">
+            <circle cx="18" cy="16" r="8"/><path d="M4 44 Q4 34 18 34 Q24 34 28 37"/>
+            <circle cx="36" cy="30" r="7"/><path d="M26 46 Q26 39 36 39 Q46 39 46 46"/>
+            <line x1="33" y1="22" x2="39" y2="22"/><line x1="36" y1="19" x2="36" y2="25"/>
+          </svg>
+        </div>
+        <div style="font-family:'Bebas Neue',sans-serif;font-size:1.05rem;letter-spacing:2px;color:var(--txt2);margin-bottom:.5rem">Sin reporte de suplencias</div>
+        <div style="font-size:.76rem;color:var(--txt3);line-height:1.7;margin-bottom:1.2rem">Cuando el coordinador active<br>el reporte, aparecerá aquí.</div>
+        <button onclick="instRenderSupTab()" style="background:var(--panel2);border:1px solid var(--border);border-radius:10px;padding:8px 20px;color:var(--txt2);font-family:'Outfit',sans-serif;font-size:.75rem;cursor:pointer;transition:all .2s;font-weight:500" onmouseover="this.style.borderColor='var(--blue)'" onmouseout="this.style.borderColor='var(--border)'">↺ Verificar</button>
+      </div>
+
+      <div id="inst-sup-activa" style="display:none">
+        <div style="font-family:'Bebas Neue',sans-serif;font-size:1.1rem;letter-spacing:2.5px;color:var(--blue);margin-bottom:.2rem">FIRMA DE SUPLENCIAS</div>
+        <div style="font-size:.7rem;color:var(--txt2);margin-bottom:1rem" id="inst-sup-periodo-lbl">—</div>
+
+        <div style="background:linear-gradient(135deg,rgba(41,128,185,.1),rgba(41,128,185,.04));border:1px solid rgba(41,128,185,.25);border-radius:14px;padding:.9rem 1.1rem;margin-bottom:1rem;display:flex;align-items:center;gap:.9rem">
+          <div style="width:44px;height:44px;border-radius:50%;background:linear-gradient(135deg,#1a5278,#2980b9);display:flex;align-items:center;justify-content:center;font-family:'Bebas Neue',sans-serif;font-size:1.15rem;color:#fff;flex-shrink:0" id="inst-sup-avatar">?</div>
+          <div style="flex:1;min-width:0">
+            <div style="font-weight:700;font-size:.88rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" id="inst-sup-nombre-lbl">—</div>
+            <div style="font-size:.63rem;color:var(--txt2);margin-top:2px" id="inst-sup-estado-lbl">Sin firma</div>
+          </div>
+          <span id="inst-sup-chip" style="font-size:.67rem;padding:4px 10px;border-radius:12px;background:rgba(224,80,80,.15);color:var(--red2);font-weight:700;white-space:nowrap;flex-shrink:0">✖ Sin firmar</span>
+        </div>
+
+        <div style="margin-bottom:1.1rem">
+          <div class="inst-section-label">Clases en las que fuiste suplente</div>
+          <div id="inst-sup-clases-tabla" style="background:var(--panel2);border:1px solid var(--border);border-radius:12px;overflow:hidden">
+            <div class="empty" style="padding:1rem">Cargando...</div>
+          </div>
+        </div>
+
+        <div class="inst-canvas-wrap" id="inst-sup-canvas-wrap">
+          <div style="padding:.65rem 1rem;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;background:rgba(0,0,0,.15)">
+            <span style="font-size:.65rem;text-transform:uppercase;letter-spacing:1.2px;color:var(--blue);font-weight:600">✏ Firma aquí como suplente</span>
+            <button id="inst-sup-borrar-btn" onclick="instLimpiarFirmaSup()" style="background:none;border:1px solid var(--border);border-radius:6px;color:var(--txt3);font-size:.64rem;padding:3px 9px;cursor:pointer;font-family:'Outfit',sans-serif;transition:all .2s">↺ Limpiar</button>
+          </div>
+          <canvas id="inst-sup-canvas" style="display:block;width:100%;touch-action:none;cursor:crosshair;background:#fff" height="200"></canvas>
+        </div>
+        <div style="font-size:.66rem;color:var(--txt3);text-align:center;margin-bottom:1rem">Usa tu dedo o stylus para firmar en el área de arriba</div>
+
+        <button id="inst-sup-guardar-btn" onclick="instGuardarFirmaSup()" class="inst-guardar-btn" style="background:linear-gradient(135deg,#1a5278,#2980b9)">
+          ✔ Guardar Firma de Suplencias
+        </button>
+      </div>
+    </div><!-- /inst-panel-suplencias -->
 
   </div><!-- /inst-content -->
 </div><!-- /instructor-screen -->
@@ -3530,80 +3586,39 @@ window._cargarFflate=function(){
 <div class="ov" id="m-hub-suplencias">
 <div class="modal narrow" style="max-width:370px;padding:1.3rem 1.1rem">
   <button class="mcls" onclick="cerrarModal('m-hub-suplencias')"><svg class="ico" viewBox="0 0 20 20"><line x1="5" y1="5" x2="15" y2="15" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><line x1="15" y1="5" x2="5" y2="15" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></button>
-
-  <!-- Título -->
   <div style="display:flex;align-items:center;gap:9px;margin-bottom:1.1rem">
     <div style="width:36px;height:36px;border-radius:10px;background:linear-gradient(135deg,var(--v2),var(--v3));display:flex;align-items:center;justify-content:center;flex-shrink:0">
-      <svg viewBox="0 0 20 20" width="18" height="18" fill="none" stroke="#fff" stroke-width="1.5" stroke-linecap="round">
-        <circle cx="7" cy="7" r="3"/><path d="M2 17 Q2 12 7 12 Q9 12 10.5 13.5"/>
-        <circle cx="15" cy="10" r="2.5"/><path d="M11 18 Q11 14.5 15 14.5 Q19 14.5 19 18"/>
-        <path d="M14 7 L16 7 M15 6 L15 8" stroke-width="1.4"/>
-      </svg>
+      <svg viewBox="0 0 20 20" width="18" height="18" fill="none" stroke="#fff" stroke-width="1.5" stroke-linecap="round"><circle cx="7" cy="7" r="3"/><path d="M2 17 Q2 12 7 12 Q9 12 10.5 13.5"/><circle cx="15" cy="10" r="2.5"/><path d="M11 18 Q11 14.5 15 14.5 Q19 14.5 19 18"/><path d="M14 7 L16 7 M15 6 L15 8" stroke-width="1.4"/></svg>
     </div>
     <div>
       <div style="font-family:'Bebas Neue',sans-serif;font-size:1.15rem;letter-spacing:2px;color:var(--neon);line-height:1">SUPLENCIAS</div>
-      <div style="font-size:.62rem;color:var(--txt3);letter-spacing:.5px">Control y gestión de suplencias</div>
+      <div style="font-size:.62rem;color:var(--txt3)">Control y gestión</div>
     </div>
   </div>
-
-  <!-- Resumen rápido -->
   <div id="hub-sup-resumen" style="background:var(--panel2);border:1px solid var(--border);border-radius:10px;padding:.6rem .85rem;margin-bottom:1rem;font-size:.72rem;color:var(--txt2);display:flex;gap:1.2rem;justify-content:space-around;text-align:center"></div>
-
-  <!-- Opciones -->
   <div style="display:flex;flex-direction:column;gap:.5rem">
-
-    <!-- 1. Planificador -->
     <button onclick="cerrarModal('m-hub-suplencias');abrirSupPlanner()" style="display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:12px;border:1px solid rgba(41,128,185,.35);background:rgba(41,128,185,.1);color:var(--blue);cursor:pointer;font-family:'Outfit',sans-serif;width:100%;transition:background .15s" onmouseover="this.style.background='rgba(41,128,185,.2)'" onmouseout="this.style.background='rgba(41,128,185,.1)'">
-      <div style="width:34px;height:34px;border-radius:9px;background:rgba(41,128,185,.2);display:flex;align-items:center;justify-content:center;flex-shrink:0">
-        <svg viewBox="0 0 20 20" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><rect x="3" y="4" width="14" height="13" rx="2"/><line x1="3" y1="9" x2="17" y2="9"/><line x1="7" y1="2" x2="7" y2="6"/><line x1="13" y1="2" x2="13" y2="6"/><line x1="7" y1="13" x2="13" y2="13"/><line x1="10" y1="11" x2="10" y2="15"/></svg>
-      </div>
-      <div style="text-align:left;flex:1">
-        <div style="font-weight:700;font-size:.84rem">Planificador</div>
-        <div style="font-size:.63rem;opacity:.75;margin-top:1px">Asignar suplentes con anticipación</div>
-      </div>
+      <div style="width:34px;height:34px;border-radius:9px;background:rgba(41,128,185,.2);display:flex;align-items:center;justify-content:center;flex-shrink:0"><svg viewBox="0 0 20 20" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><rect x="3" y="4" width="14" height="13" rx="2"/><line x1="3" y1="9" x2="17" y2="9"/><line x1="7" y1="2" x2="7" y2="6"/><line x1="13" y1="2" x2="13" y2="6"/><line x1="7" y1="13" x2="13" y2="13"/><line x1="10" y1="11" x2="10" y2="15"/></svg></div>
+      <div style="text-align:left;flex:1"><div style="font-weight:700;font-size:.84rem">Planificador</div><div style="font-size:.63rem;opacity:.75;margin-top:1px">Asignar suplentes anticipadamente</div></div>
       <svg viewBox="0 0 20 20" width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><polyline points="7,4 13,10 7,16"/></svg>
     </button>
-
-    <!-- 2. Calendario de suplencias -->
     <button onclick="cerrarModal('m-hub-suplencias');abrirCalSuplencias()" style="display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:12px;border:1px solid rgba(94,255,160,.25);background:rgba(94,255,160,.07);color:var(--neon);cursor:pointer;font-family:'Outfit',sans-serif;width:100%;transition:background .15s" onmouseover="this.style.background='rgba(94,255,160,.15)'" onmouseout="this.style.background='rgba(94,255,160,.07)'">
-      <div style="width:34px;height:34px;border-radius:9px;background:rgba(94,255,160,.12);display:flex;align-items:center;justify-content:center;flex-shrink:0">
-        <svg viewBox="0 0 20 20" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><rect x="3" y="4" width="14" height="13" rx="2"/><line x1="3" y1="9" x2="17" y2="9"/><line x1="7" y1="2" x2="7" y2="6"/><line x1="13" y1="2" x2="13" y2="6"/><circle cx="7" cy="12.5" r="1.1" fill="currentColor" stroke="none"/><circle cx="10" cy="12.5" r="1.1" fill="currentColor" stroke="none"/><circle cx="13" cy="12.5" r="1.1" fill="currentColor" stroke="none"/></svg>
-      </div>
-      <div style="text-align:left;flex:1">
-        <div style="font-weight:700;font-size:.84rem">Calendario</div>
-        <div style="font-size:.63rem;opacity:.75;margin-top:1px">Ver suplencias registradas por día</div>
-      </div>
+      <div style="width:34px;height:34px;border-radius:9px;background:rgba(94,255,160,.12);display:flex;align-items:center;justify-content:center;flex-shrink:0"><svg viewBox="0 0 20 20" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><rect x="3" y="4" width="14" height="13" rx="2"/><line x1="3" y1="9" x2="17" y2="9"/><line x1="7" y1="2" x2="7" y2="6"/><line x1="13" y1="2" x2="13" y2="6"/><circle cx="7" cy="12.5" r="1.1" fill="currentColor" stroke="none"/><circle cx="10" cy="12.5" r="1.1" fill="currentColor" stroke="none"/><circle cx="13" cy="12.5" r="1.1" fill="currentColor" stroke="none"/></svg></div>
+      <div style="text-align:left;flex:1"><div style="font-weight:700;font-size:.84rem">Calendario</div><div style="font-size:.63rem;opacity:.75;margin-top:1px">Ver suplencias por día</div></div>
       <svg viewBox="0 0 20 20" width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><polyline points="7,4 13,10 7,16"/></svg>
     </button>
-
-    <!-- 3. Reporte de suplencias -->
     <button onclick="cerrarModal('m-hub-suplencias');hubAbrirReporteSuplencias()" style="display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:12px;border:1px solid rgba(232,184,75,.3);background:rgba(232,184,75,.08);color:var(--gold2);cursor:pointer;font-family:'Outfit',sans-serif;width:100%;transition:background .15s" onmouseover="this.style.background='rgba(232,184,75,.16)'" onmouseout="this.style.background='rgba(232,184,75,.08)'">
-      <div style="width:34px;height:34px;border-radius:9px;background:rgba(232,184,75,.12);display:flex;align-items:center;justify-content:center;flex-shrink:0">
-        <svg viewBox="0 0 20 20" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><rect x="4" y="2" width="12" height="16" rx="2"/><line x1="7" y1="7" x2="13" y2="7"/><line x1="7" y1="10" x2="13" y2="10"/><line x1="7" y1="13" x2="10" y2="13"/></svg>
-      </div>
-      <div style="text-align:left;flex:1">
-        <div style="font-weight:700;font-size:.84rem">Reporte de suplencias</div>
-        <div style="font-size:.63rem;opacity:.75;margin-top:1px">Consultar y exportar por periodo</div>
-      </div>
+      <div style="width:34px;height:34px;border-radius:9px;background:rgba(232,184,75,.12);display:flex;align-items:center;justify-content:center;flex-shrink:0"><svg viewBox="0 0 20 20" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><rect x="4" y="2" width="12" height="16" rx="2"/><line x1="7" y1="7" x2="13" y2="7"/><line x1="7" y1="10" x2="13" y2="10"/><line x1="7" y1="13" x2="10" y2="13"/></svg></div>
+      <div style="text-align:left;flex:1"><div style="font-weight:700;font-size:.84rem">Reporte de suplencias</div><div style="font-size:.63rem;opacity:.75;margin-top:1px">Consultar y exportar por periodo</div></div>
       <svg viewBox="0 0 20 20" width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><polyline points="7,4 13,10 7,16"/></svg>
     </button>
-
-    <!-- Divider -->
     <div style="border-top:1px solid var(--border);margin:.1rem 0"></div>
-
-    <!-- 4. Control de firmas de suplencias -->
-    <button onclick="cerrarModal('m-hub-suplencias');hubAbrirFirmasSuplencias()" style="display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:12px;border:1px solid var(--border);background:var(--panel2);color:var(--txt);cursor:pointer;font-family:'Outfit',sans-serif;width:100%;transition:background .15s" onmouseover="this.style.borderColor='var(--v3)'" onmouseout="this.style.borderColor='var(--border)'">
-      <div style="width:34px;height:34px;border-radius:9px;background:rgba(26,122,69,.12);display:flex;align-items:center;justify-content:center;flex-shrink:0">
-        <svg viewBox="0 0 20 20" width="16" height="16" fill="none" stroke="var(--neon)" stroke-width="1.5" stroke-linecap="round"><rect x="4" y="2" width="12" height="16" rx="2"/><path d="M7 12 Q9 9 11 11 Q13 13 15 9" stroke-width="1.6"/><line x1="7" y1="15" x2="13" y2="15" opacity=".5"/></svg>
-      </div>
-      <div style="text-align:left;flex:1">
-        <div style="font-weight:700;font-size:.84rem">Control de firmas</div>
-        <div style="font-size:.63rem;color:var(--txt3);margin-top:1px">Firmas digitales de suplentes · reporte con firmas</div>
-      </div>
-      <div id="hub-firmas-badge" style="display:none;min-width:20px;height:20px;border-radius:10px;background:var(--red2);color:#fff;font-size:.6rem;font-weight:700;display:flex;align-items:center;justify-content:center;padding:0 5px;flex-shrink:0"></div>
+    <button onclick="cerrarModal('m-hub-suplencias');hubAbrirFirmasSuplencias()" style="display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:12px;border:1px solid var(--border);background:var(--panel2);color:var(--txt);cursor:pointer;font-family:'Outfit',sans-serif;width:100%;transition:all .15s" onmouseover="this.style.borderColor='var(--v3)'" onmouseout="this.style.borderColor='var(--border)'">
+      <div style="width:34px;height:34px;border-radius:9px;background:rgba(26,122,69,.12);display:flex;align-items:center;justify-content:center;flex-shrink:0"><svg viewBox="0 0 20 20" width="16" height="16" fill="none" stroke="var(--neon)" stroke-width="1.5" stroke-linecap="round"><rect x="4" y="2" width="12" height="16" rx="2"/><path d="M7 12 Q9 9 11 11 Q13 13 15 9" stroke-width="1.6"/><line x1="7" y1="15" x2="13" y2="15" opacity=".5"/></svg></div>
+      <div style="text-align:left;flex:1"><div style="font-weight:700;font-size:.84rem">Control de firmas</div><div style="font-size:.63rem;color:var(--txt3);margin-top:1px">Publicar reporte · Firmas digitales de suplentes</div></div>
+      <div id="hub-firmas-badge" style="display:none;min-width:20px;height:20px;border-radius:10px;background:var(--red2);color:#fff;font-size:.6rem;font-weight:700;align-items:center;justify-content:center;padding:0 5px;flex-shrink:0"></div>
       <svg viewBox="0 0 20 20" width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" style="flex-shrink:0"><polyline points="7,4 13,10 7,16"/></svg>
     </button>
-
   </div>
 </div>
 </div>
@@ -3612,235 +3627,604 @@ window._cargarFflate=function(){
 <div class="ov" id="m-firmas-suplencias-ctrl">
 <div class="modal narrow" style="max-width:400px;padding:1.2rem 1.1rem">
   <button class="mcls" onclick="cerrarModal('m-firmas-suplencias-ctrl')"><svg class="ico" viewBox="0 0 20 20"><line x1="5" y1="5" x2="15" y2="15" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><line x1="15" y1="5" x2="5" y2="15" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></button>
-
   <div style="display:flex;align-items:center;gap:9px;margin-bottom:1rem">
-    <div style="width:34px;height:34px;border-radius:9px;background:rgba(26,122,69,.15);display:flex;align-items:center;justify-content:center;flex-shrink:0">
-      <svg viewBox="0 0 20 20" width="16" height="16" fill="none" stroke="var(--neon)" stroke-width="1.5" stroke-linecap="round"><rect x="4" y="2" width="12" height="16" rx="2"/><path d="M7 12 Q9 9 11 11 Q13 13 15 9" stroke-width="1.6"/><line x1="7" y1="15" x2="13" y2="15" opacity=".5"/></svg>
-    </div>
-    <div>
-      <div style="font-family:'Bebas Neue',sans-serif;font-size:1.05rem;letter-spacing:2px;color:var(--neon)">CONTROL DE FIRMAS</div>
-      <div style="font-size:.62rem;color:var(--txt3)">Suplencias digitales</div>
-    </div>
+    <div style="width:34px;height:34px;border-radius:9px;background:rgba(26,122,69,.15);display:flex;align-items:center;justify-content:center;flex-shrink:0"><svg viewBox="0 0 20 20" width="16" height="16" fill="none" stroke="var(--neon)" stroke-width="1.5" stroke-linecap="round"><rect x="4" y="2" width="12" height="16" rx="2"/><path d="M7 12 Q9 9 11 11 Q13 13 15 9" stroke-width="1.6"/><line x1="7" y1="15" x2="13" y2="15" opacity=".5"/></svg></div>
+    <div><div style="font-family:'Bebas Neue',sans-serif;font-size:1.05rem;letter-spacing:2px;color:var(--neon)">CONTROL DE FIRMAS</div><div style="font-size:.62rem;color:var(--txt3)">Suplencias digitales</div></div>
   </div>
-
-  <!-- Resumen de firmas pendientes -->
   <div id="fsc-resumen" style="background:var(--panel2);border:1px solid var(--border);border-radius:10px;padding:.65rem .85rem;margin-bottom:.9rem;font-size:.72rem;color:var(--txt2)">Cargando...</div>
-
   <div style="display:flex;flex-direction:column;gap:.45rem">
 
-    <!-- Ver suplencias pendientes de firma (coordinador) -->
+    <!-- PUBLICAR reporte de firmas para instructores -->
+    <button onclick="hubPublicarReporteFirmas()" style="display:flex;align-items:center;gap:10px;padding:11px 13px;border-radius:10px;border:1px solid rgba(94,255,160,.35);background:rgba(94,255,160,.08);color:var(--neon);cursor:pointer;font-family:'Outfit',sans-serif;width:100%;transition:background .15s" onmouseover="this.style.background='rgba(94,255,160,.18)'" onmouseout="this.style.background='rgba(94,255,160,.08)'">
+      <svg viewBox="0 0 20 20" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M10 3 L10 13 M6 9 L10 13 L14 9"/><rect x="3" y="15" width="14" height="3" rx="1" fill="none"/></svg>
+      <div style="text-align:left;flex:1"><div style="font-weight:700;font-size:.82rem">Publicar reporte de firmas</div><div style="font-size:.62rem;opacity:.8;margin-top:1px">Activa el tab "Suplencias" en el portal de los instructores</div></div>
+    </button>
+
+    <!-- CERRAR reporte -->
+    <button id="fsc-btn-cerrar" onclick="hubCerrarReporteFirmas()" style="display:none;align-items:center;gap:10px;padding:11px 13px;border-radius:10px;border:1px solid rgba(192,57,43,.35);background:rgba(192,57,43,.08);color:var(--red2);cursor:pointer;font-family:'Outfit',sans-serif;width:100%;transition:background .15s" onmouseover="this.style.background='rgba(192,57,43,.18)'" onmouseout="this.style.background='rgba(192,57,43,.08)'">
+      <svg viewBox="0 0 20 20" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><polyline points="4,6 6,6 16,6"/><path d="M7 6V4h6v2M8 9v6M12 9v6"/><rect x="5" y="6" width="10" height="11" rx="1.5"/></svg>
+      <div style="text-align:left;flex:1"><div style="font-weight:700;font-size:.82rem">Cerrar reporte activo</div><div style="font-size:.62rem;opacity:.8;margin-top:1px">Los instructores ya no podrán firmar</div></div>
+    </button>
+
+    <!-- VER pendientes -->
     <button onclick="hubVerPendientesFirma()" style="display:flex;align-items:center;gap:10px;padding:11px 13px;border-radius:10px;border:1px solid rgba(224,80,80,.35);background:rgba(224,80,80,.08);color:var(--red2);cursor:pointer;font-family:'Outfit',sans-serif;width:100%;transition:background .15s" onmouseover="this.style.background='rgba(224,80,80,.16)'" onmouseout="this.style.background='rgba(224,80,80,.08)'">
       <svg viewBox="0 0 20 20" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="10" cy="10" r="7"/><line x1="10" y1="7" x2="10" y2="11"/><circle cx="10" cy="13.5" r=".8" fill="currentColor" stroke="none"/></svg>
-      <div style="text-align:left;flex:1">
-        <div style="font-weight:700;font-size:.82rem">Suplencias sin firma</div>
-        <div style="font-size:.62rem;opacity:.8;margin-top:1px">Ver cuáles faltan por firmar</div>
-      </div>
+      <div style="text-align:left;flex:1"><div style="font-weight:700;font-size:.82rem">Suplencias sin firma</div><div style="font-size:.62rem;opacity:.8;margin-top:1px">Ver cuáles faltan por firmar</div></div>
       <span id="fsc-badge-pend" style="display:none;min-width:20px;height:20px;border-radius:10px;background:var(--red2);color:#fff;font-size:.62rem;font-weight:700;align-items:center;justify-content:center;padding:0 5px"></span>
     </button>
 
-    <!-- Generar reporte con firmas -->
+    <!-- GENERAR PDF con firmas -->
     <button onclick="hubGenerarReporteConFirmas()" style="display:flex;align-items:center;gap:10px;padding:11px 13px;border-radius:10px;border:1px solid rgba(41,128,185,.35);background:rgba(41,128,185,.08);color:var(--blue);cursor:pointer;font-family:'Outfit',sans-serif;width:100%;transition:background .15s" onmouseover="this.style.background='rgba(41,128,185,.18)'" onmouseout="this.style.background='rgba(41,128,185,.08)'">
       <svg viewBox="0 0 20 20" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><rect x="4" y="7" width="12" height="8" rx="1.5"/><path d="M6 7V4H14V7"/><rect x="6" y="12" width="8" height="4" rx="1"/><circle cx="13.5" cy="10" r="1" fill="currentColor" stroke="none"/></svg>
-      <div style="text-align:left;flex:1">
-        <div style="font-weight:700;font-size:.82rem">Reporte con firmas</div>
-        <div style="font-size:.62rem;opacity:.8;margin-top:1px">PDF con la firma digital de cada suplente</div>
-      </div>
+      <div style="text-align:left;flex:1"><div style="font-weight:700;font-size:.82rem">Reporte con firmas</div><div style="font-size:.62rem;opacity:.8;margin-top:1px">PDF con firma digital de cada suplente</div></div>
     </button>
 
-    <!-- Hoja de firmas semanal (el sistema existente) -->
     <div style="border-top:1px solid var(--border);padding-top:.45rem;margin-top:.1rem"></div>
     <button onclick="cerrarModal('m-firmas-suplencias-ctrl');abrirFirmasDigitalesDirecto()" style="display:flex;align-items:center;gap:10px;padding:11px 13px;border-radius:10px;border:1px solid var(--border);background:var(--panel2);color:var(--txt2);cursor:pointer;font-family:'Outfit',sans-serif;width:100%;transition:all .15s" onmouseover="this.style.borderColor='var(--v3)'" onmouseout="this.style.borderColor='var(--border)'">
       <svg viewBox="0 0 20 20" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M4 14 Q6 10 8 12 Q10 14 12 8 Q13 5 15 6"/><line x1="3" y1="17" x2="17" y2="17"/></svg>
-      <div style="text-align:left;flex:1">
-        <div style="font-weight:600;font-size:.82rem">Hoja de firmas semanal</div>
-        <div style="font-size:.62rem;opacity:.7;margin-top:1px">Firmas de asistencia general de instructores</div>
-      </div>
+      <div style="text-align:left;flex:1"><div style="font-weight:600;font-size:.82rem">Hoja de firmas semanal</div><div style="font-size:.62rem;opacity:.7;margin-top:1px">Firmas de asistencia general</div></div>
     </button>
-
   </div>
 
-  <!-- Lista de pendientes (se muestra/oculta) -->
   <div id="fsc-lista-pendientes" style="display:none;margin-top:.9rem;border-top:1px solid var(--border);padding-top:.8rem"></div>
-
-  <!-- Picker de fechas para reporte con firmas -->
   <div id="fsc-picker-reporte" style="display:none;margin-top:.9rem;border-top:1px solid var(--border);padding-top:.8rem">
     <div style="font-size:.68rem;text-transform:uppercase;letter-spacing:1px;color:var(--txt3);margin-bottom:.5rem;font-weight:600">Periodo para el reporte</div>
     <div class="fr" style="gap:.5rem;margin-bottom:.6rem">
       <div class="fg"><label>Desde</label><input type="date" id="fsc-fecha-ini" class="ctrl"></div>
       <div class="fg"><label>Hasta</label><input type="date" id="fsc-fecha-fin" class="ctrl"></div>
     </div>
-    <button onclick="hubConfirmarReporteConFirmas()" class="bsave" style="width:100%;font-size:.8rem;padding:9px">
-      <svg class="ico" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><rect x="4" y="7" width="12" height="8" rx="1.5"/><path d="M6 7V4H14V7"/><circle cx="13.5" cy="10" r="1" fill="currentColor" stroke="none"/></svg>
-      Generar PDF con firmas
+    <button onclick="hubConfirmarReporteConFirmas()" class="bsave" style="width:100%;font-size:.8rem;padding:9px">Generar PDF con firmas</button>
+  </div>
+
+  <!-- Picker para publicar reporte -->
+  <div id="fsc-picker-publicar" style="display:none;margin-top:.9rem;border-top:1px solid var(--border);padding-top:.8rem">
+    <div style="font-size:.68rem;text-transform:uppercase;letter-spacing:1px;color:var(--txt3);margin-bottom:.5rem;font-weight:600">Periodo del reporte a publicar</div>
+    <div class="fr" style="gap:.5rem;margin-bottom:.6rem">
+      <div class="fg"><label>Desde</label><input type="date" id="fsc-pub-ini" class="ctrl"></div>
+      <div class="fg"><label>Hasta</label><input type="date" id="fsc-pub-fin" class="ctrl"></div>
+    </div>
+    <input type="text" id="fsc-pub-enc" class="ctrl" placeholder="Etiqueta (ej: Abril 2026)" style="width:100%;margin-bottom:.5rem">
+    <button onclick="hubConfirmarPublicarReporte()" class="bsave" style="width:100%;font-size:.8rem;padding:9px;background:linear-gradient(135deg,var(--v2),var(--v3))">
+      <svg class="ico" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><path d="M10 3 L10 13 M6 9 L10 13 L14 9"/><rect x="3" y="15" width="14" height="3" rx="1"/></svg>
+      Publicar para instructores
     </button>
   </div>
 </div>
 </div>
 
 <script>
-// ═══ HUB DE SUPLENCIAS — lógica ═══════════════════════════════════════
+// ══ HUB DE SUPLENCIAS — lógica coordinador ══
 
 function abrirHubSuplencias() {
-  // Resumen rápido
   try {
-    var hoy = typeof fechaLocalStr === 'function' ? fechaLocalStr(new Date()) : new Date().toISOString().slice(0,10);
-    var semIni = (() => { var d=new Date(); d.setDate(d.getDate()-((d.getDay()+6)%7)); return typeof fechaLocalStr==='function'?fechaLocalStr(d):d.toISOString().slice(0,10); })();
-    var semFin = (() => { var d=new Date(); d.setDate(d.getDate()-((d.getDay()+6)%7)+6); return typeof fechaLocalStr==='function'?fechaLocalStr(d):d.toISOString().slice(0,10); })();
-
-    var supsTotal  = (registros||[]).filter(r=>r.estado==='sub').length;
-    var supsSemana = (registros||[]).filter(r=>r.estado==='sub'&&r.fecha>=semIni&&r.fecha<=semFin).length;
-    var planPend   = (suplenciasPlan||[]).filter(s=>s.fecha>=hoy&&s.estado!=='rechazado').length;
-
-    var resumen = document.getElementById('hub-sup-resumen');
-    if(resumen) resumen.innerHTML = [
-      '<div><div style="font-family:\'Bebas Neue\',sans-serif;font-size:1.3rem;color:var(--blue);line-height:1">'+supsSemana+'</div><div style="font-size:.6rem;color:var(--txt3)">esta semana</div></div>',
-      '<div style="width:1px;background:var(--border)"></div>',
-      '<div><div style="font-family:\'Bebas Neue\',sans-serif;font-size:1.3rem;color:var(--gold2);line-height:1">'+planPend+'</div><div style="font-size:.6rem;color:var(--txt3)">planificadas</div></div>',
-      '<div style="width:1px;background:var(--border)"></div>',
-      '<div><div style="font-family:\'Bebas Neue\',sans-serif;font-size:1.3rem;color:var(--neon);line-height:1">'+supsTotal+'</div><div style="font-size:.6rem;color:var(--txt3)">total historial</div></div>'
+    const hoy=typeof fechaLocalStr==='function'?fechaLocalStr(new Date()):new Date().toISOString().slice(0,10);
+    const lun=new Date(); lun.setDate(lun.getDate()-((lun.getDay()+6)%7));
+    const dom=new Date(lun); dom.setDate(lun.getDate()+6);
+    const fmt=d=>typeof fechaLocalStr==='function'?fechaLocalStr(d):d.toISOString().slice(0,10);
+    const semIni=fmt(lun), semFin=fmt(dom);
+    const supsTotal=(registros||[]).filter(r=>r.estado==='sub').length;
+    const supsSem=(registros||[]).filter(r=>r.estado==='sub'&&r.fecha>=semIni&&r.fecha<=semFin).length;
+    const planPend=(suplenciasPlan||[]).filter(s=>s.fecha>=hoy&&s.estado!=='rechazado').length;
+    const r=document.getElementById('hub-sup-resumen');
+    if(r) r.innerHTML=[
+      `<div><div style="font-family:'Bebas Neue',sans-serif;font-size:1.3rem;color:var(--blue);line-height:1">${supsSem}</div><div style="font-size:.6rem;color:var(--txt3)">esta semana</div></div>`,
+      `<div style="width:1px;background:var(--border)"></div>`,
+      `<div><div style="font-family:'Bebas Neue',sans-serif;font-size:1.3rem;color:var(--gold2);line-height:1">${planPend}</div><div style="font-size:.6rem;color:var(--txt3)">planificadas</div></div>`,
+      `<div style="width:1px;background:var(--border)"></div>`,
+      `<div><div style="font-family:'Bebas Neue',sans-serif;font-size:1.3rem;color:var(--neon);line-height:1">${supsTotal}</div><div style="font-size:.6rem;color:var(--txt3)">total</div></div>`
     ].join('');
-
-    // Badge de firmas pendientes
-    var firmasSup = {};
-    try { firmasSup = JSON.parse(localStorage.getItem('fc_firmas_suplencias')||'{}'); } catch(e){}
-    var sinFirma = (registros||[]).filter(r=>r.estado==='sub'&&r.suplente_id&&!firmasSup[String(r.id)]).length;
-    var badge = document.getElementById('hub-firmas-badge');
-    if(badge) {
-      if(sinFirma > 0) {
-        badge.textContent = sinFirma;
-        badge.style.display = 'flex';
-      } else {
-        badge.style.display = 'none';
-      }
-    }
+    const firmasSup=JSON.parse(localStorage.getItem('fc_firmas_suplencias')||'{}');
+    const sinFirma=(registros||[]).filter(r=>r.estado==='sub'&&r.suplente_id&&!firmasSup[String(r.id)]).length;
+    const badge=document.getElementById('hub-firmas-badge');
+    if(badge){badge.textContent=sinFirma;badge.style.display=sinFirma>0?'flex':'none';}
   } catch(e) {}
-
   document.getElementById('m-hub-suplencias').classList.add('on');
 }
 
 function hubAbrirReporteSuplencias() {
-  // Pre-llenar fechas con semana actual
-  var ini = document.getElementById('sup-fecha-ini');
-  var fin = document.getElementById('sup-fecha-fin');
-  if(ini && !ini.value) {
-    var lun = new Date(); lun.setDate(lun.getDate()-((lun.getDay()+6)%7));
-    var dom = new Date(lun); dom.setDate(lun.getDate()+6);
-    var fmt = d => typeof fechaLocalStr==='function' ? fechaLocalStr(d) : d.toISOString().slice(0,10);
-    ini.value = fmt(lun); fin.value = fmt(dom);
-  }
-  // Poblar selector de suplentes
-  if(typeof instructores !== 'undefined') {
-    var sel = document.getElementById('sup-filtro-inst');
-    if(sel) {
-      sel.innerHTML = '<option value="">— Todos los suplentes —</option>' +
-        instructores.map(i=>'<option value="'+i.id+'">'+i.nombre+'</option>').join('');
-    }
-  }
+  const ini=document.getElementById('sup-fecha-ini'), fin=document.getElementById('sup-fecha-fin');
+  if(ini&&!ini.value){const lun=new Date();lun.setDate(lun.getDate()-((lun.getDay()+6)%7));const dom=new Date(lun);dom.setDate(lun.getDate()+6);const f=d=>typeof fechaLocalStr==='function'?fechaLocalStr(d):d.toISOString().slice(0,10);ini.value=f(lun);fin.value=f(dom);}
+  if(typeof instructores!=='undefined'){const sel=document.getElementById('sup-filtro-inst');if(sel)sel.innerHTML='<option value="">— Todos —</option>'+instructores.map(i=>`<option value="${i.id}">${i.nombre}</option>`).join('');}
   document.getElementById('m-suplencias').classList.add('on');
 }
 
 function hubAbrirFirmasSuplencias() {
-  // Calcular resumen
   try {
-    var firmasSup = {};
-    try { firmasSup = JSON.parse(localStorage.getItem('fc_firmas_suplencias')||'{}'); } catch(e){}
-    var todos      = (registros||[]).filter(r=>r.estado==='sub'&&r.suplente_id);
-    var firmadas   = todos.filter(r=>firmasSup[String(r.id)]).length;
-    var sinFirma   = todos.length - firmadas;
-
-    var resumen = document.getElementById('fsc-resumen');
-    if(resumen) {
-      var col = sinFirma > 0 ? 'var(--red2)' : 'var(--neon)';
-      resumen.innerHTML =
-        '<div style="display:flex;justify-content:space-around;text-align:center">' +
-        '<div><div style="font-family:\'Bebas Neue\',sans-serif;font-size:1.4rem;color:var(--blue);line-height:1">'+todos.length+'</div><div style="font-size:.6rem;color:var(--txt3)">suplencias totales</div></div>' +
-        '<div style="width:1px;background:var(--border)"></div>' +
-        '<div><div style="font-family:\'Bebas Neue\',sans-serif;font-size:1.4rem;color:var(--neon);line-height:1">'+firmadas+'</div><div style="font-size:.6rem;color:var(--txt3)">firmadas</div></div>' +
-        '<div style="width:1px;background:var(--border)"></div>' +
-        '<div><div style="font-family:\'Bebas Neue\',sans-serif;font-size:1.4rem;color:'+col+';line-height:1">'+sinFirma+'</div><div style="font-size:.6rem;color:var(--txt3)">sin firma</div></div>' +
-        '</div>';
-
-      var badge = document.getElementById('fsc-badge-pend');
-      if(badge) {
-        badge.textContent = sinFirma;
-        badge.style.display = sinFirma > 0 ? 'flex' : 'none';
-      }
-    }
+    const firmasSup=JSON.parse(localStorage.getItem('fc_firmas_suplencias')||'{}');
+    const todos=(registros||[]).filter(r=>r.estado==='sub'&&r.suplente_id);
+    const firmadas=todos.filter(r=>firmasSup[String(r.id)]).length;
+    const sinFirma=todos.length-firmadas;
+    const r=document.getElementById('fsc-resumen');
+    if(r){const col=sinFirma>0?'var(--red2)':'var(--neon)';r.innerHTML=`<div style="display:flex;justify-content:space-around;text-align:center"><div><div style="font-family:'Bebas Neue',sans-serif;font-size:1.4rem;color:var(--blue);line-height:1">${todos.length}</div><div style="font-size:.6rem;color:var(--txt3)">total</div></div><div style="width:1px;background:var(--border)"></div><div><div style="font-family:'Bebas Neue',sans-serif;font-size:1.4rem;color:var(--neon);line-height:1">${firmadas}</div><div style="font-size:.6rem;color:var(--txt3)">firmadas</div></div><div style="width:1px;background:var(--border)"></div><div><div style="font-family:'Bebas Neue',sans-serif;font-size:1.4rem;color:${col};line-height:1">${sinFirma}</div><div style="font-size:.6rem;color:var(--txt3)">sin firma</div></div></div>`;}
+    const badge=document.getElementById('fsc-badge-pend');if(badge){badge.textContent=sinFirma;badge.style.display=sinFirma>0?'flex':'none';}
+    // Mostrar/ocultar botón cerrar según hoja activa
+    const hojaActiva=localStorage.getItem('fc_hoja_firmas_suplencias');
+    const btnCerrar=document.getElementById('fsc-btn-cerrar');
+    if(btnCerrar) btnCerrar.style.display = hojaActiva ? 'flex' : 'none';
   } catch(e) {}
-
-  // Resetear paneles expandibles
-  document.getElementById('fsc-lista-pendientes').style.display = 'none';
-  document.getElementById('fsc-picker-reporte').style.display = 'none';
+  document.getElementById('fsc-lista-pendientes').style.display='none';
+  document.getElementById('fsc-picker-reporte').style.display='none';
+  document.getElementById('fsc-picker-publicar').style.display='none';
   document.getElementById('m-firmas-suplencias-ctrl').classList.add('on');
 }
 
+function hubPublicarReporteFirmas() {
+  const picker=document.getElementById('fsc-picker-publicar');
+  if(!picker) return;
+  if(picker.style.display!=='none'){picker.style.display='none';return;}
+  // Pre-llenar con semana actual
+  const ini=document.getElementById('fsc-pub-ini'), fin=document.getElementById('fsc-pub-fin');
+  if(ini&&!ini.value){const lun=new Date();lun.setDate(lun.getDate()-((lun.getDay()+6)%7));const dom=new Date(lun);dom.setDate(lun.getDate()+6);const f=d=>typeof fechaLocalStr==='function'?fechaLocalStr(d):d.toISOString().slice(0,10);ini.value=f(lun);fin.value=f(dom);}
+  document.getElementById('fsc-lista-pendientes').style.display='none';
+  document.getElementById('fsc-picker-reporte').style.display='none';
+  picker.style.display='block';
+}
+
+async function hubConfirmarPublicarReporte() {
+  const ini=document.getElementById('fsc-pub-ini'), fin=document.getElementById('fsc-pub-fin'), enc=document.getElementById('fsc-pub-enc');
+  if(!ini||!ini.value||!fin||!fin.value){if(typeof showToast==='function')showToast('Selecciona el periodo','warn');return;}
+  await window.coordPublicarHojaFirmasSuplencias(ini.value, fin.value, enc?enc.value:'');
+  document.getElementById('fsc-picker-publicar').style.display='none';
+  cerrarModal('m-firmas-suplencias-ctrl');
+  // Actualizar botón cerrar
+  const btnCerrar=document.getElementById('fsc-btn-cerrar');
+  if(btnCerrar) btnCerrar.style.display='flex';
+}
+
+async function hubCerrarReporteFirmas() {
+  await window.coordCerrarHojaFirmasSuplencias();
+  const btnCerrar=document.getElementById('fsc-btn-cerrar');
+  if(btnCerrar) btnCerrar.style.display='none';
+}
+
 function hubVerPendientesFirma() {
-  var lista = document.getElementById('fsc-lista-pendientes');
+  const lista=document.getElementById('fsc-lista-pendientes');
   if(!lista) return;
-  if(lista.style.display !== 'none') { lista.style.display='none'; return; }
-
-  var firmasSup = {};
-  try { firmasSup = JSON.parse(localStorage.getItem('fc_firmas_suplencias')||'{}'); } catch(e){}
-  var pendientes = (registros||[]).filter(r=>r.estado==='sub'&&r.suplente_id&&!firmasSup[String(r.id)])
-    .sort((a,b)=>(b.fecha||'').localeCompare(a.fecha||''));
-
-  if(pendientes.length === 0) {
-    lista.innerHTML = '<div style="text-align:center;font-size:.78rem;color:var(--neon);padding:.5rem">✔ Todas las suplencias están firmadas</div>';
-  } else {
-    lista.innerHTML = '<div style="font-size:.65rem;text-transform:uppercase;letter-spacing:1px;color:var(--red2);font-weight:700;margin-bottom:.5rem">⚠ ' + pendientes.length + ' sin firma</div>' +
-      pendientes.map(r => {
-        var instOrig = (instructores||[]).find(i=>i.id===r.inst_id);
-        var instSup  = (instructores||[]).find(i=>String(i.id)===String(r.suplente_id));
-        var fd = new Date((r.fecha||'')+'T12:00:00').toLocaleDateString('es-MX',{day:'2-digit',month:'short'});
-        return '<div style="background:var(--panel2);border:1px solid rgba(224,80,80,.25);border-left:3px solid var(--red2);border-radius:8px;padding:.5rem .75rem;margin-bottom:.35rem;font-size:.7rem">' +
-          '<div style="font-weight:700">' + (r.clase||'—') + ' <span style="font-family:\'DM Mono\',monospace;color:var(--gold2)">' + (r.hora||'') + '</span></div>' +
-          '<div style="color:var(--txt2);margin-top:1px">' + fd + ' · Suplente: <strong style="color:var(--blue)">' + (instSup?instSup.nombre:'—') + '</strong></div>' +
-          '<div style="color:var(--txt3);font-size:.62rem;margin-top:1px">Titular: ' + (instOrig?instOrig.nombre:'—') + '</div>' +
-        '</div>';
+  if(lista.style.display!=='none'){lista.style.display='none';return;}
+  const firmasSup=JSON.parse(localStorage.getItem('fc_firmas_suplencias')||'{}');
+  const pend=(registros||[]).filter(r=>r.estado==='sub'&&r.suplente_id&&!firmasSup[String(r.id)]).sort((a,b)=>(b.fecha||'').localeCompare(a.fecha||''));
+  if(pend.length===0){lista.innerHTML='<div style="text-align:center;font-size:.78rem;color:var(--neon);padding:.5rem">✔ Todas firmadas</div>';}
+  else {
+    lista.innerHTML='<div style="font-size:.65rem;text-transform:uppercase;letter-spacing:1px;color:var(--red2);font-weight:700;margin-bottom:.5rem">⚠ '+pend.length+' sin firma</div>'+
+      pend.map(r=>{
+        const instOrig=(instructores||[]).find(i=>i.id===r.inst_id);
+        const instSup=(instructores||[]).find(i=>String(i.id)===String(r.suplente_id));
+        const fd=new Date((r.fecha||'')+'T12:00:00').toLocaleDateString('es-MX',{day:'2-digit',month:'short'});
+        return `<div style="background:var(--panel2);border:1px solid rgba(224,80,80,.25);border-left:3px solid var(--red2);border-radius:8px;padding:.5rem .75rem;margin-bottom:.35rem;font-size:.7rem"><div style="font-weight:700">${r.clase||'—'} <span style="font-family:'DM Mono',monospace;color:var(--gold2)">${r.hora||''}</span></div><div style="color:var(--txt2);margin-top:1px">${fd} · Suplente: <strong style="color:var(--blue)">${instSup?instSup.nombre:'—'}</strong></div><div style="color:var(--txt3);font-size:.62rem;margin-top:1px">Titular: ${instOrig?instOrig.nombre:'—'}</div></div>`;
       }).join('');
   }
-
-  document.getElementById('fsc-picker-reporte').style.display = 'none';
-  lista.style.display = 'block';
+  document.getElementById('fsc-picker-reporte').style.display='none';
+  document.getElementById('fsc-picker-publicar').style.display='none';
+  lista.style.display='block';
 }
 
 function hubGenerarReporteConFirmas() {
-  // Mostrar picker de fechas
-  var picker = document.getElementById('fsc-picker-reporte');
+  const picker=document.getElementById('fsc-picker-reporte');
   if(!picker) return;
-  if(picker.style.display !== 'none') { picker.style.display='none'; return; }
-
-  // Fechas por defecto: semana actual
-  var ini = document.getElementById('fsc-fecha-ini');
-  var fin = document.getElementById('fsc-fecha-fin');
-  if(ini && !ini.value) {
-    var lun = new Date(); lun.setDate(lun.getDate()-((lun.getDay()+6)%7));
-    var dom = new Date(lun); dom.setDate(lun.getDate()+6);
-    var fmt = d => typeof fechaLocalStr==='function' ? fechaLocalStr(d) : d.toISOString().slice(0,10);
-    ini.value = fmt(lun); fin.value = fmt(dom);
-  }
-
-  document.getElementById('fsc-lista-pendientes').style.display = 'none';
-  picker.style.display = 'block';
+  if(picker.style.display!=='none'){picker.style.display='none';return;}
+  const ini=document.getElementById('fsc-fecha-ini'), fin=document.getElementById('fsc-fecha-fin');
+  if(ini&&!ini.value){const lun=new Date();lun.setDate(lun.getDate()-((lun.getDay()+6)%7));const dom=new Date(lun);dom.setDate(lun.getDate()+6);const f=d=>typeof fechaLocalStr==='function'?fechaLocalStr(d):d.toISOString().slice(0,10);ini.value=f(lun);fin.value=f(dom);}
+  document.getElementById('fsc-lista-pendientes').style.display='none';
+  document.getElementById('fsc-picker-publicar').style.display='none';
+  picker.style.display='block';
 }
 
 function hubConfirmarReporteConFirmas() {
-  var ini = document.getElementById('fsc-fecha-ini');
-  var fin = document.getElementById('fsc-fecha-fin');
-  if(!ini||!ini.value||!fin||!fin.value) {
-    if(typeof showToast==='function') showToast('Selecciona el periodo primero','warn');
-    return;
-  }
+  const ini=document.getElementById('fsc-fecha-ini'), fin=document.getElementById('fsc-fecha-fin');
+  if(!ini||!ini.value||!fin||!fin.value){if(typeof showToast==='function')showToast('Selecciona el periodo primero','warn');return;}
   cerrarModal('m-firmas-suplencias-ctrl');
-  // Usar la función de suplencias_link.js
-  if(typeof slk_generarReporteSuplenciasConFirmas === 'function') {
-    slk_generarReporteSuplenciasConFirmas(ini.value, fin.value);
+  if(typeof slk_generarReporteSuplenciasConFirmas==='function') slk_generarReporteSuplenciasConFirmas(ini.value,fin.value);
+  else if(typeof showToast==='function') showToast('Módulo de firmas no cargado','err');
+}
+
+window.abrirHubSuplencias=abrirHubSuplencias;
+</script>
+
+<!-- ═══ TAB FIRMA SUPLENCIAS — Portal Instructor ═══ -->
+<script>
+// ══════════════════════════════════════════════════════════════════
+// SISTEMA DE FIRMA DE SUPLENCIAS EN EL PORTAL DEL INSTRUCTOR
+// Clave Firebase: fitness/hojaFirmasSuplencias
+// Estructura: { semIni, semFin, encabezado, publicado, firmas:{ instId:{data,ts,nombre} } }
+// ══════════════════════════════════════════════════════════════════
+
+const INST_SUP_KEY = 'fc_hoja_firmas_suplencias'; // localStorage
+let _instSupHoja     = null;  // hoja publicada por coordinador
+let _instSupCanvas   = null;
+let _instSupCtx      = null;
+let _instSupDrawing  = false;
+
+// ── Cargar hoja de firmas de suplencias desde localStorage / Firebase ──
+function instCargarHojaFirmasSup() {
+  try {
+    const data = localStorage.getItem(INST_SUP_KEY);
+    _instSupHoja = data ? JSON.parse(data) : null;
+  } catch(e) { _instSupHoja = null; }
+  instActualizarBadgeSup();
+}
+
+// ── Badge en el tab ────────────────────────────────────────────────
+function instActualizarBadgeSup() {
+  const badge = document.getElementById('inst-sup-badge');
+  if (!badge) return;
+  if (!_instSupHoja || typeof instActualId === 'undefined' || !instActualId) {
+    badge.style.display = 'none'; return;
+  }
+  const firmas = _instSupHoja.firmas || {};
+  const yaFirme = firmas[String(instActualId)] && firmas[String(instActualId)].data;
+  if (yaFirme) { badge.style.display = 'none'; return; }
+  // Contar cuántas clases de suplencia tiene este instructor en el periodo
+  const { semIni='', semFin='' } = _instSupHoja;
+  const pendCnt = (typeof registros !== 'undefined')
+    ? registros.filter(r => r.estado==='sub' && String(r.suplente_id)===String(instActualId)
+        && r.fecha >= semIni && r.fecha <= semFin).length
+    : 0;
+  if (pendCnt > 0) {
+    badge.textContent  = pendCnt;
+    badge.style.display = 'flex';
   } else {
-    if(typeof showToast==='function') showToast('Módulo de firmas no cargado','err');
+    badge.style.display = 'none';
   }
 }
 
-window.abrirHubSuplencias = abrirHubSuplencias;
+// ── Render del tab de suplencias ───────────────────────────────────
+function instRenderSupTab() {
+  instCargarHojaFirmasSup();
+  const inst = typeof instructores !== 'undefined'
+    ? instructores.find(i => i.id === instActualId) : null;
+  if (!inst) return;
+
+  const sinHoja = document.getElementById('inst-sup-sin-hoja');
+  const activa  = document.getElementById('inst-sup-activa');
+
+  if (!_instSupHoja) {
+    sinHoja.style.display = 'block';
+    activa.style.display  = 'none';
+    return;
+  }
+
+  sinHoja.style.display = 'none';
+  activa.style.display  = 'block';
+
+  // Periodo label
+  const { semIni='', semFin='', encabezado='' } = _instSupHoja;
+  const dI = new Date(semIni+'T12:00:00');
+  const dF = new Date(semFin+'T12:00:00');
+  const periodoTxt = (encabezado || '') +
+    (semIni && semFin ? ` · ${dI.toLocaleDateString('es-MX',{day:'numeric',month:'short'})} al ${dF.toLocaleDateString('es-MX',{day:'numeric',month:'short',year:'numeric'})}` : '');
+  const lbl = document.getElementById('inst-sup-periodo-lbl');
+  if (lbl) lbl.textContent = periodoTxt;
+
+  // Avatar
+  const iniciales = inst.nombre.split(' ').map(p=>p[0]).join('').slice(0,2).toUpperCase();
+  const av = document.getElementById('inst-sup-avatar');
+  if (av) {
+    if (inst.foto) {
+      av.innerHTML = `<img src="${inst.foto}" style="width:100%;height:100%;object-fit:cover;border-radius:50%">`;
+      av.style.background = 'transparent';
+    } else {
+      av.textContent = iniciales;
+    }
+  }
+  const nmEl = document.getElementById('inst-sup-nombre-lbl');
+  if (nmEl) nmEl.textContent = inst.nombre;
+
+  // Estado firma
+  const firmas   = _instSupHoja.firmas || {};
+  const misFirma = firmas[String(instActualId)];
+  const firmado  = misFirma && misFirma.data;
+
+  const estadoEl = document.getElementById('inst-sup-estado-lbl');
+  const chipEl   = document.getElementById('inst-sup-chip');
+  if (estadoEl) estadoEl.textContent = firmado
+    ? '✔ Firmado el ' + new Date(misFirma.ts).toLocaleDateString('es-MX',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'})
+    : 'Sin firma';
+  if (chipEl) {
+    chipEl.textContent      = firmado ? '✔ Firmado' : '✖ Sin firmar';
+    chipEl.style.background = firmado ? 'rgba(94,255,160,.15)' : 'rgba(224,80,80,.15)';
+    chipEl.style.color      = firmado ? 'var(--neon)'          : 'var(--red2)';
+  }
+
+  // Botones
+  const btnBorrar  = document.getElementById('inst-sup-borrar-btn');
+  const btnGuardar = document.getElementById('inst-sup-guardar-btn');
+  if (btnBorrar) {
+    btnBorrar.textContent   = firmado ? '✖ Borrar firma' : '↺ Limpiar';
+    btnBorrar.style.color   = firmado ? 'var(--red2)' : 'var(--txt3)';
+  }
+  if (btnGuardar) {
+    btnGuardar.style.opacity        = firmado ? '0.5' : '1';
+    btnGuardar.style.pointerEvents  = firmado ? 'none' : 'auto';
+    btnGuardar.textContent          = firmado ? '✔ Firma guardada' : '✔ Guardar Firma de Suplencias';
+  }
+
+  // Tabla de clases donde fue suplente en el periodo
+  const tablaEl = document.getElementById('inst-sup-clases-tabla');
+  if (tablaEl && typeof registros !== 'undefined') {
+    const misRecs = registros.filter(r =>
+      r.estado === 'sub' &&
+      String(r.suplente_id) === String(instActualId) &&
+      r.fecha >= semIni && r.fecha <= semFin
+    ).sort((a,b) => a.fecha.localeCompare(b.fecha) || (a.hora||'').localeCompare(b.hora||''));
+
+    if (misRecs.length === 0) {
+      tablaEl.innerHTML = '<div class="empty" style="padding:.8rem;font-size:.72rem">Sin clases de suplencia en este periodo.</div>';
+    } else {
+      const total = misRecs.length;
+      const totalAsis = misRecs.reduce((s,r) => s + (parseInt(r.asistentes)||0), 0);
+      const conAf = misRecs.filter(r => parseInt(r.cap||0) > 0);
+      const aforProm = conAf.length > 0
+        ? Math.round(conAf.reduce((s,r) => s + (parseInt(r.asistentes)||0)/parseInt(r.cap)*100, 0) / conAf.length)
+        : null;
+
+      tablaEl.innerHTML = `
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;border-bottom:1px solid var(--border)">
+          <div style="padding:.5rem .7rem;text-align:center;border-right:1px solid var(--border)">
+            <div style="font-family:'Bebas Neue',sans-serif;font-size:1.4rem;color:var(--blue);line-height:1">${total}</div>
+            <div style="font-size:.55rem;text-transform:uppercase;letter-spacing:1px;color:var(--txt3)">Impartidas</div>
+          </div>
+          <div style="padding:.5rem .7rem;text-align:center;border-right:1px solid var(--border)">
+            <div style="font-family:'Bebas Neue',sans-serif;font-size:1.4rem;color:var(--neon);line-height:1">${totalAsis}</div>
+            <div style="font-size:.55rem;text-transform:uppercase;letter-spacing:1px;color:var(--txt3)">Asistentes</div>
+          </div>
+          <div style="padding:.5rem .7rem;text-align:center">
+            <div style="font-family:'Bebas Neue',sans-serif;font-size:1.4rem;color:${aforProm!==null?(aforProm>=70?'var(--neon)':aforProm>=40?'var(--gold2)':'var(--red2)'):'var(--txt3)'};line-height:1">${aforProm!==null?aforProm+'%':'—'}</div>
+            <div style="font-size:.55rem;text-transform:uppercase;letter-spacing:1px;color:var(--txt3)">Aforo prom.</div>
+          </div>
+        </div>
+        <div style="overflow-x:auto">
+          <table style="width:100%;font-size:.72rem;border-collapse:collapse">
+            <thead><tr style="background:var(--panel)">
+              <th style="padding:5px 8px;text-align:left;font-size:.58rem;text-transform:uppercase;letter-spacing:1px;color:var(--txt2)">Fecha</th>
+              <th style="padding:5px 8px;text-align:left;font-size:.58rem;text-transform:uppercase;letter-spacing:1px;color:var(--txt2)">Clase</th>
+              <th style="padding:5px 8px;text-align:left;font-size:.58rem;text-transform:uppercase;letter-spacing:1px;color:var(--txt2)">Titular</th>
+              <th style="padding:5px 8px;text-align:center;font-size:.58rem;text-transform:uppercase;letter-spacing:1px;color:var(--txt2)">Asist.</th>
+              <th style="padding:5px 8px;text-align:center;font-size:.58rem;text-transform:uppercase;letter-spacing:1px;color:var(--txt2)">Aforo</th>
+            </tr></thead>
+            <tbody>
+              ${misRecs.map(r => {
+                const fd  = new Date(r.fecha+'T12:00:00').toLocaleDateString('es-MX',{day:'2-digit',month:'short'});
+                const asis = parseInt(r.asistentes)||0;
+                const cap  = parseInt(r.cap)||0;
+                const afo  = cap>0 ? Math.round(asis/cap*100) : null;
+                const afoCol = afo!==null?(afo>=70?'var(--neon)':afo>=40?'var(--gold2)':'var(--red2)'):'var(--txt3)';
+                const instTitular = (typeof instructores!=='undefined')
+                  ? instructores.find(i=>i.id===r.inst_id) : null;
+                return `<tr style="border-bottom:1px solid var(--border)">
+                  <td style="padding:5px 8px;color:var(--txt2)">${fd}</td>
+                  <td style="padding:5px 8px;font-weight:600">${r.clase||'—'}<br><span style="font-size:.58rem;color:var(--txt3);font-weight:400">${r.hora||''}</span></td>
+                  <td style="padding:5px 8px;color:var(--txt3);font-size:.68rem">${instTitular?instTitular.nombre:'—'}</td>
+                  <td style="padding:5px 8px;text-align:center;font-family:monospace">${r.estado!=='falta'?asis:'—'}</td>
+                  <td style="padding:5px 8px;text-align:center;font-family:monospace;color:${afoCol}">${afo!==null?afo+'%':'—'}</td>
+                </tr>`;
+              }).join('')}
+            </tbody>
+          </table>
+        </div>`;
+    }
+  }
+
+  // Canvas
+  setTimeout(() => instInicializarCanvasSup(firmado ? misFirma.data : null), 100);
+}
+
+// ── Inicializar canvas de suplencias ──────────────────────────────
+function instInicializarCanvasSup(dataUrl) {
+  const canvas = document.getElementById('inst-sup-canvas');
+  if (!canvas) return;
+  const wrap = document.getElementById('inst-sup-canvas-wrap');
+  const w = wrap ? wrap.clientWidth : 340;
+  canvas.width  = w;
+  canvas.height = 200;
+  const ctx = canvas.getContext('2d');
+  ctx.fillStyle = '#ffffff';
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+  if (dataUrl) { const img=new Image(); img.onload=()=>ctx.drawImage(img,0,0); img.src=dataUrl; }
+
+  _instSupCanvas  = canvas;
+  _instSupCtx     = ctx;
+  _instSupDrawing = false;
+
+  const readOnly = !!dataUrl;
+  canvas.style.cursor  = readOnly ? 'not-allowed' : 'crosshair';
+  canvas.style.opacity = readOnly ? '0.85' : '1';
+
+  // Clonar para limpiar listeners
+  const newC = canvas.cloneNode(true);
+  canvas.parentNode.replaceChild(newC, canvas);
+  const c  = document.getElementById('inst-sup-canvas');
+  const cx = c.getContext('2d');
+  cx.fillStyle = '#ffffff'; cx.fillRect(0, 0, c.width, c.height);
+  if (dataUrl) { const img=new Image(); img.onload=()=>cx.drawImage(img,0,0); img.src=dataUrl; }
+  _instSupCanvas = c; _instSupCtx = cx;
+
+  if (readOnly) return;
+
+  c.addEventListener('mousedown', e => { _instSupDrawing=true; cx.beginPath(); const r=c.getBoundingClientRect(); cx.moveTo(e.clientX-r.left, e.clientY-r.top); });
+  c.addEventListener('mousemove', e => { if(!_instSupDrawing) return; const r=c.getBoundingClientRect(); cx.lineWidth=2.5; cx.lineCap='round'; cx.strokeStyle='#1a1a1a'; cx.lineTo(e.clientX-r.left, e.clientY-r.top); cx.stroke(); });
+  c.addEventListener('mouseup',    () => _instSupDrawing=false);
+  c.addEventListener('mouseleave', () => _instSupDrawing=false);
+  c.addEventListener('touchstart', e => { e.preventDefault(); _instSupDrawing=true; cx.beginPath(); const r=c.getBoundingClientRect(); const t=e.touches[0]; cx.moveTo(t.clientX-r.left, t.clientY-r.top); }, {passive:false});
+  c.addEventListener('touchmove',  e => { e.preventDefault(); if(!_instSupDrawing) return; const r=c.getBoundingClientRect(); const t=e.touches[0]; cx.lineWidth=2.5; cx.lineCap='round'; cx.strokeStyle='#1a1a1a'; cx.lineTo(t.clientX-r.left, t.clientY-r.top); cx.stroke(); }, {passive:false});
+  c.addEventListener('touchend',   () => _instSupDrawing=false);
+}
+
+// ── Limpiar / borrar firma de suplencias ──────────────────────────
+function instLimpiarFirmaSup() {
+  const firmas   = _instSupHoja ? (_instSupHoja.firmas || {}) : {};
+  const misFirma = firmas[String(instActualId)];
+  if (misFirma && misFirma.data) {
+    if (!confirm('¿Borrar tu firma de suplencias guardada?')) return;
+    const tsAhora = new Date().toISOString();
+    if (!_instSupHoja.firmasBorradas) _instSupHoja.firmasBorradas = {};
+    _instSupHoja.firmasBorradas[String(instActualId)] = tsAhora;
+    delete _instSupHoja.firmas[String(instActualId)];
+    try { localStorage.setItem(INST_SUP_KEY, JSON.stringify(_instSupHoja)); } catch(e) {}
+    if (typeof fbDb !== 'undefined' && fbDb) {
+      fbDb.ref('fitness/hojaFirmasSuplencias').set(_instSupHoja).catch(()=>{});
+    }
+    instRenderSupTab();
+    if (typeof showToast === 'function') showToast('Firma eliminada. Puedes volver a firmar.', 'info');
+    return;
+  }
+  // Solo limpiar canvas
+  if (_instSupCtx && _instSupCanvas) {
+    _instSupCtx.fillStyle = '#ffffff';
+    _instSupCtx.fillRect(0, 0, _instSupCanvas.width, _instSupCanvas.height);
+  }
+}
+
+// ── Guardar firma de suplencias ───────────────────────────────────
+async function instGuardarFirmaSup() {
+  const canvas = document.getElementById('inst-sup-canvas');
+  if (!canvas) return;
+  const ctx  = canvas.getContext('2d');
+  const data = ctx.getImageData(0, 0, canvas.width, canvas.height).data;
+  let hayTrazo = false;
+  for (let i=0; i<data.length; i+=4) { if(data[i]<240||data[i+1]<240||data[i+2]<240){hayTrazo=true;break;} }
+  if (!hayTrazo) { if(typeof showToast==='function') showToast('Firma el área antes de guardar','warn'); return; }
+  if (!_instSupHoja) return;
+
+  const dataUrl = canvas.toDataURL('image/png');
+  if (!_instSupHoja.firmas) _instSupHoja.firmas = {};
+  const inst = (typeof instructores!=='undefined') ? instructores.find(i=>i.id===instActualId) : null;
+  _instSupHoja.firmas[String(instActualId)] = {
+    data: dataUrl,
+    nombre: inst ? inst.nombre : '—',
+    ts: new Date().toISOString()
+  };
+
+  try { localStorage.setItem(INST_SUP_KEY, JSON.stringify(_instSupHoja)); } catch(e) {}
+
+  // Subir a Firebase — verificar que la hoja sigue activa
+  (async () => {
+    try {
+      if (typeof fbDb !== 'undefined' && fbDb) {
+        const snap = await fbDb.ref('fitness/hojaFirmasSuplencias').once('value');
+        const fbHoja = snap.val();
+        if (fbHoja && fbHoja.semIni === _instSupHoja.semIni && fbHoja.semFin === _instSupHoja.semFin) {
+          await fbDb.ref('fitness/hojaFirmasSuplencias').set(_instSupHoja);
+        } else {
+          localStorage.removeItem(INST_SUP_KEY);
+          _instSupHoja = null;
+          instRenderSupTab();
+          if(typeof showToast==='function') showToast('El reporte fue cerrado por coordinación.','warn');
+          return;
+        }
+      } else if (typeof sincronizarFirebase === 'function') {
+        setTimeout(sincronizarFirebase, 300);
+      }
+    } catch(e) { if(typeof sincronizarFirebase==='function') setTimeout(sincronizarFirebase,500); }
+    instRenderSupTab();
+    instActualizarBadgeSup();
+    if(typeof showToast==='function') showToast('✔ Firma de suplencias guardada','ok');
+    if(typeof registrarLog==='function') registrarLog('instructor', `Firma suplencias: ${inst?inst.nombre:'—'}`);
+  })();
+}
+
+// ── Integrar instSwitchTab para el nuevo tab ───────────────────────
+// Hookear instSwitchTab para agregar el nuevo case 'suplencias'
+(function() {
+  const _orig = window.instSwitchTab;
+  window.instSwitchTab = function(tab) {
+    // Ocultar panel de suplencias si viene de él
+    const supPanel = document.getElementById('inst-panel-suplencias');
+    if (supPanel && tab !== 'suplencias') supPanel.style.display = 'none';
+    // Llamar al original
+    _orig.call(this, tab);
+    // Si es suplencias, manejar aquí
+    if (tab === 'suplencias') {
+      // Ocultar otros panels
+      ['hoy','reporte','firma'].forEach(t => {
+        const p = document.getElementById('inst-panel-'+t);
+        if (p) p.style.display = 'none';
+      });
+      if (supPanel) supPanel.style.display = 'block';
+      // Actualizar tabs visuales
+      document.querySelectorAll('.inst-tab-btn').forEach(b => {
+        b.classList.toggle('on', b.dataset.t === 'suplencias');
+      });
+      instRenderSupTab();
+    }
+  };
+  // Sobreescribir el cargar hoja para incluir la de suplencias
+  const _origCargar = window.instCargarHojaFirmas;
+  if (_origCargar) {
+    window.instCargarHojaFirmas = function() {
+      _origCargar.apply(this, arguments);
+      instCargarHojaFirmasSup();
+    };
+  }
+})();
+
+// ── Sincronizar hoja de firmas de suplencias desde Firebase ────────
+// Se activa cuando el coordinador publica el reporte
+(function instEscucharHojaSupFirebase() {
+  const tryListen = () => {
+    if (typeof fbDb === 'undefined' || !fbDb) { setTimeout(tryListen, 1000); return; }
+    fbDb.ref('fitness/hojaFirmasSuplencias').on('value', snap => {
+      try {
+        const data = snap.val();
+        const local = localStorage.getItem(INST_SUP_KEY);
+        const localHoja = local ? JSON.parse(local) : null;
+        if (data) {
+          // Merge de firmas
+          if (localHoja && localHoja.semIni === data.semIni && localHoja.semFin === data.semFin) {
+            const merged = { ...data, firmas: { ...(data.firmas||{}) } };
+            Object.entries(localHoja.firmas||{}).forEach(([k,v]) => {
+              if (!merged.firmas[k]) merged.firmas[k] = v;
+              else if (v && v.ts && (!merged.firmas[k].ts || v.ts > merged.firmas[k].ts)) merged.firmas[k] = v;
+            });
+            localStorage.setItem(INST_SUP_KEY, JSON.stringify(merged));
+            _instSupHoja = merged;
+          } else {
+            localStorage.setItem(INST_SUP_KEY, JSON.stringify(data));
+            _instSupHoja = data;
+          }
+        } else {
+          localStorage.removeItem(INST_SUP_KEY);
+          _instSupHoja = null;
+        }
+        instActualizarBadgeSup();
+        // Actualizar tab si está visible
+        const p = document.getElementById('inst-panel-suplencias');
+        if (p && p.style.display !== 'none') instRenderSupTab();
+        // Notificar si aparece hoja nueva
+        if (data && !localHoja) {
+          if(typeof showToast==='function') showToast('✍ Reporte de suplencias disponible — ya puedes firmar','ok');
+        }
+      } catch(e) {}
+    });
+  };
+  setTimeout(tryListen, 2000);
+})();
+
+// ── Función para el coordinador: publicar hoja de firmas suplencias ──
+window.coordPublicarHojaFirmasSuplencias = async function(semIni, semFin, encabezado) {
+  const hoja = {
+    semIni, semFin,
+    encabezado: encabezado || `Suplencias ${semIni} al ${semFin}`,
+    publicado:  new Date().toISOString(),
+    firmas: {}
+  };
+  try { localStorage.setItem(INST_SUP_KEY, JSON.stringify(hoja)); } catch(e) {}
+  if (typeof fbDb !== 'undefined' && fbDb) {
+    try { await fbDb.ref('fitness/hojaFirmasSuplencias').set(hoja); } catch(e) {}
+  } else if (typeof sincronizarFirebase === 'function') {
+    setTimeout(sincronizarFirebase, 300);
+  }
+  if (typeof showToast === 'function')
+    showToast(`Reporte de suplencias publicado: ${semIni} al ${semFin}`, 'ok');
+};
+
+window.coordCerrarHojaFirmasSuplencias = async function() {
+  if (!confirm('¿Cerrar el reporte de firmas de suplencias?\nLos instructores ya no podrán firmar.')) return;
+  localStorage.removeItem(INST_SUP_KEY);
+  if (typeof fbDb !== 'undefined' && fbDb) {
+    try { await fbDb.ref('fitness/hojaFirmasSuplencias').remove(); } catch(e) {}
+  }
+  if (typeof showToast === 'function') showToast('Reporte de suplencias cerrado.','info');
+};
 </script>
 
 </body>
