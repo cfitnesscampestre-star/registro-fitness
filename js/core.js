@@ -154,10 +154,6 @@ function abrirModal(id){
     document.getElementById('rc-inst').innerHTML=opts;
     document.getElementById('rc-fecha').value=fechaLocalStr(hoy);
     document.getElementById('rc-suplente').innerHTML='<option value="">— Sin suplente —</option>'+opts;
-    document.getElementById('rc-est').value='ok';
-    document.getElementById('rc-suplente-row').style.display='none';
-    document.getElementById('rc-motivo-row').style.display='none';
-    document.getElementById('rc-falta-motivo-row').style.display='none';
     cargarHorariosInst();
   }
   if(id==='m-falta'){
@@ -288,13 +284,75 @@ function autoRellenarHorario(){
   if(sinMsg) sinMsg.style.display = 'none';
 }
 
+// ── Abrir modal de clase con datos precargados (desde tarjeta del día) ──
+function abrirModalClasePreloaded(instId, dia, hora, clase, fechaStr) {
+  const modal = document.getElementById('m-clase');
+  if(!modal) return;
+
+  const opts = instructores.map(i=>`<option value="${i.id}">${i.nombre}</option>`).join('');
+  document.getElementById('rc-inst').innerHTML = opts;
+  document.getElementById('rc-inst').value = String(instId);
+  document.getElementById('rc-suplente').innerHTML = '<option value="">— Sin suplente —</option>' + opts;
+  document.getElementById('rc-est').value = 'ok';
+  document.getElementById('rc-suplente-row').style.display = 'none';
+  document.getElementById('rc-motivo-row').style.display = 'none';
+  const fmr = document.getElementById('rc-falta-motivo-row');
+  if(fmr) fmr.style.display = 'none';
+
+  const inst = instructores.find(i => String(i.id) === String(instId));
+  const selHor = document.getElementById('rc-horario');
+  const preview = document.getElementById('rc-slot-preview');
+  const sinMsg  = document.getElementById('rc-sin-horarios');
+
+  if(!inst || !(inst.horario||[]).length) {
+    selHor.innerHTML = '<option value="">— Sin horarios asignados —</option>';
+    selHor.disabled = true;
+    if(sinMsg) sinMsg.style.display = 'block';
+  } else {
+    selHor.disabled = false;
+    const ordenDias = ['Lunes','Martes','Miércoles','Jueves','Viernes','Sábado','Domingo'];
+    const slots = [...inst.horario].sort((a,b) => {
+      const di = ordenDias.indexOf(a.dia) - ordenDias.indexOf(b.dia);
+      return di !== 0 ? di : a.hora.localeCompare(b.hora);
+    });
+    selHor.innerHTML = '<option value="">— Selecciona un horario —</option>' +
+      slots.map((s,i) => `<option value="${i}">${s.dia}  ·  ${s.hora}  —  ${s.clase}</option>`).join('');
+
+    const idx = slots.findIndex(s => s.dia === dia && s.hora === hora && s.clase === clase);
+    if(idx >= 0) {
+      selHor.value = String(idx);
+      const slot = slots[idx];
+      document.getElementById('rc-clase').value = slot.clase;
+      document.getElementById('rc-dia').value   = slot.dia;
+      document.getElementById('rc-hora').value  = slot.hora;
+      document.getElementById('rc-cap').value   = getCapClase(slot.clase);
+      if(preview) {
+        document.getElementById('rc-prev-clase').textContent = slot.clase;
+        document.getElementById('rc-prev-dia').textContent   = slot.dia;
+        document.getElementById('rc-prev-hora').textContent  = slot.hora;
+        preview.style.display = 'block';
+      }
+      if(sinMsg) sinMsg.style.display = 'none';
+    }
+  }
+
+  document.getElementById('rc-fecha').value = fechaStr;
+
+  // Pre-rellenar asistentes con el último valor usado para ese slot
+  const prevRegs = registros
+    .filter(r => String(r.inst_id)===String(instId) && r.dia===dia && r.hora===hora && r.estado!=='falta')
+    .sort((a,b) => (b.fecha||'').localeCompare(a.fecha||''));
+  document.getElementById('rc-asis').value = prevRegs.length > 0 ? (prevRegs[0].asistentes || 0) : 0;
+
+  modal.classList.add('on');
+}
+
+
 function toggleSuplenteClase(){
   const v=document.getElementById('rc-est').value;
   const isSub=(v==='sub');
-  const isFalta=(v==='falta');
   document.getElementById('rc-suplente-row').style.display=isSub?'flex':'none';
   document.getElementById('rc-motivo-row').style.display=isSub?'flex':'none';
-  document.getElementById('rc-falta-motivo-row').style.display=isFalta?'flex':'none';
 }
 function toggleSuplenteRec(){
   const v=document.getElementById('rcc-pres').value;
