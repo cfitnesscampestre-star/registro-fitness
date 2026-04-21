@@ -39,15 +39,17 @@ function guardarClase(){
     _vErr('rc-suplente','El suplente no puede ser el mismo instructor');
     showToast('El suplente no puede ser el mismo instructor','err'); ok=false;
   }
-  // Detectar duplicado exacto en el mismo día/hora/fecha
+  // Detectar duplicado exacto en el mismo día/hora/fecha — BLOQUEAR
   const duplicado=registros.find(r=>
     r.inst_id===instId && r.clase===claseNombre &&
     r.dia===diaVal && r.hora===horaVal && r.fecha===fechaVal &&
-    (r.estado==='ok'||r.estado==='sub')
+    (r.estado==='ok'||r.estado==='sub'||r.estado==='falta')
   );
   if(duplicado){
-    showToast(`Ya existe un registro de ${claseNombre} para ${inst?.nombre} el ${fechaVal}. ¿Duplicado?`,'warn');
-    // Advertencia pero no bloquea — puede ser legítimo
+    showToast(`Ya existe un registro de ${claseNombre} para ${inst?.nombre} el ${fechaVal}. Usa Editar para modificarlo.`,'warn');
+    cerrarModal('m-clase');
+    if(typeof abrirEditarRegistro==='function') abrirEditarRegistro(duplicado.id);
+    return;
   }
   if(!ok) return;
 

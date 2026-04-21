@@ -265,25 +265,32 @@ function verificarClasesSinRegistrar(silencioso = false) {
 // ═══ REGISTRO DESDE CALENDARIO ════════════════════════
 // ═══════════════════════════════════════════════════════
 function abrirRegistroDesdeCalendario(instId, dia, hora, clase, fechaStr) {
-  // Abrir el modal — esto carga la lista de instructores
+  // Si ya existe un registro para este slot+fecha → abrir modal de EDICIÓN
+  const regExistente = registros
+    .filter(r => String(r.inst_id) === String(instId) && r.dia === dia && r.hora === hora && r.fecha === fechaStr)
+    .sort((a, b) => (b.updatedAt || 0) - (a.updatedAt || 0))[0];
+
+  if(regExistente) {
+    // Abrir el modal de edición con los datos del registro existente
+    if(typeof abrirEditarRegistro === 'function') {
+      abrirEditarRegistro(regExistente.id);
+    }
+    return;
+  }
+
+  // No existe registro → abrir modal de CREACIÓN (comportamiento original)
   abrirModal('m-clase');
 
-  // Pequeño delay para que el DOM esté listo
   setTimeout(() => {
     const instSel = document.getElementById('rc-inst');
     if(!instSel) return;
 
-    // Seleccionar el instructor
     instSel.value = String(instId);
-
-    // Recargar los horarios para ese instructor
     cargarHorariosInst();
 
-    // Poner la fecha
     const fechaInp = document.getElementById('rc-fecha');
     if(fechaInp) fechaInp.value = fechaStr;
 
-    // Encontrar el índice del slot correcto (misma lógica que cargarHorariosInst)
     const inst = instructores.find(i => i.id === instId);
     if(!inst || !(inst.horario || []).length) return;
 
@@ -297,15 +304,6 @@ function abrirRegistroDesdeCalendario(instId, dia, hora, clase, fechaStr) {
     if(idx >= 0) {
       document.getElementById('rc-horario').value = String(idx);
       autoRellenarHorario();
-    }
-
-    // Si ya había un registro hoy para este slot, pre-rellenar asistentes con el último valor
-    const prev = registros.filter(r =>
-      r.inst_id === instId && r.dia === dia && r.hora === hora
-    ).sort((a, b) => (b.fecha || '').localeCompare(a.fecha || ''));
-    if(prev.length > 0) {
-      const asisInp = document.getElementById('rc-asis');
-      if(asisInp && !asisInp.value) asisInp.value = prev[0].asistentes || '';
     }
   }, 60);
 }
