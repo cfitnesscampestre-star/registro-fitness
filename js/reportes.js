@@ -876,6 +876,7 @@ function _generarHojaFirmasCore(fechaIni, fechaFin, semana, firmasDigitales){
   // ── Paleta institucional ─────────────────────────────────────────────
   const CV     = [15, 80, 40];     // verde oscuro institucional
   const CV2    = [26,122,69];      // verde medio (acentos)
+  const CVH    = [235, 245, 238];  // verde muy claro — fondo header opción B
   const CV3    = [220,242,228];    // verde muy claro (fondo encabezado instructor)
   const CGRIS  = [240,240,240];    // gris claro alternado
   const CGRIS2 = [210,218,212];    // gris medio (líneas)
@@ -896,13 +897,17 @@ function _generarHojaFirmasCore(fechaIni, fechaFin, semana, firmasDigitales){
     if(pNum>0) doc.addPage();
     pNum++;
 
-    // ▌ Barra verde superior (más alta)
-    doc.setFillColor(...CV);
+    // ▌ Header opción B: fondo verde muy claro + borde verde oscuro
+    doc.setFillColor(...CVH);
     doc.rect(0, 0, PW, HDR_H, 'F');
 
-    // Línea decorativa dorada/verde claro bajo la barra
-    doc.setFillColor(...CV2);
-    doc.rect(0, HDR_H, PW, 0.8, 'F');
+    // Línea verde oscuro superior (1.5mm)
+    doc.setFillColor(...CV);
+    doc.rect(0, 0, PW, 1.5, 'F');
+
+    // Línea verde oscuro inferior (1mm)
+    doc.setFillColor(...CV);
+    doc.rect(0, HDR_H - 1, PW, 1, 'F');
 
     // Logo Campestre Fitness — contenedor verde que integra el ícono
     try {
@@ -922,21 +927,21 @@ function _generarHojaFirmasCore(fechaIni, fechaFin, semana, firmasDigitales){
     // Institución
     doc.setFont('helvetica','bold');
     doc.setFontSize(9.5);
-    doc.setTextColor(...CBCO);
+    doc.setTextColor(...CV);
     doc.text('CLUB CAMPESTRE AGUASCALIENTES', ML+21, 10);
     doc.setFont('helvetica','normal');
     doc.setFontSize(6.5);
-    doc.setTextColor(180,230,200);
+    doc.setTextColor(...CV2);
     doc.text('COORDINACIÓN FITNESS  ·  CONTROL INTERNO  ·  NO CIRCULAR', ML+21, 15.5);
 
     // Semana — alineada a la derecha
     doc.setFont('helvetica','bold');
     doc.setFontSize(7);
-    doc.setTextColor(...CBCO);
+    doc.setTextColor(...CV);
     doc.text('SEMANA:', PW-MR, 9, {align:'right'});
     doc.setFont('helvetica','normal');
     doc.setFontSize(8.5);
-    doc.setTextColor(200,255,220);
+    doc.setTextColor(...CV2);
     doc.text(semana, PW-MR, 16, {align:'right'});
 
     // Leyenda: rectángulo rojo dibujado + texto (sin símbolo ■)
