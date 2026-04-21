@@ -1539,7 +1539,7 @@ window._cargarFflate=function(){
               <div class="mob-gc-title">RESUMEN HOY</div>
 
               <div class="mob-gc-metric">
-                <span class="mob-gc-lbl">Clases Registradas</span>
+                <span class="mob-gc-lbl">Clases Registradas <span style="font-size:.55rem;color:var(--txt3);font-weight:400">· aforo/horario</span></span>
                 <div class="mob-gc-row">
                   <span class="mob-gc-val gold" id="mob-k-reg">—</span>
                   <div class="mob-sparkline" id="mob-sparkline-reg"></div>
@@ -2016,15 +2016,15 @@ window._cargarFflate=function(){
     <div class="phdr">
       <span class="pttl"><svg class="ico" viewBox="0 0 20 20"><rect x="5" y="3" width="10" height="14" rx="2" stroke="currentColor" stroke-width="1.5" fill="none"/><rect x="8" y="2" width="4" height="2.5" rx="1" stroke="currentColor" stroke-width="1.2" fill="none"/><line x1="8" y1="9" x2="12" y2="9" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/><line x1="8" y1="12" x2="13" y2="12" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg> Historial de Clases</span>
       <div style="display:flex;gap:.5rem;flex-wrap:wrap;align-items:center">
-        <input class="ctrl" type="date" id="hist-fecha-ini" style="width:140px" onchange="filtroHistorialCambio()">
-        <input class="ctrl" type="date" id="hist-fecha-fin" style="width:140px" onchange="filtroHistorialCambio()">
-        <select class="ctrl" id="hist-inst-fil" style="width:160px" onchange="filtroHistorialCambio()">
+        <input class="ctrl" type="date" id="hist-fecha-ini" style="width:140px" onchange="renderHistorial()">
+        <input class="ctrl" type="date" id="hist-fecha-fin" style="width:140px" onchange="renderHistorial()">
+        <select class="ctrl" id="hist-inst-fil" style="width:160px" onchange="renderHistorial()">
           <option value="">— Todos los instructores —</option>
         </select>
-        <select class="ctrl" id="hist-clase-fil" style="width:140px" onchange="filtroHistorialCambio()">
+        <select class="ctrl" id="hist-clase-fil" style="width:140px" onchange="renderHistorial()">
           <option value="">— Todas las clases —</option>
         </select>
-        <select class="ctrl" id="hist-estado-fil" style="width:130px" onchange="filtroHistorialCambio()">
+        <select class="ctrl" id="hist-estado-fil" style="width:130px" onchange="renderHistorial()">
           <option value="">— Todos los estados —</option>
           <option value="ok">✔ Impartidas</option>
           <option value="sub">⇄ Con Suplente</option>
