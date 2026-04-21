@@ -265,20 +265,49 @@ function verificarClasesSinRegistrar(silencioso = false) {
 // ═══ REGISTRO DESDE CALENDARIO ════════════════════════
 // ═══════════════════════════════════════════════════════
 function abrirRegistroDesdeCalendario(instId, dia, hora, clase, fechaStr) {
-  // Si ya existe un registro para este slot+fecha → abrir modal de EDICIÓN
-  const regExistente = registros
-    .filter(r => String(r.inst_id) === String(instId) && r.dia === dia && r.hora === hora && r.fecha === fechaStr)
-    .sort((a, b) => (b.updatedAt || 0) - (a.updatedAt || 0))[0];
+  // Abrir el modal — esto carga la lista de instructores
+  abrirModal('m-clase');
 
-  if(regExistente) {
-    if(typeof abrirEditarRegistro === 'function') abrirEditarRegistro(regExistente.id);
-    return;
-  }
+  // Pequeño delay para que el DOM esté listo
+  setTimeout(() => {
+    const instSel = document.getElementById('rc-inst');
+    if(!instSel) return;
 
-  // No existe registro → abrir modal de CREACIÓN con datos precargados
-  if(typeof abrirModalClasePreloaded === 'function') {
-    abrirModalClasePreloaded(instId, dia, hora, clase, fechaStr);
-  }
+    // Seleccionar el instructor
+    instSel.value = String(instId);
+
+    // Recargar los horarios para ese instructor
+    cargarHorariosInst();
+
+    // Poner la fecha
+    const fechaInp = document.getElementById('rc-fecha');
+    if(fechaInp) fechaInp.value = fechaStr;
+
+    // Encontrar el índice del slot correcto (misma lógica que cargarHorariosInst)
+    const inst = instructores.find(i => i.id === instId);
+    if(!inst || !(inst.horario || []).length) return;
+
+    const ordenDias = ['Lunes','Martes','Miércoles','Jueves','Viernes','Sábado','Domingo'];
+    const slots = [...inst.horario].sort((a, b) => {
+      const di = ordenDias.indexOf(a.dia) - ordenDias.indexOf(b.dia);
+      return di !== 0 ? di : a.hora.localeCompare(b.hora);
+    });
+
+    const idx = slots.findIndex(s => s.dia === dia && s.hora === hora && s.clase === clase);
+    if(idx >= 0) {
+      document.getElementById('rc-horario').value = String(idx);
+      autoRellenarHorario();
+    }
+
+    // Si ya había un registro hoy para este slot, pre-rellenar asistentes con el último valor
+    const prev = registros.filter(r =>
+      r.inst_id === instId && r.dia === dia && r.hora === hora
+    ).sort((a, b) => (b.fecha || '').localeCompare(a.fecha || ''));
+    if(prev.length > 0) {
+      const asisInp = document.getElementById('rc-asis');
+      if(asisInp && !asisInp.value) asisInp.value = prev[0].asistentes || '';
+    }
+  }, 60);
 }
 
 
@@ -1009,17 +1038,42 @@ function renderMobileHome() {
   const afoBar = el('mob-aforo-bar');
   if(afoBar) afoBar.style.width = Math.min(aforoProm, 100) + '%';
 
-  // Sparkline de clases registradas (últimos 7 días)
+  // Sparkline: aforo promedio por franja horaria del día
+  // Cada barra = 1 franja horaria con clases; color = % aforo promedio
   const sparkEl = el('mob-sparkline-reg');
   if(sparkEl) {
-    const hoy7 = [];
-    for(let i=6;i>=0;i--){
-      const d=new Date(); d.setDate(d.getDate()-i);
-      const ds=d.toISOString().slice(0,10);
-      hoy7.push(registros.filter(r=>r.fecha===ds&&(r.estado==='ok'||r.estado==='sub')).length);
-    }
-    const maxS=Math.max(...hoy7,1);
-    sparkEl.innerHTML=hoy7.map((v,i)=>`<div class="mob-sparkline-bar${i===6?' active':''}" style="height:${Math.max(15,Math.round(v/maxS*100))}%"></div>`).join('');
+    const franjas = [];
+    for(let h=6;h<=21;h++) franjas.push(h);
+
+    const regsAforo = clasesHoy.filter(c =>
+      c.reg && (c.reg.estado==='ok'||c.reg.estado==='sub') && parseInt(c.reg.cap||0)>0
+    );
+
+    const segmentos = franjas.map(h => {
+      const enFranja = regsAforo.filter(c => {
+        const hn = parseInt((c.reg.hora||c.slot.hora||'00:00').split(':')[0]);
+        return hn === h;
+      });
+      if(!enFranja.length) return {h, afo:null};
+      const prom = enFranja.reduce((s,c)=>s+Math.round((parseInt(c.reg.asistentes)||0)/parseInt(c.reg.cap)*100),0)/enFranja.length;
+      return {h, afo:Math.round(prom)};
+    });
+
+    const conClase = franjas.map(h =>
+      clasesHoy.some(c => parseInt((c.slot.hora||'00:00').split(':')[0])===h)
+    );
+
+    sparkEl.innerHTML = segmentos.map((s,i) => {
+      if(!conClase[i]) return '';
+      const afo = s.afo;
+      const alt = afo!==null ? Math.max(20, afo) : 8;
+      const col = afo===null ? 'rgba(26,122,69,.15)'
+                : afo>=70   ? '#1a7a45'
+                : afo>=40   ? '#c8960a'
+                :              '#c0392b';
+      const glow = afo!==null&&afo>=70 ? `box-shadow:0 0 5px ${col}66;` : '';
+      return `<div class="mob-sparkline-bar" title="${s.h}:00 · ${afo!==null?afo+'%':'sin reg'}" style="height:${alt}%;background:${col};${glow}"></div>`;
+    }).filter(Boolean).join('');
   }
 
   // Dots de pendientes — siempre 10, color cambia según cuántos faltan
