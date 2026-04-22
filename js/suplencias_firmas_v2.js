@@ -612,19 +612,29 @@ window.sfv2_abrirFirmarSuplenciaInst = function(idx) {
   var fd  = new Date((r.fecha||'')+'T12:00:00').toLocaleDateString('es-MX',{weekday:'short',day:'2-digit',month:'short'});
   if (tit) tit.textContent = '✏ Firmando: ' + (r.clase||'—') + ' · ' + (r.hora||'') + ' · ' + fd;
 
-  // Botones
+  // Botones — siempre visibles cuando hay canvas abierto
   var btnGuard  = document.getElementById('inst-sup-guardar-btn');
+  var btnHint   = document.getElementById('inst-sup-canvas-hint');
   var btnBorrar = document.getElementById('inst-sup-borrar-btn');
+
   if (btnGuard) {
+    btnGuard.style.display       = 'block';
     btnGuard.style.opacity       = firmada ? '0.5' : '1';
     btnGuard.style.pointerEvents = firmada ? 'none' : 'auto';
-    btnGuard.textContent         = firmada ? '✔ Firma guardada' : '✔ Guardar Firma';
+    btnGuard.textContent         = firmada ? '\u2714 Firma guardada' : '\u2714 Guardar Firma';
   }
+  if (btnHint) btnHint.style.display = 'block';
   if (btnBorrar) {
-    btnBorrar.textContent   = firmada ? '✖ Borrar firma' : '↺ Limpiar';
-    btnBorrar.style.color   = firmada ? 'var(--red2)' : 'var(--txt3)';
-    btnBorrar.style.borderColor = firmada ? 'var(--red)' : 'var(--border)';
+    btnBorrar.textContent       = firmada ? '\u2716 Borrar firma' : '\u21ba Limpiar';
+    btnBorrar.style.color       = firmada ? 'var(--red2)' : 'var(--txt3)';
+    btnBorrar.style.borderColor = firmada ? 'rgba(224,80,80,.4)' : 'var(--border)';
   }
+
+  // Scroll suave hasta el canvas
+  setTimeout(function() {
+    var wrap = document.getElementById('inst-sup-canvas-wrap');
+    if (wrap) wrap.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  }, 150);
 
   // Inicializar canvas
   setTimeout(function(){ sfv2_inicializarCanvasInst(firmada ? firmaExist.data : null); }, 80);
