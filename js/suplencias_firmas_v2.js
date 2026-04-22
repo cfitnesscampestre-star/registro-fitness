@@ -374,42 +374,73 @@ function sfv2_inicializarCanvas() {
   _sfv2.ctx    = canvas.getContext('2d');
   sfv2_limpiarCanvas();
 
+  function scaleX(v, r) { return (v - r.left) * (600 / r.width); }
+  function scaleY(v, r) { return (v - r.top)  * (200 / r.height); }
+
+  function iniciarTrazo(x, y) {
+    _sfv2.dibujando = true;
+    _sfv2.lastX = x;   // inicializar AQUÍ para que el primer segmento parta del punto correcto
+    _sfv2.lastY = y;
+    _sfv2.ctx.beginPath();
+    _sfv2.ctx.moveTo(x, y);
+  }
+  function finalizarTrazo() {
+    _sfv2.dibujando = false;
+    _sfv2.lastX = null;  // resetear para que el próximo trazo no arrastre
+    _sfv2.lastY = null;
+    _sfv2.ctx.beginPath();
+  }
+
   canvas.addEventListener('touchstart', function(e) {
     e.preventDefault();
     var t = e.touches[0], r = canvas.getBoundingClientRect();
-    _sfv2.dibujando = true;
-    _sfv2.ctx.beginPath();
-    _sfv2.ctx.moveTo((t.clientX-r.left)*(600/r.width), (t.clientY-r.top)*(200/r.height));
+    iniciarTrazo(scaleX(t.clientX, r), scaleY(t.clientY, r));
   }, {passive:false});
   canvas.addEventListener('touchmove', function(e) {
     e.preventDefault();
     if (!_sfv2.dibujando) return;
     var t = e.touches[0], r = canvas.getBoundingClientRect();
-    var x = (t.clientX-r.left)*(600/r.width), y = (t.clientY-r.top)*(200/r.height);
-    sfv2_dibujar(x,y); _sfv2.puntosActual++;
+    sfv2_dibujar(scaleX(t.clientX, r), scaleY(t.clientY, r));
+    _sfv2.puntosActual++;
   }, {passive:false});
-  canvas.addEventListener('touchend', function(e) { e.preventDefault(); _sfv2.dibujando=false; _sfv2.ctx.beginPath(); }, {passive:false});
+  canvas.addEventListener('touchend',    function(e) { e.preventDefault(); finalizarTrazo(); }, {passive:false});
+  canvas.addEventListener('touchcancel', function(e) { e.preventDefault(); finalizarTrazo(); }, {passive:false});
+
   canvas.addEventListener('mousedown', function(e) {
     var r = canvas.getBoundingClientRect();
-    _sfv2.dibujando = true;
-    _sfv2.ctx.beginPath();
-    _sfv2.ctx.moveTo((e.clientX-r.left)*(600/r.width),(e.clientY-r.top)*(200/r.height));
+    iniciarTrazo(scaleX(e.clientX, r), scaleY(e.clientY, r));
   });
   canvas.addEventListener('mousemove', function(e) {
     if (!_sfv2.dibujando) return;
     var r = canvas.getBoundingClientRect();
-    sfv2_dibujar((e.clientX-r.left)*(600/r.width),(e.clientY-r.top)*(200/r.height)); _sfv2.puntosActual++;
+    sfv2_dibujar(scaleX(e.clientX, r), scaleY(e.clientY, r));
+    _sfv2.puntosActual++;
   });
-  canvas.addEventListener('mouseup',    function(){ _sfv2.dibujando=false; _sfv2.ctx.beginPath(); });
-  canvas.addEventListener('mouseleave', function(){ _sfv2.dibujando=false; _sfv2.ctx.beginPath(); });
+  canvas.addEventListener('mouseup',    function() { finalizarTrazo(); });
+  canvas.addEventListener('mouseleave', function() { finalizarTrazo(); });
 }
 
-function sfv2_dibujar(x,y) {
+function sfv2_dibujar(x, y) {
   var ctx = _sfv2.ctx;
-  ctx.strokeStyle='#1a1a2e'; ctx.lineWidth=2.2; ctx.lineCap='round'; ctx.lineJoin='round';
-  ctx.quadraticCurveTo(_sfv2.lastX||x, _sfv2.lastY||y, (x+(_sfv2.lastX||x))/2, (y+(_sfv2.lastY||y))/2);
-  ctx.stroke(); ctx.beginPath(); ctx.moveTo((x+(_sfv2.lastX||x))/2,(y+(_sfv2.lastY||y))/2);
-  _sfv2.lastX=x; _sfv2.lastY=y;
+  // Si no hay punto previo (primer movimiento del trazo), solo movemos
+  if (_sfv2.lastX === null || _sfv2.lastX === undefined) {
+    _sfv2.lastX = x; _sfv2.lastY = y;
+    ctx.beginPath(); ctx.moveTo(x, y);
+    return;
+  }
+  ctx.strokeStyle = '#1a1a2e';
+  ctx.lineWidth   = 2.4;
+  ctx.lineCap     = 'round';
+  ctx.lineJoin    = 'round';
+  // Curva suave entre el punto anterior y el actual
+  var mx = (_sfv2.lastX + x) / 2;
+  var my = (_sfv2.lastY + y) / 2;
+  ctx.quadraticCurveTo(_sfv2.lastX, _sfv2.lastY, mx, my);
+  ctx.stroke();
+  ctx.beginPath();
+  ctx.moveTo(mx, my);
+  _sfv2.lastX = x;
+  _sfv2.lastY = y;
 }
 
 function sfv2_limpiarCanvas() {
@@ -670,10 +701,56 @@ function sfv2_inicializarCanvasInst(dataUrl) {
 
   if (readOnly) return;
 
-  c.addEventListener('mousedown',  function(e){var r=c.getBoundingClientRect();cx.beginPath();cx.moveTo(e.clientX-r.left,e.clientY-r.top);});
-  c.addEventListener('mousemove',  function(e){if(e.buttons!==1)return;var r=c.getBoundingClientRect();cx.lineWidth=2.5;cx.lineCap='round';cx.strokeStyle='#1a1a1a';cx.lineTo(e.clientX-r.left,e.clientY-r.top);cx.stroke();});
-  c.addEventListener('touchstart', function(e){e.preventDefault();cx.beginPath();var r=c.getBoundingClientRect();var t=e.touches[0];cx.moveTo(t.clientX-r.left,t.clientY-r.top);},{passive:false});
-  c.addEventListener('touchmove',  function(e){e.preventDefault();if(e.touches.length===0)return;var r=c.getBoundingClientRect();var t=e.touches[0];cx.lineWidth=2.5;cx.lineCap='round';cx.strokeStyle='#1a1a1a';cx.lineTo(t.clientX-r.left,t.clientY-r.top);cx.stroke();},{passive:false});
+  // Variables locales de estado para este canvas
+  var instLastX = null, instLastY = null, instDibujando = false;
+
+  function instScaleX(v, r) { return (v - r.left) * (c.width  / r.width);  }
+  function instScaleY(v, r) { return (v - r.top)  * (c.height / r.height); }
+
+  function instIniciar(x, y) {
+    instDibujando = true;
+    instLastX = x; instLastY = y;
+    cx.beginPath(); cx.moveTo(x, y);
+  }
+  function instDibujar(x, y) {
+    if (instLastX === null) { instLastX = x; instLastY = y; cx.beginPath(); cx.moveTo(x, y); return; }
+    cx.strokeStyle = '#1a1a1a'; cx.lineWidth = 2.5; cx.lineCap = 'round'; cx.lineJoin = 'round';
+    var mx = (instLastX + x) / 2, my = (instLastY + y) / 2;
+    cx.quadraticCurveTo(instLastX, instLastY, mx, my);
+    cx.stroke(); cx.beginPath(); cx.moveTo(mx, my);
+    instLastX = x; instLastY = y;
+  }
+  function instFinalizar() {
+    instDibujando = false;
+    instLastX = null; instLastY = null;
+    cx.beginPath();
+  }
+
+  c.addEventListener('mousedown',  function(e) {
+    var r = c.getBoundingClientRect();
+    instIniciar(instScaleX(e.clientX, r), instScaleY(e.clientY, r));
+  });
+  c.addEventListener('mousemove',  function(e) {
+    if (!instDibujando) return;
+    var r = c.getBoundingClientRect();
+    instDibujar(instScaleX(e.clientX, r), instScaleY(e.clientY, r));
+  });
+  c.addEventListener('mouseup',    function() { instFinalizar(); });
+  c.addEventListener('mouseleave', function() { instFinalizar(); });
+
+  c.addEventListener('touchstart', function(e) {
+    e.preventDefault();
+    var r = c.getBoundingClientRect(), t = e.touches[0];
+    instIniciar(instScaleX(t.clientX, r), instScaleY(t.clientY, r));
+  }, {passive:false});
+  c.addEventListener('touchmove', function(e) {
+    e.preventDefault();
+    if (!instDibujando || e.touches.length === 0) return;
+    var r = c.getBoundingClientRect(), t = e.touches[0];
+    instDibujar(instScaleX(t.clientX, r), instScaleY(t.clientY, r));
+  }, {passive:false});
+  c.addEventListener('touchend',    function(e) { e.preventDefault(); instFinalizar(); }, {passive:false});
+  c.addEventListener('touchcancel', function(e) { e.preventDefault(); instFinalizar(); }, {passive:false});
 }
 
 window.instLimpiarFirmaSup = function() {
