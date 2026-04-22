@@ -3715,16 +3715,16 @@ window._cargarFflate=function(){
     </div>
   </div>
 
-  <!-- Layout: Lista izq + Panel firma der -->
-  <div style="flex:1;display:flex;min-height:0;overflow:hidden">
+  <!-- Layout: Lista ARRIBA + Panel firma abajo (mejor para tablet/mobile) -->
+  <div style="flex:1;display:flex;flex-direction:column;min-height:0;overflow:hidden">
 
-    <!-- Lista suplentes -->
-    <div id="sfv2-lista" style="width:200px;flex-shrink:0;border-right:1px solid var(--border);overflow-y:auto;background:var(--panel);padding:.5rem">
-      <div style="font-size:.6rem;text-transform:uppercase;letter-spacing:1.5px;color:var(--txt3);padding:.3rem .4rem .4rem;font-weight:700">Suplentes</div>
+    <!-- Lista suplentes — scroll horizontal arriba -->
+    <div id="sfv2-lista" style="flex-shrink:0;border-bottom:1px solid var(--border);background:var(--panel);padding:.4rem .5rem;display:flex;gap:.35rem;overflow-x:auto;overflow-y:hidden;white-space:nowrap;min-height:68px;max-height:88px;align-items:flex-start">
+      <div style="font-size:.55rem;text-transform:uppercase;letter-spacing:1.2px;color:var(--txt3);padding:.4rem .2rem .2rem;font-weight:700;flex-shrink:0;writing-mode:horizontal-tb">Suplentes</div>
     </div>
 
     <!-- Panel firma -->
-    <div style="flex:1;display:flex;flex-direction:column;min-width:0;overflow:hidden">
+    <div style="flex:1;display:flex;flex-direction:column;min-width:0;min-height:0;overflow:hidden">
 
       <!-- Info suplente activo -->
       <div id="sfv2-prof-info" style="background:var(--panel2);border-bottom:1px solid var(--border);padding:.7rem 1rem;flex-shrink:0;display:flex;align-items:center;gap:.8rem;flex-wrap:wrap">
