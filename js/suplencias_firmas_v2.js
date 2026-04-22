@@ -1398,3 +1398,134 @@ window.sfv2_cargarHoja         = sfv2_cargarHoja;
 
   }); // end wait
 })();
+
+
+// ════════════════════════════════════════════════════════════════════════
+// SECCIÓN 13 — PARCHE: Motivo en Falta + Editar registro al tocar clase
+// ════════════════════════════════════════════════════════════════════════
+(function sfv2_patchRegistro() {
+  function wait(fn, n) {
+    n = n || 80;
+    if (typeof toggleSuplenteClase === 'function' &&
+        typeof toggleErSuplente    === 'function' &&
+        typeof abrirRegistroDesdeCalendario === 'function') fn();
+    else if (n > 0) setTimeout(function(){ wait(fn, n-1); }, 150);
+  }
+
+  wait(function() {
+
+    // ── FIX 1: Mostrar "Motivo" también cuando estado es "falta" ─────
+    // Aplica a m-clase (registro nuevo) y m-edit-reg (editar)
+
+    window.toggleSuplenteClase = function() {
+      var v      = document.getElementById('rc-est').value;
+      var isSub  = (v === 'sub');
+      var isFalt = (v === 'falta');
+
+      // Fila suplente: solo si es 'sub'
+      var supRow = document.getElementById('rc-suplente-row');
+      if (supRow) supRow.style.display = isSub ? 'flex' : 'none';
+
+      // Fila motivo: si es 'sub' O 'falta'
+      var motRow = document.getElementById('rc-motivo-row');
+      if (motRow) {
+        motRow.style.display = (isSub || isFalt) ? 'flex' : 'none';
+        // Cambiar la etiqueta según el contexto
+        var lbl = motRow.querySelector('label');
+        if (lbl) lbl.textContent = isSub ? 'Motivo de Suplencia' : 'Motivo de Falta';
+      }
+    };
+
+    window.toggleErSuplente = function() {
+      var v      = document.getElementById('er-est').value;
+      var isSub  = (v === 'sub');
+      var isFalt = (v === 'falta');
+
+      var supRow = document.getElementById('er-suplente-row');
+      if (supRow) supRow.style.display = isSub ? 'flex' : 'none';
+
+      var motRow = document.getElementById('er-motivo-row');
+      if (motRow) {
+        motRow.style.display = (isSub || isFalt) ? 'flex' : 'none';
+        var lbl = motRow.querySelector('label');
+        if (lbl) lbl.textContent = isSub ? 'Motivo de Suplencia' : 'Motivo de Falta';
+      }
+    };
+
+    // Mismo fix para el recorrido
+    var _origToggleRec = window.toggleSuplenteRec;
+    if (typeof _origToggleRec === 'function') {
+      window.toggleSuplenteRec = function() {
+        _origToggleRec.apply(this, arguments);
+        // rcc-motivo-row ya lo maneja el original (solo para sub)
+        // pero lo ajustamos igual
+        var v      = (document.getElementById('rcc-pres') || {}).value || '';
+        var isSub  = (v === 'sub');
+        var isFalt = (v === 'falta');
+        var motRow = document.getElementById('rcc-motivo-row');
+        if (motRow) {
+          motRow.style.display = (isSub || isFalt) ? 'flex' : 'none';
+          var lbl = motRow.querySelector('label');
+          if (lbl) lbl.textContent = isSub ? 'Motivo de Suplencia' : 'Motivo de Falta';
+        }
+      };
+    }
+
+    // También ajustar guardarClase para que guarde motivo_suplencia en falta
+    var _origGuardarClase = window.guardarClase;
+    if (typeof _origGuardarClase === 'function') {
+      window.guardarClase = function() {
+        // Antes de guardar, copiar el motivo al campo correcto si es falta
+        var estEl  = document.getElementById('rc-est');
+        var motEl  = document.getElementById('rc-motivo');
+        if (estEl && motEl && estEl.value === 'falta') {
+          // guardarClase lee motivo_suplencia del campo rc-motivo — no necesita cambio
+          // solo asegurar que el valor esté sincronizado
+        }
+        _origGuardarClase.apply(this, arguments);
+      };
+    }
+
+    // ── FIX 2: Tocar una clase registrada abre m-edit-reg, no m-clase ─
+    var _origAbrir = window.abrirRegistroDesdeCalendario;
+    window.abrirRegistroDesdeCalendario = function(instId, dia, hora, clase, fechaStr) {
+      // Buscar si ya hay un registro para esta clase en esta fecha
+      var regExistente = (typeof registros !== 'undefined')
+        ? registros.find(function(r) {
+            return String(r.inst_id) === String(instId) &&
+                   r.fecha === fechaStr &&
+                   r.hora  === hora &&
+                   (r.clase === clase || (r.clase||'').toLowerCase() === (clase||'').toLowerCase());
+          })
+        : null;
+
+      if (regExistente && typeof abrirEditarRegistro === 'function') {
+        // Ya existe: abrir modal de edición
+        abrirEditarRegistro(regExistente.id);
+      } else {
+        // No existe: abrir modal de nuevo registro
+        _origAbrir.apply(this, arguments);
+      }
+    };
+
+    // Aplicar toggles en los modales en cuanto se abran para reflejar estado guardado
+    // (por si ya tienen estado 'falta' al abrirse desde edición)
+    var _origAbrirEdit = window.abrirEditarRegistro;
+    if (typeof _origAbrirEdit === 'function') {
+      window.abrirEditarRegistro = function(regId) {
+        _origAbrirEdit.apply(this, arguments);
+        // Forzar toggleErSuplente después para que el motivo se muestre si es falta
+        setTimeout(function() {
+          if (typeof window.toggleErSuplente === 'function') window.toggleErSuplente();
+          // Cargar motivo guardado
+          var r = (typeof registros !== 'undefined') ? registros.find(function(x){ return x.id === regId; }) : null;
+          if (r && (r.motivo_suplencia || r.motivo)) {
+            var motEl = document.getElementById('er-motivo');
+            if (motEl) motEl.value = r.motivo_suplencia || r.motivo || 'permiso';
+          }
+        }, 60);
+      };
+    }
+
+  }); // end wait
+})();
