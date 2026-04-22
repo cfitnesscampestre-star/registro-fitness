@@ -472,6 +472,10 @@ function slk_actualizarBadgeSuplencias() {
 // Funciona con o sin hoja semanal activa
 // ─────────────────────────────────────────────────────────────────────────────
 function slk_renderFirmaSuplencias() {
+  // Desactivado: el tab Suplencias dedicado reemplaza este bloque
+  var prev = document.getElementById('slk-sup-section');
+  if (prev) prev.remove(); // limpiar si quedó de una sesión anterior
+  return;
   try {
     if (typeof instActualId === 'undefined' || !instActualId) return;
 
