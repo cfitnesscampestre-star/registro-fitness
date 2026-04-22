@@ -773,7 +773,7 @@ function sfv2_generarPDF(hoja) {
   var firmasInst = hoja ? (hoja.firmas||{}) : {};
   var firmasInd  = sfv2_cargarFirmasIndividuales();
 
-  var MOTIVOS = {permiso:'Permiso',enfermedad:'Enfermedad',vacaciones:'Vacaciones',emergencia:'Emergencia',otro:'Otro'};
+  var MOTIVOS = {permiso:'Permiso',enfermedad:'Enfermedad',vacaciones:'Vacaciones',emergencia:'Emergencia',falta:'Falta',incapacidad:'Incapacidad',otro:'Otro'};
 
   var sups = (typeof registros!=='undefined')
     ? registros.filter(function(r){
@@ -793,7 +793,7 @@ function sfv2_generarPDF(hoja) {
     var instSup  = (typeof instructores!=='undefined')?instructores.find(function(i){return String(i.id)===String(r.suplente_id);}):null;
     var fd   = new Date((r.fecha||'')+'T12:00:00').toLocaleDateString('es-MX',{day:'2-digit',month:'short',year:'numeric'});
     var asis = parseInt(r.asistentes)||0;
-    var mot  = MOTIVOS[r.motivo||''] || (r.motivo||'\u2014');
+    var mot  = MOTIVOS[r.motivo_suplencia||r.motivo||''] || (r.motivo_suplencia||r.motivo||'\u2014');
     var firma = firmasInd[String(r.id)] || firmasInst[String(r.suplente_id)];
     var firmaHtml = (firma&&firma.data)
       ? '<img src="'+firma.data+'" style="height:40px;max-width:110px;object-fit:contain;display:block;margin:0 auto" alt="Firma">'
@@ -1140,4 +1140,184 @@ window.sfv2_cargarHoja         = sfv2_cargarHoja;
   }
 
   window.sfv2_persistirAsignaciones = sfv2_persistirAsignaciones;
+})();
+
+
+// ════════════════════════════════════════════════════════════════════════
+// SECCIÓN 12 — PARCHE COLUMNAS REPORTE DE SUPLENCIAS
+// Orden: Fecha · Titular · Suplente · Clase · Hora · Asistentes · Motivo
+// Se elimina "Aforo %" del reporte de consulta.
+// ════════════════════════════════════════════════════════════════════════
+(function sfv2_patchColumnas() {
+  var MOTIVOS_MAP = {
+    permiso:'Permiso', vacaciones:'Vacaciones', falta:'Falta',
+    incapacidad:'Incapacidad', enfermedad:'Enfermedad',
+    emergencia:'Emergencia', otro:'Otro'
+  };
+  function motivoLabel(r) {
+    var m = r.motivo_suplencia || r.motivo || '';
+    return MOTIVOS_MAP[m] || m || '\u2014';
+  }
+  function pctCol(p) {
+    return p >= 70 ? 'var(--neon)' : p >= 40 ? 'var(--gold2)' : 'var(--red2)';
+  }
+  function pctColPrint(p) {
+    return p >= 70 ? '#1a7a45' : p >= 40 ? '#b8860b' : '#c0392b';
+  }
+
+  function wait(fn, n) {
+    n = n || 80;
+    if (typeof renderReporteSuplencias === 'function') fn();
+    else if (n > 0) setTimeout(function(){ wait(fn, n-1); }, 150);
+  }
+
+  wait(function() {
+
+    // ── 1. Tabla de consulta (dentro del modal m-suplencias) ──────────
+    window.renderReporteSuplencias = function() {
+      var ini      = document.getElementById('sup-fecha-ini').value;
+      var fin      = document.getElementById('sup-fecha-fin').value;
+      var filtInst = document.getElementById('sup-filtro-inst').value;
+      if (!ini || !fin) { showToast('Selecciona el rango de fechas','err'); return; }
+      var d1 = new Date(ini+'T00:00:00'), d2 = new Date(fin+'T23:59:59');
+      window.lastSuplencias = registros.filter(function(r) {
+        if (r.estado !== 'sub') return false;
+        var d = new Date(r.fecha+'T12:00:00');
+        if (d < d1 || d > d2) return false;
+        if (filtInst && String(r.suplente_id) !== filtInst) return false;
+        return true;
+      }).sort(function(a,b){ return a.fecha.localeCompare(b.fecha); });
+
+      var bodyEl     = document.getElementById('sup-body');
+      var exportBtns = document.getElementById('sup-export-btns');
+
+      if (!window.lastSuplencias.length) {
+        bodyEl.innerHTML = '<div class="empty">Sin suplencias en el periodo seleccionado</div>';
+        if (exportBtns) exportBtns.style.display = 'none';
+        return;
+      }
+
+      var ths = ['Fecha','Titular','Suplente','Clase','Hora','Asist.','Motivo'].map(function(h) {
+        return '<th style="padding:7px 10px;color:var(--txt2);font-size:.67rem;text-transform:uppercase;letter-spacing:1px;border-bottom:1px solid var(--border);white-space:nowrap">'+h+'</th>';
+      }).join('');
+
+      var filas = window.lastSuplencias.map(function(r, n) {
+        var instOrig = instructores.find(function(i){ return i.id === r.inst_id; });
+        var sup      = instructores.find(function(i){ return i.id === r.suplente_id; });
+        var fd  = new Date(r.fecha+'T12:00:00').toLocaleDateString('es-MX',{day:'2-digit',month:'short',year:'numeric'});
+        var mot = motivoLabel(r);
+        var bg  = n%2 ? 'var(--panel2)' : 'transparent';
+        return '<tr style="background:'+bg+';border-bottom:1px solid var(--border)">' +
+          '<td style="padding:6px 10px;font-family:monospace;font-size:.78rem">'+fd+'</td>' +
+          '<td style="padding:6px 10px;color:var(--txt2)">'+((instOrig&&instOrig.nombre)||'\u2014')+'</td>' +
+          '<td style="padding:6px 10px;color:var(--blue);font-weight:600">'+((sup&&sup.nombre)||r.suplente_nombre||'\u2014')+'</td>' +
+          '<td style="padding:6px 10px;font-weight:600">'+((r.clase||'').toUpperCase())+'</td>' +
+          '<td style="padding:6px 10px;font-family:monospace">'+((r.hora)||'\u2014')+'</td>' +
+          '<td style="padding:6px 10px;text-align:center;font-weight:700">'+((parseInt(r.asistentes)||0))+'</td>' +
+          '<td style="padding:6px 10px;font-size:.76rem">'+mot+'</td>' +
+        '</tr>';
+      }).join('');
+
+      bodyEl.innerHTML =
+        '<div style="font-size:.78rem;color:var(--txt2);margin-bottom:.6rem">'+
+          window.lastSuplencias.length+' suplencia(s) &mdash; '+ini+' al '+fin+
+        '</div>' +
+        '<div style="overflow-x:auto;max-height:340px">' +
+          '<table style="width:100%;border-collapse:collapse;font-size:.8rem">' +
+            '<thead><tr style="position:sticky;top:0;background:var(--panel2)">'+ths+'</tr></thead>' +
+            '<tbody>'+filas+'</tbody>' +
+          '</table>' +
+        '</div>';
+      if (exportBtns) exportBtns.style.display = 'flex';
+    };
+
+    // ── 2. Imprimir / PDF del reporte (sin firmas) ────────────────────
+    window.imprimirSuplencias = function() {
+      var ini = document.getElementById('sup-fecha-ini').value;
+      var fin = document.getElementById('sup-fecha-fin').value;
+      if (!window.lastSuplencias || !window.lastSuplencias.length) return;
+
+      var ths = ['Fecha','Titular','Suplente','Clase','Hora','Asist.','Motivo'].map(function(h) {
+        return '<th style="padding:6px 9px;border:1px solid #ccc;background:#1a7a45;color:#fff;font-size:.67rem;text-transform:uppercase">'+h+'</th>';
+      }).join('');
+
+      var filas = window.lastSuplencias.map(function(r, n) {
+        var instOrig = (typeof instructores !== 'undefined') ? instructores.find(function(i){ return i.id===r.inst_id; }) : null;
+        var sup      = (typeof instructores !== 'undefined') ? instructores.find(function(i){ return i.id===r.suplente_id; }) : null;
+        var fd  = new Date(r.fecha+'T12:00:00').toLocaleDateString('es-MX',{day:'2-digit',month:'short',year:'numeric'});
+        var mot = motivoLabel(r);
+        var bg  = n%2 ? '#f9fdf9' : '#fff';
+        return '<tr style="background:'+bg+'">' +
+          '<td style="padding:5px 9px;border:1px solid #e0ede5;font-family:monospace">'+fd+'</td>' +
+          '<td style="padding:5px 9px;border:1px solid #e0ede5">'+((instOrig&&instOrig.nombre)||'\u2014')+'</td>' +
+          '<td style="padding:5px 9px;border:1px solid #e0ede5;color:#1a5a8a;font-weight:700">'+((sup&&sup.nombre)||r.suplente_nombre||'\u2014')+'</td>' +
+          '<td style="padding:5px 9px;border:1px solid #e0ede5;font-weight:600">'+((r.clase||'').toUpperCase())+'</td>' +
+          '<td style="padding:5px 9px;border:1px solid #e0ede5;font-family:monospace;text-align:center">'+((r.hora)||'\u2014')+'</td>' +
+          '<td style="padding:5px 9px;border:1px solid #e0ede5;text-align:center;font-weight:700">'+((parseInt(r.asistentes)||0))+'</td>' +
+          '<td style="padding:5px 9px;border:1px solid #e0ede5">'+mot+'</td>' +
+        '</tr>';
+      }).join('');
+
+      var html =
+        '<div style="font-family:\'Outfit\',sans-serif;color:#111">' +
+          '<div style="border-bottom:3px solid #1a7a45;padding-bottom:.7rem;margin-bottom:1rem;display:flex;justify-content:space-between;flex-wrap:wrap;gap:.5rem">' +
+            '<div>' +
+              '<h1 style="font-family:\'Bebas Neue\',sans-serif;font-size:1.6rem;letter-spacing:2px;color:#1a7a45;margin:0">REPORTE DE SUPLENCIAS</h1>' +
+              '<p style="color:#555;font-size:.8rem;margin:.2rem 0">Club Campestre Aguascalientes &middot; Coordinaci&oacute;n Fitness</p>' +
+              '<p style="color:#333;font-size:.82rem;margin:.2rem 0">Periodo: <strong>'+ini+'</strong> al <strong>'+fin+'</strong> &middot; Total: '+window.lastSuplencias.length+' suplencias</p>' +
+            '</div>' +
+            '<div style="text-align:right">' +
+              '<div style="font-family:\'Bebas Neue\',sans-serif;font-size:1.4rem;color:#1a7a45">'+window.lastSuplencias.length+'</div>' +
+              '<div style="font-size:.78rem;color:#555">suplencias</div>' +
+            '</div>' +
+          '</div>' +
+          '<table style="width:100%;border-collapse:collapse;font-size:.79rem">' +
+            '<thead><tr>'+ths+'</tr></thead>' +
+            '<tbody>'+filas+'</tbody>' +
+          '</table>' +
+          '<div style="margin-top:1.5rem;display:grid;grid-template-columns:1fr 1fr;gap:1rem">' +
+            '<div style="border-top:2px solid #1a7a45;padding-top:.5rem">' +
+              '<div style="font-size:.75rem;color:#555;margin-bottom:2rem">Firma Coordinador Fitness</div>' +
+              '<div style="border-top:1px solid #333;font-size:.72rem;color:#555">Nombre y Firma</div>' +
+            '</div>' +
+            '<div style="border-top:2px solid #1a7a45;padding-top:.5rem">' +
+              '<div style="font-size:.75rem;color:#555;margin-bottom:2rem">Vo.Bo. Recursos Humanos</div>' +
+              '<div style="border-top:1px solid #333;font-size:.72rem;color:#555">Nombre y Firma</div>' +
+            '</div>' +
+          '</div>' +
+        '</div>';
+
+      document.getElementById('print-ttl').textContent = 'Suplencias \u2014 '+ini+' al '+fin;
+      document.getElementById('print-body').innerHTML  = html;
+      if (typeof cerrarModal === 'function') cerrarModal('m-suplencias');
+      document.getElementById('m-print').classList.add('on');
+    };
+
+    // ── 3. Exportar Excel ─────────────────────────────────────────────
+    window.exportarSuplenciasExcel = function() {
+      if (!window.lastSuplencias || !window.lastSuplencias.length) return;
+      var rows = [['Fecha','Titular','Suplente','Clase','Hora','Asistentes','Motivo','Día']];
+      window.lastSuplencias.forEach(function(r) {
+        var instOrig = (typeof instructores!=='undefined')?instructores.find(function(i){return i.id===r.inst_id;}):null;
+        var sup      = (typeof instructores!=='undefined')?instructores.find(function(i){return i.id===r.suplente_id;}):null;
+        rows.push([
+          r.fecha,
+          (instOrig&&instOrig.nombre)||'\u2014',
+          (sup&&sup.nombre)||r.suplente_nombre||'\u2014',
+          (r.clase||'').toUpperCase(),
+          r.hora,
+          parseInt(r.asistentes)||0,
+          motivoLabel(r),
+          r.dia||''
+        ]);
+      });
+      if (typeof XLSX === 'undefined') { showToast('Librería Excel no disponible','warn'); return; }
+      var ws = XLSX.utils.aoa_to_sheet(rows);
+      ws['!cols'] = [{wch:14},{wch:24},{wch:24},{wch:14},{wch:9},{wch:11},{wch:14},{wch:11}];
+      var wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, 'Suplencias', ws);
+      XLSX.writeFile(wb, 'Suplencias_FitnessControl.xlsx');
+    };
+
+  }); // end wait
 })();
