@@ -265,36 +265,42 @@ function sfv2_renderListaSuplentes() {
   var firmas  = hoja.firmas || {};
   var COLORS  = ['#E85D04','#7209B7','#0077B6','#2D6A4F','#C1121F','#F59E0B','#0891B2','#BE185D','#15803D','#9333EA'];
 
-  var html = '';
+  // Conservar el label "Suplentes" que está como primer hijo
+  var labelHtml = '<span style="font-size:.55rem;text-transform:uppercase;letter-spacing:1.2px;color:var(--txt3);padding:.4rem .2rem .2rem;font-weight:700;flex-shrink:0">Suplentes</span>';
+
+  var chips = '';
   _sfv2.suplentes.forEach(function(p, idx) {
     var firmado  = !!(firmas[String(p.id)] && firmas[String(p.id)].data);
     var activo   = _sfv2.profActivo === idx;
     var color    = COLORS[(parseInt(p.id)||0) % COLORS.length];
     var initials = p.inst.nombre.trim().split(' ').map(function(w){ return w[0]||''; }).join('').slice(0,2).toUpperCase();
-    var clsCnt   = p.clases.length;
-    html += [
-      '<div onclick="sfv2_seleccionarSuplente(', idx, ')" style="',
-        'display:flex;align-items:center;gap:8px;padding:8px;border-radius:10px;cursor:pointer;margin-bottom:3px;',
-        'background:', activo?'rgba(26,122,69,.18)':'transparent', ';',
-        'border:1px solid ', activo?'var(--verde)':'transparent', ';',
-        'transition:all .15s;-webkit-tap-highlight-color:transparent">',
-        '<div style="position:relative;flex-shrink:0">',
-          '<div style="width:34px;height:34px;border-radius:50%;background:', color, ';',
-            'display:flex;align-items:center;justify-content:center;font-size:.7rem;font-weight:700;color:#fff;">', initials, '</div>',
-          firmado ? '<div style="position:absolute;bottom:-1px;right:-1px;width:13px;height:13px;border-radius:50%;background:var(--neon);border:2px solid var(--panel);display:flex;align-items:center;justify-content:center;"><svg viewBox="0 0 20 20" width="8" height="8" fill="none" stroke="#0a1f10" stroke-width="3" stroke-linecap="round"><polyline points="4,10 8,14 16,6"/></svg></div>' : '',
+    var nombre2  = p.inst.nombre.split(' ').slice(0,2).join(' ');
+    var bdr = activo ? '2px solid var(--neon)' : (firmado ? '2px solid var(--verde)' : '1px solid transparent');
+    var bg  = activo ? 'rgba(26,122,69,.2)' : 'rgba(0,0,0,.08)';
+    chips += [
+      '<div onclick="sfv2_seleccionarSuplente('+idx+')" style="',
+        'display:inline-flex;flex-direction:column;align-items:center;gap:3px;',
+        'padding:5px 8px;border-radius:10px;cursor:pointer;flex-shrink:0;',
+        'background:'+bg+';border:'+bdr+';',
+        'transition:all .15s;-webkit-tap-highlight-color:transparent;min-width:58px;max-width:72px">',
+        '<div style="position:relative">',
+          '<div style="width:36px;height:36px;border-radius:50%;background:'+color+';',
+            'display:flex;align-items:center;justify-content:center;font-size:.72rem;font-weight:700;color:#fff;">'+initials+'</div>',
+          firmado ? '<div style="position:absolute;bottom:-1px;right:-1px;width:14px;height:14px;border-radius:50%;background:var(--neon);border:2px solid var(--bg);display:flex;align-items:center;justify-content:center;"><svg viewBox="0 0 20 20" width="9" height="9" fill="none" stroke="#0a1f10" stroke-width="3.5" stroke-linecap="round"><polyline points="4,10 8,14 16,6"/></svg></div>' : '',
         '</div>',
-        '<div style="flex:1;min-width:0">',
-          '<div style="font-size:.78rem;font-weight:600;color:', activo?'var(--neon)':'var(--txt)', ';white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">',
-            p.inst.nombre.split(' ').slice(0,2).join(' '),
-          '</div>',
-          '<div style="font-size:.62rem;color:', firmado?'var(--neon)':'var(--txt3)', ';">',
-            firmado ? '✔ Firmado' : clsCnt + ' suplencia' + (clsCnt!==1?'s':''),
-          '</div>',
-        '</div>',
+        '<div style="font-size:.55rem;font-weight:600;color:'+(activo?'var(--neon)':'var(--txt)')+';text-align:center;line-height:1.2;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;width:100%;max-width:66px">'+nombre2+'</div>',
       '</div>'
     ].join('');
   });
-  cont.innerHTML = html;
+
+  cont.innerHTML = labelHtml + chips;
+  // Scroll al chip activo
+  if (_sfv2.profActivo !== null) {
+    var chips2 = cont.querySelectorAll('div[onclick]');
+    if (chips2[_sfv2.profActivo]) {
+      chips2[_sfv2.profActivo].scrollIntoView({behavior:'smooth',block:'nearest',inline:'center'});
+    }
+  }
 }
 
 window.sfv2_seleccionarSuplente = function(idx) {
@@ -763,76 +769,113 @@ window.instGuardarFirmaSup = async function() {
 // SECCIÓN 5 — GENERACIÓN DE PDF
 // ════════════════════════════════════════════════════════════════════════
 function sfv2_generarPDF(hoja) {
-  // Combinar firmas de hoja (por instId) y firmas individuales (por regId)
+  // Firmas: individual (por regId) tiene prioridad sobre hoja (por instId)
   var firmasInst = hoja ? (hoja.firmas||{}) : {};
   var firmasInd  = sfv2_cargarFirmasIndividuales();
+
+  var MOTIVOS = {permiso:'Permiso',enfermedad:'Enfermedad',vacaciones:'Vacaciones',emergencia:'Emergencia',otro:'Otro'};
 
   var sups = (typeof registros!=='undefined')
     ? registros.filter(function(r){
         return r.estado==='sub' &&
                (!hoja || (r.fecha>=hoja.semIni && r.fecha<=hoja.semFin));
-      }).sort(function(a,b){return (a.fecha||'').localeCompare(b.fecha||'');})
+      }).sort(function(a,b){
+        var df=(a.fecha||'').localeCompare(b.fecha||'');
+        return df!==0?df:(a.hora||'').localeCompare(b.hora||'');
+      })
     : [];
 
   if (sups.length===0) { showToast('Sin suplencias en el periodo','warn'); return; }
 
+  // Columnas: Fecha | Titular | Suplente | Clase | Hora | Asist. | Motivo | Firma
   var rows = sups.map(function(r, n) {
     var instOrig = (typeof instructores!=='undefined')?instructores.find(function(i){return i.id===r.inst_id;}):null;
     var instSup  = (typeof instructores!=='undefined')?instructores.find(function(i){return String(i.id)===String(r.suplente_id);}):null;
-    var fd = new Date((r.fecha||'')+'T12:00:00').toLocaleDateString('es-MX',{day:'2-digit',month:'short',year:'numeric'});
-    var asis=parseInt(r.asistentes)||0, cap=parseInt(r.cap)||0;
-    var afo=cap>0?Math.round(asis/cap*100):null;
-    // Firma: preferir individual (por registro), luego por instructor
+    var fd   = new Date((r.fecha||'')+'T12:00:00').toLocaleDateString('es-MX',{day:'2-digit',month:'short',year:'numeric'});
+    var asis = parseInt(r.asistentes)||0;
+    var mot  = MOTIVOS[r.motivo||''] || (r.motivo||'\u2014');
     var firma = firmasInd[String(r.id)] || firmasInst[String(r.suplente_id)];
-    var firmaHtml = firma&&firma.data
-      ? '<img src="'+firma.data+'" style="height:38px;max-width:130px;object-fit:contain" alt="Firma">'
-      : '<span style="color:#c00;font-size:.72rem;font-style:italic">Sin firma</span>';
-    return '<tr style="background:'+(n%2?'#f9fdf9':'#fff')+'">' +
-      '<td style="padding:5px 9px;border:1px solid #e0ede5;font-family:monospace">'+fd+'</td>' +
-      '<td style="padding:5px 9px;border:1px solid #e0ede5;font-weight:600">'+r.clase+'</td>' +
-      '<td style="padding:5px 9px;border:1px solid #e0ede5;font-family:monospace">'+r.hora+'</td>' +
-      '<td style="padding:5px 9px;border:1px solid #e0ede5">'+(instOrig?instOrig.nombre:'—')+'</td>' +
-      '<td style="padding:5px 9px;border:1px solid #e0ede5;color:#1a5a8a;font-weight:600">'+(instSup?instSup.nombre:'—')+'</td>' +
-      '<td style="padding:5px 9px;border:1px solid #e0ede5;text-align:center">'+asis+'</td>' +
-      '<td style="padding:5px 9px;border:1px solid #e0ede5;text-align:center">'+(afo!==null?afo+'%':'—')+'</td>' +
-      '<td style="padding:5px 9px;border:1px solid #e0ede5;text-align:center">'+firmaHtml+'</td>' +
+    var firmaHtml = (firma&&firma.data)
+      ? '<img src="'+firma.data+'" style="height:40px;max-width:110px;object-fit:contain;display:block;margin:0 auto" alt="Firma">'
+      : '<span style="color:#c00;font-size:.7rem;font-style:italic">Sin firma</span>';
+    var bg = n%2?'#f6fbf8':'#ffffff';
+    var td = 'padding:5px 8px;border:1px solid #d8ede2;font-size:.75rem;vertical-align:middle;';
+    return '<tr style="background:'+bg+'">' +
+      '<td style="'+td+'font-family:monospace;white-space:nowrap">'+fd+'</td>' +
+      '<td style="'+td+'">'+((instOrig&&instOrig.nombre)||'\u2014')+'</td>' +
+      '<td style="'+td+'color:#1a5a8a;font-weight:700">'+((instSup&&instSup.nombre)||r.suplente_nombre||'\u2014')+'</td>' +
+      '<td style="'+td+'font-weight:600">'+((r.clase||'\u2014').toUpperCase())+'</td>' +
+      '<td style="'+td+'font-family:monospace;text-align:center">'+((r.hora)||'\u2014')+'</td>' +
+      '<td style="'+td+'text-align:center">'+asis+'</td>' +
+      '<td style="'+td+'">'+mot+'</td>' +
+      '<td style="'+td+'text-align:center;min-width:100px">'+firmaHtml+'</td>' +
     '</tr>';
   }).join('');
 
   var totalFirm = sups.filter(function(r){
-    var f=firmasInd[String(r.id)]||firmasInst[String(r.suplente_id)];
-    return f&&f.data;
+    var f=firmasInd[String(r.id)]||firmasInst[String(r.suplente_id)]; return f&&f.data;
   }).length;
 
-  var enc = hoja ? (hoja.encabezado||hoja.semIni+' al '+hoja.semFin) : 'Suplencias';
-  var html = [
-    '<div style="font-family:\'Outfit\',sans-serif;color:#111">',
-    '<div style="border-bottom:3px solid #1a7a45;padding-bottom:.7rem;margin-bottom:1rem">',
-    '<h1 style="font-family:\'Bebas Neue\',sans-serif;font-size:1.5rem;letter-spacing:2px;color:#1a7a45;margin:0">REPORTE DE SUPLENCIAS</h1>',
-    '<p style="color:#555;font-size:.8rem;margin:.2rem 0">Club Campestre Aguascalientes · Coordinación Fitness</p>',
-    '<p style="color:#333;font-size:.8rem;margin:.2rem 0">Periodo: <strong>'+enc+'</strong> · '+sups.length+' suplencias · '+totalFirm+' firmadas</p>',
-    '</div>',
-    '<table style="width:100%;border-collapse:collapse;font-size:.78rem">',
-    '<thead><tr style="background:#f0f7f3">',
-    ['Fecha','Clase','Hora','Titular','Suplente','Asist.','Aforo','Firma'].map(function(h){
-      return '<th style="padding:6px 9px;border:1px solid #ccc;color:#1a7a45;font-size:.65rem;text-transform:uppercase">'+h+'</th>';
-    }).join(''),
-    '</tr></thead><tbody>'+rows+'</tbody></table>',
-    '<div style="margin-top:1.5rem;display:grid;grid-template-columns:1fr 1fr;gap:1rem">',
-    '<div style="border-top:2px solid #1a7a45;padding-top:.5rem"><div style="font-size:.75rem;color:#555;margin-bottom:2rem">Firma Coordinador Fitness</div><div style="border-top:1px solid #333;font-size:.72rem;color:#555">Nombre y Firma</div></div>',
-    '<div style="border-top:2px solid #1a7a45;padding-top:.5rem"><div style="font-size:.75rem;color:#555;margin-bottom:2rem">Vo.Bo. Recursos Humanos</div><div style="border-top:1px solid #333;font-size:.72rem;color:#555">Nombre y Firma</div></div>',
-    '</div>',
-    '<div style="margin-top:.5rem;font-size:.7rem;color:#888;text-align:right">Generado: '+new Date().toLocaleDateString('es-MX',{day:'2-digit',month:'long',year:'numeric'})+'</div>',
-    '</div>'
-  ].join('');
+  var enc = hoja?(hoja.encabezado||hoja.semIni+' al '+hoja.semFin):'Suplencias';
+  var ths = ['Fecha','Titular','Suplente','Clase','Hora','Asist.','Motivo','Firma'].map(function(h){
+    return '<th style="padding:6px 7px;border:1px solid #aaa;background:#1a7a45;color:#fff;font-size:.68rem;text-transform:uppercase;font-weight:700;white-space:nowrap">'+h+'</th>';
+  }).join('');
 
-  var ttl  = document.getElementById('print-ttl');
-  var body = document.getElementById('print-body');
-  if (ttl)  ttl.textContent = 'Suplencias — ' + enc;
-  if (body) body.innerHTML  = html;
-  var mPrint = document.getElementById('m-print');
-  if (mPrint) { cerrarModal('m-sup-firmas-presencial'); mPrint.classList.add('on'); }
-};
+  var htmlBody = '<div style="font-family:Arial,sans-serif;color:#111;padding:10px">' +
+    '<div style="border-bottom:3px solid #1a7a45;padding-bottom:7px;margin-bottom:10px;display:flex;justify-content:space-between;align-items:flex-end;flex-wrap:wrap;gap:5px">' +
+      '<div>' +
+        '<h2 style="font-size:1.15rem;letter-spacing:2px;color:#1a7a45;margin:0 0 2px">REPORTE DE SUPLENCIAS</h2>' +
+        '<p style="color:#333;font-size:.78rem;margin:0"><strong>'+enc+'</strong></p>' +
+        '<p style="color:#555;font-size:.7rem;margin:2px 0 0">Club Campestre Aguascalientes &middot; Coordinaci&oacute;n Fitness</p>' +
+      '</div>' +
+      '<div style="text-align:right;font-size:.72rem;color:#555">' +
+        '<div>Total: <strong>'+sups.length+'</strong> suplencias</div>' +
+        '<div>Firmadas: <strong style="color:'+(totalFirm===sups.length?'#1a7a45':'#c0392b')+'">'+totalFirm+'/'+sups.length+'</strong></div>' +
+      '</div>' +
+    '</div>' +
+    '<table style="width:100%;border-collapse:collapse"><thead><tr>'+ths+'</tr></thead><tbody>'+rows+'</tbody></table>' +
+    '<div style="margin-top:22px;display:grid;grid-template-columns:1fr 1fr;gap:18px;page-break-inside:avoid">' +
+      '<div style="border-top:2px solid #1a7a45;padding-top:5px">' +
+        '<p style="font-size:.72rem;color:#555;margin:0 0 24px">Coordinador de Fitness</p>' +
+        '<div style="border-top:1px solid #333;font-size:.68rem;color:#555;padding-top:2px">Nombre y Firma</div>' +
+      '</div>' +
+      '<div style="border-top:2px solid #1a7a45;padding-top:5px">' +
+        '<p style="font-size:.72rem;color:#555;margin:0 0 24px">Vo.Bo. Recursos Humanos</p>' +
+        '<div style="border-top:1px solid #333;font-size:.68rem;color:#555;padding-top:2px">Nombre y Firma</div>' +
+      '</div>' +
+    '</div>' +
+    '<div style="margin-top:6px;font-size:.62rem;color:#999;text-align:right">Generado: '+new Date().toLocaleDateString('es-MX',{day:'2-digit',month:'long',year:'numeric'})+'</div>' +
+  '</div>';
+
+  // Abrir ventana nueva para imprimir (garantiza que las imágenes base64 se rendericen)
+  var ventana = window.open('','_blank','width=920,height=720,scrollbars=yes');
+  if (ventana) {
+    ventana.document.write('<!DOCTYPE html><html><head><meta charset="UTF-8">' +
+      '<title>Suplencias \u2014 '+enc+'</title>' +
+      '<style>' +
+        '@page{size:A4 landscape;margin:10mm 8mm}' +
+        'body{font-family:Arial,sans-serif;margin:0;padding:0}' +
+        'img{max-width:110px;height:40px;object-fit:contain}' +
+        'table{width:100%;border-collapse:collapse}' +
+        'th{background:#1a7a45;color:#fff;padding:5px 6px;border:1px solid #999;font-size:9px}' +
+        'td{padding:4px 6px;border:1px solid #ccc;vertical-align:middle;font-size:10px}' +
+        'tr:nth-child(even) td{background:#f6fbf8}' +
+        '@media print{button,nav,.noprint{display:none!important}}' +
+      '<\/style>' +
+      '<\/head><body>' + htmlBody +
+      '<script>window.onload=function(){setTimeout(function(){window.print();},500);};<\/script>' +
+      '<\/body><\/html>');
+    ventana.document.close();
+  } else {
+    // Popup bloqueado: fallback al modal
+    var ttlEl  = document.getElementById('print-ttl');
+    var bodyEl = document.getElementById('print-body');
+    if (ttlEl)  ttlEl.textContent = 'Suplencias \u2014 ' + enc;
+    if (bodyEl) bodyEl.innerHTML  = htmlBody;
+    var mPrint = document.getElementById('m-print');
+    if (mPrint) { cerrarModal('m-sup-firmas-presencial'); mPrint.classList.add('on'); }
+  }
+}
 
 window.sfv2_generarPDFDesdeMenu = function() {
   var hoja = sfv2_cargarHoja();
@@ -976,3 +1019,125 @@ function sfv2_actualizarBadgeCoord() {
 window.sfv2_generarPDF         = sfv2_generarPDF;
 window.sfv2_limpiarCanvas      = sfv2_limpiarCanvas;
 window.sfv2_cargarHoja         = sfv2_cargarHoja;
+
+// ════════════════════════════════════════════════════════════════════════
+// SECCIÓN 11 — PARCHE PLANIFICADOR: Editar/Quitar suplente persiste
+// ════════════════════════════════════════════════════════════════════════
+(function sfv2_patchPlanificador() {
+  function wait(fn, n) {
+    n = n || 60;
+    if (typeof splGuardarAsignacion === 'function' && typeof splQuitarAsignacion === 'function') fn();
+    else if (n > 0) setTimeout(function(){ wait(fn, n-1); }, 200);
+  }
+
+  wait(function() {
+    // ── Parche splGuardarAsignacion: después de guardar en memoria, persistir ──
+    var _origGuardar = window.splGuardarAsignacion || splGuardarAsignacion;
+    window.splGuardarAsignacion = function() {
+      // Ejecutar original (guarda en splAsignaciones y re-renderiza)
+      _origGuardar.apply(this, arguments);
+      // Persistir inmediatamente en suplenciasPlan + Firebase
+      sfv2_persistirAsignaciones();
+    };
+
+    // ── Parche splQuitarAsignacion: eliminar también de suplenciasPlan ──
+    var _origQuitar = window.splQuitarAsignacion || splQuitarAsignacion;
+    window.splQuitarAsignacion = function() {
+      // Obtener la key antes de que el original la borre
+      var keyEl = document.getElementById('spl-asig-key');
+      var key   = keyEl ? keyEl.value : null;
+
+      // Ejecutar original
+      _origQuitar.apply(this, arguments);
+
+      // Eliminar de suplenciasPlan si existe
+      if (key) {
+        var parts = key.split('|'); // instId|fecha|dia|hora
+        if (parts.length >= 4) {
+          var iId = parts[0], fecha = parts[1], dia = parts[2], hora = parts[3];
+          var idx = -1;
+          for (var i = 0; i < suplenciasPlan.length; i++) {
+            var s = suplenciasPlan[i];
+            if (String(s.inst_id)===iId && s.fecha===fecha && s.dia===dia && s.hora===hora) {
+              idx = i; break;
+            }
+          }
+          if (idx >= 0) {
+            var borrada = suplenciasPlan.splice(idx, 1)[0];
+            // Persistir
+            try {
+              localStorage.setItem('fc_suplencias', JSON.stringify(suplenciasPlan));
+            } catch(e) {}
+            if (typeof fbDb !== 'undefined' && fbDb && borrada) {
+              fbDb.ref('fitness/suplencias/' + String(borrada.id)).remove().catch(function(){});
+            }
+            if (typeof guardarSupLocal === 'function') guardarSupLocal();
+            if (typeof renderSupPlan   === 'function') renderSupPlan();
+            if (typeof showToast       === 'function') showToast('Suplente removido y guardado', 'ok');
+          }
+        }
+      }
+    };
+  });
+
+  // ── Persistir asignaciones del planificador en suplenciasPlan + Firebase ──
+  function sfv2_persistirAsignaciones() {
+    if (typeof splAsignaciones === 'undefined') return;
+    var keys = Object.keys(splAsignaciones);
+    if (keys.length === 0) return;
+    var instIdEl = document.getElementById('spl-inst');
+    var instId   = instIdEl ? parseInt(instIdEl.value) : 0;
+    if (!instId) return;
+
+    var guardados = 0;
+    keys.forEach(function(key) {
+      var parts = key.split('|');
+      if (parts.length < 4) return;
+      var iId = parts[0], fecha = parts[1], dia = parts[2], hora = parts[3];
+      var inst = (typeof instructores!=='undefined') ? instructores.find(function(i){return String(i.id)===iId;}) : null;
+      if (!inst) return;
+      var slot = (inst.horario||[]).find(function(h){return h.dia===dia&&h.hora===hora;});
+      if (!slot) return;
+      var asig = splAsignaciones[key];
+
+      var datos = {
+        id: Date.now() + guardados,
+        inst_id: parseInt(iId),
+        suplente_id:     asig.supId || null,
+        suplente_nombre: asig.externo ? asig.supNombre : null,
+        clase:   slot.clase,
+        dia:     dia,
+        hora:    hora,
+        fecha:   fecha,
+        motivo:  asig.motivo || 'permiso',
+        nota:    asig.nota   || '',
+        estado:  'aprobado',
+        ts:      new Date().toISOString()
+      };
+
+      // Buscar existente
+      var exIdx = -1;
+      for (var i = 0; i < suplenciasPlan.length; i++) {
+        var s = suplenciasPlan[i];
+        if (String(s.inst_id)===iId && s.fecha===fecha && s.dia===dia && s.hora===hora) {
+          exIdx = i; break;
+        }
+      }
+      if (exIdx >= 0) { datos.id = suplenciasPlan[exIdx].id; suplenciasPlan[exIdx] = datos; }
+      else            { suplenciasPlan.push(datos); }
+
+      if (typeof fbDb !== 'undefined' && fbDb)
+        fbDb.ref('fitness/suplencias/' + String(datos.id)).set(datos).catch(function(){});
+
+      guardados++;
+    });
+
+    if (guardados > 0) {
+      try { localStorage.setItem('fc_suplencias', JSON.stringify(suplenciasPlan)); } catch(e) {}
+      if (typeof guardarSupLocal === 'function') guardarSupLocal();
+      if (typeof renderSupPlan   === 'function') renderSupPlan();
+    }
+  }
+
+  window.sfv2_persistirAsignaciones = sfv2_persistirAsignaciones;
+})();
