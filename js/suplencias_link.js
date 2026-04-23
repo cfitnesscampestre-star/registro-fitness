@@ -867,7 +867,7 @@ function slk_generarReporteSuplenciasConFirmas(fechaIni, fechaFin) {
     var firma = firmasSup[String(r.id)];
     var firmaHtml = firma && firma.data
       ? '<img src="' + firma.data + '" style="height:36px;max-width:120px;object-fit:contain" alt="Firma">'
-      : '<span style="color:#c00;font-size:.7rem">Sin firma</span>';
+      : '<div style="height:36px;width:110px;margin:0 auto;border:1px solid #ccc;border-radius:3px;background:#fff"></div>';
     return '<tr><td style="padding:5px 9px;border:1px solid #e0ede5;font-family:monospace">' + fd + '</td>' +
       '<td style="padding:5px 9px;border:1px solid #e0ede5;font-weight:600">' + (r.clase || '—') + '</td>' +
       '<td style="padding:5px 9px;border:1px solid #e0ede5;font-family:monospace">' + (r.hora || '') + '</td>' +

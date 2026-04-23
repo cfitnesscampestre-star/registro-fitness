@@ -874,7 +874,7 @@ function sfv2_generarPDF(hoja) {
     var firma = firmasInd[String(r.id)] || firmasInst[String(r.suplente_id)];
     var firmaHtml = (firma&&firma.data)
       ? '<img src="'+firma.data+'" style="height:40px;max-width:110px;object-fit:contain;display:block;margin:0 auto" alt="Firma">'
-      : '<span style="color:#c00;font-size:.7rem;font-style:italic">Sin firma</span>';
+      : '<div style="height:40px;width:110px;margin:0 auto;border:1px solid #ccc;border-radius:3px;background:#fff"></div>';
     var bg = n%2?'#f6fbf8':'#ffffff';
     var td = 'padding:5px 8px;border:1px solid #d8ede2;font-size:.75rem;vertical-align:middle;';
     return '<tr style="background:'+bg+'">' +
