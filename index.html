@@ -75,7 +75,6 @@ window._cargarFflate=function(){
 
 <!-- ═══ ESTILOS ═══ -->
 <link rel="stylesheet" href="css/fitness.css">
-<link rel="stylesheet" href="css/app-tablet.css">
 
 
 <style id="login-override">
@@ -2839,6 +2838,18 @@ window._cargarFflate=function(){
         </select>
       </div>
 
+      <!-- Motivo de falta (aparece solo cuando el instructor está Ausente) -->
+      <div id="tc-falta-row" style="display:none;margin-bottom:.7rem">
+        <label style="font-size:.63rem;color:var(--txt3);text-transform:uppercase;letter-spacing:1px;display:block;margin-bottom:4px">Motivo de falta</label>
+        <select id="tc-motivo-falta" style="width:100%;background:var(--panel2);border:1px solid var(--red);border-radius:8px;padding:7px 10px;color:var(--txt);font-family:'Outfit',sans-serif;font-size:.79rem;outline:none">
+          <option value="injustificada">Injustificada</option>
+          <option value="enfermedad">Enfermedad / Incapacidad</option>
+          <option value="permiso_personal">Permiso personal</option>
+          <option value="emergencia">Emergencia</option>
+          <option value="otro">Otro</option>
+        </select>
+      </div>
+
       <!-- Nota rápida -->
       <input id="tc-obs" type="text" placeholder="💬 Nota rápida (opcional)..."
         style="width:100%;background:var(--panel2);border:1px solid var(--border);border-radius:8px;
@@ -2927,6 +2938,17 @@ window._cargarFflate=function(){
       <option value="vacaciones">Vacaciones</option>
       <option value="falta">Falta / Ausencia</option>
       <option value="incapacidad">Incapacidad / Enfermedad</option>
+      <option value="otro">Otro</option>
+    </select>
+  </div>
+  <!-- Bug fix: campo motivo falta en modo clásico -->
+  <div class="fg" id="rcc-falta-motivo-row" style="display:none">
+    <label style="color:var(--red2)">Motivo de falta</label>
+    <select id="rcc-motivo-falta" style="border-color:var(--red)">
+      <option value="injustificada">Injustificada</option>
+      <option value="enfermedad">Enfermedad / Incapacidad</option>
+      <option value="permiso_personal">Permiso personal</option>
+      <option value="emergencia">Emergencia</option>
       <option value="otro">Otro</option>
     </select>
   </div>
