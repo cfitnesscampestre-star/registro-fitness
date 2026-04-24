@@ -732,6 +732,15 @@ function renderMobHeatmap(){
   const instFil=rawInst?parseInt(rawInst):null;
   const claseFil=document.getElementById('mob-heat-clase')?.value||'';
 
+  // Filtro de período
+  const periodoVal=document.getElementById('mob-heat-periodo')?.value||'30';
+  let fechaDesde='';
+  if(periodoVal!=='todo'){
+    const d=new Date();
+    d.setDate(d.getDate()-parseInt(periodoVal));
+    fechaDesde=typeof fechaLocalStr==='function'?fechaLocalStr(d):d.toISOString().slice(0,10);
+  }
+
   // Poblar selector de clases según instructor elegido
   const clasesSel=document.getElementById('mob-heat-clase');
   if(clasesSel){
@@ -759,7 +768,13 @@ function renderMobHeatmap(){
   const mat={};
   HORAS.forEach(h=>{ mat[h]={}; DIAS.forEach(d=>{ mat[h][d]={sum:0,cnt:0,ses:0}; }); });
 
-  registros.filter(r=>{if(r.estado!=="ok"&&r.estado!=="sub")return false;if(instFil&&r.inst_id!==instFil)return false;if(claseFil&&r.clase!==claseFil)return false;return true;}).forEach(r=>{
+  registros.filter(r=>{
+    if(r.estado!=="ok"&&r.estado!=="sub")return false;
+    if(instFil&&r.inst_id!==instFil)return false;
+    if(claseFil&&r.clase!==claseFil)return false;
+    if(fechaDesde&&r.fecha&&r.fecha<fechaDesde)return false;
+    return true;
+  }).forEach(r=>{
     const hSlot=HORAS.reduce((best,h)=>Math.abs(horaToMin(r.hora)-horaToMin(h))<Math.abs(horaToMin(r.hora)-horaToMin(best))?h:best,HORAS[0]);
     const capN=parseInt(r.cap||0);
     if(mat[hSlot]&&mat[hSlot][r.dia]!==undefined){
