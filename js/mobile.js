@@ -970,21 +970,21 @@ function renderMobRanking(){
 
     const instChip=d.instNombres.slice(0,2).map(n=>`<span style="font-size:.58rem;color:var(--txt3);background:var(--panel2);border:1px solid var(--border);border-radius:4px;padding:0 4px">${n}</span>`).join(' ');
 
-    return`<div class="mob-rank-item" style="border-left:3px solid ${barColor};margin-bottom:5px">
-      <div style="display:flex;align-items:center;gap:6px;margin-bottom:4px">
+    return`<div style="background:#ffffff;border:1px solid rgba(26,122,69,.12);border-left:4px solid ${barColor};border-radius:14px;padding:11px 13px 9px;margin-bottom:6px;box-shadow:0 2px 8px rgba(0,0,0,.05);display:block">
+      <div style="display:flex;align-items:center;gap:6px;margin-bottom:6px">
         <span style="font-size:.85rem;min-width:18px">${medal||''}</span>
-        <span style="font-size:.7rem;color:var(--txt3);min-width:16px">${medal?'':i+1}</span>
-        <span class="mob-rank-nombre" style="flex:1;color:${i<3?barColor:'inherit'}">${d.clase}</span>
-        <span class="mob-rank-val" style="color:${color}">${val}</span>
+        <span style="font-size:.7rem;color:rgba(26,80,45,.45);min-width:16px">${medal?'':i+1}</span>
+        <span style="font-size:.84rem;font-weight:700;color:${i<3?barColor:'#1a2a1e'};flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${d.clase}</span>
+        <span style="font-family:'DM Mono',monospace;font-size:.88rem;font-weight:700;color:${color};flex-shrink:0">${val}</span>
       </div>
-      <div class="mob-rank-bar-bg">
-        <div class="mob-rank-bar-fill" style="width:${pct}%;background:${barColor}"></div>
+      <div style="height:8px;background:rgba(26,122,69,.08);border-radius:5px;overflow:hidden;margin-bottom:6px;box-shadow:inset 0 2px 4px rgba(0,0,0,.12)">
+        <div style="height:100%;width:${pct}%;background:${barColor};border-radius:5px;transition:width .6s cubic-bezier(.4,0,.2,1);box-shadow:0 2px 5px rgba(0,0,0,.2),inset 0 -1px 0 rgba(0,0,0,.15),inset 0 1px 0 rgba(255,255,255,.3)"></div>
       </div>
-      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:3px;margin-top:5px">
+      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:3px">
         <div style="display:flex;gap:4px">${instChip}</div>
-        <div style="font-size:.6rem;color:var(--txt3)">${d.sesiones} ses · ${d.dias.slice(0,2).map(d=>d.slice(0,3)).join(', ')}</div>
+        <div style="font-size:.6rem;color:rgba(26,80,45,.5)">${d.sesiones} ses · ${d.dias.slice(0,2).map(d=>d.slice(0,3)).join(', ')}</div>
       </div>
-      ${sug?`<div style="font-size:.62rem;color:${sugColor};margin-top:4px;padding-top:4px;border-top:1px solid var(--border)">→ ${sug}</div>`:''}
+      ${sug?`<div style="font-size:.62rem;color:${sugColor};margin-top:5px;padding-top:5px;border-top:1px solid rgba(26,122,69,.1)">→ ${sug}</div>`:''}
     </div>`;
   }).join('');
 }
