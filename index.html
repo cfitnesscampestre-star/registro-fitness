@@ -2553,8 +2553,8 @@ window._cargarFflate=function(){
     <div class="fg"><label>Especialidades</label><input type="text" id="mi-esp" placeholder="Ej: Spinning, Yoga..."></div>
   </div>
 
-  <!-- PIN de acceso al portal -->
-  <div class="fr" style="margin-bottom:.2rem">
+  <!-- PIN de acceso al portal — solo visible para el coordinador/admin -->
+  <div class="fr solo-admin" style="margin-bottom:.2rem">
     <div class="fg">
       <label>PIN de acceso al portal</label>
       <input type="text" id="mi-pin" maxlength="6" placeholder="4–6 dígitos (def. 1234)"
@@ -2662,6 +2662,17 @@ window._cargarFflate=function(){
       <option value="vacaciones">Vacaciones</option>
       <option value="falta">Falta / Ausencia</option>
       <option value="incapacidad">Incapacidad / Enfermedad</option>
+      <option value="otro">Otro</option>
+    </select>
+  </div>
+  <!-- Bug fix: campo motivo falta en registro directo de clase -->
+  <div class="fg" id="rc-falta-motivo-row" style="display:none">
+    <label style="color:var(--red2)">Motivo de Falta</label>
+    <select id="rc-falta-motivo" style="border-color:var(--red)">
+      <option value="injustificada">Injustificada</option>
+      <option value="enfermedad">Enfermedad / Incapacidad</option>
+      <option value="permiso_personal">Permiso personal</option>
+      <option value="emergencia">Emergencia</option>
       <option value="otro">Otro</option>
     </select>
   </div>
