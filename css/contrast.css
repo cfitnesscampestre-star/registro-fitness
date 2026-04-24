@@ -1,0 +1,314 @@
+/* ═══════════════════════════════════════════════════════════════
+   CONTRAST.CSS — Fitness Control · Club Campestre
+   1. Textos más intensos / legibles sobre fondos de vidrio
+   2. Barras del ranking con efecto 3D y profundidad
+   Se carga AL FINAL de todos los CSS.
+   ═══════════════════════════════════════════════════════════════ */
+
+
+/* ════════════════════════════════════════════════════════════════
+   TEXTOS GLOBALES — más intensos sobre glassmorphism
+   ════════════════════════════════════════════════════════════════ */
+
+/* Título principal de modal */
+.mttl {
+  color: #7affb8 !important;
+  text-shadow: 0 0 18px rgba(94,255,160,.35) !important;
+}
+html.tema-claro .mttl {
+  color: #0d5230 !important;
+  text-shadow: none !important;
+}
+
+/* Títulos de paneles */
+.pttl {
+  color: #7affb8 !important;
+  text-shadow: 0 0 12px rgba(94,255,160,.25) !important;
+}
+html.tema-claro .pttl { color: #0d5230 !important; text-shadow: none !important; }
+
+/* Labels de inputs */
+.fg label {
+  color: rgba(180,230,200,.85) !important;
+  font-weight: 600 !important;
+}
+html.tema-claro .fg label { color: #1a4a28 !important; }
+
+/* Texto principal */
+.modal { color: rgba(230,255,242,.92) !important; }
+html.tema-claro .modal { color: #0d1f14 !important; }
+
+/* Texto secundario dentro de modal */
+.modal .txt2,
+.modal [style*="color:var(--txt2)"],
+.modal [style*="color: var(--txt2)"] {
+  color: rgba(160,210,180,.80) !important;
+}
+
+/* Neon más brillante en modo oscuro */
+:root {
+  --neon: #6fffb3 !important;
+}
+html.tema-claro { --neon: #1a7a45 !important; }
+
+
+/* ════════════════════════════════════════════════════════════════
+   MODALES — botones de acción (hub firmas / hub suplencias)
+   ════════════════════════════════════════════════════════════════ */
+
+/* Texto en botones del hub más legible */
+.fsm-btn,
+[class*="hub"] button,
+[class*="hub"] [onclick] {
+  font-weight: 700 !important;
+}
+
+/* Botón "Continuar hoja activa" — verde más intenso */
+.fsm-btn.continuar,
+[style*="background:rgba(26,122,69,.12)"],
+[style*="background: rgba(26,122,69,.12)"] {
+  background: rgba(26,122,69,.22) !important;
+  border-color: rgba(94,255,160,.35) !important;
+  color: #6fffb3 !important;
+}
+
+/* "Eliminar hoja activa" — rojo más visible */
+.fsm-btn.eliminar,
+[style*="background:rgba(224,80,80,.08)"],
+[style*="background: rgba(224,80,80,.08)"] {
+  background: rgba(180,40,40,.22) !important;
+  border-color: rgba(224,80,80,.35) !important;
+}
+
+
+/* ════════════════════════════════════════════════════════════════
+   MOBILE — textos en la home más intensos
+   ════════════════════════════════════════════════════════════════ */
+@media (max-width: 640px) {
+
+  /* Nombre de clase en lista */
+  .mob-c-nombre {
+    color: #1a2a1e !important;
+    font-weight: 800 !important;
+    text-shadow: none !important;
+  }
+
+  /* Hora — más dorada */
+  .mob-c-hora { color: #9a7000 !important; font-weight: 700 !important; }
+
+  /* Instructor */
+  .mob-c-inst { color: rgba(20,80,45,.65) !important; }
+
+  /* KPIs del día */
+  .mob-gc-val   { color: #0d1f14 !important; font-weight: 800 !important; }
+  .mob-gc-val.gold { color: #7a5500 !important; }
+  .mob-gc-lbl   { color: rgba(15,60,30,.65) !important; font-weight: 700 !important; }
+  .mob-gc-title { color: rgba(15,80,40,.7) !important; font-weight: 700 !important; }
+  .mob-gc-sub   { color: rgba(15,60,30,.45) !important; }
+
+  /* Label de la agenda */
+  .mob-ag-title { color: #1a7a45 !important; font-weight: 800 !important; }
+  .mob-ag-sub   { color: rgba(15,80,45,.55) !important; }
+
+  /* Label de los radiales */
+  .mob-radial-lbl {
+    color: #1a5535 !important;
+    font-weight: 800 !important;
+  }
+  .mob-radial-btn.primary .mob-radial-lbl {
+    color: #0d4225 !important;
+    font-weight: 900 !important;
+  }
+
+  /* ── BARRAS DEL RANKING (slide 3 móvil) ── */
+
+  /* Track de fondo — acanalado */
+  .mob-rank-bar-bg {
+    height: 10px !important;            /* antes 4px */
+    background: rgba(26,122,69,.10) !important;
+    border-radius: 6px !important;
+    overflow: visible !important;
+    box-shadow:
+      inset 0 2px 4px rgba(0,0,0,.20),  /* hundido */
+      inset 0 -1px 0 rgba(255,255,255,.08)
+      !important;
+    position: relative !important;
+  }
+
+  /* Relleno — gradiente + sombra elevada */
+  .mob-rank-bar-fill {
+    height: 100% !important;
+    border-radius: 6px !important;
+    transition: width .7s cubic-bezier(.4,0,.2,1) !important;
+    /* Brillo superior para efecto 3D */
+    box-shadow:
+      0 2px 6px rgba(0,0,0,.30),
+      0 -1px 0 rgba(255,255,255,.30) inset,
+      0 1px 0 rgba(0,0,0,.20) inset
+      !important;
+    position: relative !important;
+  }
+
+  /* Línea de luz sobre la barra */
+  .mob-rank-bar-fill::after {
+    content: '';
+    position: absolute;
+    top: 0; left: 8%; right: 8%;
+    height: 40%;
+    background: linear-gradient(180deg, rgba(255,255,255,.32) 0%, transparent 100%);
+    border-radius: 6px 6px 0 0;
+    pointer-events: none;
+  }
+
+  /* Nombre de clase — más visible */
+  .mob-rank-nombre {
+    font-size: .84rem !important;
+    font-weight: 800 !important;
+    color: #0d1f14 !important;
+  }
+
+  /* Valor % — más grande */
+  .mob-rank-val {
+    font-size: .8rem !important;
+    font-weight: 800 !important;
+  }
+
+  /* Item del ranking — fondo más definido */
+  .mob-rank-item {
+    background: rgba(255,255,255,.92) !important;
+    border: 1px solid rgba(26,122,69,.15) !important;
+    box-shadow:
+      0 3px 12px rgba(26,122,69,.10),
+      0 1px 0 rgba(255,255,255,.9) inset
+      !important;
+    margin-bottom: 5px !important;
+  }
+
+  /* Número de posición */
+  .mob-rank-num { color: #0d1f14 !important; opacity: .55 !important; }
+}
+
+
+/* ════════════════════════════════════════════════════════════════
+   DESKTOP — barras del ranking en las tarjetas con efecto 3D
+   ════════════════════════════════════════════════════════════════ */
+@media (min-width: 641px) {
+
+  /* La barra inline en las tarjetas del ranking (generada en analisis.js) */
+  #rk-cards [style*="height:4px"] {
+    height: 8px !important;
+    border-radius: 5px !important;
+    background: rgba(255,255,255,.08) !important;
+    box-shadow: inset 0 2px 4px rgba(0,0,0,.25), inset 0 -1px 0 rgba(255,255,255,.06) !important;
+    overflow: visible !important;
+    position: relative !important;
+  }
+
+  /* El fill dentro de la barra del ranking desktop */
+  #rk-cards [style*="height:4px"] > div {
+    height: 100% !important;
+    border-radius: 5px !important;
+    position: relative !important;
+    box-shadow:
+      0 2px 8px rgba(0,0,0,.30),
+      0 -1px 0 rgba(255,255,255,.28) inset,
+      0 1px 0 rgba(0,0,0,.18) inset
+      !important;
+  }
+
+  /* Brillo superior del fill */
+  #rk-cards [style*="height:4px"] > div::after {
+    content: '';
+    position: absolute;
+    top: 0; left: 6%; right: 6%;
+    height: 45%;
+    background: linear-gradient(180deg, rgba(255,255,255,.30) 0%, transparent 100%);
+    border-radius: 5px 5px 0 0;
+    pointer-events: none;
+  }
+
+  /* Tarjeta del ranking — mini-KPI más visible */
+  #rk-cards .panel [style*="border-top:2px solid"] {
+    box-shadow:
+      0 2px 10px rgba(0,0,0,.30),
+      0 1px 0 rgba(94,255,160,.06) inset
+      !important;
+  }
+
+  /* Texto principal en tarjetas del ranking */
+  #rk-cards [style*="font-size:1.35rem"] {
+    text-shadow: 0 1px 8px rgba(0,0,0,.25) !important;
+  }
+
+  /* Valor de aforo grande */
+  #rk-cards [style*="font-size:1.5rem"] {
+    text-shadow: 0 1px 6px rgba(0,0,0,.20) !important;
+  }
+}
+
+
+/* ════════════════════════════════════════════════════════════════
+   KPI BARS internas (en los paneles del dashboard)
+   ════════════════════════════════════════════════════════════════ */
+.kpi-bar-fill {
+  position: relative !important;
+  box-shadow:
+    0 1px 4px rgba(0,0,0,.25),
+    0 -1px 0 rgba(255,255,255,.20) inset
+    !important;
+}
+.kpi-bar-fill::after {
+  content: '';
+  position: absolute;
+  top: 0; left: 5%; right: 5%;
+  height: 45%;
+  background: rgba(255,255,255,.22);
+  border-radius: 3px 3px 0 0;
+  pointer-events: none;
+}
+.kpi-bar-wrap {
+  height: 5px !important;
+  border-radius: 4px !important;
+  box-shadow: inset 0 1px 3px rgba(0,0,0,.20) !important;
+}
+
+
+/* ════════════════════════════════════════════════════════════════
+   BARRA AFORO MÓVIL — más gruesa y 3D
+   ════════════════════════════════════════════════════════════════ */
+@media (max-width: 640px) {
+  .mob-aforo-bar-wrap {
+    height: 8px !important;
+    border-radius: 5px !important;
+    background: rgba(26,122,69,.10) !important;
+    box-shadow: inset 0 2px 4px rgba(0,0,0,.18) !important;
+  }
+  .mob-aforo-bar {
+    border-radius: 5px !important;
+    box-shadow:
+      0 2px 6px rgba(26,122,69,.35),
+      0 -1px 0 rgba(255,255,255,.25) inset
+      !important;
+    position: relative !important;
+  }
+  .mob-aforo-bar::after {
+    content: '';
+    position: absolute;
+    top: 0; left: 5%; right: 5%;
+    height: 45%;
+    background: rgba(255,255,255,.25);
+    border-radius: 5px 5px 0 0;
+    pointer-events: none;
+  }
+}
+
+
+/* ════════════════════════════════════════════════════════════════
+   SPARKLINE — barras de tendencia con algo de volumen
+   ════════════════════════════════════════════════════════════════ */
+.mob-sparkline-bar {
+  box-shadow: 0 1px 3px rgba(0,0,0,.15) !important;
+}
+.mob-sparkline-bar.active {
+  box-shadow: 0 2px 6px rgba(26,122,69,.40) !important;
+}
