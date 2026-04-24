@@ -921,7 +921,7 @@ function renderMobRanking(){
   // ── Podio mini (top 3) ───────────────────────────────
   const top3=data.slice(0,3);
   const podioOrder=[1,0,2]; // visual: 2do izq, 1ro centro, 3ro der
-  const podioColors=['var(--gold2)','var(--blue)','#cd7f32']; // [0]=1ro, [1]=2do, [2]=3ro
+  const podioColors=['#1a9e5a','#2980b9','#e05050']; // [0]=1ro verde, [1]=2do azul, [2]=3ro rojo
   const podioMedals=['🥇','🥈','🥉'];
   const podioH=['90px','64px','50px']; // 1ro más alto
   if(podioEl){
@@ -948,13 +948,17 @@ function renderMobRanking(){
 
   const maxV=m==='aforo'?data[0].aforo:m==='asis'?data[0].asis:data[0].total;
 
-  // ── Lista con sugerencia inline ──────────────────────
-  lista.innerHTML=data.slice(0,15).map((d,i)=>{
+  // ── Lista con sugerencia inline — TODAS las clases (sin límite) ──────
+  lista.innerHTML=data.map((d,i)=>{
     const val=m==='aforo'?d.aforo+'%':m==='asis'?d.asis:d.total.toLocaleString();
     const raw=m==='aforo'?d.aforo:m==='asis'?d.asis:d.total;
     const pct=maxV>0?Math.round(raw/maxV*100):0;
-    const COLS=['var(--neon)','var(--blue)','var(--gold2)'];
-    const color=i<3?COLS[i]:d.aforo<30?'var(--red2)':d.aforo<55?'var(--gold2)':'var(--txt2)';
+    // Top 3: 1ro verde, 2do azul, 3ro rojo. Resto: semáforo por aforo
+    const TOP3_COLS=['#1a9e5a','#2980b9','#e05050'];
+    const color=i===0?TOP3_COLS[0]:i===1?TOP3_COLS[1]:i===2?TOP3_COLS[2]
+      :d.aforo<30?'var(--red2)':d.aforo<55?'var(--gold2)':'var(--txt2)';
+    const barColor=i===0?TOP3_COLS[0]:i===1?TOP3_COLS[1]:i===2?TOP3_COLS[2]
+      :d.aforo<30?'var(--red2)':d.aforo<55?'var(--gold2)':d.aforo>=75?'var(--neon)':'var(--txt2)';
     const medal=i<3?['🥇','🥈','🥉'][i]:'';
 
     // Sugerencia breve
@@ -966,17 +970,17 @@ function renderMobRanking(){
 
     const instChip=d.instNombres.slice(0,2).map(n=>`<span style="font-size:.58rem;color:var(--txt3);background:var(--panel2);border:1px solid var(--border);border-radius:4px;padding:0 4px">${n}</span>`).join(' ');
 
-    return`<div style="background:var(--panel2);border:1px solid ${d.aforo<30?'rgba(224,80,80,.3)':d.aforo>=75?'rgba(94,255,160,.25)':'var(--border)'};border-radius:10px;padding:9px 11px">
+    return`<div class="mob-rank-item" style="border-left:3px solid ${barColor};margin-bottom:5px">
       <div style="display:flex;align-items:center;gap:6px;margin-bottom:4px">
         <span style="font-size:.85rem;min-width:18px">${medal||''}</span>
         <span style="font-size:.7rem;color:var(--txt3);min-width:16px">${medal?'':i+1}</span>
-        <span style="font-size:.82rem;font-weight:600;flex:1">${d.clase}</span>
-        <span style="font-family:'DM Mono',monospace;font-size:.88rem;font-weight:700;color:${color}">${val}</span>
+        <span class="mob-rank-nombre" style="flex:1;color:${i<3?barColor:'inherit'}">${d.clase}</span>
+        <span class="mob-rank-val" style="color:${color}">${val}</span>
       </div>
-      <div style="height:5px;background:var(--border);border-radius:3px;overflow:hidden;margin-bottom:5px">
-        <div style="height:100%;width:${pct}%;background:${color};border-radius:3px;transition:width .5s"></div>
+      <div class="mob-rank-bar-bg">
+        <div class="mob-rank-bar-fill" style="width:${pct}%;background:${barColor}"></div>
       </div>
-      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:3px">
+      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:3px;margin-top:5px">
         <div style="display:flex;gap:4px">${instChip}</div>
         <div style="font-size:.6rem;color:var(--txt3)">${d.sesiones} ses · ${d.dias.slice(0,2).map(d=>d.slice(0,3)).join(', ')}</div>
       </div>
