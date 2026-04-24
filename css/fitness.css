@@ -1383,9 +1383,14 @@ html.tema-claro .btn-reportes:hover { background: #1a5fa3; color: #fff; }
   overflow-x: hidden;
   z-index: 80;
   transition: width .22s cubic-bezier(.4,0,.2,1);
-  scrollbar-width: none;
+  /* Fix: scrollbar delgada visible para indicar que hay más items */
+  scrollbar-width: thin;
+  scrollbar-color: var(--border) transparent;
 }
-#sidebar::-webkit-scrollbar { display: none; }
+#sidebar::-webkit-scrollbar { width: 4px; }
+#sidebar::-webkit-scrollbar-track { background: transparent; }
+#sidebar::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+#sidebar::-webkit-scrollbar-thumb:hover { background: var(--txt3); }
 
 /* Modo colapsado (solo iconos) — tablet mediana 641-900px */
 #sidebar.collapsed { width: 60px; }
@@ -1498,11 +1503,21 @@ html.tema-claro .sb-sub-item.on { color: #1a7a45; }
   color: var(--txt3);
   font-size: .72rem;
   transition: color .15s;
+  flex-shrink: 0; /* Fix: no colapsar al tener mucho contenido */
 }
 .sb-collapse-btn:hover { color: var(--txt2); }
 .sb-collapse-btn svg { width: 16px; height: 16px; flex-shrink: 0; transition: transform .22s; }
 #sidebar.collapsed .sb-collapse-btn svg { transform: rotate(180deg); }
 #sidebar.collapsed .sb-collapse-lbl { opacity: 0; width: 0; overflow: hidden; }
+
+/* Fix: ocultar en tablet (641-900px usa modo solo-icono sin botón) */
+@media (min-width: 641px) and (max-width: 900px) {
+  .sb-collapse-btn { display: none; }
+}
+/* Fix: visible en desktop >900px */
+@media (min-width: 901px) {
+  .sb-collapse-btn { display: flex; }
+}
 
 /* ── CONTENIDO PRINCIPAL con sidebar ── */
 #content-wrap {
