@@ -293,9 +293,13 @@ function toggleSuplenteClase(){
 function toggleSuplenteRec(){
   const v=document.getElementById('rcc-pres').value;
   const isSub=(v==='sub');
+  const isNo=(v==='no');
   const row=document.getElementById('rcc-suplente-row');
   row.style.display=isSub?'flex':'none';
   document.getElementById('rcc-motivo-row').style.display=isSub?'flex':'none';
+  // Bug fix: mostrar motivo de falta solo cuando el instructor está ausente
+  const faltaRow=document.getElementById('rcc-falta-motivo-row');
+  if(faltaRow) faltaRow.style.display=isNo?'flex':'none';
   if(isSub){
     const c=recActual.clasesActivas[recIdx];
     const opts=instructores.filter(i=>i.id!==c.inst_id).map(i=>`<option value="${i.id}">${i.nombre}</option>`).join('');
@@ -449,8 +453,25 @@ function guardarInstructor(){
 }
 function eliminarInstructor(){
   const id=parseInt(document.getElementById('mi-id').value);
-  if(!confirm('¿Eliminar este instructor?'))return;
+  const inst=instructores.find(i=>String(i.id)===String(id));
+  const nomInst=inst?inst.nombre:'este instructor';
+  const regsAfectados=registros.filter(r=>String(r.inst_id)===String(id)).length;
+  const msg=regsAfectados>0
+    ? `¿Eliminar a ${nomInst}?\n\nSe eliminarán también sus ${regsAfectados} registro(s) de clases y su historial de asistencia.\n\nEsta acción no se puede deshacer.`
+    : `¿Eliminar a ${nomInst}? Esta acción no se puede deshacer.`;
+  if(!confirm(msg))return;
+  // Bug fix 5: limpiar registros y recorridos del instructor antes de eliminarlo
+  registros=registros.filter(r=>String(r.inst_id)!==String(id));
+  recorridos=recorridos.map(rec=>({
+    ...rec,
+    items:(rec.items||[]).filter(it=>String(it.inst_id)!==String(id))
+  }));
   instructores=instructores.filter(i=>String(i.id)!==String(id));
   cerrarModal('m-instructor');renderAll();
+  registrarLog('instructor',`Eliminado: ${nomInst} · ${regsAfectados} registro(s) borrados`);
+  const msgToast = regsAfectados>0
+    ? `${nomInst} eliminado · ${regsAfectados} registro(s) borrados`
+    : `${nomInst} eliminado`;
+  showToast(msgToast,'ok');
 }
 

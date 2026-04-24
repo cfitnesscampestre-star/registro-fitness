@@ -845,8 +845,16 @@ let fbInicializado = false; // true SOLO después de recibir la primera respuest
                              // NUNCA subir datos hasta que esto sea true
 let fbDataRecibida = false;  // true SOLO cuando Firebase devolvió datos reales (no null/vacío)
                               // Dispositivo sin datos NUNCA sube hasta confirmar que Firebase también está vacío
-let _fbMaxRegistros  = 0;    // máximo de registros conocidos en Firebase — protege contra borrados accidentales
-let _fbMaxRecorridos = 0;    // igual para recorridos
+// Bug fix 6: persistir máximos en localStorage para que la guardia anti-borrado
+// sobreviva recargas de página y no se pierda tras cerrar el navegador
+let _fbMaxRegistros  = parseInt(localStorage.getItem('fc_max_registros')  || '0');
+let _fbMaxRecorridos = parseInt(localStorage.getItem('fc_max_recorridos') || '0');
+function _persistirMaximos(){
+  try{
+    localStorage.setItem('fc_max_registros',  String(_fbMaxRegistros));
+    localStorage.setItem('fc_max_recorridos', String(_fbMaxRecorridos));
+  }catch(e){}
+}
 
 const FIREBASE_ACTIVO = true;
 // ⚠ SEGURIDAD: Esta apiKey es pública (GitHub Pages). Protege la base de datos
@@ -1001,6 +1009,7 @@ async function sincronizarFirebase(){
     // Actualizar contadores máximos tras subida exitosa
     if(registros.length  > _fbMaxRegistros)  _fbMaxRegistros  = registros.length;
     if(recorridos.length > _fbMaxRecorridos) _fbMaxRecorridos = recorridos.length;
+    _persistirMaximos(); // Bug fix 6: guardar en localStorage para sobrevivir recargas
     fbDataRecibida = true;
     setIndicador('🟢 Guardado en la nube ✔');
   } catch(e){

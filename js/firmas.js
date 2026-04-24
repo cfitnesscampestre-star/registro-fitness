@@ -858,6 +858,8 @@ async function inicializarFirebase(){
       const _fbRecCount = data.recorridos ? Object.keys(data.recorridos).length : 0;
       if(_fbRegCount > _fbMaxRegistros)  _fbMaxRegistros  = _fbRegCount;
       if(_fbRecCount > _fbMaxRecorridos) _fbMaxRecorridos = _fbRecCount;
+      // Bug fix 6: persistir máximos para que la guardia sobreviva recargas
+      if(typeof _persistirMaximos === 'function') _persistirMaximos();
 
       // ─── Comparar timestamps ────────────────────────────────────────────────
       const localTs = parseInt(localStorage.getItem('fc_local_ts') || '0');
