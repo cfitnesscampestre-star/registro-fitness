@@ -251,3 +251,43 @@
   }
 
 }
+
+/* ════════════════════════════════════════════════════════════════
+   HERO — fondo degradado verde oscuro sin imagen externa
+   ════════════════════════════════════════════════════════════════ */
+@media (max-width: 640px) {
+
+  /* Eliminar capa del mapa (ya vacía en HTML) */
+  .mob-hero-map-layer {
+    background-image: none !important;
+    background:
+      radial-gradient(ellipse 70% 80% at 80% 20%, rgba(94,255,160,.12) 0%, transparent 55%),
+      radial-gradient(ellipse 50% 50% at 90% 80%, rgba(26,122,69,.18) 0%, transparent 50%)
+      !important;
+  }
+
+  /* Quitar el SVG fantasma de fondo (::before tenía el mapa, ::after el stickman) */
+  .mob-hero-bg::before {
+    background-image: none !important;
+    background:
+      radial-gradient(ellipse 60% 70% at 70% 30%, rgba(26,122,69,.22) 0%, transparent 60%),
+      radial-gradient(ellipse 40% 40% at 88% 75%, rgba(94,255,160,.10) 0%, transparent 50%)
+      !important;
+  }
+
+  /* Quitar el stickman SVG fantasma */
+  .mob-hero-bg::after {
+    background-image: none !important;
+    background: none !important;
+    display: none !important;
+  }
+
+  /* Ícono PNG — tamaño y sombra acorde */
+  .mob-hero-runner-wrap img {
+    width: 68px !important;
+    height: auto !important;
+    filter: drop-shadow(0 2px 12px rgba(94,255,160,.50)) !important;
+    display: block !important;
+  }
+
+}
