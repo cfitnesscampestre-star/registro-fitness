@@ -1,23 +1,56 @@
 // ═══ PWA — Service Worker + Botón Instalar ═══
 if('serviceWorker' in navigator) {
+  // Versión del caché — incrementar aquí fuerza que todos los dispositivos
+  // descarten el caché viejo y descarguen los archivos nuevos
+  const SW_VERSION = 'v4';
+
   const swCode = `
-    const CACHE='fitness-ctrl-v1';
-    self.addEventListener('install',e=>{self.skipWaiting();});
-    self.addEventListener('activate',e=>{self.clients.claim();});
-    self.addEventListener('fetch',e=>{
-      if(e.request.method!=='GET')return;
+    const CACHE = 'fitness-ctrl-${SW_VERSION}';
+    const CACHE_STATIC = ['fitness-ctrl-static-${SW_VERSION}'];
+
+    // Al instalar: limpiar cachés viejos
+    self.addEventListener('install', e => {
+      self.skipWaiting();
+    });
+
+    self.addEventListener('activate', e => {
+      e.waitUntil(
+        caches.keys().then(keys =>
+          Promise.all(
+            keys.filter(k => k !== CACHE && !CACHE_STATIC.includes(k))
+                .map(k => caches.delete(k))
+          )
+        ).then(() => self.clients.claim())
+      );
+    });
+
+    self.addEventListener('fetch', e => {
+      if (e.request.method !== 'GET') return;
+      const url = e.request.url;
+
+      // JS, CSS, HTML — siempre de la red primero, nunca del caché
+      // Esto garantiza que los cambios de PIN y lógica llegan de inmediato
+      if (url.endsWith('.js') || url.endsWith('.css') || url.endsWith('.html') || url.includes('index')) {
+        e.respondWith(
+          fetch(e.request, { cache: 'no-store' })
+            .catch(() => caches.match(e.request))
+        );
+        return;
+      }
+
+      // Imágenes y fuentes — caché normal (network-first con fallback)
       e.respondWith(
-        fetch(e.request).then(r=>{
-          const rc=r.clone();
-          caches.open(CACHE).then(c=>c.put(e.request,rc));
+        fetch(e.request).then(r => {
+          const rc = r.clone();
+          caches.open(CACHE).then(c => c.put(e.request, rc));
           return r;
-        }).catch(()=>caches.match(e.request))
+        }).catch(() => caches.match(e.request))
       );
     });
   `;
-  const blob=new Blob([swCode],{type:'application/javascript'});
+  const blob = new Blob([swCode], {type:'application/javascript'});
   navigator.serviceWorker.register(URL.createObjectURL(blob))
-    .catch(()=>{});
+    .catch(() => {});
 }
 
 let _pwaPrompt=null;
@@ -27,7 +60,8 @@ window.addEventListener('beforeinstallprompt',e=>{
   const b=document.createElement('button');
   b.id='btn-instalar';b.className='btn no-print';
   b.style.cssText='background:#0d2218;color:var(--neon);border:1px solid var(--verde);font-size:.65rem;padding:5px 8px;white-space:nowrap;flex-shrink:0;';
-  b.innerHTML='<svg class="ico" viewBox="0 0 20 20"><rect x="5" y="2" width="10" height="16" rx="2" stroke="currentColor" stroke-width="1.4" fill="none"/><circle cx="10" cy="15.5" r="1" fill="currentColor"/><polyline points="8,7 10,5 12,7" stroke="currentColor" stroke-width="1.3" fill="none" stroke-linecap="round" stroke-linejoin="round"/><line x1="10" y1="5" x2="10" y2="11" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg> Instalar';b.title='Instalar en pantalla de inicio';
+  b.innerHTML='<svg class="ico" viewBox="0 0 20 20"><rect x="5" y="2" width="10" height="16" rx="2" stroke="currentColor" stroke-width="1.4" fill="none"/><circle cx="10" cy="15.5" r="1" fill="currentColor"/><polyline points="8,7 10,5 12,7" stroke="currentColor" stroke-width="1.3" fill="none" stroke-linecap="round" stroke-linejoin="round"/><line x1="10" y1="5" x2="10" y2="11" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg> Instalar';
+  b.title='Instalar en pantalla de inicio';
   b.onclick=async()=>{
     if(!_pwaPrompt)return;
     _pwaPrompt.prompt();

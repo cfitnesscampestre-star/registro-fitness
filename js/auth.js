@@ -175,10 +175,19 @@ async function intentarLogin() {
       errEl.style.display = 'block';
       return;
     }
-    // Login instructor: leer PIN del objeto instructor (sincronizado por Firebase) con fallback a localStorage
-    const instObj = (typeof instructores !== 'undefined') ? instructores.find(i => i.id === instId) : null;
-    const pinGuardado = (instObj && instObj.pin) || localStorage.getItem(`fc_pin_${instId}`) || '1234';
+    // Leer PIN en orden de prioridad:
+    // 1. inst.pin en el objeto en memoria (viene de Firebase via listener)
+    // 2. localStorage fc_pin_X (respaldo local)
+    // 3. Default 1234
+    const instObj = (typeof instructores !== 'undefined')
+      ? instructores.find(i => i.id === instId || String(i.id) === String(instId))
+      : null;
+    const pinDeObj = instObj ? (instObj.pin || '') : '';
+    const pinDeLS  = localStorage.getItem(`fc_pin_${instId}`) || '';
+    const pinGuardado = pinDeObj || pinDeLS || '1234';
     if (pass === pinGuardado) {
+      // Al hacer login exitoso, sincronizar el pin al localStorage del dispositivo
+      if(pinDeObj) localStorage.setItem(`fc_pin_${instId}`, pinDeObj);
       _loginExitoso('instructor', instId);
     } else {
       _loginFallido('instructor', 'PIN incorrecto. Intenta de nuevo.');
