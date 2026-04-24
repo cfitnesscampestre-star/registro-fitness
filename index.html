@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="es"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 
-<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1.0, user-scalable=no">
 <title>Fitness Control — Club Campestre</title>
 
 <!-- PWA -->
@@ -2209,7 +2209,7 @@ window._cargarFflate=function(){
     <div style="font-size:1.5rem">📱</div>
     <div style="flex:1">
       <div style="font-size:.85rem;font-weight:700;color:var(--neon)">Portal del Instructor</div>
-      <div style="font-size:.73rem;color:var(--txt2);margin-top:2px">Comparte este enlace con tus instructores para que vean su horario, estadísticas y puedan solicitar permisos desde su celular.</div>
+      <div style="font-size:.73rem;color:var(--txt2);margin-top:2px">Comparte este enlace con tus instructores para que vean su horario, estadísticas y puedan firmar suplencias desde cualquier dispositivo.</div>
     </div>
     <div style="display:flex;gap:.5rem;flex-wrap:wrap">
       <button class="btn bg" onclick="abrirPortalInstructor()" style="font-size:.75rem">
@@ -2221,28 +2221,10 @@ window._cargarFflate=function(){
     </div>
   </div>
 
-  <!-- Panel PINs de instructores -->
-  <div class="panel" style="margin-bottom:1rem">
-    <div class="phdr">
-      <span class="pttl">🔑 PINs de Acceso — Instructores</span>
-      <span style="font-size:.7rem;color:var(--txt2)">PIN por defecto: 1234 · Asigna uno único a cada instructor</span>
-    </div>
-    <div class="pbody" id="pines-body"></div>
-  </div>
-
-  <!-- Solicitudes pendientes de instructores -->
-  <div class="panel" style="margin-bottom:1rem">
-    <div class="phdr">
-      <span class="pttl">📬 Solicitudes Pendientes de Instructores</span>
-      <button class="btn bg" style="font-size:.72rem;padding:5px 11px" onclick="renderSupPlan()">↺ Actualizar</button>
-    </div>
-    <div class="pbody" id="solicitudes-pendientes"></div>
-  </div>
-
   <!-- Suplencias planificadas aprobadas -->
   <div class="panel">
     <div class="phdr">
-      <span class="pttl">⇄ Suplencias Planificadas Aprobadas</span>
+      <span class="pttl">⇄ Suplencias Planificadas</span>
       <button class="btn bg solo-admin" onclick="abrirModalNuevaSuplencia()" style="font-size:.72rem;padding:5px 11px">+ Nueva</button>
     </div>
     <div style="padding:.5rem 1.1rem;border-bottom:1px solid var(--border);display:flex;gap:.5rem;flex-wrap:wrap">
@@ -2569,6 +2551,17 @@ window._cargarFflate=function(){
       <select id="mi-turno"><option value="mañana">Mañana</option><option value="tarde">Tarde</option><option value="ambos">Ambos</option></select>
     </div>
     <div class="fg"><label>Especialidades</label><input type="text" id="mi-esp" placeholder="Ej: Spinning, Yoga..."></div>
+  </div>
+
+  <!-- PIN de acceso al portal -->
+  <div class="fr" style="margin-bottom:.2rem">
+    <div class="fg">
+      <label>PIN de acceso al portal</label>
+      <input type="text" id="mi-pin" maxlength="6" placeholder="4–6 dígitos (def. 1234)"
+        style="font-family:'DM Mono',monospace;letter-spacing:3px;font-size:1rem"
+        oninput="this.value=this.value.replace(/[^0-9]/g,'')">
+      <span style="font-size:.63rem;color:var(--txt3);margin-top:2px">El instructor usa este PIN para entrar a su portal desde cualquier dispositivo.</span>
+    </div>
   </div>
 
   <div style="font-size:.7rem;text-transform:uppercase;letter-spacing:1.5px;color:var(--txt2);margin:.8rem 0 .4rem">Horario de Clases</div>
