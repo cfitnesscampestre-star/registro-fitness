@@ -2358,6 +2358,20 @@ _syncFirmasBadge = function() {
     b.textContent = txt;
     b.style.display = vis;
   });
+
+  // Fix: Badge de Firmas de Suplencias en el nuevo item del sidebar
+  const supBadge = document.getElementById('sb-firmas-sup-badge');
+  if(supBadge) {
+    try {
+      const hoja = typeof sfv2_cargarHoja === 'function' ? sfv2_cargarHoja() : null;
+      if(!hoja) { supBadge.style.display = 'none'; return; }
+      const firmados = Object.values(hoja.firmas || {}).filter(f => f && f.data).length;
+      const total = typeof sfv2_suplentesUnicos === 'function' ? sfv2_suplentesUnicos(hoja).length : 0;
+      const pend = Math.max(0, total - firmados);
+      supBadge.textContent = pend;
+      supBadge.style.display = pend > 0 ? 'inline' : 'none';
+    } catch(e) { supBadge.style.display = 'none'; }
+  }
 };
 
 // Correr cada 8 segundos y al cargar
