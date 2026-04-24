@@ -767,7 +767,7 @@ function exportarPDF() {
     doc.setFontSize(7);
     doc.setTextColor(120);
     doc.text('Coordinador Fitness',10,lastY+4);
-    doc.text('Vo.Bo. RRHH',110,lastY+4);
+    doc.text('Vo.Bo. GERENCIA DEPORTES',110,lastY+4);
   }
 
   doc.save(`${titulo.replace(/[^a-zA-Z0-9áéíóúÁÉÍÓÚñÑ\s]/g,'_')}_FitnessControl.pdf`);
@@ -870,7 +870,7 @@ function _generarHojaFirmasCore(fechaIni, fechaFin, semana, firmasDigitales){
   // ── Configuración de página: carta horizontal ────────────────────────
   const doc = new jsPDF({orientation:'landscape', unit:'mm', format:'letter'});
   const PW=279.4, PH=215.9;
-  const ML=10, MR=10, MB=10;
+  const ML=14, MR=14, MB=10;   // Fix: margen lateral aumentado de 10 a 14mm
   const CW = PW-ML-MR;
 
   // ── Paleta institucional ─────────────────────────────────────────────
@@ -1219,7 +1219,7 @@ function _generarHojaFirmasCore(fechaIni, fechaFin, semana, firmasDigitales){
     // Firma digital del coordinador o línea punteada
     if(firmasDigitales && firmasDigitales['coord']) {
       try {
-        const sigW = 28, sigH = 8;
+        const sigW = 42, sigH = 14;   // Fix: firma más grande (antes 28x8)
         const sigX = ML + halfW - sigW - 4;
         const sigY = Y0c + (COORD_H - sigH) / 2 - 1;
         doc.addImage(firmasDigitales['coord'], 'PNG', sigX, sigY, sigW, sigH);
@@ -1243,11 +1243,11 @@ function _generarHojaFirmasCore(fechaIni, fechaFin, semana, firmasDigitales){
       doc.text('Firma', ML + halfW - 21, Y0c + COORD_H - 1.5, {align:'center'});
     }
 
-    // ── LADO DERECHO: Vo.Bo. RRHH ────────────────────────────────────
+    // ── LADO DERECHO: Vo.Bo. GERENCIA DEPORTES ───────────────────────
     const xR = ML + halfW + 3;
     doc.setFont('helvetica','bold'); doc.setFontSize(5.5);
     doc.setTextColor(80, 80, 80);
-    doc.text('Vo.Bo. RECURSOS HUMANOS', xR, Y0c + 4);
+    doc.text('Vo.Bo. GERENCIA DEPORTES', xR, Y0c + 4);
 
     doc.setFont('helvetica','normal'); doc.setFontSize(5.5);
     doc.setTextColor(120, 120, 120);

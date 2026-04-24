@@ -873,8 +873,8 @@ function sfv2_generarPDF(hoja) {
     var mot  = MOTIVOS[r.motivo_suplencia||r.motivo||''] || (r.motivo_suplencia||r.motivo||'\u2014');
     var firma = firmasInd[String(r.id)] || firmasInst[String(r.suplente_id)];
     var firmaHtml = (firma&&firma.data)
-      ? '<img src="'+firma.data+'" style="height:40px;max-width:110px;object-fit:contain;display:block;margin:0 auto" alt="Firma">'
-      : '<div style="height:40px;width:110px;margin:0 auto;border:1px solid #ccc;border-radius:3px;background:#fff"></div>';
+      ? '<img src="'+firma.data+'" style="height:32px;max-width:88px;object-fit:contain;display:block;margin:0 auto" alt="Firma">'
+      : '<div style="height:32px;width:88px;margin:0 auto;border:1px solid #ccc;border-radius:3px;background:#fff"></div>';
     var bg = n%2?'#f6fbf8':'#ffffff';
     var td = 'padding:5px 8px;border:1px solid #d8ede2;font-size:.75rem;vertical-align:middle;';
     return '<tr style="background:'+bg+'">' +
@@ -917,7 +917,7 @@ function sfv2_generarPDF(hoja) {
         '<div style="border-top:1px solid #333;font-size:.68rem;color:#555;padding-top:2px">Nombre y Firma</div>' +
       '</div>' +
       '<div style="border-top:2px solid #1a7a45;padding-top:5px">' +
-        '<p style="font-size:.72rem;color:#555;margin:0 0 24px">Vo.Bo. Recursos Humanos</p>' +
+        '<p style="font-size:.72rem;color:#555;margin:0 0 24px">Vo.Bo. Gerencia Deportes</p>' +
         '<div style="border-top:1px solid #333;font-size:.68rem;color:#555;padding-top:2px">Nombre y Firma</div>' +
       '</div>' +
     '</div>' +
@@ -925,17 +925,21 @@ function sfv2_generarPDF(hoja) {
   '</div>';
 
   // Abrir ventana nueva para imprimir (garantiza que las imágenes base64 se rendericen)
-  var ventana = window.open('','_blank','width=920,height=720,scrollbars=yes');
+  var ventana = window.open('','_blank','width=800,height=900,scrollbars=yes');
   if (ventana) {
     ventana.document.write('<!DOCTYPE html><html><head><meta charset="UTF-8">' +
       '<title>Suplencias \u2014 '+enc+'</title>' +
       '<style>' +
-        '@page{size:A4 landscape;margin:10mm 8mm}' +
-        'body{font-family:Arial,sans-serif;margin:0;padding:0}' +
-        'img{max-width:110px;height:40px;object-fit:contain}' +
-        'table{width:100%;border-collapse:collapse}' +
-        'th{background:#1a7a45;color:#fff;padding:5px 6px;border:1px solid #999;font-size:9px}' +
-        'td{padding:4px 6px;border:1px solid #ccc;vertical-align:middle;font-size:10px}' +
+        '@page{size:A4 portrait;margin:12mm 14mm}' +   /* Fix: portrait + márgenes */
+        'body{font-family:Arial,sans-serif;margin:0;padding:0;font-size:9px}' +
+        /* Fix: firma más grande en impresión */
+        'img{max-width:90px;height:32px;object-fit:contain;display:block;margin:0 auto}' +
+        'table{width:100%;border-collapse:collapse;margin-bottom:0}' +
+        'th{background:#1a7a45;color:#fff;padding:4px 5px;border:1px solid #999;font-size:8px;white-space:nowrap}' +
+        /* Fix: padding reducido para aprovechar mejor el espacio vertical */
+        'td{padding:3px 5px;border:1px solid #ccc;vertical-align:middle;font-size:8.5px}' +
+        /* Fix: columna firma más compacta para portrait */
+        'td:last-child{min-width:80px;max-width:90px;text-align:center}' +
         'tr:nth-child(even) td{background:#f6fbf8}' +
         '@media print{button,nav,.noprint{display:none!important}}' +
       '<\/style>' +
