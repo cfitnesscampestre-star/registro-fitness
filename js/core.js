@@ -364,6 +364,9 @@ function abrirModalInstructor(id){
     _miMostrarFotoPreview(inst.foto||null);
     tmpSlots=[...(inst.horario||[])];
     document.getElementById('mi-del').style.display='block';
+    // Cargar PIN guardado del instructor
+    const pinEl=document.getElementById('mi-pin');
+    if(pinEl) pinEl.value=inst.pin||localStorage.getItem(`fc_pin_${id}`)||'1234';
   } else {
     document.getElementById('mi-ttl').textContent='+ Nuevo Instructor';
     document.getElementById('mi-id').value='';
@@ -376,6 +379,9 @@ function abrirModalInstructor(id){
     _miMostrarFotoPreview(null);
     tmpSlots=[];
     document.getElementById('mi-del').style.display='none';
+    // PIN por defecto para nuevo instructor
+    const pinEl=document.getElementById('mi-pin');
+    if(pinEl) pinEl.value='1234';
   }
   renderSlots();
   document.getElementById('m-instructor').classList.add('on');
@@ -441,12 +447,24 @@ function guardarInstructor(){
   // Mínimo 1 clase en horario si es nuevo
   if(!id && tmpSlots.length===0) showToast('Recuerda agregar el horario del instructor después','info');
   const fotoData=document.getElementById('mi-foto-data').value||null;
+  // PIN del instructor — leer del nuevo campo
+  const pinEl=document.getElementById('mi-pin');
+  const pinVal=(pinEl&&pinEl.value.trim().length>=4)?pinEl.value.trim():'1234';
   const data={nombre,tipo:document.getElementById('mi-tipo').value,
     turno:document.getElementById('mi-turno').value,
     esp:document.getElementById('mi-esp').value.trim(),
-    foto:fotoData,horario:[...tmpSlots]};
-  if(id){ const idx=instructores.findIndex(i=>String(i.id)===String(id)); if(idx>=0) instructores[idx]={...instructores[idx],...data}; else{ showToast('No se encontró el instructor. Intenta de nuevo.','err'); return; } }
-  else{ const nid=instructores.reduce((m,i)=>Math.max(m,i.id||0),0)+1; instructores.push({id:nid,...data}); }
+    foto:fotoData,horario:[...tmpSlots],pin:pinVal};
+  if(id){
+    const idx=instructores.findIndex(i=>String(i.id)===String(id));
+    if(idx>=0) instructores[idx]={...instructores[idx],...data};
+    else{ showToast('No se encontró el instructor. Intenta de nuevo.','err'); return; }
+    // Sincronizar también el localStorage de PIN para que auth.js lo encuentre
+    localStorage.setItem(`fc_pin_${id}`, pinVal);
+  } else {
+    const nid=instructores.reduce((m,i)=>Math.max(m,i.id||0),0)+1;
+    instructores.push({id:nid,...data});
+    localStorage.setItem(`fc_pin_${nid}`, pinVal);
+  }
   cerrarModal('m-instructor');renderAll();
   registrarLog('instructor', `${id?'Editado':'Nuevo'}: ${nombre} · ${data.tipo}`);
   showToast(`Instructor ${id?'actualizado':'agregado'}`,'ok');

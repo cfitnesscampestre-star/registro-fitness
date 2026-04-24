@@ -175,7 +175,9 @@ async function intentarLogin() {
       errEl.style.display = 'block';
       return;
     }
-    const pinGuardado = localStorage.getItem(`fc_pin_${instId}`) || '1234';
+    // Login instructor: leer PIN del objeto instructor (sincronizado por Firebase) con fallback a localStorage
+    const instObj = (typeof instructores !== 'undefined') ? instructores.find(i => i.id === instId) : null;
+    const pinGuardado = (instObj && instObj.pin) || localStorage.getItem(`fc_pin_${instId}`) || '1234';
     if (pass === pinGuardado) {
       _loginExitoso('instructor', instId);
     } else {
