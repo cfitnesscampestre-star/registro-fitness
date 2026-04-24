@@ -986,8 +986,21 @@ function sfv2_guardarFirmasIndividuales(obj) {
 // Badge del tab Suplencias en el portal
 window.instActualizarBadgeSup = function() {
   var badge = document.getElementById('inst-sup-badge');
-  if (!badge||typeof instActualId==='undefined'||!instActualId) return;
+  var tab   = document.getElementById('inst-tabn-suplencias');
+  if (typeof instActualId==='undefined'||!instActualId) return;
   var hoja = sfv2_cargarHoja();
+
+  // Verificar si el instructor tiene suplencias (periodo activo o últimos 60 días)
+  var ini60 = (function(){ var d=new Date(); d.setDate(d.getDate()-60); return typeof fechaLocalStr==='function'?fechaLocalStr(d):d.toISOString().slice(0,10); })();
+  var tieneSups = (typeof registros!=='undefined') && registros.some(function(r){
+    return r.estado==='sub' && String(r.suplente_id)===String(instActualId) &&
+           r.fecha >= (hoja ? hoja.semIni : ini60);
+  });
+
+  // Mostrar tab solo si hay hoja activa O el instructor tiene suplencias recientes
+  if (tab) tab.style.display = (hoja || tieneSups) ? '' : 'none';
+
+  if (!badge) return;
   if (!hoja) { badge.style.display='none'; return; }
   var firmasInd = sfv2_cargarFirmasIndividuales();
   var pend = (typeof registros!=='undefined')

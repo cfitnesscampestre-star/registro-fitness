@@ -100,26 +100,53 @@ function turboMostrar(){
   const salon=salones.find(s=>s.clases&&s.clases.some(cl=>cl.toLowerCase()===c.clase.toLowerCase()));
   document.getElementById('tc-salon').textContent=salon?`📍 ${salon.nombre} · ${salon.cap}p`:'';
 
+  // Fix: aviso de suplencia planificada — solo para esta clase específica
+  const supPlan=(suplenciasPlan||[]).find(s=>
+    String(s.inst_id)===String(c.inst_id) &&
+    s.clase===c.clase && s.dia===c.dia && s.hora===c.hora &&
+    s.fecha===recActual.fecha && s.estado!=='rechazado'
+  );
+  const avisoEl=document.getElementById('tc-aviso-sup');
+  if(avisoEl){
+    if(supPlan){
+      const supNom=instructores.find(i=>String(i.id)===String(supPlan.suplente_id))?.nombre||supPlan.suplente_nombre||'Suplente externo';
+      avisoEl.innerHTML=`⇄ Suplencia planificada: <strong>${supNom}</strong> · ${supPlan.motivo||''}`;
+      avisoEl.style.display='block';
+      // Pre-seleccionar estado sub y suplente automáticamente
+      turboSetPres('sub');
+      const selSup=document.getElementById('tc-suplente');
+      if(selSup&&supPlan.suplente_id){
+        const opts=instructores.filter(i=>i.id!==c.inst_id).map(i=>`<option value="${i.id}">${i.nombre}</option>`).join('');
+        selSup.innerHTML='<option value="">— Seleccionar suplente —</option>'+opts;
+        selSup.value=String(supPlan.suplente_id);
+      }
+      const selMot=document.getElementById('tc-motivo');
+      if(selMot) selMot.value=supPlan.motivo||'permiso';
+    } else {
+      avisoEl.style.display='none';
+    }
+  }
+
   // Capacidad desde salón (o del último registro histórico si existe)
   const capSalon=getCapClase(c.clase)||20;
-  // Usar cap del último registro si existe, para no perder override manual
   const histRecsAll=registros.filter(r=>String(r.inst_id)===String(c.inst_id)&&r.clase===c.clase&&r.dia===c.dia).sort((a,b)=>(b.fecha||'').localeCompare(a.fecha||''));
   const capPrev=histRecsAll.length>0&&parseInt(histRecsAll[0].cap)>0?parseInt(histRecsAll[0].cap):capSalon;
   document.getElementById('tc-cap').value=capPrev;
-  // Reset asistentes con último valor histórico como sugerencia
   const histRecs=histRecsAll.filter(r=>r.estado==='ok'||r.estado==='sub');
   const sugerido=histRecs.length>0?histRecs[0].asistentes:0;
   document.getElementById('tc-asis').value=sugerido;
   turboActualizarColor();
 
-  // Reset estado
-  turboSetPres('si');
-  document.getElementById('tc-obs').value='';
-  document.getElementById('tc-suplente-row').style.display='none';
-
-  // Suplentes
-  const opts=instructores.filter(i=>i.id!==c.inst_id).map(i=>`<option value="${i.id}">${i.nombre}</option>`).join('');
-  document.getElementById('tc-suplente').innerHTML='<option value="">— Seleccionar suplente —</option>'+opts;
+  // Reset estado (solo si no había suplencia planificada)
+  if(!supPlan){
+    turboSetPres('si');
+    document.getElementById('tc-obs').value='';
+    document.getElementById('tc-suplente-row').style.display='none';
+    const opts=instructores.filter(i=>i.id!==c.inst_id).map(i=>`<option value="${i.id}">${i.nombre}</option>`).join('');
+    document.getElementById('tc-suplente').innerHTML='<option value="">— Seleccionar suplente —</option>'+opts;
+  } else {
+    document.getElementById('tc-obs').value='';
+  }
 
   // Chips de progreso
   turboActualizarChips();
@@ -129,7 +156,7 @@ function turboMostrar(){
   card.style.transition='transform .18s,opacity .18s,border-color .18s';
   card.style.transform='translateX(0) rotate(0deg)';
   card.style.opacity='1';
-  card.style.borderColor='var(--border)';
+  card.style.borderColor=supPlan?'rgba(41,128,185,.5)':'var(--border)';
   document.getElementById('turbo-hint-left').style.opacity='0';
   document.getElementById('turbo-hint-right').style.opacity='0';
 
@@ -218,8 +245,6 @@ function turboSetPres(estado){
     }
   });
   document.getElementById('tc-suplente-row').style.display=estado==='sub'?'block':'none';
-  // Bug fix: mostrar motivo de falta solo cuando el instructor está ausente
-  document.getElementById('tc-falta-row').style.display=estado==='no'?'block':'none';
   if(navigator.vibrate) navigator.vibrate(15);
 }
 
@@ -229,14 +254,12 @@ function turboGuardar(){
   const asis=parseInt(document.getElementById('tc-asis').value)||0;
   const supId=turboPresEstado==='sub'?(parseInt(document.getElementById('tc-suplente').value)||null):null;
   const motivoSup=turboPresEstado==='sub'?(document.getElementById('tc-motivo').value||'permiso'):null;
-  // Bug fix: capturar motivo de falta cuando el instructor está ausente
-  const motivoFalta=turboPresEstado==='no'?(document.getElementById('tc-motivo-falta').value||'injustificada'):null;
   const obs=document.getElementById('tc-obs').value.trim();
   const cap=parseInt(document.getElementById('tc-cap').value)||parseInt(getCapClase(c.clase))||20;
   // Normalizar inst_id a número para evitar mismatch con Firebase
   const instIdNum=parseInt(c.inst_id)||c.inst_id;
   const existeIdx=recActual.items.findIndex(it=>String(it.inst_id)===String(c.inst_id)&&it.hora===c.hora&&it.clase===c.clase);
-  const item={...c,inst_id:instIdNum,asis,presente:turboPresEstado,suplente_id:supId,motivo_suplencia:motivoSup,motivo_falta:motivoFalta,obs,saltado:false,cap};
+  const item={...c,inst_id:instIdNum,asis,presente:turboPresEstado,suplente_id:supId,motivo_suplencia:motivoSup,obs,saltado:false,cap};
   if(existeIdx>=0)recActual.items[existeIdx]=item;
   else recActual.items.push(item);
   if(navigator.vibrate) navigator.vibrate([20,10,20]);
@@ -348,13 +371,35 @@ function mostrarClaseRec(){
   document.getElementById('rcc-hora').textContent=c.hora;
   document.getElementById('rcc-dia').textContent=c.dia;
   document.getElementById('rcc-asis').value=0;
-  document.getElementById('rcc-pres').value='si';
   document.getElementById('rcc-obs').value='';
-  document.getElementById('rcc-suplente-row').style.display='none';
   // Inicializar capacidad: del último registro histórico si existe, si no del salón
   const histCap=registros.filter(r=>r.inst_id===c.inst_id&&r.clase===c.clase&&r.dia===c.dia&&parseInt(r.cap)>0).sort((a,b)=>(b.fecha||'').localeCompare(a.fecha||''));
   const capDefault=histCap.length>0?parseInt(histCap[0].cap):getCapClase(c.clase)||20;
   document.getElementById('rcc-cap').value=capDefault;
+
+  // Fix: aviso de suplencia planificada específico para esta clase
+  const supPlan=(suplenciasPlan||[]).find(s=>
+    String(s.inst_id)===String(c.inst_id) &&
+    s.clase===c.clase && s.dia===c.dia && s.hora===c.hora &&
+    s.fecha===recActual.fecha && s.estado!=='rechazado'
+  );
+  const avisoRcc=document.getElementById('rcc-aviso-sup');
+  if(supPlan){
+    const supNom=instructores.find(i=>String(i.id)===String(supPlan.suplente_id))?.nombre||supPlan.suplente_nombre||'Suplente externo';
+    if(avisoRcc){avisoRcc.textContent=`⇄ Suplencia planificada: ${supNom} · ${supPlan.motivo||''}`;avisoRcc.style.display='block';}
+    document.getElementById('rcc-pres').value='sub';
+    toggleSuplenteRec();
+    setTimeout(()=>{
+      if(supPlan.suplente_id) document.getElementById('rcc-suplente').value=String(supPlan.suplente_id);
+      if(supPlan.motivo) document.getElementById('rcc-motivo').value=supPlan.motivo;
+    },50);
+  } else {
+    if(avisoRcc) avisoRcc.style.display='none';
+    document.getElementById('rcc-pres').value='si';
+    document.getElementById('rcc-suplente-row').style.display='none';
+    const faltaRow=document.getElementById('rcc-falta-motivo-row');
+    if(faltaRow) faltaRow.style.display='none';
+  }
   document.getElementById('rcc-asis').focus();
 }
 function ajustarAsis(delta){
@@ -366,11 +411,9 @@ function siguienteClaseRec(){
   const pres=document.getElementById('rcc-pres').value;
   const supId=pres==='sub'?parseInt(document.getElementById('rcc-suplente').value)||null:null;
   const motivoSup=pres==='sub'?(document.getElementById('rcc-motivo').value||'permiso'):null;
-  // Bug fix: capturar motivo de falta en modo clásico
-  const motivoFalta=pres==='no'?(document.getElementById('rcc-motivo-falta')?.value||'injustificada'):null;
   const cap=parseInt(document.getElementById('rcc-cap').value)||getCapClase(c.clase)||20;
   recActual.items.push({...c,asis:parseInt(document.getElementById('rcc-asis').value)||0,
-    presente:pres,suplente_id:supId,motivo_suplencia:motivoSup,motivo_falta:motivoFalta,obs:document.getElementById('rcc-obs').value.trim(),saltado:false,cap});
+    presente:pres,suplente_id:supId,motivo_suplencia:motivoSup,obs:document.getElementById('rcc-obs').value.trim(),saltado:false,cap});
   avanzarRec();
 }
 function saltarClaseRec(){
@@ -424,11 +467,6 @@ function terminarRecorrido(){
   document.getElementById('m-rec-res').classList.add('on');
 }
 function guardarRecorrido(){
-  // Bug fix 4: guardia anti-doble-tap — bloquear si ya se está guardando
-  if(guardarRecorrido._guardando) return;
-  guardarRecorrido._guardando = true;
-  setTimeout(()=>{ guardarRecorrido._guardando = false; }, 3000);
-
   const vis=recActual.items.filter(i=>!i.saltado);
   if(vis.length===0&&!confirm('No se registraron clases con aforo. ¿Guardar el recorrido igualmente?'))return;
   const totalAsis=vis.reduce((a,i)=>a+(parseInt(i.asis)||0),0);
@@ -436,21 +474,9 @@ function guardarRecorrido(){
   const aforoProm=recsConCap.length>0?Math.round(recsConCap.reduce((a,i)=>a+(parseInt(i.asis)||0)/(parseInt(i.cap)||20)*100,0)/recsConCap.length):0;
   const ausentes=recActual.items.filter(i=>i.presente==='no').length;
   const suplentes=recActual.items.filter(i=>i.presente==='sub').length;
-
-  // Bug fix 4: evitar recorrido duplicado para la misma fecha/dia/hora
-  const recDuplicado=recorridos.find(r=>r.fecha===recActual.fecha&&r.dia===recActual.dia&&r.hora===recActual.hora);
-  if(recDuplicado){
-    if(!confirm(`Ya existe un recorrido para ${recActual.dia} ${recActual.hora} del ${recActual.fecha}. ¿Sobreescribir?`)){
-      guardarRecorrido._guardando=false; return;
-    }
-    // Eliminar el duplicado antes de guardar el nuevo
-    recorridos=recorridos.filter(r=>r.id!==recDuplicado.id);
-  }
-
-  // Bug fix 1: usar max+1 en lugar de length+1 para evitar IDs duplicados tras eliminaciones
-  const _maxRecId = recorridos.reduce((m,r)=>Math.max(m,parseInt(r.id)||0),0);
+  // Guardar resumen del recorrido
   recorridos.push({
-    id:_maxRecId+1,fecha:recActual.fecha,hora:recActual.hora,dia:recActual.dia,
+    id:recorridos.length+1,fecha:recActual.fecha,hora:recActual.hora,dia:recActual.dia,
     visitadas:vis.length,totalAsis,aforoProm,ausentes,suplentes,items:[...recActual.items]
   });
   // Guardar cada item como registro individual en el historial
@@ -470,9 +496,6 @@ function guardarRecorrido(){
       ex.asistentes=parseInt(item.asis)||0;
       ex.estado=nuevoEst;
       ex.suplente_id=item.suplente_id||null;
-      // Bug fix 3: propagar motivo_falta al actualizar registro existente
-      ex.motivo_falta=(nuevoEst==='falta'?(item.motivo_falta||'injustificada'):null);
-      ex.motivo_suplencia=(nuevoEst==='sub'?(item.motivo_suplencia||'permiso'):null);
       ex.cap=cap;
       ex.updatedAt=Date.now();
     } else {
@@ -487,8 +510,6 @@ function guardarRecorrido(){
         fecha:recActual.fecha,
         tipo:'recorrido',
         suplente_id:item.suplente_id||null,
-        // Bug fix 3: guardar motivo_falta en registro nuevo desde recorrido
-        motivo_falta:(nuevoEst==='falta'?(item.motivo_falta||'injustificada'):null),
         motivo_suplencia:(nuevoEst==='sub'?(item.motivo_suplencia||'permiso'):null),
         updatedAt:Date.now()
       });

@@ -328,8 +328,26 @@ async function guardarNuevaSuplencia(){
   if(idx>=0)suplenciasPlan[idx]=datos;
   else suplenciasPlan.push(datos);
   guardarSupLocal();
+
+  // Fix 4: si ya existe un registro de clase para esa fecha/hora, actualizarlo con el nuevo suplente
+  const regAsoc=registros.find(r=>
+    String(r.inst_id)===String(instId) &&
+    r.clase===clase && r.dia===dia && r.hora===hora &&
+    r.fecha===fecha
+  );
+  if(regAsoc){
+    regAsoc.estado='sub';
+    regAsoc.suplente_id=supId;
+    regAsoc.motivo_suplencia=datos.motivo;
+    regAsoc.updatedAt=Date.now();
+    guardarLocal();
+  }
+
   if(fbDb){
-    try{await fbDb.ref(`fitness/suplencias/${datos.id}`).set(datos);}catch(e){}
+    try{
+      await fbDb.ref(`fitness/suplencias/${datos.id}`).set(datos);
+      if(regAsoc) await fbDb.ref(`fitness/registros/${regAsoc.id}`).set(regAsoc);
+    }catch(e){}
   }
   cerrarModal('m-nueva-sup');
   renderSupPlan();
@@ -340,12 +358,45 @@ async function guardarNuevaSuplencia(){
 
 async function eliminarSuplencia(id){
   const idDel=id||parseInt(document.getElementById('nsup-id').value);
+  const sup=suplenciasPlan.find(s=>s.id===idDel);
   if(!confirm('¿Eliminar esta suplencia planificada?'))return;
+
+  // Fix 3: si ya existe un registro asociado con estado 'sub', revertirlo a 'ok'
+  // para que no siga contando como suplencia en reportes
+  if(sup){
+    const regAsoc=registros.find(r=>
+      String(r.inst_id)===String(sup.inst_id) &&
+      r.clase===sup.clase && r.dia===sup.dia && r.hora===sup.hora &&
+      r.fecha===sup.fecha && r.estado==='sub'
+    );
+    if(regAsoc){
+      regAsoc.estado='ok';
+      regAsoc.suplente_id=null;
+      regAsoc.motivo_suplencia=null;
+      regAsoc.updatedAt=Date.now();
+      showToast('El registro de clase fue revertido a "Impartida" al eliminar la suplencia','info');
+    }
+  }
+
   suplenciasPlan=suplenciasPlan.filter(s=>s.id!==idDel);
-  guardarSupLocal();
-  if(fbDb){try{await fbDb.ref(`fitness/suplencias/${idDel}`).remove();}catch(e){}}
+  guardarLocal();
+  if(fbDb){
+    try{
+      await fbDb.ref(`fitness/suplencias/${idDel}`).remove();
+      // Sincronizar el registro revertido también
+      if(sup){
+        const regRev=registros.find(r=>
+          String(r.inst_id)===String(sup.inst_id)&&r.clase===sup.clase&&r.dia===sup.dia&&r.hora===sup.hora&&r.fecha===sup.fecha
+        );
+        if(regRev) await fbDb.ref(`fitness/registros/${regRev.id}`).set(regRev);
+      }
+    }catch(e){}
+  }
   cerrarModal('m-nueva-sup');
+  renderAll();
   renderSupPlan();
+  registrarLog('suplencia',`Eliminada: ${sup?sup.clase+' · '+sup.fecha:'id '+idDel}`);
+  showToast('Suplencia eliminada','ok');
 }
 
 // guardarSupLocal está definida arriba en la sección de Firebase unificada
