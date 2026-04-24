@@ -1,0 +1,253 @@
+/* ═══════════════════════════════════════════════════════════════
+   HOME-TUNE.CSS — Fitness Control · Club Campestre
+   Ajustes visuales finos de la home móvil.
+   Se carga AL FINAL, después de depth.css.
+   ═══════════════════════════════════════════════════════════════ */
+
+@media (max-width: 640px) {
+
+  /* ════════════════════════════════════════════════════════════════
+     BUSCADOR — más delgado y discreto
+     ════════════════════════════════════════════════════════════════ */
+  #mobile-home > div:first-child {
+    padding: 6px 13px 0 !important;  /* antes 10px — más arriba */
+    gap: 3px !important;
+  }
+
+  #mob-search-bar {
+    padding: 8px 12px !important;    /* antes 12px — más delgado */
+    border-radius: 10px !important;
+  }
+
+  #mob-search-input {
+    font-size: .8rem !important;     /* texto más pequeño */
+  }
+
+  /* Pill de sync aún más pequeña */
+  #mob-sync-pill {
+    font-size: .55rem !important;
+    padding: 0 !important;
+    gap: 4px !important;
+  }
+
+  /* Dots del carrusel — menos espacio */
+  #mob-dots {
+    padding: 2px 0 1px !important;
+    gap: 4px !important;
+  }
+  .mob-dot { width: 5px !important; height: 5px !important; }
+  .mob-dot.on { width: 16px !important; }
+
+
+  /* ════════════════════════════════════════════════════════════════
+     HERO RECORRIDO — más arriba y con degradado verde oscuro
+     ════════════════════════════════════════════════════════════════ */
+  .mob-hero-rec {
+    min-height: 145px !important;
+    margin-top: 4px !important;       /* más junto al buscador */
+    border-radius: 18px !important;
+    /* Degradado verde oscuro institucional */
+    background:
+      linear-gradient(145deg,
+        #071810 0%,
+        #0a2318 30%,
+        #0d3322 65%,
+        #0a2010 100%
+      ) !important;
+    box-shadow:
+      0 6px 28px rgba(0,0,0,.55),
+      0 0 0 1px rgba(94,255,160,.12)
+      !important;
+  }
+
+  /* Overlay del hero: más verde, menos transparente */
+  .mob-hero-bg-overlay {
+    background:
+      linear-gradient(130deg, rgba(5,18,10,.55) 0%, rgba(7,24,14,.15) 60%, transparent 100%),
+      linear-gradient(to top, rgba(5,18,10,.70) 0%, transparent 55%)
+      !important;
+  }
+
+  /* Quitar el SVG del mapa — reemplazar con partículas verdes */
+  .mob-hero-bg::before {
+    background-image: none !important;
+    background:
+      radial-gradient(ellipse 55% 60% at 75% 35%, rgba(26,122,69,.28) 0%, transparent 65%),
+      radial-gradient(ellipse 35% 40% at 85% 70%, rgba(94,255,160,.12) 0%, transparent 55%),
+      radial-gradient(ellipse 25% 30% at 55% 15%, rgba(94,255,160,.08) 0%, transparent 50%)
+      !important;
+  }
+
+  /* Ícono fantasma más tenue */
+  .mob-hero-bg::after {
+    opacity: .35 !important;
+    right: 0px !important;
+    top: -4px !important;
+    width: 115px !important;
+    height: 115px !important;
+  }
+
+  .mob-hero-content {
+    padding: 10px 14px 14px !important;
+  }
+
+  .mob-hero-title {
+    font-size: 1.55rem !important;
+  }
+
+  .mob-hero-sup {
+    font-size: .5rem !important;
+    letter-spacing: 3.5px !important;
+  }
+
+  /* Botón INICIAR RECORRIDO — más compacto */
+  .mob-hero-cta {
+    font-size: .82rem !important;
+    padding: 9px 12px !important;
+    min-width: 80px !important;
+    max-width: 90px !important;
+    border-radius: 12px !important;
+    line-height: 1.2 !important;
+  }
+
+  /* Tags Turbo/Normal — más chicos */
+  .mob-hero-modes .mob-mode-tag {
+    font-size: .58rem !important;
+    padding: 3px 8px !important;
+  }
+
+
+  /* ════════════════════════════════════════════════════════════════
+     AGENDA — menos margen respecto al hero
+     ════════════════════════════════════════════════════════════════ */
+  .mob-agenda-card {
+    margin-top: 5px !important;       /* antes 8px */
+    padding: 10px 14px !important;
+    border-radius: 14px !important;
+  }
+
+  .mob-ag-icon {
+    width: 40px !important;
+    height: 40px !important;
+    border-radius: 12px !important;
+  }
+
+  .mob-ag-title {
+    font-size: .78rem !important;
+  }
+
+  .mob-ag-sub {
+    font-size: .58rem !important;
+  }
+
+
+  /* ════════════════════════════════════════════════════════════════
+     LAYOUT MÉTRICAS + RADIAL — subir y apretar
+     ════════════════════════════════════════════════════════════════ */
+  .mob-premium-layout {
+    margin-top: 5px !important;       /* antes 8px */
+    gap: 7px !important;
+    align-items: flex-start !important;
+  }
+
+
+  /* ════════════════════════════════════════════════════════════════
+     MENÚ RADIAL — botones más chicos y juntos
+     ════════════════════════════════════════════════════════════════ */
+  .mob-radial-menu {
+    width: 76px !important;           /* antes 96px */
+    gap: 6px !important;              /* antes 10px */
+  }
+
+  /* Círculos secundarios (Suplencia y Firmas) */
+  .mob-radial-circle {
+    width: 56px !important;           /* antes 70px */
+    height: 56px !important;
+  }
+
+  /* Botón primario (+Clase) — más oscuro y más chico */
+  .mob-radial-btn.primary .mob-radial-circle {
+    width: 62px !important;           /* antes 80px */
+    height: 62px !important;
+    /* Color más oscuro, acorde al tema verde oscuro */
+    background: linear-gradient(145deg, #1a6040 0%, #0d3d25 60%, #09281a 100%) !important;
+    border: 1.5px solid rgba(94,255,160,.28) !important;
+    box-shadow:
+      0 5px 18px rgba(13,61,37,.55),
+      0 0 0 2px rgba(26,122,69,.12),
+      inset 0 1px 0 rgba(94,255,160,.18)
+      !important;
+  }
+
+  /* SVG del ícono ligeramente más pequeño */
+  .mob-radial-circle svg {
+    width: 28px !important;
+    height: 28px !important;
+  }
+
+  /* Botón primary — ícono un poco más pequeño */
+  .mob-radial-btn.primary .mob-radial-circle svg {
+    width: 30px !important;
+    height: 30px !important;
+  }
+
+  .mob-radial-lbl {
+    font-size: .58rem !important;     /* antes .63rem */
+    letter-spacing: .5px !important;
+  }
+
+  .mob-radial-btn.primary .mob-radial-lbl {
+    font-size: .6rem !important;
+    color: #1a6040 !important;        /* más oscuro */
+  }
+
+
+  /* ════════════════════════════════════════════════════════════════
+     GLASS CARD (KPIs) — un poco más compacta
+     ════════════════════════════════════════════════════════════════ */
+  .mob-glass-card {
+    padding: 10px 11px 8px !important;
+    border-radius: 14px !important;
+  }
+
+  .mob-gc-date-row {
+    margin-bottom: 0 !important;
+  }
+
+  .mob-gc-divider {
+    margin: 5px 0 !important;
+  }
+
+  .mob-gc-title {
+    font-size: .72rem !important;
+    margin-bottom: 6px !important;
+  }
+
+  .mob-gc-metric {
+    margin-bottom: 5px !important;
+  }
+
+  .mob-gc-val {
+    font-size: 1.5rem !important;
+  }
+
+  .mob-gc-sub {
+    font-size: .58rem !important;
+    margin-top: 4px !important;
+  }
+
+
+  /* ════════════════════════════════════════════════════════════════
+     LISTA DE CLASES — empieza más arriba
+     ════════════════════════════════════════════════════════════════ */
+  #mob-lista-lbl {
+    margin-top: 6px !important;       /* antes 10px */
+  }
+
+  .mob-clase-item {
+    margin-bottom: 5px !important;
+    padding: 10px 13px 8px !important;
+    border-radius: 13px !important;
+  }
+
+}
