@@ -287,8 +287,12 @@ function autoRellenarHorario(){
 function toggleSuplenteClase(){
   const v=document.getElementById('rc-est').value;
   const isSub=(v==='sub');
+  const isFalta=(v==='falta');
   document.getElementById('rc-suplente-row').style.display=isSub?'flex':'none';
   document.getElementById('rc-motivo-row').style.display=isSub?'flex':'none';
+  // Bug fix: mostrar campo motivo falta cuando estado es Falta
+  const faltaRow=document.getElementById('rc-falta-motivo-row');
+  if(faltaRow) faltaRow.style.display=isFalta?'flex':'none';
 }
 function toggleSuplenteRec(){
   const v=document.getElementById('rcc-pres').value;
