@@ -1694,8 +1694,30 @@ window._cargarFflate=function(){
           <button id="mob-heat-btn-asis" class="comp-tipo-btn" style="flex:1;padding:5px 4px;font-size:.68rem" onclick="setMobHeatMetric('asis')">Asistentes</button>
           <button id="mob-heat-btn-ses" class="comp-tipo-btn" style="flex:1;padding:5px 4px;font-size:.68rem" onclick="setMobHeatMetric('ses')">Sesiones</button>
         </div>
+
+        <!-- ── Filtros: Instructor / Clase / Período ── -->
+        <div style="display:flex;flex-direction:column;gap:5px;margin-top:6px;">
+          <div style="display:flex;gap:5px;">
+            <select id="mob-heat-inst" class="ctrl" style="flex:1;font-size:.72rem;padding:5px 8px;border-radius:9px" onchange="renderMobHeatmap()">
+              <option value="">Todos los instructores</option>
+            </select>
+            <select id="mob-heat-clase" class="ctrl" style="flex:1;font-size:.72rem;padding:5px 8px;border-radius:9px" onchange="renderMobHeatmap()">
+              <option value="">Todas las clases</option>
+            </select>
+          </div>
+          <div style="display:flex;gap:5px;align-items:center;">
+            <select id="mob-heat-periodo" class="ctrl" style="flex:1;font-size:.72rem;padding:5px 8px;border-radius:9px" onchange="renderMobHeatmap()">
+              <option value="30" selected>Últimos 30 días</option>
+              <option value="7">Últimos 7 días</option>
+              <option value="90">Últimos 90 días</option>
+              <option value="todo">Todo el historial</option>
+            </select>
+            <button class="ctrl" onclick="(function(){document.getElementById('mob-heat-inst').value='';document.getElementById('mob-heat-clase').value='';document.getElementById('mob-heat-periodo').value='30';renderMobHeatmap();})()" style="font-size:.65rem;padding:5px 10px;border-radius:9px;white-space:nowrap;cursor:pointer;background:var(--panel2);border:1px solid var(--border);color:var(--txt2)">↺ Reset</button>
+          </div>
+        </div>
+
         <!-- Grid de temperatura -->
-        <div id="mob-heat-grid" style="overflow-x:auto;"></div>
+        <div id="mob-heat-grid" style="overflow-x:auto;margin-top:6px;"></div>
         <!-- Ranking horarios top + críticos -->
         <div class="mob-sec-lbl" style="margin-top:8px">
           <svg width="11" height="11" viewBox="0 0 20 20" fill="none" stroke="var(--neon)" stroke-width="1.8"><path d="M6 3H14L13 11Q12 14 10 14Q8 14 7 11Z"/><line x1="10" y1="14" x2="10" y2="16.5"/><line x1="7" y1="17" x2="13" y2="17"/></svg>
