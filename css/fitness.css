@@ -271,25 +271,152 @@ html.tema-claro .dash-filter-bar {
   backdrop-filter: none;
   -webkit-backdrop-filter: none;
 }
-/* ═══ GLASSMORPHISM GLOBAL — paneles flotantes y filtros ═══ */
-html:not(.tema-claro) .panel,
-html:not(.tema-claro) .kpi,
-html:not(.tema-claro) .modal,
-html:not(.tema-claro) #coord-menu-dropdown,
-html:not(.tema-claro) .rec-card,
-html:not(.tema-claro) .diag-card,
-html:not(.tema-claro) .sch-slot,
-html:not(.tema-claro) .alert-card {
-  backdrop-filter:blur(14px);
-  -webkit-backdrop-filter:blur(14px);
+/* ═══ GLASSMORPHISM GLOBAL — tema oscuro ═══ */
+html:not(.tema-claro) body {
+  background-attachment: fixed;
 }
-html:not(.tema-claro) .panel { background:rgba(15,28,20,0.75); }
-html:not(.tema-claro) .kpi   { background:rgba(15,28,20,0.70); }
-html:not(.tema-claro) .modal { background:rgba(12,22,16,0.88); }
-html:not(.tema-claro) .rec-card,
-html:not(.tema-claro) .diag-card,
-html:not(.tema-claro) .sch-slot { background:rgba(15,28,20,0.72); }
-html:not(.tema-claro) .alert-card { background:rgba(15,28,20,0.65); }
+
+/* Elementos con glass: fondo semi-transparente para que el gradiente del body se vea */
+html:not(.tema-claro) .panel {
+  background: rgba(10, 22, 15, 0.62) !important;
+  border-color: rgba(94,255,160,.14) !important;
+  backdrop-filter: blur(18px) saturate(160%) !important;
+  -webkit-backdrop-filter: blur(18px) saturate(160%) !important;
+  box-shadow: 0 4px 24px rgba(0,0,0,.45), 0 1px 0 rgba(94,255,160,.07) inset !important;
+}
+html:not(.tema-claro) .kpi {
+  background: rgba(10, 22, 15, 0.58) !important;
+  border-color: rgba(94,255,160,.13) !important;
+  backdrop-filter: blur(14px) saturate(150%) !important;
+  -webkit-backdrop-filter: blur(14px) saturate(150%) !important;
+  box-shadow: 0 2px 16px rgba(0,0,0,.35), 0 1px 0 rgba(94,255,160,.08) inset !important;
+}
+html:not(.tema-claro) .modal {
+  background: rgba(8, 18, 13, 0.82) !important;
+  border-color: rgba(94,255,160,.20) !important;
+  backdrop-filter: blur(24px) saturate(180%) !important;
+  -webkit-backdrop-filter: blur(24px) saturate(180%) !important;
+  box-shadow: 0 8px 48px rgba(0,0,0,.65), 0 1px 0 rgba(94,255,160,.10) inset !important;
+}
+html:not(.tema-claro) .ov {
+  background: rgba(0, 8, 4, 0.72) !important;
+  backdrop-filter: blur(6px) !important;
+  -webkit-backdrop-filter: blur(6px) !important;
+}
+html:not(.tema-claro) #hdr {
+  background: rgba(6, 16, 10, 0.80) !important;
+  border-bottom-color: rgba(94,255,160,.14) !important;
+  backdrop-filter: blur(28px) saturate(200%) !important;
+  -webkit-backdrop-filter: blur(28px) saturate(200%) !important;
+}
+html:not(.tema-claro) #tabs {
+  background: rgba(8, 18, 13, 0.70) !important;
+  border-bottom-color: rgba(94,255,160,.12) !important;
+  backdrop-filter: blur(16px) !important;
+  -webkit-backdrop-filter: blur(16px) !important;
+}
+html:not(.tema-claro) #sidebar {
+  background: rgba(8, 20, 14, 0.75) !important;
+  border-right-color: rgba(94,255,160,.12) !important;
+  backdrop-filter: blur(20px) !important;
+  -webkit-backdrop-filter: blur(20px) !important;
+}
+html:not(.tema-claro) #bottom-nav {
+  background: rgba(4, 12, 8, 0.82) !important;
+  border-top-color: rgba(94,255,160,.13) !important;
+  backdrop-filter: blur(28px) saturate(180%) !important;
+  -webkit-backdrop-filter: blur(28px) saturate(180%) !important;
+}
+html:not(.tema-claro) .rec-card {
+  background: rgba(10, 22, 15, 0.60) !important;
+  border-color: rgba(94,255,160,.13) !important;
+  backdrop-filter: blur(14px) !important;
+  -webkit-backdrop-filter: blur(14px) !important;
+}
+html:not(.tema-claro) .diag-card {
+  background: rgba(10, 22, 15, 0.58) !important;
+  border-color: rgba(94,255,160,.12) !important;
+  backdrop-filter: blur(12px) !important;
+  -webkit-backdrop-filter: blur(12px) !important;
+}
+html:not(.tema-claro) .diag-card:hover {
+  background: rgba(26,122,69,.20) !important;
+  border-color: rgba(94,255,160,.30) !important;
+}
+html:not(.tema-claro) .sch-slot {
+  background: rgba(8, 18, 13, 0.65) !important;
+  border-color: rgba(94,255,160,.13) !important;
+  backdrop-filter: blur(10px) !important;
+  -webkit-backdrop-filter: blur(10px) !important;
+}
+html:not(.tema-claro) .alert-card {
+  background: rgba(10, 20, 14, 0.60) !important;
+  backdrop-filter: blur(10px) !important;
+  -webkit-backdrop-filter: blur(10px) !important;
+}
+html:not(.tema-claro) #coord-menu-dropdown {
+  background: rgba(6, 16, 10, 0.90) !important;
+  border-color: rgba(94,255,160,.18) !important;
+  backdrop-filter: blur(24px) saturate(200%) !important;
+  -webkit-backdrop-filter: blur(24px) saturate(200%) !important;
+}
+html:not(.tema-claro) .phdr {
+  background: rgba(94,255,160,.04) !important;
+  border-bottom-color: rgba(94,255,160,.11) !important;
+}
+html:not(.tema-claro) .ctrl {
+  background: rgba(6, 16, 10, 0.55) !important;
+  border-color: rgba(94,255,160,.16) !important;
+}
+html:not(.tema-claro) .ctrl:focus {
+  border-color: rgba(94,255,160,.45) !important;
+  box-shadow: 0 0 0 3px rgba(94,255,160,.08) !important;
+}
+html:not(.tema-claro) .fg input,
+html:not(.tema-claro) .fg select,
+html:not(.tema-claro) .fg textarea {
+  background: rgba(6, 16, 10, 0.55) !important;
+  border-color: rgba(94,255,160,.16) !important;
+}
+html:not(.tema-claro) .fg input:focus,
+html:not(.tema-claro) .fg select:focus,
+html:not(.tema-claro) .fg textarea:focus {
+  border-color: rgba(94,255,160,.50) !important;
+  box-shadow: 0 0 0 3px rgba(94,255,160,.08) !important;
+}
+/* Línea de luz en el borde superior del modal */
+html:not(.tema-claro) .modal::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 12%; right: 12%;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(94,255,160,.50) 50%, transparent);
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 1;
+}
+/* Efecto shine en botón guardar */
+html:not(.tema-claro) .bsave { position: relative; overflow: hidden; }
+html:not(.tema-claro) .bsave::after {
+  content: '';
+  position: absolute; top: -50%; left: -60%;
+  width: 40%; height: 200%;
+  background: linear-gradient(105deg, transparent, rgba(255,255,255,.15), transparent);
+  transform: skewX(-20deg);
+  transition: left .5s ease;
+  pointer-events: none;
+}
+html:not(.tema-claro) .bsave:hover::after { left: 130%; }
+/* Hover en panels y kpis */
+html:not(.tema-claro) .panel:hover,
+html:not(.tema-claro) .kpi:hover {
+  border-color: rgba(94,255,160,.24) !important;
+}
+/* Scrollbar */
+html:not(.tema-claro) ::-webkit-scrollbar { width: 5px; height: 5px; }
+html:not(.tema-claro) ::-webkit-scrollbar-track { background: rgba(8,22,14,.30); }
+html:not(.tema-claro) ::-webkit-scrollbar-thumb { background: rgba(94,255,160,.22); border-radius: 10px; }
+html:not(.tema-claro) ::-webkit-scrollbar-thumb:hover { background: rgba(94,255,160,.40); }
 /* ═══ SISTEMA DE ICONOS SVG ═══ */
 .ico{
   display:inline-block;width:1.1em;height:1.1em;
