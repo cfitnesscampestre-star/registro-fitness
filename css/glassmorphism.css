@@ -460,3 +460,190 @@ html.tema-claro .cal-day {
 html.tema-claro .cal-day:hover {
   background: rgba(26,122,69,.08) !important;
 }
+
+
+/* ════════════════════════════════════════════════════════════════
+   MODAL HEADER — cabecera fija dentro del modal
+   ════════════════════════════════════════════════════════════════ */
+.mhdr {
+  background: rgba(8, 20, 12, 0.65) !important;
+  border-bottom: 1px solid var(--glass-border) !important;
+  backdrop-filter: blur(14px) !important;
+  -webkit-backdrop-filter: blur(14px) !important;
+}
+html.tema-claro .mhdr {
+  background: rgba(240,248,242,.80) !important;
+}
+
+
+/* ════════════════════════════════════════════════════════════════
+   DROPDOWN MENÚ COORDINACIÓN — ya tenía glass inline, reforzamos
+   ════════════════════════════════════════════════════════════════ */
+#coord-menu-dropdown {
+  background: rgba(8, 20, 14, 0.88) !important;
+  backdrop-filter: blur(22px) saturate(200%) !important;
+  -webkit-backdrop-filter: blur(22px) saturate(200%) !important;
+  border: 1px solid var(--glass-border) !important;
+  box-shadow: 0 12px 40px rgba(0,0,0,.65), 0 1px 0 rgba(94,255,160,.08) inset !important;
+}
+html.tema-claro #coord-menu-dropdown {
+  background: rgba(255,255,255,.92) !important;
+  border-color: rgba(26,122,69,.20) !important;
+}
+
+
+/* ════════════════════════════════════════════════════════════════
+   PORTAL INSTRUCTOR — header
+   ════════════════════════════════════════════════════════════════ */
+.inst-portal-header {
+  backdrop-filter: blur(22px) saturate(180%) !important;
+  -webkit-backdrop-filter: blur(22px) saturate(180%) !important;
+  border-bottom: 1px solid var(--glass-border) !important;
+}
+
+/* Tabs del instructor */
+.inst-tabs-bar {
+  background: rgba(8, 20, 14, 0.62) !important;
+  backdrop-filter: blur(14px) !important;
+  -webkit-backdrop-filter: blur(14px) !important;
+  border-bottom: 1px solid var(--glass-border) !important;
+}
+html.tema-claro .inst-tabs-bar {
+  background: rgba(255,255,255,.75) !important;
+}
+
+/* Clases del instructor */
+.inst-clase-card {
+  background: rgba(8,22,14,.48) !important;
+  border: 1px solid var(--glass-border) !important;
+  backdrop-filter: blur(10px) !important;
+  -webkit-backdrop-filter: blur(10px) !important;
+}
+.inst-clase-card:hover {
+  background: rgba(26,122,69,.14) !important;
+  border-color: rgba(94,255,160,.28) !important;
+}
+html.tema-claro .inst-clase-card {
+  background: rgba(240,248,242,.65) !important;
+}
+
+
+/* ════════════════════════════════════════════════════════════════
+   PILLS / BADGES — vidrio fino
+   ════════════════════════════════════════════════════════════════ */
+.inst-periodo-pill {
+  background: rgba(8,22,14,.50) !important;
+  border: 1px solid var(--glass-border) !important;
+  backdrop-filter: blur(8px) !important;
+  -webkit-backdrop-filter: blur(8px) !important;
+}
+.inst-periodo-pill.on {
+  background: linear-gradient(135deg, var(--v2), var(--v3)) !important;
+  border-color: transparent !important;
+  backdrop-filter: none !important;
+}
+html.tema-claro .inst-periodo-pill {
+  background: rgba(240,248,242,.70) !important;
+}
+
+
+/* ════════════════════════════════════════════════════════════════
+   INPUTS STANDALONE (fuera de modal) — subtil
+   ════════════════════════════════════════════════════════════════ */
+input.ctrl, select.ctrl, textarea.ctrl {
+  background: rgba(8, 20, 14, 0.45) !important;
+  border: 1px solid rgba(94,255,160,.16) !important;
+  backdrop-filter: blur(6px) !important;
+  -webkit-backdrop-filter: blur(6px) !important;
+}
+input.ctrl:focus, select.ctrl:focus, textarea.ctrl:focus {
+  border-color: rgba(94,255,160,.45) !important;
+  box-shadow: 0 0 0 3px rgba(94,255,160,.08), 0 0 12px rgba(94,255,160,.06) !important;
+  background: rgba(8, 22, 14, 0.58) !important;
+}
+html.tema-claro input.ctrl,
+html.tema-claro select.ctrl,
+html.tema-claro textarea.ctrl {
+  background: rgba(240,248,242,.75) !important;
+  border-color: rgba(26,122,69,.22) !important;
+}
+html.tema-claro input.ctrl:focus,
+html.tema-claro select.ctrl:focus,
+html.tema-claro textarea.ctrl:focus {
+  border-color: rgba(26,122,69,.55) !important;
+  box-shadow: 0 0 0 3px rgba(26,122,69,.08) !important;
+}
+
+
+/* ════════════════════════════════════════════════════════════════
+   BRILLO AMBIENTAL — glow de fondo en el body (sutil)
+   Requiere que #app o body no tengan overflow hidden absoluto
+   ════════════════════════════════════════════════════════════════ */
+body::before {
+  content: '';
+  position: fixed;
+  top: -20%; left: 50%;
+  transform: translateX(-50%);
+  width: 600px; height: 400px;
+  background: radial-gradient(ellipse at center,
+    rgba(26,122,69,.07) 0%,
+    transparent 70%
+  );
+  pointer-events: none;
+  z-index: 0;
+}
+html.tema-claro body::before {
+  background: radial-gradient(ellipse at center,
+    rgba(26,122,69,.05) 0%,
+    transparent 70%
+  );
+}
+
+
+/* ════════════════════════════════════════════════════════════════
+   HOVER SHINE — efecto de brillo al pasar sobre panels y modals
+   ════════════════════════════════════════════════════════════════ */
+.panel, .kpi, .inst-kpi-card {
+  transition: box-shadow .22s ease, border-color .22s ease !important;
+}
+.panel:hover, .kpi:hover, .inst-kpi-card:hover {
+  border-color: rgba(94,255,160,.25) !important;
+  box-shadow: 0 6px 28px rgba(0,0,0,.40), 0 1px 0 rgba(94,255,160,.12) inset !important;
+}
+html.tema-claro .panel:hover,
+html.tema-claro .kpi:hover,
+html.tema-claro .inst-kpi-card:hover {
+  border-color: rgba(26,122,69,.30) !important;
+  box-shadow: 0 6px 24px rgba(26,122,69,.14), 0 1px 0 rgba(255,255,255,.8) inset !important;
+}
+
+
+/* ════════════════════════════════════════════════════════════════
+   SUPLENCIAS HUB MODAL — vidrio especial
+   ════════════════════════════════════════════════════════════════ */
+#m-hub-suplencias .modal {
+  background: rgba(8, 18, 14, 0.60) !important;
+}
+
+
+/* ════════════════════════════════════════════════════════════════
+   SCROLLBAR — integrada con el tema de vidrio
+   ════════════════════════════════════════════════════════════════ */
+::-webkit-scrollbar { width: 5px; height: 5px; }
+::-webkit-scrollbar-track { background: rgba(8,22,14,.30); }
+::-webkit-scrollbar-thumb {
+  background: rgba(94,255,160,.22);
+  border-radius: 10px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(94,255,160,.40);
+}
+html.tema-claro ::-webkit-scrollbar-track {
+  background: rgba(26,122,69,.06);
+}
+html.tema-claro ::-webkit-scrollbar-thumb {
+  background: rgba(26,122,69,.25);
+}
+html.tema-claro ::-webkit-scrollbar-thumb:hover {
+  background: rgba(26,122,69,.45);
+}
