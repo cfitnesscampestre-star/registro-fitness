@@ -88,7 +88,7 @@ window._cargarFflate=function(){
   position: fixed !important;
   inset: 0 !important;
   z-index: 9999 !important;
-  background: #eef4ee !important;
+  background: linear-gradient(160deg, #daeeda 0%, #c5e4ca 45%, #d2ecd6 100%) !important;
   display: flex !important;
   align-items: center !important;
   justify-content: center !important;
@@ -97,13 +97,15 @@ window._cargarFflate=function(){
 #login-screen.oculto { display: none !important; }
 
 .login-box {
-  background: #ffffff !important;
+  background: rgba(255, 255, 255, 0.45) !important;
+  backdrop-filter: blur(20px) saturate(180%) !important;
+  -webkit-backdrop-filter: blur(20px) saturate(180%) !important;
   border-radius: 24px !important;
   padding: 2rem 1.8rem 1.6rem !important;
   width: 380px !important;
   max-width: 94vw !important;
-  box-shadow: 0 12px 48px rgba(26,122,69,.18) !important;
-  border: 1.5px solid rgba(26,122,69,.25) !important;
+  box-shadow: 0 12px 48px rgba(26,122,69,.20), 0 1px 0 rgba(255,255,255,.80) inset !important;
+  border: 1.5px solid rgba(255,255,255,.70) !important;
 }
 
 /* ── Logo: cuadrado verde + título derecha ── */
@@ -2747,7 +2749,7 @@ window._cargarFflate=function(){
 </div>
 
 <!-- ══ RECORRIDO TURBO (pantalla completa) ══ -->
-<div id="turbo-screen" style="display:none;position:fixed;inset:0;z-index:500;background:var(--bg);flex-direction:column;overflow:hidden">
+<div id="turbo-screen" style="display:none;position:fixed;inset:0;z-index:500;background:linear-gradient(160deg,#daeeda 0%,#c5e4ca 45%,#d2ecd6 100%);flex-direction:column;overflow:hidden">
 
   <!-- Barra superior -->
   <div style="background:var(--panel);border-bottom:1px solid var(--border);padding:.6rem 1rem;display:flex;align-items:center;justify-content:space-between;flex-shrink:0">
@@ -2775,10 +2777,11 @@ window._cargarFflate=function(){
 
     <!-- Tarjeta deslizable -->
     <div id="turbo-card"
-      style="width:100%;max-width:420px;background:var(--panel);border:2px solid var(--border);border-radius:20px;
+      style="width:100%;max-width:420px;background:rgba(255,255,255,0.45);border:1.5px solid rgba(255,255,255,.65);border-radius:20px;
              padding:1.2rem 1.4rem;touch-action:pan-y;user-select:none;
              transition:transform .18s, opacity .18s, border-color .18s;
-             box-shadow:0 8px 32px rgba(0,0,0,.4)">
+             backdrop-filter:blur(20px) saturate(180%);-webkit-backdrop-filter:blur(20px) saturate(180%);
+             box-shadow:0 8px 40px rgba(26,122,69,.18), 0 1px 0 rgba(255,255,255,.8) inset">
 
       <!-- Cabecera clase -->
       <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:.9rem">
