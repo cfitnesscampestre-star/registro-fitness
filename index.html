@@ -2766,6 +2766,9 @@ window._cargarFflate=function(){
     <div id="turbo-progbar" style="height:100%;background:var(--neon);transition:width .3s;width:0%"></div>
   </div>
 
+  <!-- Aviso suplencia planificada — fuera de turbo-card para que no se duplique -->
+  <div id="tc-aviso-sup" style="display:none;margin:.4rem 1rem 0;background:rgba(41,128,185,.12);border:1px solid rgba(41,128,185,.35);border-radius:8px;padding:6px 12px;font-size:.74rem;color:var(--blue);font-weight:600;flex-shrink:0"></div>
+
   <!-- Área de tarjeta principal -->
   <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:1rem;overflow:hidden;position:relative">
 
@@ -2792,8 +2795,7 @@ window._cargarFflate=function(){
         </div>
       </div>
 
-      <!-- Aviso suplencia planificada (específico por clase) -->
-      <div id="tc-aviso-sup" style="display:none;background:rgba(41,128,185,.12);border:1px solid rgba(41,128,185,.35);border-radius:8px;padding:6px 10px;font-size:.74rem;color:var(--blue);margin-bottom:.7rem;font-weight:600"></div>
+      <!-- Aviso suplencia planificada — controlado desde recorrido.js -->
 
       <!-- Número de asistentes — grande y táctil -->
       <div style="text-align:center;margin:.4rem 0 .9rem">
