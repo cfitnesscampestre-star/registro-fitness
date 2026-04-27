@@ -591,21 +591,77 @@ window.sfv2_exportarPDF = function() {
 // ════════════════════════════════════════════════════════════════════════
 // SECCIÓN 4 — PORTAL INSTRUCTOR: firma por suplencia individual
 // ════════════════════════════════════════════════════════════════════════
-window.instRenderSupTab = function() {
-  var inst = (typeof instructores!=='undefined') ? instructores.find(function(i){return i.id===instActualId;}) : null;
-  if (!inst) return;
+// ── Descarga registros e instructores desde Firebase si están vacíos ────
+// Esto es el fix raíz: en el dispositivo del instructor, registros=[] hasta
+// que el listener principal (pwa.js/mobile.js) los carga — pero ese proceso
+// puede no haber terminado cuando el instructor abre el tab de Suplencias.
+function sfv2_asegurarDatosBase(callback) {
+  var tieneRegistros   = (typeof registros   !== 'undefined') && registros.length   > 0;
+  var tieneInstructores= (typeof instructores !== 'undefined') && instructores.length > 0;
 
-  // Si ya tenemos hoja en memoria, renderizar inmediato (no bloquear UI)
-  // Luego sincronizar con Firebase y re-renderizar si hay cambios
-  var hojaLocalExiste = !!sfv2_cargarHoja();
-  if (hojaLocalExiste) {
-    sfv2_cargarHojaEnMemoria();
-    _instRenderSupTabConHoja(inst);
+  if (tieneRegistros && tieneInstructores) {
+    // Ya tenemos datos en memoria — no hace falta ir a Firebase
+    callback(); return;
   }
-  // Siempre consultar Firebase para garantizar datos frescos
-  sfv2_cargarHojaDesdeFirebase(function(hoja) {
-    _sfv2.hoja = hoja;
-    _instRenderSupTabConHoja(inst);
+
+  if (typeof fbDb === 'undefined' || !fbDb) { callback(); return; }
+
+  // Intentar cargar desde localStorage primero (más rápido)
+  if (!tieneRegistros) {
+    try {
+      var ls = localStorage.getItem('fc_registros');
+      if (ls) { registros = JSON.parse(ls); if(typeof normalizarRegistros==='function') normalizarRegistros(); tieneRegistros = registros.length > 0; }
+    } catch(e) {}
+  }
+  if (!tieneInstructores) {
+    try {
+      var li = localStorage.getItem('fc_instructores');
+      if (li) { instructores = JSON.parse(li); tieneInstructores = instructores.length > 0; }
+    } catch(e) {}
+  }
+
+  if (tieneRegistros && tieneInstructores) { callback(); return; }
+
+  // Último recurso: descargar desde Firebase directamente
+  fbDb.ref('fitness').once('value', function(snap) {
+    try {
+      var data = snap.val();
+      if (!data) { callback(); return; }
+
+      if (!tieneInstructores && data.instructores) {
+        try {
+          instructores = Array.isArray(data.instructores)
+            ? data.instructores
+            : Object.values(data.instructores);
+          localStorage.setItem('fc_instructores', JSON.stringify(instructores));
+        } catch(e) {}
+      }
+
+      if (!tieneRegistros && data.registros) {
+        try {
+          registros = Object.values(data.registros);
+          if (typeof normalizarRegistros === 'function') normalizarRegistros();
+          localStorage.setItem('fc_registros', JSON.stringify(registros));
+        } catch(e) {}
+      }
+    } catch(e) {}
+    callback();
+  }).catch(function() { callback(); });
+}
+
+window.instRenderSupTab = function() {
+  // Primero asegurar que registros e instructores estén cargados
+  sfv2_asegurarDatosBase(function() {
+    var inst = (typeof instructores!=='undefined')
+      ? instructores.find(function(i){ return String(i.id)===String(instActualId); })
+      : null;
+    if (!inst) return;
+
+    // Renderizar con datos locales inmediato, luego refrescar desde Firebase
+    sfv2_cargarHojaDesdeFirebase(function(hoja) {
+      _sfv2.hoja = hoja;
+      _instRenderSupTabConHoja(inst);
+    });
   });
 };
 
@@ -1162,6 +1218,13 @@ window.instActualizarBadgeSup = function() {
   var tab   = document.getElementById('inst-tabn-suplencias');
   if (typeof instActualId==='undefined'||!instActualId) return;
 
+  // Asegurar datos base antes de calcular badge
+  sfv2_asegurarDatosBase(function() {
+    _computarBadgeSup(badge, tab);
+  });
+};
+
+function _computarBadgeSup(badge, tab) {
   function _aplicarBadge(hoja) {
     var ini60 = (function(){ var d=new Date(); d.setDate(d.getDate()-60); return typeof fechaLocalStr==='function'?fechaLocalStr(d):d.toISOString().slice(0,10); })();
     var tieneSups = (typeof registros!=='undefined') && registros.some(function(r){
