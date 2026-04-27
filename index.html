@@ -636,6 +636,118 @@ window._cargarFflate=function(){
   display: flex; align-items: center; justify-content: center;
   margin: 0 auto 1rem;
 }
+
+/* ══════════════════════════════════════════════
+   CALENDARIO DE SUPLENCIAS — calsup-*
+   ══════════════════════════════════════════════ */
+#calsup-cal-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 3px;
+}
+.calsup-weekday {
+  font-family: 'DM Mono', monospace;
+  font-size: .6rem;
+  color: var(--txt3);
+  text-align: center;
+  padding: 3px 0 4px;
+  letter-spacing: .5px;
+  text-transform: uppercase;
+}
+.calsup-weekday.fin { color: var(--gold2); }
+
+.calsup-day {
+  position: relative;
+  aspect-ratio: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 7px;
+  font-family: 'Outfit', sans-serif;
+  font-size: .75rem;
+  color: var(--txt2);
+  cursor: pointer;
+  border: 1px solid transparent;
+  transition: transform .12s, background .12s, border-color .12s;
+  user-select: none;
+}
+.calsup-day:hover { transform: scale(1.08); background: var(--panel2); }
+.calsup-day.vacio { pointer-events: none; }
+.calsup-day.other-month { opacity: .3; }
+.calsup-day.is-today {
+  border-color: var(--gold2);
+  font-weight: 700;
+  color: var(--gold2);
+}
+.calsup-day.has-sup {
+  background: rgba(26,122,69,.18);
+  border-color: rgba(94,255,160,.3);
+  color: var(--neon);
+  font-weight: 600;
+}
+.calsup-day.is-selected {
+  background: rgba(232,93,4,.18);
+  border-color: #E85D04;
+  color: #f08030;
+  font-weight: 700;
+}
+
+/* Badge naranja con número de suplencias */
+.calsup-badge {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  min-width: 16px;
+  height: 16px;
+  padding: 0 3px;
+  border-radius: 8px;
+  background: linear-gradient(135deg, #E85D04, #f08030);
+  box-shadow: 0 1px 4px rgba(232,93,4,.5), 0 0 0 2px var(--panel);
+  font-family: 'DM Mono', monospace;
+  font-size: .55rem;
+  font-weight: 700;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* Panel de detalle del día */
+#calsup-detail .calsup-empty {
+  text-align: center;
+  padding: 1.2rem .5rem;
+  color: var(--txt3);
+  font-size: .78rem;
+}
+#calsup-detail .sup-item {
+  padding: .55rem .7rem;
+  border-radius: 9px;
+  border: 1px solid var(--border);
+  background: var(--panel2);
+  margin-bottom: .4rem;
+  transition: background .12s;
+}
+#calsup-detail .sup-item:hover { background: var(--panel); }
+.sup-item-hora  { font-family: 'DM Mono', monospace; font-size: .65rem; color: var(--txt3); margin-bottom: 2px; }
+.sup-item-clase { font-size: .82rem; font-weight: 700; color: var(--txt); margin-bottom: 3px; }
+.sup-item-suplente {
+  font-size: .74rem; color: var(--blue); font-weight: 600;
+  display: flex; align-items: center; gap: 4px;
+}
+.sup-item-suplente::before { content: '⇄'; font-size: .7rem; color: var(--neon); }
+.sup-item-original { font-size: .68rem; color: var(--txt3); margin-top: 1px; }
+.sup-item-motivo {
+  display: inline-block;
+  margin-top: 4px;
+  font-size: .6rem;
+  padding: 1px 7px;
+  border-radius: 20px;
+  background: rgba(94,255,160,.08);
+  border: 1px solid rgba(94,255,160,.2);
+  color: var(--txt3);
+}
 </style>
 
 <div id="instructor-screen" style="display:none;position:fixed;inset:0;background:var(--bg);z-index:9998;flex-direction:column;overflow:hidden">
@@ -1942,7 +2054,7 @@ window._cargarFflate=function(){
       <span class="pttl"><svg class="ico" viewBox="0 0 20 20"><rect x="3" y="12" width="3" height="5" rx="1" stroke="currentColor" stroke-width="1.4" fill="none"/><rect x="8.5" y="8" width="3" height="9" rx="1" stroke="currentColor" stroke-width="1.4" fill="none"/><rect x="14" y="4" width="3" height="13" rx="1" stroke="currentColor" stroke-width="1.4" fill="none"/></svg> Aforo por Tipo de Clase — Haz clic para diagnóstico</span>
       <span style="font-size:.72rem;color:var(--txt2)">% aforo y cantidad de asistentes · clic en barra = diagnóstico</span>
     </div>
-    <div class="pbody"><div class="graph-wrap"><canvas id="chart-clases"></canvas></div><div id="chart-clases-legend"></div></div>
+    <div class="pbody"><div class="graph-wrap"><canvas id="chart-clases"></canvas></div></div>
   </div>
 </div>
 
@@ -2766,9 +2878,6 @@ window._cargarFflate=function(){
     <div id="turbo-progbar" style="height:100%;background:var(--neon);transition:width .3s;width:0%"></div>
   </div>
 
-  <!-- Aviso suplencia planificada — fuera de turbo-card para que no se duplique -->
-  <div id="tc-aviso-sup" style="display:none;margin:.4rem 1rem 0;background:rgba(41,128,185,.12);border:1px solid rgba(41,128,185,.35);border-radius:8px;padding:6px 12px;font-size:.74rem;color:var(--blue);font-weight:600;flex-shrink:0"></div>
-
   <!-- Área de tarjeta principal -->
   <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:1rem;overflow:hidden;position:relative">
 
@@ -2795,7 +2904,8 @@ window._cargarFflate=function(){
         </div>
       </div>
 
-      <!-- Aviso suplencia planificada — controlado desde recorrido.js -->
+      <!-- Aviso suplencia planificada (específico por clase) -->
+      <div id="tc-aviso-sup" style="display:none;background:rgba(41,128,185,.12);border:1px solid rgba(41,128,185,.35);border-radius:8px;padding:6px 10px;font-size:.74rem;color:var(--blue);margin-bottom:.7rem;font-weight:600"></div>
 
       <!-- Número de asistentes — grande y táctil -->
       <div style="text-align:center;margin:.4rem 0 .9rem">
