@@ -258,16 +258,34 @@ window.sfv2_confirmarCrearHoja = async function() {
   localStorage.setItem(SFV2_LS, JSON.stringify(hoja));
   _sfv2.hoja = hoja;
 
+  // No guardar firmas:{} vacío — Firebase descarta objetos vacíos y puede causar problemas
+  var hojaFirebase = {
+    semIni:     hoja.semIni,
+    semFin:     hoja.semFin,
+    encabezado: hoja.encabezado,
+    publicado:  hoja.publicado
+    // firmas se omite intencionalmente si está vacío
+  };
+
   if (typeof fbDb !== 'undefined' && fbDb) {
     try {
-      await fbDb.ref(SFV2_FB + '/hoja').set(hoja);
+      await fbDb.ref(SFV2_FB + '/hoja').set(hojaFirebase);
       console.log('[SFV2] hoja subida a Firebase OK:', hoja.encabezado);
+      // Verificar que quedó guardada
+      fbDb.ref(SFV2_FB + '/hoja/semIni').once('value', function(snap) {
+        console.log('[SFV2] verificación post-guardado semIni:', snap.val());
+        if (!snap.val()) {
+          console.error('[SFV2] FALLO: la hoja no quedó en Firebase después del set');
+          showToast('⚠ Error al publicar — verifica conexión y reglas de Firebase','err');
+        }
+      });
     } catch(e) {
       console.error('[SFV2] ERROR subiendo hoja a Firebase:', e);
-      showToast('Guardado local, reintentando subida...','warn');
+      showToast('Sin conexión — la hoja está guardada localmente. Vuelve a intentarlo.','warn');
     }
   } else {
     console.warn('[SFV2] fbDb no disponible al crear hoja — solo local');
+    showToast('Sin conexión con Firebase — la hoja no es visible para otros dispositivos','warn');
   }
 
   cerrarModal('m-sup-firmas-crear');
@@ -1429,6 +1447,24 @@ function sfv2_actualizarBadgeCoord() {
     });
   }
   setTimeout(try1, 500); // reducido: instructores ven hoja más rápido
+})();
+
+// ── Test de escritura Firebase al arrancar ────────────────────────────
+(function sfv2_testFirebase() {
+  function run() {
+    if (typeof fbDb === 'undefined' || !fbDb) { setTimeout(run, 2000); return; }
+    var testRef = fbDb.ref(SFV2_FB + '/_test');
+    testRef.set({ ts: Date.now() })
+      .then(function() {
+        console.log('[SFV2] ✔ Firebase escritura OK en', SFV2_FB);
+        testRef.remove().catch(function(){});
+      })
+      .catch(function(e) {
+        console.error('[SFV2] ✖ Firebase escritura BLOQUEADA en', SFV2_FB, '— error:', e.code, e.message);
+        // Esto indica reglas de Firebase denegando acceso al nodo fc_sup_firmas
+      });
+  }
+  setTimeout(run, 3000);
 })();
 
 // ── Integrar con instSwitchTab ────────────────────────────────────────
