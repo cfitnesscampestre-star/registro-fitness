@@ -259,8 +259,15 @@ window.sfv2_confirmarCrearHoja = async function() {
   _sfv2.hoja = hoja;
 
   if (typeof fbDb !== 'undefined' && fbDb) {
-    try { await fbDb.ref(SFV2_FB + '/hoja').set(hoja); }
-    catch(e) { showToast('Guardado local, reintentando subida...','warn'); }
+    try {
+      await fbDb.ref(SFV2_FB + '/hoja').set(hoja);
+      console.log('[SFV2] hoja subida a Firebase OK:', hoja.encabezado);
+    } catch(e) {
+      console.error('[SFV2] ERROR subiendo hoja a Firebase:', e);
+      showToast('Guardado local, reintentando subida...','warn');
+    }
+  } else {
+    console.warn('[SFV2] fbDb no disponible al crear hoja — solo local');
   }
 
   cerrarModal('m-sup-firmas-crear');
@@ -599,54 +606,102 @@ function sfv2_asegurarDatosBase(callback) {
   var tieneRegistros   = (typeof registros   !== 'undefined') && registros.length   > 0;
   var tieneInstructores= (typeof instructores !== 'undefined') && instructores.length > 0;
 
+  console.log('[SFV2] asegurarDatosBase — registros:', tieneRegistros ? registros.length : 0, '| instructores:', tieneInstructores ? instructores.length : 0);
+
   if (tieneRegistros && tieneInstructores) {
-    // Ya tenemos datos en memoria — no hace falta ir a Firebase
     callback(); return;
   }
 
-  if (typeof fbDb === 'undefined' || !fbDb) { callback(); return; }
+  if (typeof fbDb === 'undefined' || !fbDb) {
+    console.warn('[SFV2] fbDb no disponible — callback sin datos');
+    callback(); return;
+  }
 
   // Intentar cargar desde localStorage primero (más rápido)
   if (!tieneRegistros) {
     try {
       var ls = localStorage.getItem('fc_registros');
-      if (ls) { registros = JSON.parse(ls); if(typeof normalizarRegistros==='function') normalizarRegistros(); tieneRegistros = registros.length > 0; }
-    } catch(e) {}
+      if (ls) {
+        registros = JSON.parse(ls);
+        if(typeof normalizarRegistros==='function') normalizarRegistros();
+        tieneRegistros = registros.length > 0;
+        console.log('[SFV2] registros desde localStorage:', registros.length);
+      }
+    } catch(e) { console.warn('[SFV2] Error leyendo fc_registros de localStorage', e); }
   }
   if (!tieneInstructores) {
     try {
       var li = localStorage.getItem('fc_instructores');
-      if (li) { instructores = JSON.parse(li); tieneInstructores = instructores.length > 0; }
-    } catch(e) {}
+      if (li) {
+        instructores = JSON.parse(li);
+        tieneInstructores = instructores.length > 0;
+        console.log('[SFV2] instructores desde localStorage:', instructores.length);
+      }
+    } catch(e) { console.warn('[SFV2] Error leyendo fc_instructores de localStorage', e); }
   }
 
-  if (tieneRegistros && tieneInstructores) { callback(); return; }
+  if (tieneRegistros && tieneInstructores) {
+    console.log('[SFV2] datos completos desde localStorage — ok');
+    callback(); return;
+  }
 
-  // Último recurso: descargar desde Firebase directamente
-  fbDb.ref('fitness').once('value', function(snap) {
-    try {
-      var data = snap.val();
-      if (!data) { callback(); return; }
+  // Descargar nodos individuales (más liviano que fitness/ completo)
+  console.log('[SFV2] descargando desde Firebase — instructores:', !tieneInstructores, '| registros:', !tieneRegistros);
 
-      if (!tieneInstructores && data.instructores) {
-        try {
-          instructores = Array.isArray(data.instructores)
-            ? data.instructores
-            : Object.values(data.instructores);
-          localStorage.setItem('fc_instructores', JSON.stringify(instructores));
-        } catch(e) {}
-      }
+  var pendientes = 0;
+  var callbackLlamado = false;
+  function _done() {
+    pendientes--;
+    if (pendientes <= 0 && !callbackLlamado) {
+      callbackLlamado = true;
+      console.log('[SFV2] Firebase descarga completa — instructores:', (typeof instructores!=='undefined'?instructores.length:0), '| registros:', (typeof registros!=='undefined'?registros.length:0));
+      callback();
+    }
+  }
 
-      if (!tieneRegistros && data.registros) {
-        try {
-          registros = Object.values(data.registros);
+  if (!tieneInstructores) {
+    pendientes++;
+    fbDb.ref('fitness/instructores').once('value', function(snap) {
+      try {
+        var data = snap.val();
+        if (data) {
+          instructores = Array.isArray(data) ? data : Object.values(data);
+          try { localStorage.setItem('fc_instructores', JSON.stringify(instructores)); } catch(e) {}
+          console.log('[SFV2] instructores desde Firebase:', instructores.length);
+        } else {
+          console.warn('[SFV2] Firebase fitness/instructores vacío');
+        }
+      } catch(e) { console.error('[SFV2] Error procesando instructores', e); }
+      _done();
+    }).catch(function(e) { console.error('[SFV2] Error descargando instructores', e); _done(); });
+  }
+
+  if (!tieneRegistros) {
+    pendientes++;
+    fbDb.ref('fitness/registros').once('value', function(snap) {
+      try {
+        var data = snap.val();
+        if (data) {
+          registros = Object.values(data);
           if (typeof normalizarRegistros === 'function') normalizarRegistros();
-          localStorage.setItem('fc_registros', JSON.stringify(registros));
-        } catch(e) {}
-      }
-    } catch(e) {}
-    callback();
-  }).catch(function() { callback(); });
+          try { localStorage.setItem('fc_registros', JSON.stringify(registros)); } catch(e) {}
+          console.log('[SFV2] registros desde Firebase:', registros.length);
+        } else {
+          console.warn('[SFV2] Firebase fitness/registros vacío');
+        }
+      } catch(e) { console.error('[SFV2] Error procesando registros', e); }
+      _done();
+    }).catch(function(e) { console.error('[SFV2] Error descargando registros', e); _done(); });
+  }
+
+  // Safety: si Firebase no responde en 8s, continuar igual
+  setTimeout(function() {
+    if (!callbackLlamado) {
+      callbackLlamado = true;
+      console.warn('[SFV2] Timeout Firebase — continuando sin datos completos');
+      callback();
+    }
+  }, 8000);
 }
 
 window.instRenderSupTab = function() {
@@ -672,6 +727,8 @@ function _instRenderSupTabConHoja(inst) {
   var activa  = document.getElementById('inst-sup-activa');
   var hoja    = _sfv2.hoja;
 
+  console.log('[SFV2] renderSupTab — inst:', inst ? inst.nombre : 'null', '| instActualId:', instActualId, '| hoja:', hoja ? hoja.encabezado : 'null', '| registros totales:', (typeof registros!=='undefined' ? registros.length : 0));
+
   // Calcular mis suplencias del periodo (o de los últimos 60 días si no hay hoja)
   var fechaIni = hoja ? hoja.semIni : '';
   var fechaFin = hoja ? hoja.semFin : '';
@@ -682,6 +739,8 @@ function _instRenderSupTabConHoja(inst) {
                (!fechaIni || r.fecha >= fechaIni) && (!fechaFin || r.fecha <= fechaFin);
       }).sort(function(a,b){ return (b.fecha||'').localeCompare(a.fecha||'')||(a.hora||'').localeCompare(b.hora||''); })
     : [];
+
+  console.log('[SFV2] misSups encontradas:', misSups.length, '| periodo:', fechaIni, '-', fechaFin);
 
   _sfv2.supClases  = misSups;
   _sfv2.supSelIdx  = null;
@@ -1142,13 +1201,16 @@ function sfv2_cargarHojaEnMemoria() {
 // Usar en el portal del instructor para garantizar datos frescos
 function sfv2_cargarHojaDesdeFirebase(callback) {
   if (typeof fbDb === 'undefined' || !fbDb) {
+    console.warn('[SFV2] fbDb no disponible en cargarHojaDesdeFirebase — usando localStorage');
     _sfv2.hoja = sfv2_cargarHoja();
     if (callback) callback(_sfv2.hoja);
     return;
   }
+  console.log('[SFV2] descargando hoja desde Firebase:', SFV2_FB + '/hoja');
   fbDb.ref(SFV2_FB + '/hoja').once('value', function(snap) {
     try {
       var fbHoja = snap.val();
+      console.log('[SFV2] hoja desde Firebase:', fbHoja ? (fbHoja.encabezado || fbHoja.semIni) : 'null/vacía');
       if (fbHoja) {
         // Fusionar con firmas locales si es la misma hoja
         var local = sfv2_cargarHoja();
