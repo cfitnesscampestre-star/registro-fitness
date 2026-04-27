@@ -100,6 +100,10 @@ function turboMostrar(){
   const salon=salones.find(s=>s.clases&&s.clases.some(cl=>cl.toLowerCase()===c.clase.toLowerCase()));
   document.getElementById('tc-salon').textContent=salon?`📍 ${salon.nombre} · ${salon.cap}p`:'';
 
+  // Ocultar avisos de suplencia al inicio — evita que persistan de clase anterior
+  const avisoElPrev=document.getElementById("tc-aviso-sup");
+  if(avisoElPrev) avisoElPrev.style.display="none";
+
   // Fix: aviso de suplencia planificada — solo para esta clase específica
   const supPlan=(suplenciasPlan||[]).find(s=>
     String(s.inst_id)===String(c.inst_id) &&
@@ -245,6 +249,10 @@ function turboSetPres(estado){
     }
   });
   document.getElementById('tc-suplente-row').style.display=estado==='sub'?'block':'none';
+  // Mostrar fila de motivo para falta Y para suplencia
+  // tc-falta-row: fila de motivo para Ausente (independiente de tc-suplente-row)
+  const faltaRow=document.getElementById('tc-falta-row');
+  if(faltaRow) faltaRow.style.display=estado==='no'?'block':'none';
   if(navigator.vibrate) navigator.vibrate(15);
 }
 
@@ -253,7 +261,15 @@ function turboGuardar(){
   if(!c)return;
   const asis=parseInt(document.getElementById('tc-asis').value)||0;
   const supId=turboPresEstado==='sub'?(parseInt(document.getElementById('tc-suplente').value)||null):null;
-  const motivoSup=turboPresEstado==='sub'?(document.getElementById('tc-motivo').value||'permiso'):null;
+  // Capturar motivo: para sub usa tc-motivo, para falta usa tc-motivo-falta
+  let motivoSup=null;
+  if(turboPresEstado==='sub'){
+    const mEl=document.getElementById('tc-motivo');
+    motivoSup=mEl?mEl.value||'permiso':null;
+  } else if(turboPresEstado==='no'){
+    const mEl=document.getElementById('tc-motivo-falta');
+    motivoSup=mEl?mEl.value||'injustificada':null;
+  }
   const obs=document.getElementById('tc-obs').value.trim();
   const cap=parseInt(document.getElementById('tc-cap').value)||parseInt(getCapClase(c.clase))||20;
   // Normalizar inst_id a número para evitar mismatch con Firebase
@@ -410,7 +426,10 @@ function siguienteClaseRec(){
   const c=recActual.clasesActivas[recIdx];
   const pres=document.getElementById('rcc-pres').value;
   const supId=pres==='sub'?parseInt(document.getElementById('rcc-suplente').value)||null:null;
-  const motivoSup=pres==='sub'?(document.getElementById('rcc-motivo').value||'permiso'):null;
+  // Capturar motivo tanto para suplencia como para falta
+  const motivoSup=(pres==='sub'||pres==='no')
+    ?(document.getElementById('rcc-motivo')?document.getElementById('rcc-motivo').value||(pres==='sub'?'permiso':'falta'):null)
+    :null;
   const cap=parseInt(document.getElementById('rcc-cap').value)||getCapClase(c.clase)||20;
   recActual.items.push({...c,asis:parseInt(document.getElementById('rcc-asis').value)||0,
     presente:pres,suplente_id:supId,motivo_suplencia:motivoSup,obs:document.getElementById('rcc-obs').value.trim(),saltado:false,cap});
@@ -496,6 +515,7 @@ function guardarRecorrido(){
       ex.asistentes=parseInt(item.asis)||0;
       ex.estado=nuevoEst;
       ex.suplente_id=item.suplente_id||null;
+      ex.motivo_suplencia=(nuevoEst==='sub'||nuevoEst==='falta')?(item.motivo_suplencia||null):null;
       ex.cap=cap;
       ex.updatedAt=Date.now();
     } else {
@@ -510,7 +530,7 @@ function guardarRecorrido(){
         fecha:recActual.fecha,
         tipo:'recorrido',
         suplente_id:item.suplente_id||null,
-        motivo_suplencia:(nuevoEst==='sub'?(item.motivo_suplencia||'permiso'):null),
+        motivo_suplencia:(nuevoEst==='sub'||nuevoEst==='falta')?(item.motivo_suplencia||null):null,
         updatedAt:Date.now()
       });
     }
