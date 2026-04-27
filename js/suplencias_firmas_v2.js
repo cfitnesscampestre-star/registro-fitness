@@ -1307,9 +1307,12 @@ function sfv2_actualizarBadgeCoord() {
           localStorage.removeItem(SFV2_LS); _sfv2.hoja=null;
           if(local&&typeof showToast==='function') showToast('El reporte de suplencias fue cerrado.','info');
         }
-        if(typeof instActualizarBadgeSup==='function') instActualizarBadgeSup();
-        var p=document.getElementById('inst-panel-suplencias');
-        if(p&&p.style.display!=='none'&&typeof instRenderSupTab==='function') instRenderSupTab();
+        // Asegurar datos base antes de refrescar badge y tab del instructor
+        sfv2_asegurarDatosBase(function() {
+          if(typeof instActualizarBadgeSup==='function') instActualizarBadgeSup();
+          // Refrescar si el tab está visible (usa flag en vez de display para evitar race condition)
+          if(_sfv2.tabVisible&&typeof instRenderSupTab==='function') instRenderSupTab();
+        });
         // Refrescar modal presencial del coordinador si está abierto
         var modalPresencial = document.getElementById('m-sup-firmas-presencial');
         if (modalPresencial && modalPresencial.classList.contains('on') && _sfv2.hoja) {
@@ -1358,8 +1361,7 @@ function sfv2_actualizarBadgeCoord() {
             }
           }
           // Refrescar tab suplencias del portal del instructor si está visible
-          var panelSup = document.getElementById('inst-panel-suplencias');
-          if (panelSup && panelSup.style.display !== 'none' && typeof instRenderSupTab==='function') instRenderSupTab();
+          if (_sfv2.tabVisible && typeof instRenderSupTab==='function') instRenderSupTab();
         }
       } catch(e){}
     });
@@ -1384,8 +1386,11 @@ function sfv2_actualizarBadgeCoord() {
         ['hoy','reporte','firma'].forEach(function(t){var p=document.getElementById('inst-panel-'+t);if(p)p.style.display='none';});
         if(sp)sp.style.display='block';
         document.querySelectorAll('.inst-tab-btn').forEach(function(b){b.classList.toggle('on',b.dataset.t==='suplencias');});
+        _sfv2.tabVisible=true;
         // Siempre forzar lectura de Firebase al entrar al tab
         instRenderSupTab();
+      } else {
+        _sfv2.tabVisible=false;
       }
     };
     var _origC=window.instCargarHojaFirmas;
@@ -1398,18 +1403,24 @@ function sfv2_actualizarBadgeCoord() {
 
 // ── Botón "Verificar" en el portal: fuerza recarga desde Firebase ────────
 window.sfv2_verificarHojaPortal = function() {
-  var inst = (typeof instructores!=='undefined') ? instructores.find(function(i){return i.id===instActualId;}) : null;
-  if (!inst) return;
   showToast('Verificando...','info');
-  sfv2_cargarHojaDesdeFirebase(function(hoja) {
-    _sfv2.hoja = hoja;
-    if (typeof _instRenderSupTabConHoja === 'function') _instRenderSupTabConHoja(inst);
-    if (typeof instActualizarBadgeSup === 'function') instActualizarBadgeSup();
-    if (hoja) {
-      showToast('✔ Reporte encontrado: ' + (hoja.encabezado || hoja.semIni + ' al ' + hoja.semFin), 'ok');
-    } else {
+  // Asegurar datos base primero (fix: en dispositivo nuevo instructores=[] al presionar Verificar)
+  sfv2_asegurarDatosBase(function() {
+    var inst = (typeof instructores!=='undefined') ? instructores.find(function(i){return String(i.id)===String(instActualId);}) : null;
+    if (!inst) {
       showToast('Sin reporte activo por el momento','info');
+      return;
     }
+    sfv2_cargarHojaDesdeFirebase(function(hoja) {
+      _sfv2.hoja = hoja;
+      if (typeof _instRenderSupTabConHoja === 'function') _instRenderSupTabConHoja(inst);
+      if (typeof instActualizarBadgeSup === 'function') instActualizarBadgeSup();
+      if (hoja) {
+        showToast('✔ Reporte encontrado: ' + (hoja.encabezado || hoja.semIni + ' al ' + hoja.semFin), 'ok');
+      } else {
+        showToast('Sin reporte activo por el momento','info');
+      }
+    });
   });
 };
 window.sfv2_verificarHojaPortal = window.sfv2_verificarHojaPortal; // exponer
