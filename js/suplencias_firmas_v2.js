@@ -592,9 +592,25 @@ window.sfv2_exportarPDF = function() {
 // SECCIÓN 4 — PORTAL INSTRUCTOR: firma por suplencia individual
 // ════════════════════════════════════════════════════════════════════════
 window.instRenderSupTab = function() {
-  sfv2_cargarHojaEnMemoria();
   var inst = (typeof instructores!=='undefined') ? instructores.find(function(i){return i.id===instActualId;}) : null;
   if (!inst) return;
+
+  // Si ya tenemos hoja en memoria, renderizar inmediato (no bloquear UI)
+  // Luego sincronizar con Firebase y re-renderizar si hay cambios
+  var hojaLocalExiste = !!sfv2_cargarHoja();
+  if (hojaLocalExiste) {
+    sfv2_cargarHojaEnMemoria();
+    _instRenderSupTabConHoja(inst);
+  }
+  // Siempre consultar Firebase para garantizar datos frescos
+  sfv2_cargarHojaDesdeFirebase(function(hoja) {
+    _sfv2.hoja = hoja;
+    _instRenderSupTabConHoja(inst);
+  });
+};
+
+// Función interna que hace el render real con la hoja ya cargada
+function _instRenderSupTabConHoja(inst) {
 
   var sinHoja = document.getElementById('inst-sup-sin-hoja');
   var activa  = document.getElementById('inst-sup-activa');
@@ -1065,6 +1081,44 @@ function sfv2_cargarHoja() {
 function sfv2_cargarHojaEnMemoria() {
   _sfv2.hoja = sfv2_cargarHoja();
 }
+
+// ── Carga hoja desde Firebase, sincroniza localStorage y ejecuta callback ─
+// Usar en el portal del instructor para garantizar datos frescos
+function sfv2_cargarHojaDesdeFirebase(callback) {
+  if (typeof fbDb === 'undefined' || !fbDb) {
+    _sfv2.hoja = sfv2_cargarHoja();
+    if (callback) callback(_sfv2.hoja);
+    return;
+  }
+  fbDb.ref(SFV2_FB + '/hoja').once('value', function(snap) {
+    try {
+      var fbHoja = snap.val();
+      if (fbHoja) {
+        // Fusionar con firmas locales si es la misma hoja
+        var local = sfv2_cargarHoja();
+        if (local && local.semIni === fbHoja.semIni && local.semFin === fbHoja.semFin) {
+          fbHoja.firmas = fbHoja.firmas || {};
+          Object.keys(local.firmas || {}).forEach(function(k) {
+            var fL = (local.firmas||{})[k], fR = fbHoja.firmas[k];
+            if (!fL || !fL.data) return;
+            if (!fR || !fR.data || new Date(fL.ts||0) > new Date(fR.ts||0)) fbHoja.firmas[k] = fL;
+          });
+        }
+        localStorage.setItem(SFV2_LS, JSON.stringify(fbHoja));
+        _sfv2.hoja = fbHoja;
+      } else {
+        localStorage.removeItem(SFV2_LS);
+        _sfv2.hoja = null;
+      }
+    } catch(e) {
+      _sfv2.hoja = sfv2_cargarHoja(); // fallback
+    }
+    if (callback) callback(_sfv2.hoja);
+  }).catch(function() {
+    _sfv2.hoja = sfv2_cargarHoja(); // fallback sin conexión
+    if (callback) callback(_sfv2.hoja);
+  });
+}
 function sfv2_suplentesUnicos(hoja) {
   var set = {};
   (typeof registros!=='undefined'?registros:[]).forEach(function(r){
@@ -1107,28 +1161,46 @@ window.instActualizarBadgeSup = function() {
   var badge = document.getElementById('inst-sup-badge');
   var tab   = document.getElementById('inst-tabn-suplencias');
   if (typeof instActualId==='undefined'||!instActualId) return;
-  var hoja = sfv2_cargarHoja();
 
-  // Verificar si el instructor tiene suplencias (periodo activo o últimos 60 días)
-  var ini60 = (function(){ var d=new Date(); d.setDate(d.getDate()-60); return typeof fechaLocalStr==='function'?fechaLocalStr(d):d.toISOString().slice(0,10); })();
-  var tieneSups = (typeof registros!=='undefined') && registros.some(function(r){
-    return r.estado==='sub' && String(r.suplente_id)===String(instActualId) &&
-           r.fecha >= (hoja ? hoja.semIni : ini60);
-  });
+  function _aplicarBadge(hoja) {
+    var ini60 = (function(){ var d=new Date(); d.setDate(d.getDate()-60); return typeof fechaLocalStr==='function'?fechaLocalStr(d):d.toISOString().slice(0,10); })();
+    var tieneSups = (typeof registros!=='undefined') && registros.some(function(r){
+      return r.estado==='sub' && String(r.suplente_id)===String(instActualId) &&
+             r.fecha >= (hoja ? hoja.semIni : ini60);
+    });
+    // Mostrar tab si hay hoja activa O tiene suplencias recientes
+    if (tab) tab.style.display = (hoja || tieneSups) ? '' : 'none';
+    if (!badge) return;
+    if (!hoja) { badge.style.display='none'; return; }
+    var firmasInd = sfv2_cargarFirmasIndividuales();
+    var pend = (typeof registros!=='undefined')
+      ? registros.filter(function(r){
+          return r.estado==='sub'&&String(r.suplente_id)===String(instActualId)&&
+                 r.fecha>=hoja.semIni&&r.fecha<=hoja.semFin&&
+                 !(firmasInd[String(r.id)]&&firmasInd[String(r.id)].data);
+        }).length : 0;
+    badge.textContent=pend; badge.style.display=pend>0?'flex':'none';
+  }
 
-  // Mostrar tab solo si hay hoja activa O el instructor tiene suplencias recientes
-  if (tab) tab.style.display = (hoja || tieneSups) ? '' : 'none';
+  // Aplicar con datos locales inmediato (no bloquea UI)
+  _aplicarBadge(sfv2_cargarHoja());
 
-  if (!badge) return;
-  if (!hoja) { badge.style.display='none'; return; }
-  var firmasInd = sfv2_cargarFirmasIndividuales();
-  var pend = (typeof registros!=='undefined')
-    ? registros.filter(function(r){
-        return r.estado==='sub'&&String(r.suplente_id)===String(instActualId)&&
-               r.fecha>=hoja.semIni&&r.fecha<=hoja.semFin&&
-               !(firmasInd[String(r.id)]&&firmasInd[String(r.id)].data);
-      }).length : 0;
-  badge.textContent=pend; badge.style.display=pend>0?'flex':'none';
+  // Luego verificar Firebase para corregir si el local estaba desactualizado
+  if (typeof fbDb !== 'undefined' && fbDb) {
+    fbDb.ref(SFV2_FB + '/hoja').once('value', function(snap) {
+      try {
+        var fbHoja = snap.val();
+        if (fbHoja) {
+          localStorage.setItem(SFV2_LS, JSON.stringify(fbHoja));
+          _sfv2.hoja = fbHoja;
+        } else {
+          localStorage.removeItem(SFV2_LS);
+          _sfv2.hoja = null;
+        }
+        _aplicarBadge(fbHoja);
+      } catch(e) {}
+    }).catch(function(){});
+  }
 };
 
 // Badge del coordinador en la home
@@ -1229,7 +1301,7 @@ function sfv2_actualizarBadgeCoord() {
       } catch(e){}
     });
   }
-  setTimeout(try1, 2000);
+  setTimeout(try1, 500); // reducido: instructores ven hoja más rápido
 })();
 
 // ── Integrar con instSwitchTab ────────────────────────────────────────
@@ -1249,6 +1321,7 @@ function sfv2_actualizarBadgeCoord() {
         ['hoy','reporte','firma'].forEach(function(t){var p=document.getElementById('inst-panel-'+t);if(p)p.style.display='none';});
         if(sp)sp.style.display='block';
         document.querySelectorAll('.inst-tab-btn').forEach(function(b){b.classList.toggle('on',b.dataset.t==='suplencias');});
+        // Siempre forzar lectura de Firebase al entrar al tab
         instRenderSupTab();
       }
     };
@@ -1259,6 +1332,26 @@ function sfv2_actualizarBadgeCoord() {
     };
   });
 })();
+
+// ── Botón "Verificar" en el portal: fuerza recarga desde Firebase ────────
+window.sfv2_verificarHojaPortal = function() {
+  var inst = (typeof instructores!=='undefined') ? instructores.find(function(i){return i.id===instActualId;}) : null;
+  if (!inst) return;
+  showToast('Verificando...','info');
+  sfv2_cargarHojaDesdeFirebase(function(hoja) {
+    _sfv2.hoja = hoja;
+    if (typeof _instRenderSupTabConHoja === 'function') _instRenderSupTabConHoja(inst);
+    if (typeof instActualizarBadgeSup === 'function') instActualizarBadgeSup();
+    if (hoja) {
+      showToast('✔ Reporte encontrado: ' + (hoja.encabezado || hoja.semIni + ' al ' + hoja.semFin), 'ok');
+    } else {
+      showToast('Sin reporte activo por el momento','info');
+    }
+  });
+};
+window.sfv2_verificarHojaPortal = window.sfv2_verificarHojaPortal; // exponer
+// Alias por si el HTML lo llama con nombre diferente
+window.instVerificarHojaSup = window.sfv2_verificarHojaPortal;
 
 // Exponer globales
 window.sfv2_generarPDF         = sfv2_generarPDF;
