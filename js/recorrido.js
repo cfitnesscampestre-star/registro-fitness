@@ -114,7 +114,7 @@ function turboMostrar(){
   if(avisoEl){
     if(supPlan){
       const supNom=instructores.find(i=>String(i.id)===String(supPlan.suplente_id))?.nombre||supPlan.suplente_nombre||'Suplente externo';
-      avisoEl.innerHTML=`⇄ Suplencia planificada: <strong>${supNom}</strong> · ${supPlan.motivo||''}`;
+      avisoEl.innerHTML=`⇄ Suplencia planificada: <strong>${supNom}</strong>${supPlan.motivo?' · '+supPlan.motivo:''}`;
       avisoEl.style.display='block';
       // Pre-seleccionar estado sub y suplente automáticamente
       turboSetPres('sub');
