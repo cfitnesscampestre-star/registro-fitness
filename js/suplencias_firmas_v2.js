@@ -30,8 +30,8 @@ var _sfv2 = {
 // ════════════════════════════════════════════════════════════════════════
 // SECCIÓN 1 — MENÚ DE GESTIÓN (igual que abrirFirmasDigitalesDirecto)
 // ════════════════════════════════════════════════════════════════════════
-window.abrirMenuFirmasSuplencias = function() {
-  var hoja = sfv2_cargarHoja();
+// ── Renderiza el menú con los datos de una hoja (puede ser null) ───────
+function sfv2_renderMenu(hoja) {
   var estadoEl   = document.getElementById('fsm-estado-wrap');
   var btnCont    = document.getElementById('fsm-btn-continuar');
   var btnElim    = document.getElementById('fsm-btn-eliminar');
@@ -81,7 +81,47 @@ window.abrirMenuFirmasSuplencias = function() {
     if (btnCrearSb) btnCrearSb.textContent    = 'Se publicará para que los suplentes firmen';
     if (btnCrearEl) btnCrearEl.style.background = '';
   }
-  document.getElementById('m-sup-firmas-menu').classList.add('on');
+}
+
+// ── Abre el menú: siempre sincroniza con Firebase primero ──────────────
+window.abrirMenuFirmasSuplencias = function() {
+  // Mostrar el modal de inmediato con los datos locales (no bloquear la UI)
+  var hojaLocal = sfv2_cargarHoja();
+  sfv2_renderMenu(hojaLocal);
+  var menuEl = document.getElementById('m-sup-firmas-menu');
+  if (menuEl) menuEl.classList.add('on');
+
+  // Luego consultar Firebase y actualizar si hay diferencias
+  if (typeof fbDb === 'undefined' || !fbDb) return;
+  fbDb.ref(SFV2_FB + '/hoja').once('value', function(snap) {
+    try {
+      var fbHoja = snap.val();
+      var local  = sfv2_cargarHoja();
+
+      if (fbHoja) {
+        // Firebase tiene hoja — fusionar con local y actualizar menú
+        if (local && local.semIni === fbHoja.semIni && local.semFin === fbHoja.semFin) {
+          // Misma hoja: mezclar firmas (ganador: más reciente)
+          fbHoja.firmas = fbHoja.firmas || {};
+          Object.keys(local.firmas || {}).forEach(function(k) {
+            var fL = (local.firmas||{})[k], fR = fbHoja.firmas[k];
+            if (!fL || !fL.data) return;
+            if (!fR || !fR.data || new Date(fL.ts||0) > new Date(fR.ts||0)) fbHoja.firmas[k] = fL;
+          });
+        }
+        localStorage.setItem(SFV2_LS, JSON.stringify(fbHoja));
+        _sfv2.hoja = fbHoja;
+        sfv2_renderMenu(fbHoja);
+      } else {
+        // Firebase no tiene hoja — limpiar local si hubiera algo
+        if (local) {
+          localStorage.removeItem(SFV2_LS);
+          _sfv2.hoja = null;
+          sfv2_renderMenu(null);
+        }
+      }
+    } catch(e) {}
+  }).catch(function() {});
 };
 
 window.fsmAccion = function(accion) {
@@ -91,36 +131,78 @@ window.fsmAccion = function(accion) {
     return;
   }
   if (accion === 'eliminar') {
-    var hoja = sfv2_cargarHoja();
-    if (!hoja) { showToast('No hay hoja activa','info'); return; }
-    var firmados = Object.values(hoja.firmas||{}).filter(function(f){return f&&f.data;}).length;
-    var semTxt   = hoja.encabezado || (hoja.semIni + ' → ' + hoja.semFin);
-    var msg = firmados > 0
-      ? '¿Eliminar la hoja "' + semTxt + '"?\n\nTiene ' + firmados + ' firma' + (firmados!==1?'s':'') + ' guardada' + (firmados!==1?'s':'') + '.\nEsta acción no se puede deshacer.'
-      : '¿Eliminar la hoja "' + semTxt + '"?';
-    if (!confirm(msg)) return;
-    localStorage.removeItem(SFV2_LS);
-    _sfv2.hoja = null;
-    if (typeof fbDb !== 'undefined' && fbDb)
-      fbDb.ref(SFV2_FB + '/hoja').remove().catch(function(){});
-    sfv2_actualizarBadgeCoord();
-    cerrarModal('m-sup-firmas-menu');
-    showToast('Hoja de suplencias eliminada','ok');
-    return;
-  }
-  if (accion === 'crear') {
-    var hoja = sfv2_cargarHoja();
-    var firmados = hoja ? Object.values(hoja.firmas||{}).filter(function(f){return f&&f.data;}).length : 0;
-    if (firmados > 0) {
-      if (!confirm('¿Crear una nueva hoja?\n\nSe perderán las ' + firmados + ' firma' + (firmados!==1?'s':'') + ' guardadas.\nEsta acción no se puede deshacer.'))
-        return;
+    // Leer de Firebase para tener el estado real antes de eliminar
+    function _procederEliminar(hojaReal) {
+      if (!hojaReal) { showToast('No hay hoja activa','info'); return; }
+      var firmados = Object.values(hojaReal.firmas||{}).filter(function(f){return f&&f.data;}).length;
+      var semTxt   = hojaReal.encabezado || (hojaReal.semIni + ' → ' + hojaReal.semFin);
+      var msg = firmados > 0
+        ? '¿Eliminar la hoja "' + semTxt + '"?\n\nTiene ' + firmados + ' firma' + (firmados!==1?'s':'') + ' guardada' + (firmados!==1?'s':'') + '.\nEsta acción no se puede deshacer.'
+        : '¿Eliminar la hoja "' + semTxt + '"?';
+      if (!confirm(msg)) return;
       localStorage.removeItem(SFV2_LS);
       _sfv2.hoja = null;
       if (typeof fbDb !== 'undefined' && fbDb)
         fbDb.ref(SFV2_FB + '/hoja').remove().catch(function(){});
+      sfv2_actualizarBadgeCoord();
+      cerrarModal('m-sup-firmas-menu');
+      showToast('Hoja de suplencias eliminada','ok');
     }
-    cerrarModal('m-sup-firmas-menu');
-    sfv2_abrirCrearHoja();
+
+    if (typeof fbDb !== 'undefined' && fbDb) {
+      fbDb.ref(SFV2_FB + '/hoja').once('value', function(snap) {
+        var fbHoja = snap.val();
+        if (fbHoja) { localStorage.setItem(SFV2_LS, JSON.stringify(fbHoja)); _sfv2.hoja = fbHoja; }
+        else { localStorage.removeItem(SFV2_LS); _sfv2.hoja = null; }
+        _procederEliminar(fbHoja);
+      }).catch(function() { _procederEliminar(sfv2_cargarHoja()); });
+    } else {
+      _procederEliminar(sfv2_cargarHoja());
+    }
+    return;
+  }
+  if (accion === 'crear') {
+    // Consultar Firebase (fuente de verdad global) antes de permitir crear
+    function _procederCrear(hojaReal) {
+      var firmados = hojaReal ? Object.values(hojaReal.firmas||{}).filter(function(f){return f&&f.data;}).length : 0;
+      if (hojaReal && firmados > 0) {
+        var semTxt = hojaReal.encabezado || (hojaReal.semIni + ' → ' + hojaReal.semFin);
+        if (!confirm('⚠ Ya existe la hoja "' + semTxt + '" con ' + firmados + ' firma' + (firmados!==1?'s':'') + ' guardada' + (firmados!==1?'s':'') + '.\n\nSi creas una nueva se perderán todas las firmas.\n¿Confirmar?'))
+          return;
+        localStorage.removeItem(SFV2_LS);
+        _sfv2.hoja = null;
+        if (typeof fbDb !== 'undefined' && fbDb)
+          fbDb.ref(SFV2_FB + '/hoja').remove().catch(function(){});
+      } else if (hojaReal) {
+        // Hoja sin firmas — reemplazar directo
+        localStorage.removeItem(SFV2_LS);
+        _sfv2.hoja = null;
+        if (typeof fbDb !== 'undefined' && fbDb)
+          fbDb.ref(SFV2_FB + '/hoja').remove().catch(function(){});
+      }
+      cerrarModal('m-sup-firmas-menu');
+      sfv2_abrirCrearHoja();
+    }
+
+    if (typeof fbDb !== 'undefined' && fbDb) {
+      fbDb.ref(SFV2_FB + '/hoja').once('value', function(snap) {
+        var fbHoja = snap.val();
+        // Sincronizar localStorage con Firebase
+        if (fbHoja) {
+          localStorage.setItem(SFV2_LS, JSON.stringify(fbHoja));
+          _sfv2.hoja = fbHoja;
+        } else {
+          localStorage.removeItem(SFV2_LS);
+          _sfv2.hoja = null;
+        }
+        _procederCrear(fbHoja);
+      }).catch(function() {
+        // Sin conexión — fallback a localStorage
+        _procederCrear(sfv2_cargarHoja());
+      });
+    } else {
+      _procederCrear(sfv2_cargarHoja());
+    }
   }
 };
 
@@ -499,7 +581,11 @@ window.sfv2_exportarPDF = function() {
   if (!hoja) { showToast('No hay hoja activa','warn'); return; }
   var firmados = Object.values(hoja.firmas||{}).filter(function(f){return f&&f.data;}).length;
   if (firmados === 0) { showToast('Aún no hay firmas guardadas','warn'); return; }
-  sfv2_generarPDF(hoja);
+  // Sincronizar firmas individuales desde Firebase antes de generar
+  showToast('Descargando firmas...','info');
+  sfv2_sincFirmasIndDesdeFirebase(function() {
+    sfv2_generarPDF(hoja);
+  });
 };
 
 // ════════════════════════════════════════════════════════════════════════
@@ -824,7 +910,11 @@ window.instGuardarFirmaSup = async function() {
   // Subir a Firebase
   if (typeof fbDb!=='undefined'&&fbDb) {
     fbDb.ref(SFV2_FB+'/firmas_ind/'+String(r.id)).set(entrada).catch(function(){});
-    if (hoja) fbDb.ref(SFV2_FB+'/hoja/firmas/'+String(instActualId)).set(hoja.firmas[String(instActualId)]).catch(function(){});
+    // Guardar también en hoja/firmas/{instId} para que el coordinador vea el avance en tiempo real
+    if (hoja) {
+      var firmaHoja = { data:dataUrl, nombre:inst?inst.nombre:'—', ts:new Date().toISOString() };
+      fbDb.ref(SFV2_FB+'/hoja/firmas/'+String(instActualId)).set(firmaHoja).catch(function(){});
+    }
   }
 
   if (typeof registrarLog==='function') registrarLog('instructor','Firma suplencia: '+(inst?inst.nombre:'—')+' · '+r.clase+' '+r.fecha);
@@ -960,7 +1050,10 @@ function sfv2_generarPDF(hoja) {
 
 window.sfv2_generarPDFDesdeMenu = function() {
   var hoja = sfv2_cargarHoja();
-  sfv2_generarPDF(hoja);
+  showToast('Descargando firmas...','info');
+  sfv2_sincFirmasIndDesdeFirebase(function() {
+    sfv2_generarPDF(hoja);
+  });
 };
 
 // ════════════════════════════════════════════════════════════════════════
@@ -985,6 +1078,28 @@ function sfv2_cargarFirmasIndividuales() {
 }
 function sfv2_guardarFirmasIndividuales(obj) {
   try { localStorage.setItem('fc_firmas_sup_ind', JSON.stringify(obj)); } catch(e){}
+}
+
+// ── Carga firmas_ind desde Firebase y las fusiona con localStorage ────
+// Llamar antes de generar el PDF para asegurarse de tener todas las firmas
+function sfv2_sincFirmasIndDesdeFirebase(callback) {
+  if (typeof fbDb === 'undefined' || !fbDb) { if(callback) callback(); return; }
+  fbDb.ref(SFV2_FB + '/firmas_ind').once('value', function(snap) {
+    try {
+      var data = snap.val();
+      if (!data) { if(callback) callback(); return; }
+      var local = sfv2_cargarFirmasIndividuales();
+      var changed = false;
+      Object.keys(data).forEach(function(k) {
+        var fF = data[k], fL = local[k];
+        if (!fF || !fF.data) return;
+        if (!fL || !fL.data) { local[k] = fF; changed = true; return; }
+        if (new Date(fF.ts||0) > new Date(fL.ts||0)) { local[k] = fF; changed = true; }
+      });
+      if (changed) sfv2_guardarFirmasIndividuales(local);
+    } catch(e) {}
+    if (callback) callback();
+  }).catch(function() { if(callback) callback(); });
 }
 
 // Badge del tab Suplencias en el portal
@@ -1060,6 +1175,14 @@ function sfv2_actualizarBadgeCoord() {
         if(typeof instActualizarBadgeSup==='function') instActualizarBadgeSup();
         var p=document.getElementById('inst-panel-suplencias');
         if(p&&p.style.display!=='none'&&typeof instRenderSupTab==='function') instRenderSupTab();
+        // Refrescar modal presencial del coordinador si está abierto
+        var modalPresencial = document.getElementById('m-sup-firmas-presencial');
+        if (modalPresencial && modalPresencial.classList.contains('on') && _sfv2.hoja) {
+          var firmadosAct = Object.values(_sfv2.hoja.firmas||{}).filter(function(f){return f&&f.data;}).length;
+          var pf = document.getElementById('sfv2-prog-firmados');
+          if (pf) pf.textContent = firmadosAct;
+          sfv2_renderListaSuplentes();
+        }
       } catch(e){}
     });
     // Sincronizar firmas individuales
@@ -1074,7 +1197,35 @@ function sfv2_actualizarBadgeCoord() {
           if(!fL||!fL.data){local[k]=fF;changed=true;return;}
           if(new Date(fF.ts||0)>new Date(fL.ts||0)){local[k]=fF;changed=true;}
         });
-        if(changed){sfv2_guardarFirmasIndividuales(local);if(typeof instActualizarBadgeSup==='function')instActualizarBadgeSup();}
+        if(changed){
+          sfv2_guardarFirmasIndividuales(local);
+          if(typeof instActualizarBadgeSup==='function')instActualizarBadgeSup();
+          // Refrescar vista presencial del coordinador si está abierta
+          var modalPresencial = document.getElementById('m-sup-firmas-presencial');
+          if (modalPresencial && modalPresencial.classList.contains('on')) {
+            // Actualizar contador de firmados
+            var hoja = sfv2_cargarHoja();
+            if (hoja) {
+              // Recalcular firmados contando firmas individuales
+              var allFirmas = sfv2_cargarFirmasIndividuales();
+              var sups = (typeof registros!=='undefined')
+                ? registros.filter(function(r){ return r.estado==='sub' && r.suplente_id && r.fecha>=hoja.semIni && r.fecha<=hoja.semFin; })
+                : [];
+              var instConFirma = new Set();
+              sups.forEach(function(r) {
+                if (allFirmas[String(r.id)] && allFirmas[String(r.id)].data) instConFirma.add(String(r.suplente_id));
+              });
+              // Mezclar con firmas del objeto hoja
+              Object.keys(hoja.firmas||{}).forEach(function(k){ if(hoja.firmas[k]&&hoja.firmas[k].data) instConFirma.add(k); });
+              var pf = document.getElementById('sfv2-prog-firmados');
+              if (pf) pf.textContent = instConFirma.size;
+              sfv2_renderListaSuplentes();
+            }
+          }
+          // Refrescar tab suplencias del portal del instructor si está visible
+          var panelSup = document.getElementById('inst-panel-suplencias');
+          if (panelSup && panelSup.style.display !== 'none' && typeof instRenderSupTab==='function') instRenderSupTab();
+        }
       } catch(e){}
     });
   }
