@@ -475,3 +475,209 @@ function exportarSuplenciasExcel(){
   XLSX.writeFile(wb,'Suplencias_FitnessControl.xlsx');
 }
 
+// ╔══════════════════════════════════════════════════════════════╗
+// ║  CALENDARIO DE SUPLENCIAS — abrirCalSuplencias & helpers    ║
+// ╚══════════════════════════════════════════════════════════════╝
+
+let _calsupMes   = new Date().getMonth();
+let _calsupYear  = new Date().getFullYear();
+let _calsupDia   = null;   // fecha seleccionada 'YYYY-MM-DD'
+let _calsupFiltInst = '';  // id instructor filtrado ('' = todos)
+
+const _CALSUP_MESES = ['Enero','Febrero','Marzo','Abril','Mayo','Junio',
+                       'Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+const _CALSUP_DOWS  = ['Do','Lu','Ma','Mi','Ju','Vi','Sá'];
+
+function abrirCalSuplencias() {
+  // Resetear estado
+  _calsupMes   = new Date().getMonth();
+  _calsupYear  = new Date().getFullYear();
+  _calsupDia   = null;
+  _calsupFiltInst = '';
+
+  // Llenar selector de instructores
+  const sel = document.getElementById('calsup-inst-fil');
+  if (sel) {
+    sel.innerHTML = '<option value="">Todos los instructores</option>' +
+      (instructores || []).map(i =>
+        `<option value="${i.id}">${i.nombre}</option>`
+      ).join('');
+    sel.value = '';
+  }
+
+  _calsupRenderGrid();
+  _calsupRenderDetalle(null);
+  abrirModal('m-cal-suplencias');
+}
+
+function calsupCambiarMes(delta) {
+  _calsupMes += delta;
+  if (_calsupMes > 11) { _calsupMes = 0;  _calsupYear++; }
+  if (_calsupMes < 0)  { _calsupMes = 11; _calsupYear--; }
+  _calsupDia = null;
+  _calsupRenderGrid();
+  _calsupRenderDetalle(null);
+}
+
+function calsupFiltrarInst() {
+  const sel = document.getElementById('calsup-inst-fil');
+  _calsupFiltInst = sel ? sel.value : '';
+  _calsupDia = null;
+  _calsupRenderGrid();
+  _calsupRenderDetalle(null);
+}
+
+function _calsupGetData() {
+  // Combina suplenciasPlan (planificadas) y registros estado='sub' (recorrido)
+  const resultado = {};
+
+  // ── 1. Suplencias planificadas ──────────────────────────────
+  (suplenciasPlan || []).forEach(s => {
+    if (!s.fecha) return;
+    if (_calsupFiltInst && String(s.inst_id) !== _calsupFiltInst &&
+        String(s.suplente_id) !== _calsupFiltInst) return;
+    if (!resultado[s.fecha]) resultado[s.fecha] = [];
+    const instOrig = (instructores || []).find(i => i.id === s.inst_id);
+    const sup      = (instructores || []).find(i => i.id === s.suplente_id);
+    resultado[s.fecha].push({
+      hora:     s.hora || '—',
+      clase:    s.clase || '—',
+      dia:      s.dia  || '',
+      original: instOrig ? instOrig.nombre : '—',
+      suplente: sup     ? sup.nombre      : '—',
+      motivo:   s.motivo || '',
+      fuente:   'plan',
+      estado:   s.estado || ''
+    });
+  });
+
+  // ── 2. Registros reales de recorrido (estado='sub') ─────────
+  (registros || []).forEach(r => {
+    if (r.estado !== 'sub' || !r.fecha) return;
+    if (_calsupFiltInst && String(r.inst_id) !== _calsupFiltInst &&
+        String(r.suplente_id) !== _calsupFiltInst) return;
+    if (!resultado[r.fecha]) resultado[r.fecha] = [];
+    const instOrig = (instructores || []).find(i => i.id === r.inst_id);
+    const sup      = (instructores || []).find(i => i.id === r.suplente_id);
+    resultado[r.fecha].push({
+      hora:     r.hora    || '—',
+      clase:    r.clase   || '—',
+      dia:      r.dia     || '',
+      original: instOrig  ? instOrig.nombre : '—',
+      suplente: sup        ? sup.nombre      : '—',
+      motivo:   r.motivo_suplencia || '',
+      fuente:   'real',
+      estado:   ''
+    });
+  });
+
+  return resultado;
+}
+
+function _calsupRenderGrid() {
+  const lbl  = document.getElementById('calsup-mes-lbl');
+  const grid = document.getElementById('calsup-cal-grid');
+  if (!lbl || !grid) return;
+
+  lbl.textContent = `${_CALSUP_MESES[_calsupMes]} ${_calsupYear}`;
+
+  const data       = _calsupGetData();
+  const primerDow  = new Date(_calsupYear, _calsupMes, 1).getDay();
+  const diasEnMes  = new Date(_calsupYear, _calsupMes + 1, 0).getDate();
+  const hoy        = new Date();
+  const esEsteMes  = hoy.getFullYear() === _calsupYear && hoy.getMonth() === _calsupMes;
+  const diaHoy     = hoy.getDate();
+
+  let html = '';
+
+  // Cabecera días de la semana
+  _CALSUP_DOWS.forEach((d, i) => {
+    const esFin = i === 0 || i === 6;
+    html += `<div class="calsup-weekday${esFin ? ' fin' : ''}">${d}</div>`;
+  });
+
+  // Celdas vacías iniciales
+  for (let i = 0; i < primerDow; i++) {
+    html += `<div class="calsup-day vacio"></div>`;
+  }
+
+  // Días del mes
+  for (let d = 1; d <= diasEnMes; d++) {
+    const yyyy = _calsupYear;
+    const mm   = String(_calsupMes + 1).padStart(2, '0');
+    const dd   = String(d).padStart(2, '0');
+    const key  = `${yyyy}-${mm}-${dd}`;
+    const sups = data[key] || [];
+    const cnt  = sups.length;
+
+    const esHoy   = esEsteMes && d === diaHoy;
+    const esSelec = _calsupDia === key;
+    const tieneSup = cnt > 0;
+
+    let cls = 'calsup-day';
+    if (esSelec)  cls += ' is-selected';
+    else if (esHoy) cls += ' is-today';
+    if (tieneSup && !esSelec) cls += ' has-sup';
+
+    const badge = cnt > 0
+      ? `<span class="calsup-badge">${cnt}</span>`
+      : '';
+
+    html += `<div class="${cls}" onclick="_calsupSelecDia('${key}')">${d}${badge}</div>`;
+  }
+
+  grid.innerHTML = html;
+}
+
+function _calsupSelecDia(key) {
+  _calsupDia = (_calsupDia === key) ? null : key;
+  _calsupRenderGrid();
+  _calsupRenderDetalle(_calsupDia);
+}
+
+function _calsupRenderDetalle(key) {
+  const el = document.getElementById('calsup-detail');
+  if (!el) return;
+
+  if (!key) {
+    el.innerHTML = `<div class="calsup-empty">Toca un día para ver las suplencias registradas.</div>`;
+    return;
+  }
+
+  const data = _calsupGetData();
+  const sups = data[key] || [];
+
+  if (sups.length === 0) {
+    const fd = new Date(key + 'T12:00:00').toLocaleDateString('es-MX',
+      {weekday:'long', day:'numeric', month:'long'});
+    el.innerHTML = `<div class="calsup-empty">${fd}<br><br>Sin suplencias registradas.</div>`;
+    return;
+  }
+
+  const fd = new Date(key + 'T12:00:00').toLocaleDateString('es-MX',
+    {weekday:'long', day:'numeric', month:'long', year:'numeric'});
+
+  let html = `<div style="font-size:.7rem;color:var(--txt3);margin-bottom:.5rem;text-transform:capitalize">${fd}</div>`;
+
+  sups.forEach(s => {
+    const motivoMap = {
+      permiso:'Permiso', vacaciones:'Vacaciones', falta:'Falta',
+      incapacidad:'Incapacidad', medico:'Cita médica',
+      capacitacion:'Capacitación', emergencia:'Emergencia', otro:'Otro'
+    };
+    const motivoTxt = s.motivo ? (motivoMap[s.motivo] || s.motivo) : '';
+    const fuenteTag = s.fuente === 'real'
+      ? `<span style="font-size:.58rem;color:var(--neon);margin-left:4px">✓ recorrido</span>`
+      : '';
+
+    html += `<div class="sup-item">
+      <div class="sup-item-hora">${s.hora} · ${s.dia || ''}</div>
+      <div class="sup-item-clase">${s.clase}${fuenteTag}</div>
+      <div class="sup-item-suplente">${s.suplente}</div>
+      <div class="sup-item-original">por: ${s.original}</div>
+      ${motivoTxt ? `<div class="sup-item-motivo">${motivoTxt}</div>` : ''}
+    </div>`;
+  });
+
+  el.innerHTML = html;
+}
