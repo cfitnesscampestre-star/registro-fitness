@@ -179,22 +179,56 @@ function renderDashboard(){
   // Hay datos — restaurar canvas y ocultar mensaje vacío
   if(ctx)ctx.style.display='block';
   if(emptyMsg)emptyMsg.style.display='none';
+  const aforo2Color = temaActual==='claro' ? 'rgba(200,169,74,0.4)' : 'rgba(94,255,160,0.5)';
+  const aforo2Border = temaActual==='claro' ? 'rgba(200,169,74,0.8)' : 'rgba(94,255,160,0.85)';
   chartClases=new Chart(ctx.getContext('2d'),{
     type:'bar',
     data:{labels,datasets:[
-      {label:'Aforo %',data:vals,backgroundColor:colors,borderRadius:5,borderSkipped:false,yAxisID:'y'},
-      {label:'Asis. Prom.',data:vals2,backgroundColor:temaActual==='claro'?'rgba(200,169,74,0.35)':'rgba(94,255,160,0.55)',borderRadius:5,borderSkipped:false,yAxisID:'y2',type:'bar'}
+      {
+        label:'Aforo %',
+        data:vals,
+        backgroundColor:colors,
+        borderColor:colors.map(c=>c.replace(/[\d.]+\)$/,'1)')),
+        borderWidth:0,
+        borderRadius:6,
+        borderSkipped:false,
+        yAxisID:'y'
+      },
+      {
+        label:'Asis. Prom.',
+        data:vals2,
+        backgroundColor:aforo2Color,
+        borderColor:aforo2Border,
+        borderWidth:1,
+        borderRadius:6,
+        borderSkipped:false,
+        yAxisID:'y2',
+        type:'bar'
+      }
     ]},
-    options:{responsive:true,maintainAspectRatio:false,
+    options:{
+      responsive:true,
+      maintainAspectRatio:false,
       plugins:{
-        legend:{labels:{color:chartTxtColor,font:{size:11}}},
-        tooltip:{callbacks:{
-          label:c=>c.datasetIndex===0?`Aforo: ${c.raw}%`:`Asistentes prom: ${c.raw}`,
-          afterBody:(items)=>{
-            if(items[0]&&items[0].datasetIndex===0)return['','👆 Clic en la barra para ver diagnóstico'];
-            return[];
+        legend:{
+          display:false  // usamos leyenda custom HTML abajo
+        },
+        tooltip:{
+          backgroundColor:temaActual==='claro'?'rgba(255,255,255,.97)':'rgba(15,28,20,.97)',
+          titleColor:chartTxtColor,
+          bodyColor:chartTxtColor,
+          borderColor:temaActual==='claro'?'rgba(0,0,0,.1)':'rgba(94,255,160,.2)',
+          borderWidth:1,
+          padding:10,
+          cornerRadius:10,
+          callbacks:{
+            label:c=>c.datasetIndex===0?` Aforo: ${c.raw}%`:` Asistentes prom: ${c.raw}`,
+            afterBody:(items)=>{
+              if(items[0]&&items[0].datasetIndex===0)return['','  👆 Clic para diagnóstico'];
+              return[];
+            }
           }
-        }}
+        }
       },
       onClick:(e,els)=>{
         if(els.length>0){
@@ -208,12 +242,53 @@ function renderDashboard(){
         }
       },
       scales:{
-        x:{ticks:{color:chartTxtColor,font:{family:'DM Mono',size:10}},grid:{color:chartGridColor}},
-        y:{ticks:{color:chartTxtColor,font:{family:'DM Mono',size:10},callback:v=>v+'%'},grid:{color:chartGridColor},max:100,title:{display:true,text:'Aforo %',color:chartTxtColor,font:{size:10}}},
-        y2:{position:'right',ticks:{color:temaActual==='claro'?'#9a7800':'var(--neon)',font:{family:'DM Mono',size:10}},grid:{display:false},title:{display:true,text:'Asis. Prom.',color:temaActual==='claro'?'#9a7800':'var(--neon)',font:{size:10}}}
+        x:{
+          ticks:{color:chartTxtColor,font:{family:'DM Mono',size:10}},
+          grid:{color:chartGridColor},
+          border:{color:chartGridColor}
+        },
+        y:{
+          ticks:{color:chartTxtColor,font:{family:'DM Mono',size:10},callback:v=>v+'%'},
+          grid:{color:chartGridColor},
+          border:{color:chartGridColor},
+          max:100,
+          title:{display:true,text:'Aforo %',color:chartTxtColor,font:{size:10}}
+        },
+        y2:{
+          position:'right',
+          ticks:{color:temaActual==='claro'?'#9a7800':aforo2Border,font:{family:'DM Mono',size:10}},
+          grid:{display:false},
+          border:{color:'transparent'},
+          title:{display:true,text:'Asis. Prom.',color:temaActual==='claro'?'#9a7800':aforo2Border,font:{size:10}}
+        }
       }
     }
   });
+
+  // Leyenda custom premium debajo de la gráfica
+  const legendWrap = document.getElementById('chart-clases-legend');
+  if(legendWrap){
+    const isClaro = temaActual==='claro';
+    legendWrap.innerHTML = [
+      '<div style="display:flex;align-items:center;gap:18px;justify-content:center;flex-wrap:wrap;margin-top:.6rem;padding:.4rem .8rem;border-radius:10px;background:'+(isClaro?'rgba(0,0,0,.04)':'rgba(255,255,255,.04)')+';border:1px solid '+(isClaro?'rgba(0,0,0,.08)':'rgba(255,255,255,.07)')+'">' ,
+        '<div style="display:flex;align-items:center;gap:7px">',
+          '<span style="display:inline-flex;gap:2px">',
+            '<span style="width:10px;height:10px;border-radius:3px;background:var(--neon);opacity:.9;display:inline-block"></span>',
+            '<span style="width:10px;height:10px;border-radius:3px;background:var(--gold2);opacity:.9;display:inline-block"></span>',
+            '<span style="width:10px;height:10px;border-radius:3px;background:var(--red2);opacity:.9;display:inline-block"></span>',
+          '</span>',
+          '<span style="font-size:.7rem;color:'+(isClaro?'#444':'var(--txt2)')+';font-family:'DM Mono',monospace">Aforo %</span>',
+        '</div>',
+        '<div style="width:1px;height:14px;background:'+(isClaro?'rgba(0,0,0,.15)':'rgba(255,255,255,.12)')+'"></div>',
+        '<div style="display:flex;align-items:center;gap:7px">',
+          '<span style="width:22px;height:10px;border-radius:3px;background:'+aforo2Color+';border:1px solid '+aforo2Border+';display:inline-block"></span>',
+          '<span style="font-size:.7rem;color:'+(isClaro?'#444':'var(--txt2)')+';font-family:'DM Mono',monospace">Asis. Prom.</span>',
+        '</div>',
+        '<div style="width:1px;height:14px;background:'+(isClaro?'rgba(0,0,0,.15)':'rgba(255,255,255,.12)')+'"></div>',
+        '<span style="font-size:.68rem;color:var(--txt3);font-style:italic">clic en barra → diagnóstico</span>',
+      '</div>'
+    ].join('');
+  }
 }
 
 // ═══ INSTRUCTORES ═══
