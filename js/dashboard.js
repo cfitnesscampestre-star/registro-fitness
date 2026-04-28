@@ -140,7 +140,7 @@ function renderDashboard(){
     ?'<div class="empty"><svg class="ico ico-ok" viewBox="0 0 20 20"><circle cx="10" cy="10" r="8" stroke="currentColor" stroke-width="1.5" fill="none"/><polyline points="6,10 9,13 14,7" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg> Sin faltas</div>'
     :wf.map(i=>`<div class="arow"><div class="adot" style="background:${i.faltas>2?'var(--red2)':'var(--gold2)'}"></div><span style="flex:1;font-size:.83rem">${i.nombre}</span><span class="mono" style="color:${i.faltas>2?'var(--red2)':'var(--gold2)'}">${i.faltas}</span></div>`).join('');
 
-  // ─── Gráfica Aforo por Tipo de Clase — 3D ────────────────────────────────
+  // Gráfica conectada al aforo real — filtrada por periodo — clickable para diagnóstico
   const claseMap={};
   regsBase.filter(r=>(r.estado==='ok'||r.estado==='sub')&&parseInt(r.cap||0)>0).forEach(r=>{
     const asis=parseInt(r.asistentes)||0;
@@ -150,28 +150,16 @@ function renderDashboard(){
     claseMap[r.clase].cnt++;
     claseMap[r.clase].totalAsis+=asis;
   });
-  const labels=[],vals=[],vals2=[],rawColors=[];
+  const labels=[],vals=[],vals2=[],colors=[];
   Object.entries(claseMap).filter(([,v])=>v.cnt>0).sort((a,b)=>b[1].sumPct/b[1].cnt-a[1].sumPct/a[1].cnt).forEach(([k,v])=>{
     const p=Math.round(v.sumPct/v.cnt);
-    labels.push(k);
-    vals.push(p);
-    vals2.push(Math.round(v.totalAsis/v.cnt));
-    rawColors.push(pctCol(p));
+    labels.push(k);vals.push(p);vals2.push(Math.round(v.totalAsis/v.cnt));colors.push(pctCol(p));
   });
-
-  const esClaro       = temaActual==='claro';
-  const chartTxtColor = esClaro ? '#2d5a3a'  : '#7aaa90';
-  const chartTxt3     = esClaro ? '#6aaa7a'  : '#3d6650';
-  const chartGridColor= esClaro ? 'rgba(26,122,69,0.09)' : 'rgba(255,255,255,0.035)';
-  const lineColor     = esClaro ? 'rgba(26,95,163,0.85)' : 'rgba(94,255,160,0.85)';
-  const lineFill      = esClaro ? 'rgba(26,95,163,0.07)' : 'rgba(94,255,160,0.07)';
-  const linePoint     = esClaro ? '#1a5fa3' : '#5effa0';
-  const tickFont      = {family:'DM Mono',size:10};
-
+  const chartTxtColor = temaActual==='claro' ? '#2d5a3a' : '#7aaa90';
+  const chartGridColor = temaActual==='claro' ? '#d0e8d0' : '#0e1f17';
   if(chartClases)chartClases.destroy();
   const ctx=document.getElementById('chart-clases');
-
-  // Sin datos → mensaje vacío
+  // Si no hay datos reales, mostrar mensaje en lugar de gráfica vacía
   const chartWrap=document.querySelector('.graph-wrap');
   let emptyMsg=document.getElementById('chart-empty-msg');
   if(labels.length===0){
@@ -181,196 +169,36 @@ function renderDashboard(){
       emptyMsg=document.createElement('div');
       emptyMsg.id='chart-empty-msg';
       emptyMsg.className='empty';
-      emptyMsg.style.cssText='height:220px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.5rem;font-size:.82rem;color:var(--txt3)';
-      emptyMsg.innerHTML='<svg viewBox="0 0 20 20" width="28" height="28" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" opacity=".5"><rect x="2" y="12" width="3" height="6" rx="1"/><rect x="8.5" y="7" width="3" height="11" rx="1"/><rect x="15" y="4" width="3" height="14" rx="1"/></svg><span>Sin clases registradas aún</span><span style="font-size:.72rem;opacity:.6">Agrega aforo con "+ Clase" o Recorrido</span>';
+      emptyMsg.style.cssText='height:200px;display:flex;align-items:center;justify-content:center;font-size:.85rem';
+      emptyMsg.textContent='Sin clases registradas aún. Agrega aforo con "+ Clase" o "<svg class="ico" viewBox="0 0 20 20"><circle cx="10" cy="4" r="2" stroke="currentColor" stroke-width="1.4" fill="none"/><path d="M10 6 L9 11 L7 16 M10 6 L11 11 L13 16 M9 11 L12 11" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg> Recorrido".';
       if(chartWrap)chartWrap.appendChild(emptyMsg);
     }
     emptyMsg.style.display='flex';
     return;
   }
+  // Hay datos — restaurar canvas y ocultar mensaje vacío
   if(ctx)ctx.style.display='block';
   if(emptyMsg)emptyMsg.style.display='none';
-
-  // ── Helper hex→{r,g,b} ───────────────────────────────────────────────
-  function hexToRgb(col){
-    if(!col||typeof col!=='string') return {r:94,g:200,b:120};
-    const h=(col.startsWith('#')?col.slice(1):null);
-    if(!h) return {r:94,g:200,b:120};
-    const full=h.length===3?h.split('').map(x=>x+x).join(''):h;
-    return{r:parseInt(full.slice(0,2),16)||0,g:parseInt(full.slice(2,4),16)||0,b:parseInt(full.slice(4,6),16)||0};
-  }
-
-  // ── Plugin combinado: 3D + línea meta ────────────────────────────────
-  const pluginAforo = {
-    id:'aforoPlugin',
-    afterDraw(chart){
-      const cc=chart.ctx;  // canvas context — nombre distinto para evitar colisión
-      const meta=chart.getDatasetMeta(0);
-      if(!meta||!meta.data||!meta.data.length) return;
-      const D=8; // profundidad 3D
-
-      // ── Barras 3D ──────────────────────────────────────────────────
-      meta.data.forEach(function(bar,i){
-        var p=bar.getProps(['x','y','width','base'],true);
-        var bx=p.x, bt=p.y, bw=p.width, bb=p.base;
-        if(!bw||bb<=bt) return;
-        var L=bx-bw/2, R=bx+bw/2;
-        var rgb=hexToRgb(rawColors[i]||'#5effa0');
-        var r=rgb.r,g=rgb.g,b=rgb.b;
-        cc.save();
-
-        // cara lateral
-        cc.beginPath();
-        cc.moveTo(R,bt); cc.lineTo(R+D,bt-D*0.5);
-        cc.lineTo(R+D,bb-D*0.5); cc.lineTo(R,bb);
-        cc.closePath();
-        var gL=cc.createLinearGradient(R,0,R+D,0);
-        gL.addColorStop(0,'rgba('+r+','+g+','+b+',0.75)');
-        gL.addColorStop(1,'rgba('+Math.max(r-60,0)+','+Math.max(g-60,0)+','+Math.max(b-60,0)+',0.38)');
-        cc.fillStyle=gL; cc.fill();
-
-        // cara superior
-        cc.beginPath();
-        cc.moveTo(L,bt); cc.lineTo(L+D,bt-D*0.5);
-        cc.lineTo(R+D,bt-D*0.5); cc.lineTo(R,bt);
-        cc.closePath();
-        var gT=cc.createLinearGradient(0,bt-D*0.5,0,bt+2);
-        gT.addColorStop(0,'rgba('+Math.min(r+90,255)+','+Math.min(g+90,255)+','+Math.min(b+90,255)+',0.95)');
-        gT.addColorStop(1,'rgba('+r+','+g+','+b+',0.60)');
-        cc.fillStyle=gT; cc.fill();
-
-        // cara frontal
-        var gF=cc.createLinearGradient(0,bt,0,bb);
-        gF.addColorStop(0,'rgba('+Math.min(r+80,255)+','+Math.min(g+80,255)+','+Math.min(b+80,255)+',1)');
-        gF.addColorStop(0.2,'rgba('+r+','+g+','+b+',0.97)');
-        gF.addColorStop(0.75,'rgba('+r+','+g+','+b+',0.90)');
-        gF.addColorStop(1,'rgba('+Math.max(r-45,0)+','+Math.max(g-45,0)+','+Math.max(b-45,0)+',0.78)');
-        cc.fillStyle=gF;
-        var rd=5;
-        cc.beginPath();
-        cc.moveTo(L+rd,bt); cc.lineTo(R-rd,bt);
-        cc.quadraticCurveTo(R,bt,R,bt+rd);
-        cc.lineTo(R,bb); cc.lineTo(L,bb); cc.lineTo(L,bt+rd);
-        cc.quadraticCurveTo(L,bt,L+rd,bt);
-        cc.closePath(); cc.fill();
-
-        // reflejo izquierdo
-        var gS=cc.createLinearGradient(L,0,L+bw*0.42,0);
-        gS.addColorStop(0,'rgba(255,255,255,0.18)');
-        gS.addColorStop(0.55,'rgba(255,255,255,0.07)');
-        gS.addColorStop(1,'rgba(255,255,255,0)');
-        cc.fillStyle=gS;
-        cc.beginPath();
-        cc.moveTo(L+rd,bt); cc.lineTo(L+bw*0.42,bt);
-        cc.lineTo(L+bw*0.42,bb); cc.lineTo(L,bb); cc.lineTo(L,bt+rd);
-        cc.quadraticCurveTo(L,bt,L+rd,bt);
-        cc.closePath(); cc.fill();
-
-        // borde superior brillante
-        cc.beginPath();
-        cc.moveTo(L+rd,bt+0.5); cc.lineTo(R-rd,bt+0.5);
-        cc.strokeStyle='rgba(255,255,255,0.42)';
-        cc.lineWidth=1; cc.stroke();
-
-        cc.restore();
-      });
-
-      // ── Línea meta 60% ─────────────────────────────────────────────
-      try{
-        var yScale=chart.scales.y;
-        if(!yScale) return;
-        var yPos=yScale.getPixelForValue(60);
-        var ca=chart.chartArea;
-        cc.save();
-        cc.setLineDash([6,4]);
-        cc.lineWidth=1.5;
-        cc.strokeStyle=esClaro?'rgba(26,122,69,0.45)':'rgba(94,255,160,0.40)';
-        cc.beginPath(); cc.moveTo(ca.left,yPos); cc.lineTo(ca.right,yPos); cc.stroke();
-        cc.setLineDash([]);
-        cc.font="bold 10px 'DM Mono',monospace";
-        cc.fillStyle=esClaro?'rgba(26,122,69,0.70)':'rgba(94,255,160,0.65)';
-        cc.fillText('meta 60%',ca.right-62,yPos-5);
-        cc.restore();
-      }catch(e){}
-    }
-  };
-
-  chartClases = new Chart(ctx.getContext('2d'), {
-    type: 'bar',
-    plugins: [pluginAforo],
-    data: {
-      labels,
-      datasets: [
-        {
-          label: 'Aforo %',
-          data: vals,
-          backgroundColor: rawColors.map(function(c){return c+'44';}),
-          borderColor: rawColors,
-          borderWidth: 1,
-          borderRadius: 0,
-          borderSkipped: false,
-          yAxisID: 'y',
-          order: 2,
-          barPercentage: 0.60,
-          categoryPercentage: 0.78,
-        },
-        {
-          label: 'Asis. Prom.',
-          data: vals2,
-          type: 'line',
-          yAxisID: 'y2',
-          order: 1,
-          borderColor: lineColor,
-          backgroundColor: lineFill,
-          pointBackgroundColor: linePoint,
-          pointBorderColor: esClaro ? '#ffffff' : '#0f1f18',
-          pointBorderWidth: 2,
-          pointRadius: 5,
-          pointHoverRadius: 7,
-          borderWidth: 2.5,
-          fill: true,
-          tension: 0.38,
-        }
-      ]
-    },
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      interaction: { mode: 'index', intersect: false },
-      animation: { duration: 600, easing: 'easeOutQuart' },
-      plugins: {
-        legend: {
-          position: 'top',
-          align: 'end',
-          labels: {
-            color: chartTxtColor,
-            font: { family: 'Outfit, sans-serif', size: 11, weight: '500' },
-            usePointStyle: true,
-            pointStyle: 'circle',
-            boxWidth: 8,
-            boxHeight: 8,
-            padding: 14,
+  chartClases=new Chart(ctx.getContext('2d'),{
+    type:'bar',
+    data:{labels,datasets:[
+      {label:'Aforo %',data:vals,backgroundColor:colors,borderRadius:5,borderSkipped:false,yAxisID:'y'},
+      {label:'Asis. Prom.',data:vals2,backgroundColor:temaActual==='claro'?'rgba(200,169,74,0.35)':'rgba(94,255,160,0.55)',borderRadius:5,borderSkipped:false,yAxisID:'y2',type:'bar'}
+    ]},
+    options:{responsive:true,maintainAspectRatio:false,
+      plugins:{
+        legend:{labels:{color:chartTxtColor,font:{size:11}}},
+        tooltip:{callbacks:{
+          label:c=>c.datasetIndex===0?`Aforo: ${c.raw}%`:`Asistentes prom: ${c.raw}`,
+          afterBody:(items)=>{
+            if(items[0]&&items[0].datasetIndex===0)return['','👆 Clic en la barra para ver diagnóstico'];
+            return[];
           }
-        },
-        tooltip: {
-          backgroundColor: esClaro ? 'rgba(255,255,255,0.97)' : 'rgba(8,20,14,0.97)',
-          borderColor: esClaro ? 'rgba(26,122,69,0.28)' : 'rgba(94,255,160,0.25)',
-          borderWidth: 1,
-          titleColor: esClaro ? '#1a2a1e' : '#dff0e8',
-          bodyColor: chartTxtColor,
-          padding: 11,
-          titleFont: { family: "'Bebas Neue', sans-serif", size: 14 },
-          bodyFont: { family: "'DM Mono', monospace", size: 11 },
-          callbacks: {
-            title: items => items[0]?.label || '',
-            label: c => c.datasetIndex===0 ? `  Aforo: ${c.raw}%` : `  Asis. prom: ${c.raw}`,
-            afterBody: items => items.some(i=>i.datasetIndex===0) ? ['','  ↗ Clic para diagnóstico'] : []
-          }
-        }
+        }}
       },
-      onClick: (e, els) => {
-        if(els.length > 0){
-          const clase = labels[els[0].index];
+      onClick:(e,els)=>{
+        if(els.length>0){
+          const clase=labels[els[0].index];
           document.querySelectorAll('.tab').forEach(x=>x.classList.remove('on'));
           document.querySelectorAll('.vista').forEach(x=>x.classList.remove('on'));
           document.querySelector('[data-v="diagnostico"]').classList.add('on');
@@ -379,49 +207,10 @@ function renderDashboard(){
           renderDiagnostico();
         }
       },
-      scales: {
-        x: {
-          ticks: {
-            color: chartTxtColor,
-            font: { family: "'Barlow Condensed', sans-serif", size: 11, weight: '600' },
-            maxRotation: 38,
-            minRotation: 0,
-          },
-          grid: { color: chartGridColor },
-          border: { color: 'transparent' },
-        },
-        y: {
-          position: 'left',
-          min: 0,
-          max: 112,
-          ticks: {
-            color: chartTxtColor,
-            font: tickFont,
-            callback: v => v <= 100 ? v+'%' : '',
-            stepSize: 20,
-          },
-          grid: { color: chartGridColor },
-          border: { color: 'transparent' },
-          title: {
-            display: true,
-            text: 'AFORO %',
-            color: chartTxt3,
-            font: { family: "'Barlow Condensed', sans-serif", size: 10, weight: '600' },
-          }
-        },
-        y2: {
-          position: 'right',
-          min: 0,
-          ticks: { color: linePoint, font: tickFont },
-          grid: { display: false },
-          border: { color: 'transparent' },
-          title: {
-            display: true,
-            text: 'ASIS. PROM.',
-            color: linePoint,
-            font: { family: "'Barlow Condensed', sans-serif", size: 10, weight: '600' },
-          }
-        }
+      scales:{
+        x:{ticks:{color:chartTxtColor,font:{family:'DM Mono',size:10}},grid:{color:chartGridColor}},
+        y:{ticks:{color:chartTxtColor,font:{family:'DM Mono',size:10},callback:v=>v+'%'},grid:{color:chartGridColor},max:100,title:{display:true,text:'Aforo %',color:chartTxtColor,font:{size:10}}},
+        y2:{position:'right',ticks:{color:temaActual==='claro'?'#9a7800':'var(--neon)',font:{family:'DM Mono',size:10}},grid:{display:false},title:{display:true,text:'Asis. Prom.',color:temaActual==='claro'?'#9a7800':'var(--neon)',font:{size:10}}}
       }
     }
   });
