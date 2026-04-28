@@ -10,7 +10,7 @@
      BUSCADOR — más delgado y discreto
      ════════════════════════════════════════════════════════════════ */
   #mobile-home > div:first-child {
-    padding: 6px 13px 0 !important;  /* antes 10px — más arriba */
+    padding: 6px 10px 0 !important;  /* alineado con slide padding */
     gap: 3px !important;
   }
 
@@ -100,20 +100,39 @@
     letter-spacing: 3.5px !important;
   }
 
-  /* Botón INICIAR RECORRIDO — más compacto */
+  /* Botón INICIAR RECORRIDO — tamaño proporcional al contenido */
   .mob-hero-cta {
-    font-size: .82rem !important;
-    padding: 9px 12px !important;
-    min-width: 80px !important;
-    max-width: 90px !important;
-    border-radius: 12px !important;
-    line-height: 1.2 !important;
+    font-size: .95rem !important;
+    padding: 11px 18px !important;
+    min-width: 0 !important;
+    max-width: none !important;
+    width: auto !important;
+    border-radius: 14px !important;
+    line-height: 1.15 !important;
+    white-space: nowrap !important;
+    letter-spacing: .04em !important;
   }
 
-  /* Tags Turbo/Normal — más chicos */
+  /* Tags Turbo/Classic — proporcionales */
   .mob-hero-modes .mob-mode-tag {
-    font-size: .58rem !important;
-    padding: 3px 8px !important;
+    font-size: .7rem !important;
+    padding: 5px 13px !important;
+    border-radius: 20px !important;
+    font-weight: 600 !important;
+  }
+
+  /* Contenido del hero — padding correcto */
+  .mob-hero-content {
+    padding: 14px 16px 16px !important;
+    gap: 10px !important;
+  }
+
+  /* Ícono corredor — tamaño adecuado */
+  .mob-hero-runner-wrap img {
+    width: 90px !important;
+    height: auto !important;
+    filter: drop-shadow(0 2px 14px rgba(94,255,160,.55)) !important;
+    display: block !important;
   }
 
 
@@ -282,102 +301,6 @@
     display: none !important;
   }
 
-  /* Ícono PNG — tamaño y sombra acorde */
-  .mob-hero-runner-wrap img {
-    width: 68px !important;
-    height: auto !important;
-    filter: drop-shadow(0 2px 12px rgba(94,255,160,.50)) !important;
-    display: block !important;
-  }
+  /* Ícono PNG — manejado en bloque principal */
 
 }
-
-
-/* ════════════════════════════════════════════════════════════════
-   GRÁFICA AFORO — contenedor y canvas profesional 3D
-   ════════════════════════════════════════════════════════════════ */
-
-/* Wrapper de la gráfica */
-.graph-wrap {
-  position: relative;
-  height: 295px;
-  padding: 6px 0 0;
-  /* Fondo con profundidad: simula el "piso" donde se apoyan las barras 3D */
-  background:
-    linear-gradient(
-      to bottom,
-      transparent 0%,
-      transparent 82%,
-      rgba(0,0,0,0.06) 100%
-    );
-  border-radius: 10px;
-  overflow: visible;
-}
-
-@media (max-width: 640px) {
-  .graph-wrap {
-    height: 245px;
-  }
-}
-
-/* Canvas toma todo el espacio disponible */
-.graph-wrap canvas {
-  width: 100% !important;
-  height: 100% !important;
-  cursor: pointer;
-}
-
-/* Reflejo de piso debajo del chart (línea base) */
-.graph-wrap::after {
-  content: '';
-  position: absolute;
-  bottom: 0;
-  left: 4%;
-  right: 4%;
-  height: 1px;
-  background: linear-gradient(
-    to right,
-    transparent,
-    rgba(94,255,160,0.20) 20%,
-    rgba(94,255,160,0.35) 50%,
-    rgba(94,255,160,0.20) 80%,
-    transparent
-  );
-  pointer-events: none;
-}
-html.tema-claro .graph-wrap::after {
-  background: linear-gradient(
-    to right,
-    transparent,
-    rgba(26,122,69,0.18) 20%,
-    rgba(26,122,69,0.28) 50%,
-    rgba(26,122,69,0.18) 80%,
-    transparent
-  );
-}
-
-/* Brillo ambiental sutil en la parte superior del área */
-.graph-wrap::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 40%;
-  background: radial-gradient(
-    ellipse 70% 60% at 50% 0%,
-    rgba(94,255,160,0.04) 0%,
-    transparent 70%
-  );
-  pointer-events: none;
-  z-index: 0;
-  border-radius: 10px;
-}
-html.tema-claro .graph-wrap::before {
-  background: radial-gradient(
-    ellipse 70% 60% at 50% 0%,
-    rgba(26,122,69,0.03) 0%,
-    transparent 70%
-  );
-}
-.graph-wrap canvas { position: relative; z-index: 1; }
