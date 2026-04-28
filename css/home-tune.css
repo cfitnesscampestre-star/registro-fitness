@@ -291,3 +291,86 @@
   }
 
 }
+
+
+/* ════════════════════════════════════════════════════════════════
+   GRÁFICA AFORO — contenedor y canvas profesional
+   ════════════════════════════════════════════════════════════════ */
+
+/* Wrapper de la gráfica: fondo diferenciado, sin borde genérico */
+.graph-wrap {
+  position: relative;
+  height: 280px;
+  padding: 4px 0 0;
+}
+
+@media (max-width: 640px) {
+  .graph-wrap {
+    height: 230px;
+  }
+}
+
+/* Canvas toma todo el espacio disponible */
+.graph-wrap canvas {
+  width: 100% !important;
+  height: 100% !important;
+  cursor: pointer;
+}
+
+/* Panel que envuelve la gráfica — borde superior accent */
+.panel:has(.graph-wrap) .phdr .pttl,
+#dash-chart-panel .pttl {
+  display: flex;
+  align-items: center;
+  gap: .45rem;
+}
+
+/* Leyenda inline en el header del panel de gráfica */
+.chart-legend-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-family: 'Outfit', sans-serif;
+  font-size: .65rem;
+  font-weight: 500;
+  color: var(--txt2);
+  background: var(--panel2);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 2px 9px;
+  white-space: nowrap;
+}
+.chart-legend-pill .dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+/* Hint de clic — se muestra debajo de la gráfica */
+.chart-click-hint {
+  text-align: center;
+  font-size: .63rem;
+  color: var(--txt3);
+  font-family: 'Outfit', sans-serif;
+  letter-spacing: .5px;
+  padding: 4px 0 0;
+  opacity: .75;
+}
+
+/* Fondo sutil del área del chart cuando hay datos */
+.graph-wrap::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 10px;
+  background:
+    radial-gradient(ellipse 60% 50% at 50% 100%, rgba(26,122,69,.06) 0%, transparent 70%);
+  pointer-events: none;
+  z-index: 0;
+}
+html.tema-claro .graph-wrap::before {
+  background:
+    radial-gradient(ellipse 60% 50% at 50% 100%, rgba(26,122,69,.04) 0%, transparent 70%);
+}
+.graph-wrap canvas { position: relative; z-index: 1; }
