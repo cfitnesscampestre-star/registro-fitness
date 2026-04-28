@@ -191,124 +191,109 @@ function renderDashboard(){
   if(ctx)ctx.style.display='block';
   if(emptyMsg)emptyMsg.style.display='none';
 
-  // ── Helper: parsea hex/rgb a {r,g,b} ──────────────────────────────────
+  // ── Helper: parsea hex a {r,g,b} ─────────────────────────────────────
   function parseColor(col){
+    if(!col) return {r:94,g:200,b:120};
     if(col.startsWith('#')){
       const h=col.replace('#','');
       const full=h.length===3?h.split('').map(c=>c+c).join(''):h;
       return{r:parseInt(full.slice(0,2),16),g:parseInt(full.slice(2,4),16),b:parseInt(full.slice(4,6),16)};
     }
     const m=col.match(/\d+/g);
-    return m?{r:+m[0],g:+m[1],b:+m[2]}:{r:90,g:200,b:120};
+    return m?{r:+m[0],g:+m[1],b:+m[2]}:{r:94,g:200,b:120};
   }
 
-  // ── Plugin 3D: gradiente vertical + cara lateral + cara superior ──────
+  // ── Plugin 3D: todo en afterDraw para tener dimensiones reales ────────
   const plugin3D = {
     id: 'bars3d',
-    // Dibuja ANTES que Chart.js para que las caras queden DETRÁS de la barra frontal
-    beforeDatasetsDraw(chart) {
-      const {ctx: c, data, chartArea: {bottom}, scales: {y}} = chart;
+    afterDraw(chart) {
+      const {ctx: c} = chart;
       const meta = chart.getDatasetMeta(0);
-      const depth = 7;  // profundidad 3D en px
+      if(!meta || !meta.data || meta.data.length === 0) return;
+      const depth = 8;
 
       meta.data.forEach((bar, i) => {
-        const {x, y: yTop, width, base} = bar.getProps(['x','y','width','base'], true);
-        const left  = x - width / 2;
-        const right = x + width / 2;
+        // Leer posición y tamaño reales del elemento barra
+        const props = bar.getProps(['x','y','width','base'], true);
+        const bx     = props.x;
+        const byTop  = props.y;
+        const bWidth = props.width;
+        const bBase  = props.base;
+        if(!bWidth || bBase <= byTop) return;
+
+        const left  = bx - bWidth / 2;
+        const right = bx + bWidth / 2;
         const col   = rawColors[i] || '#5effa0';
         const {r,g,b} = parseColor(col);
-        const barH  = base - yTop;
-        if(barH <= 0) return;
 
         c.save();
 
-        // ── Cara LATERAL derecha (sombra lateral oscura) ──────────────
+        // 1) Cara lateral derecha ────────────────────────────────────
         c.beginPath();
-        c.moveTo(right,           yTop);
-        c.lineTo(right + depth,   yTop - depth * 0.55);
-        c.lineTo(right + depth,   base - depth * 0.55);
-        c.lineTo(right,           base);
+        c.moveTo(right,           byTop);
+        c.lineTo(right + depth,   byTop - depth * 0.5);
+        c.lineTo(right + depth,   bBase - depth * 0.5);
+        c.lineTo(right,           bBase);
         c.closePath();
-        // Gradiente de izquierda a derecha (más oscuro en el extremo)
         const gLat = c.createLinearGradient(right, 0, right + depth, 0);
-        gLat.addColorStop(0, `rgba(${r},${g},${b},0.70)`);
-        gLat.addColorStop(1, `rgba(${Math.max(r-55,0)},${Math.max(g-55,0)},${Math.max(b-55,0)},0.45)`);
+        gLat.addColorStop(0, `rgba(${r},${g},${b},0.75)`);
+        gLat.addColorStop(1, `rgba(${Math.max(r-60,0)},${Math.max(g-60,0)},${Math.max(b-60,0)},0.40)`);
         c.fillStyle = gLat;
         c.fill();
 
-        // ── Cara SUPERIOR (brillo superior) ──────────────────────────
+        // 2) Cara superior ───────────────────────────────────────────
         c.beginPath();
-        c.moveTo(left,            yTop);
-        c.lineTo(left  + depth,   yTop - depth * 0.55);
-        c.lineTo(right + depth,   yTop - depth * 0.55);
-        c.lineTo(right,           yTop);
+        c.moveTo(left,            byTop);
+        c.lineTo(left  + depth,   byTop - depth * 0.5);
+        c.lineTo(right + depth,   byTop - depth * 0.5);
+        c.lineTo(right,           byTop);
         c.closePath();
-        const gTop = c.createLinearGradient(0, yTop - depth * 0.55, 0, yTop);
-        gTop.addColorStop(0, `rgba(${Math.min(r+80,255)},${Math.min(g+80,255)},${Math.min(b+80,255)},0.90)`);
-        gTop.addColorStop(1, `rgba(${r},${g},${b},0.60)`);
+        const gTop = c.createLinearGradient(0, byTop - depth * 0.5, 0, byTop + 2);
+        gTop.addColorStop(0, `rgba(${Math.min(r+90,255)},${Math.min(g+90,255)},${Math.min(b+90,255)},0.95)`);
+        gTop.addColorStop(1, `rgba(${r},${g},${b},0.65)`);
         c.fillStyle = gTop;
         c.fill();
 
-        c.restore();
-      });
-    },
-    // Dibuja DESPUÉS para el gradiente vertical de la cara frontal
-    afterDatasetsDraw(chart) {
-      const {ctx: c, chartArea: {bottom}, scales: {y}} = chart;
-      const meta = chart.getDatasetMeta(0);
-
-      meta.data.forEach((bar, i) => {
-        const {x, y: yTop, width, base} = bar.getProps(['x','y','width','base'], true);
-        const left  = x - width / 2;
-        const right = x + width / 2;
-        const col   = rawColors[i] || '#5effa0';
-        const {r,g,b} = parseColor(col);
-        const barH = base - yTop;
-        if(barH <= 0) return;
-
-        c.save();
-
-        // ── Cara FRONTAL — gradiente vertical con brillo y sombra ────
-        const gFront = c.createLinearGradient(0, yTop, 0, base);
-        gFront.addColorStop(0.00, `rgba(${Math.min(r+70,255)},${Math.min(g+70,255)},${Math.min(b+70,255)},1.0)`);  // punta brillante
-        gFront.addColorStop(0.20, `rgba(${r},${g},${b},0.95)`);
-        gFront.addColorStop(0.70, `rgba(${r},${g},${b},0.88)`);
-        gFront.addColorStop(1.00, `rgba(${Math.max(r-40,0)},${Math.max(g-40,0)},${Math.max(b-40,0)},0.75)`);  // base sombreada
+        // 3) Cara frontal con gradiente vertical ─────────────────────
+        const gFront = c.createLinearGradient(0, byTop, 0, bBase);
+        gFront.addColorStop(0.00, `rgba(${Math.min(r+75,255)},${Math.min(g+75,255)},${Math.min(b+75,255)},1.0)`);
+        gFront.addColorStop(0.18, `rgba(${r},${g},${b},0.97)`);
+        gFront.addColorStop(0.72, `rgba(${r},${g},${b},0.90)`);
+        gFront.addColorStop(1.00, `rgba(${Math.max(r-45,0)},${Math.max(g-45,0)},${Math.max(b-45,0)},0.78)`);
         c.fillStyle = gFront;
+        const rad = 5;
         c.beginPath();
-        // Esquinas redondeadas arriba
-        const radius = 5;
-        c.moveTo(left + radius, yTop);
-        c.lineTo(right - radius, yTop);
-        c.quadraticCurveTo(right, yTop, right, yTop + radius);
-        c.lineTo(right, base);
-        c.lineTo(left,  base);
-        c.lineTo(left,  yTop + radius);
-        c.quadraticCurveTo(left, yTop, left + radius, yTop);
+        c.moveTo(left + rad, byTop);
+        c.lineTo(right - rad, byTop);
+        c.quadraticCurveTo(right, byTop, right, byTop + rad);
+        c.lineTo(right, bBase);
+        c.lineTo(left,  bBase);
+        c.lineTo(left,  byTop + rad);
+        c.quadraticCurveTo(left, byTop, left + rad, byTop);
         c.closePath();
         c.fill();
 
-        // ── Reflejo especular (franja blanca en el tercio izquierdo) ─
-        const gShine = c.createLinearGradient(left, 0, left + width * 0.45, 0);
-        gShine.addColorStop(0,    `rgba(255,255,255,0.22)`);
-        gShine.addColorStop(0.5,  `rgba(255,255,255,0.10)`);
-        gShine.addColorStop(1,    `rgba(255,255,255,0.00)`);
+        // 4) Reflejo especular izquierdo ─────────────────────────────
+        const gShine = c.createLinearGradient(left, 0, left + bWidth * 0.42, 0);
+        gShine.addColorStop(0,   `rgba(255,255,255,0.20)`);
+        gShine.addColorStop(0.5, `rgba(255,255,255,0.09)`);
+        gShine.addColorStop(1,   `rgba(255,255,255,0.00)`);
         c.fillStyle = gShine;
         c.beginPath();
-        c.moveTo(left + radius, yTop);
-        c.lineTo(left + width * 0.45, yTop);
-        c.lineTo(left + width * 0.45, base);
-        c.lineTo(left, base);
-        c.lineTo(left, yTop + radius);
-        c.quadraticCurveTo(left, yTop, left + radius, yTop);
+        c.moveTo(left + rad, byTop);
+        c.lineTo(left + bWidth * 0.42, byTop);
+        c.lineTo(left + bWidth * 0.42, bBase);
+        c.lineTo(left, bBase);
+        c.lineTo(left, byTop + rad);
+        c.quadraticCurveTo(left, byTop, left + rad, byTop);
         c.closePath();
         c.fill();
 
-        // ── Borde superior brillante ──────────────────────────────────
+        // 5) Línea brillante en el borde superior ────────────────────
         c.beginPath();
-        c.moveTo(left + radius, yTop + 0.5);
-        c.lineTo(right - radius, yTop + 0.5);
-        c.strokeStyle = `rgba(255,255,255,0.50)`;
+        c.moveTo(left + rad, byTop + 0.5);
+        c.lineTo(right - rad, byTop + 0.5);
+        c.strokeStyle = `rgba(255,255,255,0.45)`;
         c.lineWidth = 1;
         c.stroke();
 
@@ -346,9 +331,10 @@ function renderDashboard(){
         {
           label: 'Aforo %',
           data: vals,
-          // Transparente: el plugin3D dibuja el fill
-          backgroundColor: 'transparent',
-          borderColor: 'transparent',
+          // rgba casi transparente — Chart.js crea los elementos de barra
+          // pero el plugin3D sobreescribe visualmente con gradientes
+          backgroundColor: 'rgba(0,0,0,0.01)',
+          borderColor: 'rgba(0,0,0,0)',
           borderWidth: 0,
           borderRadius: 0,
           borderSkipped: false,
