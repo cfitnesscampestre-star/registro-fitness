@@ -140,7 +140,7 @@ function renderDashboard(){
     ?'<div class="empty"><svg class="ico ico-ok" viewBox="0 0 20 20"><circle cx="10" cy="10" r="8" stroke="currentColor" stroke-width="1.5" fill="none"/><polyline points="6,10 9,13 14,7" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg> Sin faltas</div>'
     :wf.map(i=>`<div class="arow"><div class="adot" style="background:${i.faltas>2?'var(--red2)':'var(--gold2)'}"></div><span style="flex:1;font-size:.83rem">${i.nombre}</span><span class="mono" style="color:${i.faltas>2?'var(--red2)':'var(--gold2)'}">${i.faltas}</span></div>`).join('');
 
-  // ─── Gráfica Aforo por Tipo de Clase ─────────────────────────────────────
+  // ─── Gráfica Aforo por Tipo de Clase — 3D ────────────────────────────────
   const claseMap={};
   regsBase.filter(r=>(r.estado==='ok'||r.estado==='sub')&&parseInt(r.cap||0)>0).forEach(r=>{
     const asis=parseInt(r.asistentes)||0;
@@ -150,26 +150,23 @@ function renderDashboard(){
     claseMap[r.clase].cnt++;
     claseMap[r.clase].totalAsis+=asis;
   });
-  const labels=[],vals=[],vals2=[],colors=[],colorsAlpha=[];
+  const labels=[],vals=[],vals2=[],rawColors=[];
   Object.entries(claseMap).filter(([,v])=>v.cnt>0).sort((a,b)=>b[1].sumPct/b[1].cnt-a[1].sumPct/a[1].cnt).forEach(([k,v])=>{
     const p=Math.round(v.sumPct/v.cnt);
-    const col=pctCol(p);
     labels.push(k);
     vals.push(p);
     vals2.push(Math.round(v.totalAsis/v.cnt));
-    colors.push(col);
-    // Versión semitransparente del color para la línea de asistentes
-    colorsAlpha.push(temaActual==='claro'?'rgba(26,95,163,0.18)':'rgba(94,255,160,0.18)');
+    rawColors.push(pctCol(p));
   });
 
-  const esClaro = temaActual==='claro';
-  const chartTxtColor  = esClaro ? '#2d5a3a'  : '#7aaa90';
-  const chartTxt3Color = esClaro ? '#6aaa7a'  : '#3d6650';
-  const chartGridColor = esClaro ? 'rgba(26,122,69,0.10)' : 'rgba(255,255,255,0.04)';
-  const lineColor      = esClaro ? 'rgba(26,95,163,0.75)' : 'rgba(94,255,160,0.75)';
-  const lineFill       = esClaro ? 'rgba(26,95,163,0.08)' : 'rgba(94,255,160,0.08)';
-  const linePointColor = esClaro ? '#1a5fa3' : '#5effa0';
-  const tickFont = {family:'DM Mono',size:10};
+  const esClaro       = temaActual==='claro';
+  const chartTxtColor = esClaro ? '#2d5a3a'  : '#7aaa90';
+  const chartTxt3     = esClaro ? '#6aaa7a'  : '#3d6650';
+  const chartGridColor= esClaro ? 'rgba(26,122,69,0.09)' : 'rgba(255,255,255,0.035)';
+  const lineColor     = esClaro ? 'rgba(26,95,163,0.85)' : 'rgba(94,255,160,0.85)';
+  const lineFill      = esClaro ? 'rgba(26,95,163,0.07)' : 'rgba(94,255,160,0.07)';
+  const linePoint     = esClaro ? '#1a5fa3' : '#5effa0';
+  const tickFont      = {family:'DM Mono',size:10};
 
   if(chartClases)chartClases.destroy();
   const ctx=document.getElementById('chart-clases');
@@ -194,7 +191,133 @@ function renderDashboard(){
   if(ctx)ctx.style.display='block';
   if(emptyMsg)emptyMsg.style.display='none';
 
-  // Plugin personalizado: dibuja línea de referencia al 60% (meta)
+  // ── Helper: parsea hex/rgb a {r,g,b} ──────────────────────────────────
+  function parseColor(col){
+    if(col.startsWith('#')){
+      const h=col.replace('#','');
+      const full=h.length===3?h.split('').map(c=>c+c).join(''):h;
+      return{r:parseInt(full.slice(0,2),16),g:parseInt(full.slice(2,4),16),b:parseInt(full.slice(4,6),16)};
+    }
+    const m=col.match(/\d+/g);
+    return m?{r:+m[0],g:+m[1],b:+m[2]}:{r:90,g:200,b:120};
+  }
+
+  // ── Plugin 3D: gradiente vertical + cara lateral + cara superior ──────
+  const plugin3D = {
+    id: 'bars3d',
+    // Dibuja ANTES que Chart.js para que las caras queden DETRÁS de la barra frontal
+    beforeDatasetsDraw(chart) {
+      const {ctx: c, data, chartArea: {bottom}, scales: {y}} = chart;
+      const meta = chart.getDatasetMeta(0);
+      const depth = 7;  // profundidad 3D en px
+
+      meta.data.forEach((bar, i) => {
+        const {x, y: yTop, width, base} = bar.getProps(['x','y','width','base'], true);
+        const left  = x - width / 2;
+        const right = x + width / 2;
+        const col   = rawColors[i] || '#5effa0';
+        const {r,g,b} = parseColor(col);
+        const barH  = base - yTop;
+        if(barH <= 0) return;
+
+        c.save();
+
+        // ── Cara LATERAL derecha (sombra lateral oscura) ──────────────
+        c.beginPath();
+        c.moveTo(right,           yTop);
+        c.lineTo(right + depth,   yTop - depth * 0.55);
+        c.lineTo(right + depth,   base - depth * 0.55);
+        c.lineTo(right,           base);
+        c.closePath();
+        // Gradiente de izquierda a derecha (más oscuro en el extremo)
+        const gLat = c.createLinearGradient(right, 0, right + depth, 0);
+        gLat.addColorStop(0, `rgba(${r},${g},${b},0.70)`);
+        gLat.addColorStop(1, `rgba(${Math.max(r-55,0)},${Math.max(g-55,0)},${Math.max(b-55,0)},0.45)`);
+        c.fillStyle = gLat;
+        c.fill();
+
+        // ── Cara SUPERIOR (brillo superior) ──────────────────────────
+        c.beginPath();
+        c.moveTo(left,            yTop);
+        c.lineTo(left  + depth,   yTop - depth * 0.55);
+        c.lineTo(right + depth,   yTop - depth * 0.55);
+        c.lineTo(right,           yTop);
+        c.closePath();
+        const gTop = c.createLinearGradient(0, yTop - depth * 0.55, 0, yTop);
+        gTop.addColorStop(0, `rgba(${Math.min(r+80,255)},${Math.min(g+80,255)},${Math.min(b+80,255)},0.90)`);
+        gTop.addColorStop(1, `rgba(${r},${g},${b},0.60)`);
+        c.fillStyle = gTop;
+        c.fill();
+
+        c.restore();
+      });
+    },
+    // Dibuja DESPUÉS para el gradiente vertical de la cara frontal
+    afterDatasetsDraw(chart) {
+      const {ctx: c, chartArea: {bottom}, scales: {y}} = chart;
+      const meta = chart.getDatasetMeta(0);
+
+      meta.data.forEach((bar, i) => {
+        const {x, y: yTop, width, base} = bar.getProps(['x','y','width','base'], true);
+        const left  = x - width / 2;
+        const right = x + width / 2;
+        const col   = rawColors[i] || '#5effa0';
+        const {r,g,b} = parseColor(col);
+        const barH = base - yTop;
+        if(barH <= 0) return;
+
+        c.save();
+
+        // ── Cara FRONTAL — gradiente vertical con brillo y sombra ────
+        const gFront = c.createLinearGradient(0, yTop, 0, base);
+        gFront.addColorStop(0.00, `rgba(${Math.min(r+70,255)},${Math.min(g+70,255)},${Math.min(b+70,255)},1.0)`);  // punta brillante
+        gFront.addColorStop(0.20, `rgba(${r},${g},${b},0.95)`);
+        gFront.addColorStop(0.70, `rgba(${r},${g},${b},0.88)`);
+        gFront.addColorStop(1.00, `rgba(${Math.max(r-40,0)},${Math.max(g-40,0)},${Math.max(b-40,0)},0.75)`);  // base sombreada
+        c.fillStyle = gFront;
+        c.beginPath();
+        // Esquinas redondeadas arriba
+        const radius = 5;
+        c.moveTo(left + radius, yTop);
+        c.lineTo(right - radius, yTop);
+        c.quadraticCurveTo(right, yTop, right, yTop + radius);
+        c.lineTo(right, base);
+        c.lineTo(left,  base);
+        c.lineTo(left,  yTop + radius);
+        c.quadraticCurveTo(left, yTop, left + radius, yTop);
+        c.closePath();
+        c.fill();
+
+        // ── Reflejo especular (franja blanca en el tercio izquierdo) ─
+        const gShine = c.createLinearGradient(left, 0, left + width * 0.45, 0);
+        gShine.addColorStop(0,    `rgba(255,255,255,0.22)`);
+        gShine.addColorStop(0.5,  `rgba(255,255,255,0.10)`);
+        gShine.addColorStop(1,    `rgba(255,255,255,0.00)`);
+        c.fillStyle = gShine;
+        c.beginPath();
+        c.moveTo(left + radius, yTop);
+        c.lineTo(left + width * 0.45, yTop);
+        c.lineTo(left + width * 0.45, base);
+        c.lineTo(left, base);
+        c.lineTo(left, yTop + radius);
+        c.quadraticCurveTo(left, yTop, left + radius, yTop);
+        c.closePath();
+        c.fill();
+
+        // ── Borde superior brillante ──────────────────────────────────
+        c.beginPath();
+        c.moveTo(left + radius, yTop + 0.5);
+        c.lineTo(right - radius, yTop + 0.5);
+        c.strokeStyle = `rgba(255,255,255,0.50)`;
+        c.lineWidth = 1;
+        c.stroke();
+
+        c.restore();
+      });
+    }
+  };
+
+  // ── Plugin línea de meta 60% ──────────────────────────────────────────
   const metaLinePlugin = {
     id: 'metaLine',
     afterDraw(chart) {
@@ -202,40 +325,39 @@ function renderDashboard(){
       if(!y) return;
       const yPos = y.getPixelForValue(60);
       c.save();
-      c.setLineDash([5, 4]);
-      c.lineWidth = 1;
-      c.strokeStyle = esClaro ? 'rgba(26,122,69,0.35)' : 'rgba(94,255,160,0.30)';
+      c.setLineDash([6, 4]);
+      c.lineWidth = 1.5;
+      c.strokeStyle = esClaro ? 'rgba(26,122,69,0.45)' : 'rgba(94,255,160,0.40)';
       c.beginPath(); c.moveTo(left, yPos); c.lineTo(right, yPos); c.stroke();
       c.setLineDash([]);
-      c.font = "10px 'DM Mono', monospace";
-      c.fillStyle = esClaro ? 'rgba(26,122,69,0.55)' : 'rgba(94,255,160,0.50)';
-      c.fillText('meta 60%', right - 58, yPos - 5);
+      c.font = "bold 10px 'DM Mono', monospace";
+      c.fillStyle = esClaro ? 'rgba(26,122,69,0.70)' : 'rgba(94,255,160,0.65)';
+      c.fillText('meta 60%', right - 60, yPos - 5);
       c.restore();
     }
   };
 
   chartClases = new Chart(ctx.getContext('2d'), {
     type: 'bar',
-    plugins: [metaLinePlugin],
+    plugins: [plugin3D, metaLinePlugin],
     data: {
       labels,
       datasets: [
         {
-          // Dataset 1: barras de Aforo %
           label: 'Aforo %',
           data: vals,
-          backgroundColor: colors.map(c => c + (esClaro ? 'cc' : 'bb')),
-          borderColor: colors,
-          borderWidth: 1,
-          borderRadius: 6,
+          // Transparente: el plugin3D dibuja el fill
+          backgroundColor: 'transparent',
+          borderColor: 'transparent',
+          borderWidth: 0,
+          borderRadius: 0,
           borderSkipped: false,
           yAxisID: 'y',
           order: 2,
-          barPercentage: 0.62,
-          categoryPercentage: 0.80,
+          barPercentage: 0.60,
+          categoryPercentage: 0.78,
         },
         {
-          // Dataset 2: línea de Asistentes Promedio
           label: 'Asis. Prom.',
           data: vals2,
           type: 'line',
@@ -243,12 +365,12 @@ function renderDashboard(){
           order: 1,
           borderColor: lineColor,
           backgroundColor: lineFill,
-          pointBackgroundColor: linePointColor,
-          pointBorderColor: esClaro ? '#fff' : '#0f1f18',
-          pointBorderWidth: 1.5,
-          pointRadius: 4,
-          pointHoverRadius: 6,
-          borderWidth: 2,
+          pointBackgroundColor: linePoint,
+          pointBorderColor: esClaro ? '#ffffff' : '#0f1f18',
+          pointBorderWidth: 2,
+          pointRadius: 5,
+          pointHoverRadius: 7,
+          borderWidth: 2.5,
           fill: true,
           tension: 0.38,
         }
@@ -258,7 +380,12 @@ function renderDashboard(){
       responsive: true,
       maintainAspectRatio: false,
       interaction: { mode: 'index', intersect: false },
-      animation: { duration: 500, easing: 'easeOutQuart' },
+      animation: {
+        duration: 700,
+        easing: 'easeOutQuart',
+        // Animación de entrada desde abajo (crece hacia arriba)
+        y: { from: ctx => ctx.chart.scales.y.getPixelForValue(0) }
+      },
       plugins: {
         legend: {
           position: 'top',
@@ -268,38 +395,32 @@ function renderDashboard(){
             font: { family: 'Outfit, sans-serif', size: 11, weight: '500' },
             usePointStyle: true,
             pointStyle: 'circle',
-            boxWidth: 7,
-            boxHeight: 7,
-            padding: 16,
+            boxWidth: 8,
+            boxHeight: 8,
+            padding: 14,
           }
         },
         tooltip: {
-          backgroundColor: esClaro ? 'rgba(255,255,255,0.96)' : 'rgba(10,26,18,0.96)',
-          borderColor: esClaro ? 'rgba(26,122,69,0.25)' : 'rgba(94,255,160,0.20)',
+          backgroundColor: esClaro ? 'rgba(255,255,255,0.97)' : 'rgba(8,20,14,0.97)',
+          borderColor: esClaro ? 'rgba(26,122,69,0.28)' : 'rgba(94,255,160,0.25)',
           borderWidth: 1,
           titleColor: esClaro ? '#1a2a1e' : '#dff0e8',
           bodyColor: chartTxtColor,
-          padding: 10,
-          titleFont: { family: 'Bebas Neue, sans-serif', size: 13, letterSpacing: '1px' },
-          bodyFont: { family: 'DM Mono, monospace', size: 11 },
+          padding: 11,
+          titleFont: { family: "'Bebas Neue', sans-serif", size: 14 },
+          bodyFont: { family: "'DM Mono', monospace", size: 11 },
           callbacks: {
             title: items => items[0]?.label || '',
-            label: c => {
-              if(c.datasetIndex === 0) return `  Aforo: ${c.raw}%`;
-              return `  Asis. prom: ${c.raw}`;
-            },
-            afterBody: items => {
-              if(items.some(i => i.datasetIndex === 0)) return ['', '  ↗ Clic para diagnóstico'];
-              return [];
-            }
+            label: c => c.datasetIndex===0 ? `  Aforo: ${c.raw}%` : `  Asis. prom: ${c.raw}`,
+            afterBody: items => items.some(i=>i.datasetIndex===0) ? ['','  ↗ Clic para diagnóstico'] : []
           }
         }
       },
       onClick: (e, els) => {
-        if(els.length > 0) {
+        if(els.length > 0){
           const clase = labels[els[0].index];
-          document.querySelectorAll('.tab').forEach(x => x.classList.remove('on'));
-          document.querySelectorAll('.vista').forEach(x => x.classList.remove('on'));
+          document.querySelectorAll('.tab').forEach(x=>x.classList.remove('on'));
+          document.querySelectorAll('.vista').forEach(x=>x.classList.remove('on'));
           document.querySelector('[data-v="diagnostico"]').classList.add('on');
           document.getElementById('v-diagnostico').classList.add('on');
           initDiagClases(clase);
@@ -310,8 +431,8 @@ function renderDashboard(){
         x: {
           ticks: {
             color: chartTxtColor,
-            font: { family: 'Barlow Condensed, sans-serif', size: 11, weight: '600' },
-            maxRotation: 35,
+            font: { family: "'Barlow Condensed', sans-serif", size: 11, weight: '600' },
+            maxRotation: 38,
             minRotation: 0,
           },
           grid: { color: chartGridColor },
@@ -320,38 +441,33 @@ function renderDashboard(){
         y: {
           position: 'left',
           min: 0,
-          max: 110,
+          max: 112,
           ticks: {
             color: chartTxtColor,
             font: tickFont,
-            callback: v => v <= 100 ? v + '%' : '',
+            callback: v => v <= 100 ? v+'%' : '',
             stepSize: 20,
           },
           grid: { color: chartGridColor },
-          border: { color: 'transparent', dash: [3, 3] },
+          border: { color: 'transparent' },
           title: {
             display: true,
             text: 'AFORO %',
-            color: chartTxt3Color,
-            font: { family: 'Barlow Condensed, sans-serif', size: 10, weight: '600' },
-            padding: { bottom: 4 },
+            color: chartTxt3,
+            font: { family: "'Barlow Condensed', sans-serif", size: 10, weight: '600' },
           }
         },
         y2: {
           position: 'right',
           min: 0,
-          ticks: {
-            color: linePointColor,
-            font: tickFont,
-          },
+          ticks: { color: linePoint, font: tickFont },
           grid: { display: false },
           border: { color: 'transparent' },
           title: {
             display: true,
             text: 'ASIS. PROM.',
-            color: linePointColor,
-            font: { family: 'Barlow Condensed, sans-serif', size: 10, weight: '600' },
-            padding: { bottom: 4 },
+            color: linePoint,
+            font: { family: "'Barlow Condensed', sans-serif", size: 10, weight: '600' },
           }
         }
       }
