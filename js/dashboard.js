@@ -140,7 +140,7 @@ function renderDashboard(){
     ?'<div class="empty"><svg class="ico ico-ok" viewBox="0 0 20 20"><circle cx="10" cy="10" r="8" stroke="currentColor" stroke-width="1.5" fill="none"/><polyline points="6,10 9,13 14,7" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg> Sin faltas</div>'
     :wf.map(i=>`<div class="arow"><div class="adot" style="background:${i.faltas>2?'var(--red2)':'var(--gold2)'}"></div><span style="flex:1;font-size:.83rem">${i.nombre}</span><span class="mono" style="color:${i.faltas>2?'var(--red2)':'var(--gold2)'}">${i.faltas}</span></div>`).join('');
 
-  // Gráfica conectada al aforo real — filtrada por periodo — clickable para diagnóstico
+  // ─── Gráfica Aforo por Tipo de Clase ─────────────────────────────────────
   const claseMap={};
   regsBase.filter(r=>(r.estado==='ok'||r.estado==='sub')&&parseInt(r.cap||0)>0).forEach(r=>{
     const asis=parseInt(r.asistentes)||0;
@@ -150,16 +150,31 @@ function renderDashboard(){
     claseMap[r.clase].cnt++;
     claseMap[r.clase].totalAsis+=asis;
   });
-  const labels=[],vals=[],vals2=[],colors=[];
+  const labels=[],vals=[],vals2=[],colors=[],colorsAlpha=[];
   Object.entries(claseMap).filter(([,v])=>v.cnt>0).sort((a,b)=>b[1].sumPct/b[1].cnt-a[1].sumPct/a[1].cnt).forEach(([k,v])=>{
     const p=Math.round(v.sumPct/v.cnt);
-    labels.push(k);vals.push(p);vals2.push(Math.round(v.totalAsis/v.cnt));colors.push(pctCol(p));
+    const col=pctCol(p);
+    labels.push(k);
+    vals.push(p);
+    vals2.push(Math.round(v.totalAsis/v.cnt));
+    colors.push(col);
+    // Versión semitransparente del color para la línea de asistentes
+    colorsAlpha.push(temaActual==='claro'?'rgba(26,95,163,0.18)':'rgba(94,255,160,0.18)');
   });
-  const chartTxtColor = temaActual==='claro' ? '#2d5a3a' : '#7aaa90';
-  const chartGridColor = temaActual==='claro' ? '#d0e8d0' : '#0e1f17';
+
+  const esClaro = temaActual==='claro';
+  const chartTxtColor  = esClaro ? '#2d5a3a'  : '#7aaa90';
+  const chartTxt3Color = esClaro ? '#6aaa7a'  : '#3d6650';
+  const chartGridColor = esClaro ? 'rgba(26,122,69,0.10)' : 'rgba(255,255,255,0.04)';
+  const lineColor      = esClaro ? 'rgba(26,95,163,0.75)' : 'rgba(94,255,160,0.75)';
+  const lineFill       = esClaro ? 'rgba(26,95,163,0.08)' : 'rgba(94,255,160,0.08)';
+  const linePointColor = esClaro ? '#1a5fa3' : '#5effa0';
+  const tickFont = {family:'DM Mono',size:10};
+
   if(chartClases)chartClases.destroy();
   const ctx=document.getElementById('chart-clases');
-  // Si no hay datos reales, mostrar mensaje en lugar de gráfica vacía
+
+  // Sin datos → mensaje vacío
   const chartWrap=document.querySelector('.graph-wrap');
   let emptyMsg=document.getElementById('chart-empty-msg');
   if(labels.length===0){
@@ -169,48 +184,176 @@ function renderDashboard(){
       emptyMsg=document.createElement('div');
       emptyMsg.id='chart-empty-msg';
       emptyMsg.className='empty';
-      emptyMsg.style.cssText='height:200px;display:flex;align-items:center;justify-content:center;font-size:.85rem';
-      emptyMsg.textContent='Sin clases registradas aún. Agrega aforo con "+ Clase" o "<svg class="ico" viewBox="0 0 20 20"><circle cx="10" cy="4" r="2" stroke="currentColor" stroke-width="1.4" fill="none"/><path d="M10 6 L9 11 L7 16 M10 6 L11 11 L13 16 M9 11 L12 11" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg> Recorrido".';
+      emptyMsg.style.cssText='height:220px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.5rem;font-size:.82rem;color:var(--txt3)';
+      emptyMsg.innerHTML='<svg viewBox="0 0 20 20" width="28" height="28" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" opacity=".5"><rect x="2" y="12" width="3" height="6" rx="1"/><rect x="8.5" y="7" width="3" height="11" rx="1"/><rect x="15" y="4" width="3" height="14" rx="1"/></svg><span>Sin clases registradas aún</span><span style="font-size:.72rem;opacity:.6">Agrega aforo con "+ Clase" o Recorrido</span>';
       if(chartWrap)chartWrap.appendChild(emptyMsg);
     }
     emptyMsg.style.display='flex';
     return;
   }
-  // Hay datos — restaurar canvas y ocultar mensaje vacío
   if(ctx)ctx.style.display='block';
   if(emptyMsg)emptyMsg.style.display='none';
-  chartClases=new Chart(ctx.getContext('2d'),{
-    type:'bar',
-    data:{labels,datasets:[
-      {label:'Aforo %',data:vals,backgroundColor:colors,borderRadius:5,borderSkipped:false,yAxisID:'y'},
-      {label:'Asis. Prom.',data:vals2,backgroundColor:temaActual==='claro'?'rgba(200,169,74,0.35)':'rgba(94,255,160,0.55)',borderRadius:5,borderSkipped:false,yAxisID:'y2',type:'bar'}
-    ]},
-    options:{responsive:true,maintainAspectRatio:false,
-      plugins:{
-        legend:{labels:{color:chartTxtColor,font:{size:11}}},
-        tooltip:{callbacks:{
-          label:c=>c.datasetIndex===0?`Aforo: ${c.raw}%`:`Asistentes prom: ${c.raw}`,
-          afterBody:(items)=>{
-            if(items[0]&&items[0].datasetIndex===0)return['','👆 Clic en la barra para ver diagnóstico'];
-            return[];
+
+  // Plugin personalizado: dibuja línea de referencia al 60% (meta)
+  const metaLinePlugin = {
+    id: 'metaLine',
+    afterDraw(chart) {
+      const {ctx: c, chartArea: {left, right}, scales: {y}} = chart;
+      if(!y) return;
+      const yPos = y.getPixelForValue(60);
+      c.save();
+      c.setLineDash([5, 4]);
+      c.lineWidth = 1;
+      c.strokeStyle = esClaro ? 'rgba(26,122,69,0.35)' : 'rgba(94,255,160,0.30)';
+      c.beginPath(); c.moveTo(left, yPos); c.lineTo(right, yPos); c.stroke();
+      c.setLineDash([]);
+      c.font = "10px 'DM Mono', monospace";
+      c.fillStyle = esClaro ? 'rgba(26,122,69,0.55)' : 'rgba(94,255,160,0.50)';
+      c.fillText('meta 60%', right - 58, yPos - 5);
+      c.restore();
+    }
+  };
+
+  chartClases = new Chart(ctx.getContext('2d'), {
+    type: 'bar',
+    plugins: [metaLinePlugin],
+    data: {
+      labels,
+      datasets: [
+        {
+          // Dataset 1: barras de Aforo %
+          label: 'Aforo %',
+          data: vals,
+          backgroundColor: colors.map(c => c + (esClaro ? 'cc' : 'bb')),
+          borderColor: colors,
+          borderWidth: 1,
+          borderRadius: 6,
+          borderSkipped: false,
+          yAxisID: 'y',
+          order: 2,
+          barPercentage: 0.62,
+          categoryPercentage: 0.80,
+        },
+        {
+          // Dataset 2: línea de Asistentes Promedio
+          label: 'Asis. Prom.',
+          data: vals2,
+          type: 'line',
+          yAxisID: 'y2',
+          order: 1,
+          borderColor: lineColor,
+          backgroundColor: lineFill,
+          pointBackgroundColor: linePointColor,
+          pointBorderColor: esClaro ? '#fff' : '#0f1f18',
+          pointBorderWidth: 1.5,
+          pointRadius: 4,
+          pointHoverRadius: 6,
+          borderWidth: 2,
+          fill: true,
+          tension: 0.38,
+        }
+      ]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      interaction: { mode: 'index', intersect: false },
+      animation: { duration: 500, easing: 'easeOutQuart' },
+      plugins: {
+        legend: {
+          position: 'top',
+          align: 'end',
+          labels: {
+            color: chartTxtColor,
+            font: { family: 'Outfit, sans-serif', size: 11, weight: '500' },
+            usePointStyle: true,
+            pointStyle: 'circle',
+            boxWidth: 7,
+            boxHeight: 7,
+            padding: 16,
           }
-        }}
+        },
+        tooltip: {
+          backgroundColor: esClaro ? 'rgba(255,255,255,0.96)' : 'rgba(10,26,18,0.96)',
+          borderColor: esClaro ? 'rgba(26,122,69,0.25)' : 'rgba(94,255,160,0.20)',
+          borderWidth: 1,
+          titleColor: esClaro ? '#1a2a1e' : '#dff0e8',
+          bodyColor: chartTxtColor,
+          padding: 10,
+          titleFont: { family: 'Bebas Neue, sans-serif', size: 13, letterSpacing: '1px' },
+          bodyFont: { family: 'DM Mono, monospace', size: 11 },
+          callbacks: {
+            title: items => items[0]?.label || '',
+            label: c => {
+              if(c.datasetIndex === 0) return `  Aforo: ${c.raw}%`;
+              return `  Asis. prom: ${c.raw}`;
+            },
+            afterBody: items => {
+              if(items.some(i => i.datasetIndex === 0)) return ['', '  ↗ Clic para diagnóstico'];
+              return [];
+            }
+          }
+        }
       },
-      onClick:(e,els)=>{
-        if(els.length>0){
-          const clase=labels[els[0].index];
-          document.querySelectorAll('.tab').forEach(x=>x.classList.remove('on'));
-          document.querySelectorAll('.vista').forEach(x=>x.classList.remove('on'));
+      onClick: (e, els) => {
+        if(els.length > 0) {
+          const clase = labels[els[0].index];
+          document.querySelectorAll('.tab').forEach(x => x.classList.remove('on'));
+          document.querySelectorAll('.vista').forEach(x => x.classList.remove('on'));
           document.querySelector('[data-v="diagnostico"]').classList.add('on');
           document.getElementById('v-diagnostico').classList.add('on');
           initDiagClases(clase);
           renderDiagnostico();
         }
       },
-      scales:{
-        x:{ticks:{color:chartTxtColor,font:{family:'DM Mono',size:10}},grid:{color:chartGridColor}},
-        y:{ticks:{color:chartTxtColor,font:{family:'DM Mono',size:10},callback:v=>v+'%'},grid:{color:chartGridColor},max:100,title:{display:true,text:'Aforo %',color:chartTxtColor,font:{size:10}}},
-        y2:{position:'right',ticks:{color:temaActual==='claro'?'#9a7800':'var(--neon)',font:{family:'DM Mono',size:10}},grid:{display:false},title:{display:true,text:'Asis. Prom.',color:temaActual==='claro'?'#9a7800':'var(--neon)',font:{size:10}}}
+      scales: {
+        x: {
+          ticks: {
+            color: chartTxtColor,
+            font: { family: 'Barlow Condensed, sans-serif', size: 11, weight: '600' },
+            maxRotation: 35,
+            minRotation: 0,
+          },
+          grid: { color: chartGridColor },
+          border: { color: 'transparent' },
+        },
+        y: {
+          position: 'left',
+          min: 0,
+          max: 110,
+          ticks: {
+            color: chartTxtColor,
+            font: tickFont,
+            callback: v => v <= 100 ? v + '%' : '',
+            stepSize: 20,
+          },
+          grid: { color: chartGridColor },
+          border: { color: 'transparent', dash: [3, 3] },
+          title: {
+            display: true,
+            text: 'AFORO %',
+            color: chartTxt3Color,
+            font: { family: 'Barlow Condensed, sans-serif', size: 10, weight: '600' },
+            padding: { bottom: 4 },
+          }
+        },
+        y2: {
+          position: 'right',
+          min: 0,
+          ticks: {
+            color: linePointColor,
+            font: tickFont,
+          },
+          grid: { display: false },
+          border: { color: 'transparent' },
+          title: {
+            display: true,
+            text: 'ASIS. PROM.',
+            color: linePointColor,
+            font: { family: 'Barlow Condensed, sans-serif', size: 10, weight: '600' },
+            padding: { bottom: 4 },
+          }
+        }
       }
     }
   });
