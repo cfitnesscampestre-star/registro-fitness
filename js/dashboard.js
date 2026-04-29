@@ -65,10 +65,14 @@ function renderDashboard(){
   const totProg=instructores.reduce((a,i)=>a+(i.horario||[]).length,0);
   const totImp=allS.reduce((a,i)=>a+i.impartidas,0);
   const totFalt=allS.reduce((a,i)=>a+i.faltas,0);
-  const totAsis=allS.reduce((a,i)=>a+i.totalAsis,0);
+  // totAsis calculado directamente desde regsBase para evitar doble conteo por suplencias
+  const totAsis=regsBase.filter(r=>r.estado==='ok'||r.estado==='sub').reduce((a,r)=>a+(parseInt(r.asistentes)||0),0);
   const aforoProm=allS.length>0?Math.round(allS.reduce((a,i)=>a+i.aforo,0)/allS.length):0;
   const pct=totProg>0?Math.round(totImp/totProg*100):0;
   const totSuplencias=regsBase.filter(r=>r.estado==='sub').length;
+  // Estimación de género: 70% mujeres, 30% hombres
+  const asisM=Math.round(totAsis*0.70);
+  const asisH=Math.round(totAsis*0.30);
 
   document.getElementById('kpi-row').innerHTML=`
     <div class="kpi"><div class="klbl">Clases / Semana</div><div class="kval" style="color:var(--neon)">${totProg}</div><div class="ksub">Programadas</div></div>
@@ -90,7 +94,28 @@ function renderDashboard(){
       <div class="kpi-sem">${aforoProm>=60?'<svg class="ico" viewBox="0 0 20 20"><circle cx="10" cy="10" r="5" fill="var(--neon)"/></svg>':aforoProm>=35?'<svg class="ico" viewBox="0 0 20 20"><circle cx="10" cy="10" r="5" fill="var(--gold2)"/></svg>':'<svg class="ico" viewBox="0 0 20 20"><circle cx="10" cy="10" r="5" fill="var(--red2)"/></svg>'}</div>
     </div>
     <div class="kpi"><div class="klbl">Instructores</div><div class="kval" style="color:var(--neon)">${instructores.length}</div><div class="ksub">Activos</div></div>
-    <div class="kpi" style="cursor:pointer" onclick="abrirModal('m-suplencias')"><div class="klbl">Suplencias</div><div class="kval" style="color:var(--blue)">${totSuplencias}</div><div class="ksub">Ver reporte →</div></div>`;
+    <div class="kpi" style="cursor:pointer" onclick="abrirModal('m-suplencias')"><div class="klbl">Suplencias</div><div class="kval" style="color:var(--blue)">${totSuplencias}</div><div class="ksub">Ver reporte →</div></div>
+    <div class="kpi" style="grid-column:1/-1">
+      <div class="klbl">Asistentes por Género <span style="font-size:.62rem;color:var(--txt3);font-weight:400;margin-left:4px">estimación histórica</span></div>
+      <div style="display:flex;align-items:center;gap:1rem;margin-top:.4rem;flex-wrap:wrap">
+        <div style="display:flex;align-items:center;gap:.4rem">
+          <svg style="width:16px;height:16px;flex-shrink:0" viewBox="0 0 20 20"><circle cx="10" cy="7" r="3.5" stroke="#e88aff" stroke-width="1.5" fill="none"/><path d="M4 18 Q4 13 10 13 Q16 13 16 18" stroke="#e88aff" stroke-width="1.4" fill="none" stroke-linecap="round"/><line x1="10" y1="3.5" x2="10" y2="1" stroke="#e88aff" stroke-width="1.2" stroke-linecap="round"/><line x1="8.5" y1="2.5" x2="11.5" y2="2.5" stroke="#e88aff" stroke-width="1.2" stroke-linecap="round"/></svg>
+          <span style="font-family:'Bebas Neue',sans-serif;font-size:1.5rem;color:#e88aff;line-height:1">${asisM.toLocaleString()}</span>
+          <span style="font-size:.7rem;color:var(--txt2)">Mujeres<br><strong style="color:#e88aff">70%</strong></span>
+        </div>
+        <div style="flex:1;min-width:80px">
+          <div style="height:8px;background:var(--border);border-radius:4px;overflow:hidden;display:flex">
+            <div style="width:70%;background:linear-gradient(90deg,#e88aff,#c966ff);border-radius:4px 0 0 4px;transition:width .6s"></div>
+            <div style="width:30%;background:linear-gradient(90deg,#4db8e8,#2d9fd4);border-radius:0 4px 4px 0;transition:width .6s"></div>
+          </div>
+        </div>
+        <div style="display:flex;align-items:center;gap:.4rem">
+          <svg style="width:16px;height:16px;flex-shrink:0" viewBox="0 0 20 20"><circle cx="10" cy="7" r="3.5" stroke="var(--blue)" stroke-width="1.5" fill="none"/><path d="M4 18 Q4 13 10 13 Q16 13 16 18" stroke="var(--blue)" stroke-width="1.4" fill="none" stroke-linecap="round"/><line x1="10" y1="10.5" x2="10" y2="13" stroke="var(--blue)" stroke-width="1.2" stroke-linecap="round"/><line x1="8.5" y1="12" x2="11.5" y2="12" stroke="var(--blue)" stroke-width="1.2" stroke-linecap="round"/></svg>
+          <span style="font-family:'Bebas Neue',sans-serif;font-size:1.5rem;color:var(--blue);line-height:1">${asisH.toLocaleString()}</span>
+          <span style="font-size:.7rem;color:var(--txt2)">Hombres<br><strong style="color:var(--blue)">30%</strong></span>
+        </div>
+      </div>
+    </div>`;
 
   renderQuickAlerts();
 
