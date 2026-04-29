@@ -1144,48 +1144,41 @@ function setIndicador(txt){
 
 // ═══════════════════════════════════════════════════════════════════════════
 // ACCESO DIRECTO desde el dashboard (botón "Firmas" mobile, sidebar y snav).
-// Si hay una hoja de firmas activa → abrir el menú de gestión (m-firmas-menu)
-// para que el usuario elija "Continuar" o "Eliminar". Si no hay hoja activa
-// → caer al flujo normal de creación (abrirFirmasDigitales).
+// Siempre abre el menú de gestión de Firmas Digitales (m-firmas-menu) —
+// el menú mismo controla el flujo: Continuar hoja activa / Eliminar / etc.
+// Si hay hoja activa, actualiza el subtítulo del botón "Continuar" con el
+// progreso de firmas para dar contexto al usuario.
 // ═══════════════════════════════════════════════════════════════════════════
 function abrirFirmasDigitalesDirecto() {
-  let hojaActiva = null;
-  try {
-    hojaActiva = JSON.parse(localStorage.getItem('fc_hoja_firmas_activa') || 'null');
-  } catch(e) { hojaActiva = null; }
-
-  // ── Caso 1: Hay hoja activa → mostrar menú de gestión ──
-  if(hojaActiva) {
-    const menu = document.getElementById('m-firmas-menu');
-    if(menu) {
-      // Actualizar subtítulo del botón "Continuar" con info de la hoja
-      try {
-        const sub = document.getElementById('fm-btn-continuar-sub');
-        if(sub) {
-          const firmasObj = hojaActiva.firmas || {};
-          const firmados  = Object.values(firmasObj).filter(f => f && f.data).length;
-          const semTxt    = hojaActiva.encabezado || `${hojaActiva.semIni||''} → ${hojaActiva.semFin||''}`;
-          const totalInst = (typeof instructores !== 'undefined')
-            ? instructores.filter(i => (i.horario||[]).length > 0).length
-            : 0;
-          const totalConCoord = totalInst + 1;
-          sub.textContent = `${semTxt} · ${firmados}/${totalConCoord} firmas`;
-        }
-      } catch(e) {}
-      menu.classList.add('on');
-      return;
-    }
-    // Fallback si el menú no existe en el DOM: abrir directo
-    if(typeof abrirFirmasDigitales === 'function') abrirFirmasDigitales('continuar');
+  const menu = document.getElementById('m-firmas-menu');
+  if(!menu) {
+    // Fallback: si el menú no está en el DOM por alguna razón, ir al flujo normal
+    if(typeof abrirFirmasDigitales === 'function') abrirFirmasDigitales();
+    else if(typeof showToast === 'function') showToast('No se pudo abrir Firmas Digitales', 'err');
     return;
   }
 
-  // ── Caso 2: No hay hoja activa → flujo normal de creación ──
-  if(typeof abrirFirmasDigitales === 'function') {
-    abrirFirmasDigitales();
-  } else if(typeof showToast === 'function') {
-    showToast('No se pudo abrir Firmas Digitales', 'err');
-  }
+  // Si hay hoja activa → actualizar el subtítulo de "Continuar" con el progreso
+  try {
+    const hojaActiva = JSON.parse(localStorage.getItem('fc_hoja_firmas_activa') || 'null');
+    const sub = document.getElementById('fm-btn-continuar-sub');
+    if(sub) {
+      if(hojaActiva) {
+        const firmasObj = hojaActiva.firmas || {};
+        const firmados  = Object.values(firmasObj).filter(f => f && f.data).length;
+        const semTxt    = hojaActiva.encabezado || `${hojaActiva.semIni||''} → ${hojaActiva.semFin||''}`;
+        const totalInst = (typeof instructores !== 'undefined')
+          ? instructores.filter(i => (i.horario||[]).length > 0).length
+          : 0;
+        const totalConCoord = totalInst + 1;
+        sub.textContent = `${semTxt} · ${firmados}/${totalConCoord} firmas`;
+      } else {
+        sub.textContent = 'Sin hoja activa — crea una nueva primero';
+      }
+    }
+  } catch(e) {}
+
+  menu.classList.add('on');
 }
 
 // Exponer en window para que los onclick inline del HTML la encuentren
