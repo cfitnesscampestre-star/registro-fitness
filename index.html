@@ -282,27 +282,36 @@ window._cargarFflate=function(){
    ════════════════════════════════════════════════════════════ */
 @media (max-width: 640px) {
 
-  /* Menú móvil compacto en el header (Dashboard · Reporte · Generar · Salir) */
+  /* Header como tarjeta unificada en móvil - logo, título, sync y menú dentro del mismo recuadro */
+  #hdr {
+    flex-wrap: wrap !important;
+    background: rgba(255,255,255,.92) !important;
+    border-radius: 14px !important;
+    padding: 10px 12px !important;
+    margin: 6px 8px 8px !important;
+    box-shadow: 0 2px 8px rgba(0,0,0,.06) !important;
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    z-index: 50;
+  }
+  /* Menú móvil compacto debajo del header (Dashboard · Reporte · Generar · Salir) */
   #hdr .mob-hdr-menu {
     display: flex !important;
     width: 100% !important;
     order: 99;
-    margin-top: 6px !important;
+    margin-top: 8px !important;
     margin-bottom: 0 !important;
-    padding-top: 5px !important;
+    padding-top: 7px !important;
     padding-bottom: 0 !important;
-    border-top: 1px solid var(--border) !important;
+    border-top: 1px solid rgba(0,0,0,.08) !important;
     border-bottom: none !important;
-  }
-  /* Permite que el header crezca verticalmente para acomodar el menú */
-  #hdr {
-    flex-wrap: wrap !important;
+    justify-content: space-around !important;
   }
   /* Quita el fondo blanco del logo en móvil para integrarse con el header */
   #hdr img[alt="Club Campestre"] {
     background: transparent !important;
     padding: 0 !important;
-    height: 32px !important;
+    height: 30px !important;
   }
 
   /* Fondo: imagen de telas */
