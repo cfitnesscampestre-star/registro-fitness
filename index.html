@@ -285,13 +285,18 @@ window._cargarFflate=function(){
   /* Menú móvil compacto en el header (Dashboard · Reporte · Generar · Salir) */
   #hdr .mob-hdr-menu {
     display: flex !important;
+    width: 100% !important;
+    order: 99;
+    margin-top: 6px !important;
+    margin-bottom: 0 !important;
+    padding-top: 5px !important;
+    padding-bottom: 0 !important;
+    border-top: 1px solid var(--border) !important;
+    border-bottom: none !important;
   }
-  /* Reorganiza el header en móvil para que el menú quede arriba */
+  /* Permite que el header crezca verticalmente para acomodar el menú */
   #hdr {
     flex-wrap: wrap !important;
-  }
-  #hdr .mob-hdr-menu {
-    order: -1;
   }
   /* Quita el fondo blanco del logo en móvil para integrarse con el header */
   #hdr img[alt="Club Campestre"] {
@@ -1188,8 +1193,8 @@ window._cargarFflate=function(){
 
 <!-- ═══ HEADER ═══ -->
 <div id="hdr">
-  <!-- Menú móvil compacto en la parte superior del header (solo móvil) -->
-  <div class="mob-hdr-menu no-print" style="display:none;width:100%;flex-wrap:wrap;gap:4px;justify-content:flex-end;align-items:center;padding:0 2px 4px;margin-bottom:4px;border-bottom:1px solid var(--border)">
+  <!-- Menú móvil compacto debajo del header (solo móvil) -->
+  <div class="mob-hdr-menu no-print" style="display:none;width:100%;flex-wrap:wrap;gap:4px;justify-content:flex-end;align-items:center;padding:0 2px;">
     <button onclick="navegarA('dashboard')" style="display:flex;align-items:center;gap:3px;background:none;border:none;color:var(--txt3);font-family:'Outfit',sans-serif;font-size:.58rem;cursor:pointer;padding:1px 4px;border-radius:5px;-webkit-tap-highlight-color:transparent">
       <svg class="ico" viewBox="0 0 20 20" style="width:10px;height:10px"><rect x="3" y="12" width="3" height="5" rx="1" stroke="currentColor" stroke-width="1.7" fill="none"/><rect x="8.5" y="8" width="3" height="9" rx="1" stroke="currentColor" stroke-width="1.7" fill="none"/><rect x="14" y="4" width="3" height="13" rx="1" stroke="currentColor" stroke-width="1.7" fill="none"/></svg> Dashboard
     </button>
