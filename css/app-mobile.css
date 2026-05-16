@@ -403,6 +403,7 @@
     background: rgba(6,12,8,.99) !important;
     border-bottom: none !important;
     box-shadow: 0 2px 12px rgba(0,0,0,.5) !important;
+    cursor: grab !important;
   }
 
   /* Línea de acento inferior */
@@ -414,20 +415,45 @@
     background: linear-gradient(90deg, transparent, rgba(94,255,160,.35) 40%, rgba(94,255,160,.35) 60%, transparent);
   }
 
+  /* Indicador visual de swipe — pequeña flecha/línea en el borde inferior del header */
+  #hdr::before {
+    content: '';
+    position: absolute;
+    bottom: -4px; left: 50%;
+    transform: translateX(-50%);
+    width: 28px; height: 4px;
+    background: rgba(94,255,160,.4);
+    border-radius: 0 0 4px 4px;
+    transition: background .2s;
+    z-index: 2;
+  }
+  #hdr:hover::before { background: rgba(94,255,160,.7); }
+
   html.tema-claro #hdr {
     background: rgba(255,255,255,1) !important;
     box-shadow: 0 2px 12px rgba(26,122,69,.15) !important;
   }
+  html.tema-claro #hdr::before {
+    background: rgba(26,122,69,.35);
+  }
 
-  /* ── Menú de navegación fijo debajo del header ── */
+  /* ── Menú de navegación — oculto por defecto, se revela con swipe ── */
   #mob-nav-bar {
     display: flex !important;
+    transform: translateY(-110%) !important;
+    transition: transform .28s cubic-bezier(.4,0,.2,1) !important;
+    pointer-events: none !important;
+  }
+
+  #mob-nav-bar.visible {
+    transform: translateY(0) !important;
+    pointer-events: auto !important;
   }
 
   html.tema-claro #mob-nav-bar {
     background: rgba(255,255,255,1) !important;
     border-bottom-color: rgba(26,122,69,.2) !important;
-    box-shadow: 0 2px 8px rgba(26,122,69,.1) !important;
+    box-shadow: 0 4px 12px rgba(26,122,69,.12) !important;
   }
 
   html.tema-claro #mob-nav-bar button {
