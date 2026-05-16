@@ -333,14 +333,16 @@ window._cargarXLSX=function(){
   /* Header como tarjeta unificada en móvil - logo, título, sync y menú dentro del mismo recuadro */
   #hdr {
     flex-wrap: wrap !important;
-    background: rgba(255,255,255,.92) !important;
-    border-radius: 14px !important;
+    background: rgba(255,255,255,.96) !important;
+    border-radius: 0 0 14px 14px !important;
     padding: 10px 12px !important;
-    margin: 6px 8px 8px !important;
-    box-shadow: 0 2px 8px rgba(0,0,0,.06) !important;
-    backdrop-filter: blur(8px);
-    -webkit-backdrop-filter: blur(8px);
-    z-index: 50;
+    margin: 0 !important;
+    box-shadow: 0 2px 12px rgba(0,0,0,.10) !important;
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    position: sticky !important;
+    top: 0 !important;
+    z-index: 200 !important;
   }
   /* Menú móvil compacto debajo del header (Dashboard · Reporte · Generar · Salir) */
   #hdr .mob-hdr-menu {
