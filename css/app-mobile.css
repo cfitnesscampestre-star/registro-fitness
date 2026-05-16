@@ -390,6 +390,9 @@
 @media (max-width: 640px) {
 
   #hdr {
+    position: sticky !important;
+    top: 0 !important;
+    z-index: 500 !important;
     height: var(--hdr-mob-h) !important;
     padding: 0 14px !important;
     flex-wrap: nowrap !important;
