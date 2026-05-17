@@ -123,9 +123,38 @@ function _repCalcStats(ini, fin) {
   // para que el preview pueda renderizar al menos los ceros y no quedarse en el placeholder del HTML.
   const _regs   = (typeof registros   !== 'undefined' && Array.isArray(registros))   ? registros   : [];
   const _insts  = (typeof instructores!== 'undefined' && Array.isArray(instructores))? instructores: [];
+
+  // Normalizar r.fecha a YYYY-MM-DD tolerando variantes:
+  // - "2026-05-04" (canónico, input HTML5)
+  // - "2026-05-04T00:00:00" (con tiempo)
+  // - "04/05/2026" o "4/5/2026" (DD/MM/YYYY)
+  // - Date object
+  // - timestamp numérico (ms)
+  function _normFecha(v) {
+    if(!v) return '';
+    if(typeof v === 'number') {
+      try { return new Date(v).toISOString().slice(0,10); } catch(e){ return ''; }
+    }
+    if(v instanceof Date) {
+      try { return v.toISOString().slice(0,10); } catch(e){ return ''; }
+    }
+    const s = String(v).trim();
+    // Ya en formato ISO YYYY-MM-DD...
+    const mIso = s.match(/^(\d{4})-(\d{2})-(\d{2})/);
+    if(mIso) return `${mIso[1]}-${mIso[2]}-${mIso[3]}`;
+    // DD/MM/YYYY o D/M/YYYY
+    const mEs = s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})/);
+    if(mEs) {
+      const dd = mEs[1].padStart(2,'0');
+      const mm = mEs[2].padStart(2,'0');
+      return `${mEs[3]}-${mm}-${dd}`;
+    }
+    return s; // último recurso, dejar tal cual
+  }
+
   const regs = _regs.filter(r => {
-    const f = r.fecha || '';
-    return f >= ini && f <= fin;
+    const f = _normFecha(r.fecha);
+    return f && f >= ini && f <= fin;
   });
   const impartidas = regs.filter(r => r.estado === 'ok' || r.estado === 'sub');
   const faltas     = regs.filter(r => r.estado === 'falta');
@@ -133,7 +162,7 @@ function _repCalcStats(ini, fin) {
 
   // Stats por instructor para sugerir destacado / menos destacado
   const statsInsts = _insts.map(inst => {
-    const iRegs = regs.filter(r => r.inst_id === inst.id);
+    const iRegs = regs.filter(r => String(r.inst_id) === String(inst.id));
     const iImp  = iRegs.filter(r => r.estado === 'ok' || r.estado === 'sub');
     const iFalt = iRegs.filter(r => r.estado === 'falta').length;
     const iAfor = iImp.filter(r => parseInt(r.cap||0)>0);
@@ -153,6 +182,18 @@ function _repCalcStats(ini, fin) {
     const scoreB = (b.aforo||0) - b.faltas*15;
     return scoreB < scoreA ? b : a;
   }) : (statsInsts.filter(s=>s.faltas>0).sort((a,b)=>b.faltas-a.faltas)[0] || null);
+
+  // Exponer info de diagnóstico (último cálculo) para que el botón manual pueda mostrarlo
+  try {
+    window._repUltDiag = {
+      totalEnRegistros: _regs.length,
+      totalEnRango: regs.length,
+      ini, fin,
+      muestraRegistros: _regs.slice(0,3).map(r => ({ fecha: r.fecha, estado: r.estado, inst_id: r.inst_id })),
+      fechasUnicasEnRango: [...new Set(regs.map(r => _normFecha(r.fecha)))].slice(0,7),
+      todasFechasUnicas: [...new Set(_regs.map(r => _normFecha(r.fecha)))].sort().slice(-15)
+    };
+  } catch(e){}
 
   return {
     totalClases: impartidas.length,
@@ -388,7 +429,23 @@ function repCargarSistema() {
 
   _repAutoCargarSistema(ini, fin);
   repAutoguardar();
-  showToast('✔ Datos cargados del sistema','ok');
+
+  // Diagnóstico visible: si no hay registros en el rango, explicar por qué
+  const diag = window._repUltDiag;
+  if(diag) {
+    if(diag.totalEnRegistros === 0) {
+      showToast('⚠ No hay registros cargados en el sistema (¿sincronizando Firebase?). Intenta de nuevo en unos segundos.','warn');
+      return;
+    }
+    if(diag.totalEnRango === 0) {
+      const ultimas = (diag.todasFechasUnicas || []).slice(-5).join(', ');
+      showToast(`⚠ No hay registros entre ${ini} y ${fin}. Hay ${diag.totalEnRegistros} registros en total. Últimas fechas con datos: ${ultimas || '—'}`, 'warn');
+      return;
+    }
+    showToast(`✔ Cargados ${diag.totalEnRango} registros del sistema (${diag.totalEnRegistros} totales)`, 'ok');
+  } else {
+    showToast('✔ Datos cargados del sistema','ok');
+  }
 }
 
 // ─── Guardar / Limpiar ───────────────────────────────────────────
