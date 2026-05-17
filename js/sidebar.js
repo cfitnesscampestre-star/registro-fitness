@@ -224,8 +224,32 @@ function renderReporteDep() {
   repRenderIncidencias();
 
   if(_repDep.iniDate && _repDep.finDate) {
+    // Actualizar preview de stats
     const stats = _repCalcStats(_repDep.iniDate, _repDep.finDate);
     _repActualizarPreview(stats);
+    // Actualizar texto de semana si estaba vacío o desactualizado
+    const elSem = document.getElementById('rep-semana');
+    if(elSem && !elSem.value) {
+      elSem.value = _repFmtSemana(_repDep.iniDate, _repDep.finDate);
+    }
+  } else {
+    // Sin fechas guardadas: calcular semana actual automáticamente
+    const { ini, fin } = _repGetLunesViernes();
+    const di = document.getElementById('rep-ini-date');
+    const df = document.getElementById('rep-fin-date');
+    if(di && !di.value) di.value = ini;
+    if(df && !df.value) df.value = fin;
+    if(ini && fin) {
+      _repDep.iniDate = ini;
+      _repDep.finDate = fin;
+      const stats = _repCalcStats(ini, fin);
+      _repActualizarPreview(stats);
+      const elSem = document.getElementById('rep-semana');
+      if(elSem && !elSem.value) {
+        elSem.value = _repFmtSemana(ini, fin);
+        _repDep.semana = elSem.value;
+      }
+    }
   }
 }
 
@@ -2380,60 +2404,61 @@ setTimeout(_syncFirmasBadge, 2000);
 
 
 // ═══════════════════════════════════════════════════════════════════
-// PATCH: Inicializar Reporte Dep. al navegar a la vista
-// Intercepta navegarA() para llamar renderReporteDep() cuando
-// se abre v-reporte-dep (tanto en PC como en móvil/tablet)
+// PATCH: Inicializar Reporte Dep. al navegar (PC + móvil + tablet)
+// Usa MutationObserver sobre #v-reporte-dep como mecanismo principal
+// y también intercepta navegarA() cuando está disponible
 // ═══════════════════════════════════════════════════════════════════
 (function() {
-  // Esperar a que navegarA esté definida (puede venir de mobile.js que carga después)
-  function _patchNavegara() {
-    if (typeof navegarA === 'function' && !window._navegarA_repDep_patched) {
-      const _orig = navegarA;
-      window.navegarA = function(seccionOVista) {
-        _orig.apply(this, arguments);
-        // Si se navega al reporte deportivo, inicializar los campos
-        if (seccionOVista === 'reporte-dep') {
-          setTimeout(function() {
-            if (typeof renderReporteDep === 'function') {
-              renderReporteDep();
-            }
-          }, 60);
-        }
-      };
-      window.navegarA = window.navegarA; // asegurar que es global
-      window._navegarA_repDep_patched = true;
-    }
+
+  function _initReporteDep() {
+    if (typeof renderReporteDep === 'function') renderReporteDep();
   }
 
-  // Intentar parchear en varios momentos (por el defer de los scripts)
-  _patchNavegara();
-  document.addEventListener('DOMContentLoaded', _patchNavegara);
-  setTimeout(_patchNavegara, 500);
-  setTimeout(_patchNavegara, 1500);
-
-  // También usar MutationObserver sobre v-reporte-dep como respaldo:
-  // cuando la vista recibe la clase 'on', inicializar el reporte
-  document.addEventListener('DOMContentLoaded', function() {
+  // ── Estrategia 1: MutationObserver sobre la vista ────────────────
+  // Detecta cuando #v-reporte-dep recibe la clase 'on' (cualquier
+  // mecanismo de navegación: sidebar, móvil, swipe, etc.)
+  function _setupObserver() {
     var vistaEl = document.getElementById('v-reporte-dep');
-    if (!vistaEl) return;
-    var _yaIniciado = false;
+    if (!vistaEl) return false;
 
+    var _cooldown = false;
     var obs = new MutationObserver(function(mutations) {
       mutations.forEach(function(m) {
-        if (m.type === 'attributes' && m.attributeName === 'class') {
-          var tieneOn = vistaEl.classList.contains('on');
-          if (tieneOn && !_yaIniciado) {
-            _yaIniciado = true;
-            setTimeout(function() {
-              if (typeof renderReporteDep === 'function') renderReporteDep();
-              // Reiniciar para detectar próximas aperturas
-              setTimeout(function() { _yaIniciado = false; }, 300);
-            }, 50);
-          }
+        if (m.attributeName === 'class' && vistaEl.classList.contains('on') && !_cooldown) {
+          _cooldown = true;
+          setTimeout(function() {
+            _initReporteDep();
+            setTimeout(function() { _cooldown = false; }, 400);
+          }, 60);
         }
       });
     });
-
     obs.observe(vistaEl, { attributes: true });
-  });
+    return true;
+  }
+
+  // ── Estrategia 2: Interceptar navegarA() ─────────────────────────
+  function _patchNavegara() {
+    if (typeof window.navegarA !== 'function' || window._repDep_patch) return;
+    var _orig = window.navegarA;
+    window.navegarA = function(id) {
+      _orig.apply(this, arguments);
+      if (id === 'reporte-dep') setTimeout(_initReporteDep, 80);
+    };
+    window._repDep_patch = true;
+  }
+
+  // Ejecutar en varios momentos para cubrir el defer de los scripts
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', function() {
+      _setupObserver();
+      _patchNavegara();
+    });
+  } else {
+    _setupObserver();
+    _patchNavegara();
+  }
+  setTimeout(_patchNavegara, 600);
+  setTimeout(_patchNavegara, 1600);
+
 })();
