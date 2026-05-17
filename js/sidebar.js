@@ -333,6 +333,8 @@ function _repLeerCampos() {
 // Esto sustituye al click manual del botón "⚡ Cargar del sistema",
 // indispensable en móvil/iPad donde el flujo de varios toques se rompe.
 function repOnFechaChange() {
+  // [DIAG MÓVIL] confirmar que el handler se disparó
+  try { showToast('▶ repOnFechaChange disparado','info'); } catch(e){}
   const ini = document.getElementById('rep-ini-date')?.value || '';
   const fin = document.getElementById('rep-fin-date')?.value || '';
   _repDep.iniDate = ini;
@@ -417,6 +419,8 @@ function repSemanaActual() {
 // ─── ⚡ Cargar datos del sistema ──────────────────────────────────
 // Versión manual (con toast) — disparada por el botón "⚡ Cargar del sistema"
 function repCargarSistema() {
+  // [DIAG MÓVIL] confirmar que el handler se disparó
+  try { showToast('▶ repCargarSistema disparado','info'); } catch(e){ alert('repCargarSistema disparado'); }
   const ini = document.getElementById('rep-ini-date')?.value || '';
   const fin = document.getElementById('rep-fin-date')?.value || '';
   if(!ini || !fin) {
@@ -2471,3 +2475,22 @@ _syncFirmasBadge = function() {
 // Correr cada 8 segundos y al cargar
 setInterval(_syncFirmasBadge, 8000);
 setTimeout(_syncFirmasBadge, 2000);
+
+// ═══════════════════════════════════════════════════════════════════
+// EXPOSICIÓN EXPLÍCITA AL WINDOW — garantía para handlers inline en móvil
+// (algunos navegadores móviles tienen problemas resolviendo funciones
+// declaradas en scripts diferidos cuando se cachean por PWA)
+// ═══════════════════════════════════════════════════════════════════
+(function _exponerRepDep(){
+  const fns = [
+    'renderReporteDep','repOnFechaChange','repSemanaActual','repCargarSistema',
+    '_repAutoCargarSistema','_repCalcStats','_repActualizarPreview','_repFmtSemana',
+    'repAutoguardar','repLimpiar','repGuardar','repImprimir','repExportarPDF',
+    'repExportarGDocs','repAddComp','repDelComp','repAddLogro','repDelLogro',
+    'repAddIncidencia','repDelIncidencia','repRenderCompetencias','repRenderLogros',
+    'repRenderIncidencias','_repLeerCampos','_repPoblarInstructores'
+  ];
+  fns.forEach(n => {
+    try { if(typeof eval(n) === 'function') window[n] = eval(n); } catch(e){}
+  });
+})();
