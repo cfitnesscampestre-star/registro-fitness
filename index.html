@@ -4225,5 +4225,72 @@ function abrirHubSuplencias() {
 window.abrirHubSuplencias=abrirHubSuplencias;
 </script>
 
+
+<!-- ═══ SWIPE NAV — deslizar header hacia abajo revela el menú ═══ -->
+<script>
+(function(){
+  var isMob = function(){ return window.innerWidth <= 640; };
+  var hdr = document.getElementById('hdr');
+  var bar = document.getElementById('mob-nav-bar');
+  if(!hdr || !bar) return;
+
+  var touchStartY = 0;
+  var menuVisible = false;
+  var autoHideTimer = null;
+
+  function showMenu(){
+    if(!isMob()) return;
+    bar.classList.add('visible');
+    menuVisible = true;
+    resetAutoHide();
+  }
+
+  function hideMenu(){
+    bar.classList.remove('visible');
+    menuVisible = false;
+    if(autoHideTimer){ clearTimeout(autoHideTimer); autoHideTimer = null; }
+  }
+
+  function resetAutoHide(){
+    if(autoHideTimer) clearTimeout(autoHideTimer);
+    autoHideTimer = setTimeout(function(){ hideMenu(); }, 4000);
+  }
+
+  // Touch en el header
+  hdr.addEventListener('touchstart', function(e){
+    touchStartY = e.touches[0].clientY;
+  }, { passive: true });
+
+  hdr.addEventListener('touchend', function(e){
+    if(!isMob()) return;
+    var dy = e.changedTouches[0].clientY - touchStartY;
+    if(dy > 18 && !menuVisible) showMenu();       // swipe abajo → mostrar
+    else if(dy < -12 && menuVisible) hideMenu();  // swipe arriba → ocultar
+  }, { passive: true });
+
+  // Tap en el header también alterna (útil si el swipe no se detecta bien)
+  hdr.addEventListener('click', function(e){
+    if(!isMob()) return;
+    // solo si el tap fue en área vacía del header (no en botones)
+    if(e.target === hdr || e.target.classList.contains('htit') || 
+       e.target.closest('#sync-indicator') || e.target.closest('.hico')){
+      menuVisible ? hideMenu() : showMenu();
+    }
+  });
+
+  // Cerrar al tocar fuera
+  document.addEventListener('touchstart', function(e){
+    if(menuVisible && !hdr.contains(e.target) && !bar.contains(e.target)){
+      hideMenu();
+    }
+  }, { passive: true });
+
+  // Botones del menú cierran el menú al hacer tap
+  bar.querySelectorAll('button').forEach(function(btn){
+    btn.addEventListener('click', function(){ hideMenu(); });
+  });
+})();
+</script>
+
 </body>
 </html>
