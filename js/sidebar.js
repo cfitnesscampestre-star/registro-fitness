@@ -2377,3 +2377,63 @@ _syncFirmasBadge = function() {
 // Correr cada 8 segundos y al cargar
 setInterval(_syncFirmasBadge, 8000);
 setTimeout(_syncFirmasBadge, 2000);
+
+
+// ═══════════════════════════════════════════════════════════════════
+// PATCH: Inicializar Reporte Dep. al navegar a la vista
+// Intercepta navegarA() para llamar renderReporteDep() cuando
+// se abre v-reporte-dep (tanto en PC como en móvil/tablet)
+// ═══════════════════════════════════════════════════════════════════
+(function() {
+  // Esperar a que navegarA esté definida (puede venir de mobile.js que carga después)
+  function _patchNavegara() {
+    if (typeof navegarA === 'function' && !window._navegarA_repDep_patched) {
+      const _orig = navegarA;
+      window.navegarA = function(seccionOVista) {
+        _orig.apply(this, arguments);
+        // Si se navega al reporte deportivo, inicializar los campos
+        if (seccionOVista === 'reporte-dep') {
+          setTimeout(function() {
+            if (typeof renderReporteDep === 'function') {
+              renderReporteDep();
+            }
+          }, 60);
+        }
+      };
+      window.navegarA = window.navegarA; // asegurar que es global
+      window._navegarA_repDep_patched = true;
+    }
+  }
+
+  // Intentar parchear en varios momentos (por el defer de los scripts)
+  _patchNavegara();
+  document.addEventListener('DOMContentLoaded', _patchNavegara);
+  setTimeout(_patchNavegara, 500);
+  setTimeout(_patchNavegara, 1500);
+
+  // También usar MutationObserver sobre v-reporte-dep como respaldo:
+  // cuando la vista recibe la clase 'on', inicializar el reporte
+  document.addEventListener('DOMContentLoaded', function() {
+    var vistaEl = document.getElementById('v-reporte-dep');
+    if (!vistaEl) return;
+    var _yaIniciado = false;
+
+    var obs = new MutationObserver(function(mutations) {
+      mutations.forEach(function(m) {
+        if (m.type === 'attributes' && m.attributeName === 'class') {
+          var tieneOn = vistaEl.classList.contains('on');
+          if (tieneOn && !_yaIniciado) {
+            _yaIniciado = true;
+            setTimeout(function() {
+              if (typeof renderReporteDep === 'function') renderReporteDep();
+              // Reiniciar para detectar próximas aperturas
+              setTimeout(function() { _yaIniciado = false; }, 300);
+            }, 50);
+          }
+        }
+      });
+    });
+
+    obs.observe(vistaEl, { attributes: true });
+  });
+})();
