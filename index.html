@@ -1249,7 +1249,7 @@ window._cargarXLSX=function(){
 </div><!-- /instructor-screen -->
 
 <!-- ═══ MENÚ MÓVIL FIJO — barra independiente debajo del header ═══ -->
-<div id="mob-nav-bar" class="no-print" style="display:none;position:fixed;top:var(--hdr-mob-h,56px);left:0;right:0;z-index:499;flex-wrap:nowrap;gap:0;justify-content:space-around;align-items:center;padding:5px 8px;background:rgba(6,12,8,.99);border-bottom:1px solid rgba(94,255,160,.15);box-shadow:0 2px 8px rgba(0,0,0,.4);">
+<div id="mob-nav-bar" class="no-print" style="position:fixed;top:var(--hdr-mob-h,56px);left:0;right:0;z-index:499;flex-wrap:nowrap;gap:0;justify-content:space-around;align-items:center;padding:5px 8px;background:rgba(6,12,8,.99);border-bottom:1px solid rgba(94,255,160,.15);box-shadow:0 2px 8px rgba(0,0,0,.4);">
     <button onclick="navegarA('dashboard')" style="display:flex;align-items:center;gap:3px;background:none;border:none;color:var(--txt3);font-family:'Outfit',sans-serif;font-size:.58rem;cursor:pointer;padding:1px 8px;border-radius:5px;-webkit-tap-highlight-color:transparent">
       <svg class="ico" viewBox="0 0 20 20" style="width:10px;height:10px"><rect x="3" y="12" width="3" height="5" rx="1" stroke="currentColor" stroke-width="1.7" fill="none"/><rect x="8.5" y="8" width="3" height="9" rx="1" stroke="currentColor" stroke-width="1.7" fill="none"/><rect x="14" y="4" width="3" height="13" rx="1" stroke="currentColor" stroke-width="1.7" fill="none"/></svg> Dashboard
     </button>
@@ -4228,54 +4228,69 @@ window.abrirHubSuplencias=abrirHubSuplencias;
 
 <!-- ═══ SWIPE NAV — deslizar header hacia abajo revela el menú ═══ -->
 <script>
-(function(){
+window.addEventListener('DOMContentLoaded', function(){
   var isMob = function(){ return window.innerWidth <= 640; };
   var hdr = document.getElementById('hdr');
   var bar = document.getElementById('mob-nav-bar');
-  if(!hdr || !bar) return;
+  if(!hdr || !bar){ return; }
 
   var touchStartY = 0;
+  var touchStartX = 0;
   var menuVisible = false;
   var autoHideTimer = null;
 
+  // Inicializar oculto via display:none, pero preparado para mostrar
+  bar.style.display = 'none';
+  bar.style.transition = 'opacity .25s ease, transform .28s cubic-bezier(.4,0,.2,1)';
+  bar.style.opacity = '0';
+  bar.style.transform = 'translateY(-8px)';
+
   function showMenu(){
-    if(!isMob()) return;
-    bar.classList.add('visible');
+    bar.style.display = 'flex';
+    requestAnimationFrame(function(){
+      bar.style.opacity = '1';
+      bar.style.transform = 'translateY(0)';
+    });
     menuVisible = true;
     resetAutoHide();
   }
 
   function hideMenu(){
-    bar.classList.remove('visible');
+    bar.style.opacity = '0';
+    bar.style.transform = 'translateY(-8px)';
+    setTimeout(function(){ 
+      if(!menuVisible) bar.style.display = 'none'; 
+    }, 280);
     menuVisible = false;
     if(autoHideTimer){ clearTimeout(autoHideTimer); autoHideTimer = null; }
   }
 
   function resetAutoHide(){
     if(autoHideTimer) clearTimeout(autoHideTimer);
-    autoHideTimer = setTimeout(function(){ hideMenu(); }, 4000);
+    autoHideTimer = setTimeout(hideMenu, 4000);
   }
 
-  // Touch en el header
   hdr.addEventListener('touchstart', function(e){
     touchStartY = e.touches[0].clientY;
+    touchStartX = e.touches[0].clientX;
   }, { passive: true });
 
   hdr.addEventListener('touchend', function(e){
     if(!isMob()) return;
     var dy = e.changedTouches[0].clientY - touchStartY;
-    if(dy > 18 && !menuVisible) showMenu();       // swipe abajo → mostrar
-    else if(dy < -12 && menuVisible) hideMenu();  // swipe arriba → ocultar
+    var dx = Math.abs(e.changedTouches[0].clientX - touchStartX);
+    if(Math.abs(dy) > dx){
+      if(dy > 15 && !menuVisible){ showMenu(); }
+      else if(dy < -10 && menuVisible){ hideMenu(); }
+    }
   }, { passive: true });
 
-  // Tap en el header también alterna (útil si el swipe no se detecta bien)
+  // Tap en logo/título también alterna el menú
   hdr.addEventListener('click', function(e){
     if(!isMob()) return;
-    // solo si el tap fue en área vacía del header (no en botones)
-    if(e.target === hdr || e.target.classList.contains('htit') || 
-       e.target.closest('#sync-indicator') || e.target.closest('.hico')){
-      menuVisible ? hideMenu() : showMenu();
-    }
+    var tag = e.target.tagName.toLowerCase();
+    if(tag === 'button' || e.target.closest('button')) return;
+    menuVisible ? hideMenu() : showMenu();
   });
 
   // Cerrar al tocar fuera
@@ -4285,11 +4300,11 @@ window.abrirHubSuplencias=abrirHubSuplencias;
     }
   }, { passive: true });
 
-  // Botones del menú cierran el menú al hacer tap
+  // Botones del menú cierran al navegar
   bar.querySelectorAll('button').forEach(function(btn){
-    btn.addEventListener('click', function(){ hideMenu(); });
+    btn.addEventListener('click', function(){ setTimeout(hideMenu, 150); });
   });
-})();
+});
 </script>
 
 </body>
