@@ -119,7 +119,11 @@ function _repPoblarInstructores() {
 // ─── Calcular stats de la semana desde el sistema ─────────────────
 function _repCalcStats(ini, fin) {
   if(!ini || !fin) return null;
-  const regs = registros.filter(r => {
+  // Defensivo: si los datos globales no se han cargado, devolver stats vacíos en vez de null
+  // para que el preview pueda renderizar al menos los ceros y no quedarse en el placeholder del HTML.
+  const _regs   = (typeof registros   !== 'undefined' && Array.isArray(registros))   ? registros   : [];
+  const _insts  = (typeof instructores!== 'undefined' && Array.isArray(instructores))? instructores: [];
+  const regs = _regs.filter(r => {
     const f = r.fecha || '';
     return f >= ini && f <= fin;
   });
@@ -128,7 +132,7 @@ function _repCalcStats(ini, fin) {
   const totalAsis  = impartidas.reduce((a, r) => a + (parseInt(r.asistentes) || 0), 0);
 
   // Stats por instructor para sugerir destacado / menos destacado
-  const statsInsts = instructores.map(inst => {
+  const statsInsts = _insts.map(inst => {
     const iRegs = regs.filter(r => r.inst_id === inst.id);
     const iImp  = iRegs.filter(r => r.estado === 'ok' || r.estado === 'sub');
     const iFalt = iRegs.filter(r => r.estado === 'falta').length;
@@ -234,9 +238,13 @@ function renderReporteDep() {
   repRenderLogros();
   repRenderIncidencias();
 
-  // Calcular y mostrar stats del periodo
-  const stats = _repCalcStats(_repDep.iniDate, _repDep.finDate);
-  _repActualizarPreview(stats);
+  // Autocarga silenciosa del sistema al entrar a la vista (clave en móvil/iPad,
+  // donde el usuario no debería tener que pulsar "⚡ Cargar del sistema" manualmente)
+  if(_repDep.iniDate && _repDep.finDate) {
+    _repAutoCargarSistema(_repDep.iniDate, _repDep.finDate);
+  } else {
+    _repActualizarPreview(null);
+  }
 }
 
 // ─── Leer todos los campos ────────────────────────────────────────
@@ -279,54 +287,43 @@ function _repLeerCampos() {
 }
 
 // ─── Cambio de fechas ─────────────────────────────────────────────
+// Al cambiar las fechas se carga AUTOMÁTICAMENTE la información del sistema
+// (clases, faltas, asistencia, profesores destacados/menos destacados).
+// Esto sustituye al click manual del botón "⚡ Cargar del sistema",
+// indispensable en móvil/iPad donde el flujo de varios toques se rompe.
 function repOnFechaChange() {
   const ini = document.getElementById('rep-ini-date')?.value || '';
   const fin = document.getElementById('rep-fin-date')?.value || '';
   _repDep.iniDate = ini;
   _repDep.finDate = fin;
+
   if(ini && fin) {
+    // Validar orden de fechas
+    if(ini > fin) {
+      try { showToast('La fecha de inicio debe ser anterior a la fecha de fin','warn'); } catch(e){}
+      return;
+    }
+    // Recalcular SIEMPRE el texto de la semana desde las fechas (no condicional)
     const semTxt = _repFmtSemana(ini, fin);
-    const el = document.getElementById('rep-semana');
-    if(el && !el.value) el.value = semTxt;
-    const stats = _repCalcStats(ini, fin);
-    _repActualizarPreview(stats);
+    _repDep.semana = semTxt;
+    const elSem = document.getElementById('rep-semana');
+    if(elSem) elSem.value = semTxt;
+
+    // Cargar datos del sistema automáticamente (silencioso, sin toast)
+    _repAutoCargarSistema(ini, fin);
   }
   repAutoguardar();
 }
 
-function repSemanaActual() {
-  const { ini, fin } = _repGetLunesViernes();
-  const di = document.getElementById('rep-ini-date');
-  const df = document.getElementById('rep-fin-date');
-  if(di) di.value = ini;
-  if(df) df.value = fin;
-  repOnFechaChange();
-  // Forzar semana en campo texto
-  const semTxt = _repFmtSemana(ini, fin);
-  const elSem = document.getElementById('rep-semana');
-  if(elSem) elSem.value = semTxt;
-  repAutoguardar();
-}
-
-// ─── ⚡ Cargar datos del sistema ──────────────────────────────────
-function repCargarSistema() {
-  const ini = document.getElementById('rep-ini-date')?.value || '';
-  const fin = document.getElementById('rep-fin-date')?.value || '';
-  if(!ini || !fin) {
-    showToast('Primero selecciona el rango de fechas de la semana','warn');
-    return;
-  }
-
+// Carga silenciosa del sistema — usada por onchange de fechas y por render inicial.
+// No muestra toast (a diferencia de repCargarSistema) para no saturar al usuario en móvil.
+function _repAutoCargarSistema(ini, fin) {
   const stats = _repCalcStats(ini, fin);
-  if(!stats) return;
-
-  // Semana
-  const semEl = document.getElementById('rep-semana');
-  if(semEl) semEl.value = _repFmtSemana(ini, fin);
+  if(!stats) { _repActualizarPreview(null); return; }
 
   // Profesores
   const tpEl = document.getElementById('rep-prof-total');
-  if(tpEl) tpEl.value = instructores.length;
+  if(tpEl && (typeof instructores !== 'undefined')) tpEl.value = instructores.length;
 
   const tcEl = document.getElementById('rep-prof-clases');
   if(tcEl) tcEl.value = stats.totalClases;
@@ -338,17 +335,17 @@ function repCargarSistema() {
   const asEl = document.getElementById('rep-alum-asistencia');
   if(asEl) asEl.value = stats.totalAsis;
 
-  // Sugerir destacados
+  // Sugerir destacados (sólo si los campos están vacíos, para no pisar lo que el usuario haya escrito)
   const dSel = document.getElementById('rep-prof-destacado');
   const mSel = document.getElementById('rep-prof-menos');
-  if(dSel && stats.mejor) {
+  if(dSel && stats.mejor && !dSel.value) {
     dSel.value = String(stats.mejor.inst.id);
     const razEl = document.getElementById('rep-prof-destacado-razon');
     if(razEl && !razEl.value) {
       razEl.value = `Aforo del ${stats.mejor.aforo}% · ${stats.mejor.clases} clases impartidas · ${stats.mejor.asistentes} asistentes totales`;
     }
   }
-  if(mSel && stats.peor && (!stats.mejor || stats.peor.inst.id !== stats.mejor.inst.id)) {
+  if(mSel && stats.peor && (!stats.mejor || stats.peor.inst.id !== stats.mejor.inst.id) && !mSel.value) {
     mSel.value = String(stats.peor.inst.id);
     const razEl = document.getElementById('rep-prof-menos-razon');
     if(razEl && !razEl.value) {
@@ -360,6 +357,36 @@ function repCargarSistema() {
   }
 
   _repActualizarPreview(stats);
+}
+
+function repSemanaActual() {
+  const { ini, fin } = _repGetLunesViernes();
+  const di = document.getElementById('rep-ini-date');
+  const df = document.getElementById('rep-fin-date');
+  if(di) di.value = ini;
+  if(df) df.value = fin;
+  // Forzar semana en campo texto SIEMPRE (no condicional)
+  const semTxt = _repFmtSemana(ini, fin);
+  const elSem = document.getElementById('rep-semana');
+  if(elSem) elSem.value = semTxt;
+  // Dispara el flujo completo (que ya recalcula semana y autocarga sistema)
+  repOnFechaChange();
+}
+
+// ─── ⚡ Cargar datos del sistema ──────────────────────────────────
+// Versión manual (con toast) — disparada por el botón "⚡ Cargar del sistema"
+function repCargarSistema() {
+  const ini = document.getElementById('rep-ini-date')?.value || '';
+  const fin = document.getElementById('rep-fin-date')?.value || '';
+  if(!ini || !fin) {
+    showToast('Primero selecciona el rango de fechas de la semana','warn');
+    return;
+  }
+  // Recalcular semana
+  const semEl = document.getElementById('rep-semana');
+  if(semEl) semEl.value = _repFmtSemana(ini, fin);
+
+  _repAutoCargarSistema(ini, fin);
   repAutoguardar();
   showToast('✔ Datos cargados del sistema','ok');
 }
