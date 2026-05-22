@@ -2477,48 +2477,33 @@ setInterval(_syncFirmasBadge, 8000);
 setTimeout(_syncFirmasBadge, 2000);
 
 // ═══════════════════════════════════════════════════════════════════
-// HOOK: disparar renderReporteDep() al entrar a la vista de reporte
-// en móvil/tablet (donde navegarA() muestra la vista pero no la puebla).
-// Usa MutationObserver para detectar cuando #v-reporte-dep recibe clase 'on'.
-// ═══════════════════════════════════════════════════════════════════
-(function _hookRepDep() {
-  function instalar() {
-    const el = document.getElementById('v-reporte-dep');
-    if (!el) return;
-    let _estabaVisible = el.classList.contains('on');
-    new MutationObserver(function() {
-      const visible = el.classList.contains('on');
-      if (visible && !_estabaVisible) {
-        // La vista acaba de activarse — disparar render
-        try {
-          if (typeof renderReporteDep === 'function') renderReporteDep();
-        } catch(e) {}
-      }
-      _estabaVisible = visible;
-    }).observe(el, { attributes: true, attributeFilter: ['class'] });
-  }
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', instalar);
-  } else {
-    instalar();
-  }
-})();
-
-// ═══════════════════════════════════════════════════════════════════
 // EXPOSICIÓN EXPLÍCITA AL WINDOW — garantía para handlers inline en móvil
 // (algunos navegadores móviles tienen problemas resolviendo funciones
 // declaradas en scripts diferidos cuando se cachean por PWA)
 // ═══════════════════════════════════════════════════════════════════
-(function _exponerRepDep(){
-  const fns = [
-    'renderReporteDep','repOnFechaChange','repSemanaActual','repCargarSistema',
-    '_repAutoCargarSistema','_repCalcStats','_repActualizarPreview','_repFmtSemana',
-    'repAutoguardar','repLimpiar','repGuardar','repImprimir','repExportarPDF',
-    'repExportarGDocs','repAddComp','repDelComp','repAddLogro','repDelLogro',
-    'repAddIncidencia','repDelIncidencia','repRenderCompetencias','repRenderLogros',
-    'repRenderIncidencias','_repLeerCampos','_repPoblarInstructores'
-  ];
-  fns.forEach(n => {
-    try { if(typeof eval(n) === 'function') window[n] = eval(n); } catch(e){}
-  });
-})();
+// Exposición directa al window — sin eval (compatible con todos los navegadores móviles y Safari)
+window.renderReporteDep        = renderReporteDep;
+window.repOnFechaChange        = repOnFechaChange;
+window.repSemanaActual         = repSemanaActual;
+window.repCargarSistema        = repCargarSistema;
+window._repAutoCargarSistema   = _repAutoCargarSistema;
+window._repCalcStats           = _repCalcStats;
+window._repActualizarPreview   = _repActualizarPreview;
+window._repFmtSemana           = _repFmtSemana;
+window.repAutoguardar          = repAutoguardar;
+window.repLimpiar              = repLimpiar;
+window.repGuardar              = repGuardar;
+window.repImprimir             = repImprimir;
+window.repExportarPDF          = repExportarPDF;
+window.repExportarGDocs        = repExportarGDocs;
+window.repAddComp              = repAddComp;
+window.repDelComp              = repDelComp;
+window.repAddLogro             = repAddLogro;
+window.repDelLogro             = repDelLogro;
+window.repAddIncidencia        = repAddIncidencia;
+window.repDelIncidencia        = repDelIncidencia;
+window.repRenderCompetencias   = repRenderCompetencias;
+window.repRenderLogros         = repRenderLogros;
+window.repRenderIncidencias    = repRenderIncidencias;
+window._repLeerCampos          = _repLeerCampos;
+window._repPoblarInstructores  = _repPoblarInstructores;
