@@ -437,7 +437,7 @@ function _triggerRender(viewId) {
   if(viewId === 'sup-plan')   { renderSupPlan(); return; }
   if(viewId === 'log')        { renderLog(); return; }
   if(viewId === 'comparar')   { renderComparar(); return; }
-  if(viewId === 'reporte-dep'){ (window.renderReporteDep || renderReporteDep)?.(); return; }
+  if(viewId === 'reporte-dep'){ renderReporteDep(); return; }
   if(viewId === 'eventos'){ evtRenderAll(); return; }
 }
 
