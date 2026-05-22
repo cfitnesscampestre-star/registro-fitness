@@ -2477,6 +2477,34 @@ setInterval(_syncFirmasBadge, 8000);
 setTimeout(_syncFirmasBadge, 2000);
 
 // ═══════════════════════════════════════════════════════════════════
+// HOOK: disparar renderReporteDep() al entrar a la vista de reporte
+// en móvil/tablet (donde navegarA() muestra la vista pero no la puebla).
+// Usa MutationObserver para detectar cuando #v-reporte-dep recibe clase 'on'.
+// ═══════════════════════════════════════════════════════════════════
+(function _hookRepDep() {
+  function instalar() {
+    const el = document.getElementById('v-reporte-dep');
+    if (!el) return;
+    let _estabaVisible = el.classList.contains('on');
+    new MutationObserver(function() {
+      const visible = el.classList.contains('on');
+      if (visible && !_estabaVisible) {
+        // La vista acaba de activarse — disparar render
+        try {
+          if (typeof renderReporteDep === 'function') renderReporteDep();
+        } catch(e) {}
+      }
+      _estabaVisible = visible;
+    }).observe(el, { attributes: true, attributeFilter: ['class'] });
+  }
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', instalar);
+  } else {
+    instalar();
+  }
+})();
+
+// ═══════════════════════════════════════════════════════════════════
 // EXPOSICIÓN EXPLÍCITA AL WINDOW — garantía para handlers inline en móvil
 // (algunos navegadores móviles tienen problemas resolviendo funciones
 // declaradas en scripts diferidos cuando se cachean por PWA)
