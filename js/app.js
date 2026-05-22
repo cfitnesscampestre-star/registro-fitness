@@ -1033,3 +1033,52 @@ renderAll = function(){
 renderAll._timer = null;
 
 // ═══════════════════════════════════════════════════════
+
+// ═══════════════════════════════════════════════════════
+// TOGGLE TEMA (oscuro / claro)
+// ═══════════════════════════════════════════════════════
+function toggleTema() {
+  const html = document.documentElement;
+  const esClaro = html.classList.contains('tema-claro');
+
+  if (esClaro) {
+    // Pasar a oscuro
+    html.classList.remove('tema-claro');
+    localStorage.setItem('fitness-tema', 'oscuro');
+  } else {
+    // Pasar a claro
+    html.classList.add('tema-claro');
+    localStorage.setItem('fitness-tema', 'claro');
+  }
+
+  // Actualizar ícono del botón en el menú de coord
+  const icono = document.getElementById('coord-tema-icon');
+  if (icono) {
+    if (html.classList.contains('tema-claro')) {
+      // Ícono sol (tema claro activo → clic cambia a oscuro)
+      icono.innerHTML = '<svg class="ico" viewBox="0 0 20 20"><circle cx="10" cy="10" r="3" stroke="currentColor" stroke-width="1.4" fill="none"/><path d="M10 2 L10 5 M10 15 L10 18 M2 10 L5 10 M15 10 L18 10 M4.2 4.2 L6.4 6.4 M13.6 13.6 L15.8 15.8 M15.8 4.2 L13.6 6.4 M6.4 13.6 L4.2 15.8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>';
+    } else {
+      // Ícono luna (tema oscuro activo → clic cambia a claro)
+      icono.innerHTML = '<svg class="ico" viewBox="0 0 20 20"><path d="M14 4 Q10 4 8 7 Q6 10 8 13 Q10 16 14 16 Q11 14 11 10 Q11 6 14 4" stroke="currentColor" stroke-width="1.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+    }
+  }
+
+  // Si temaActual existe como variable global, sincronizarla
+  if (typeof temaActual !== 'undefined') {
+    temaActual = html.classList.contains('tema-claro') ? 'claro' : 'oscuro';
+  }
+
+  // Re-renderizar dashboard para que los charts usen los colores correctos
+  if (typeof renderDashboard === 'function') {
+    setTimeout(renderDashboard, 50);
+  }
+}
+window.toggleTema = toggleTema;
+
+// Aplicar tema guardado al cargar la página
+(function() {
+  const temaGuardado = localStorage.getItem('fitness-tema');
+  if (temaGuardado === 'claro') {
+    document.documentElement.classList.add('tema-claro');
+  }
+})();
