@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="es"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<html lang="es" class="tema-claro"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1.0, user-scalable=no">
 <title>Fitness Control — Club Campestre</title>
@@ -4224,6 +4224,67 @@ function abrirHubSuplencias() {
 window.abrirHubSuplencias=abrirHubSuplencias;
 </script>
 
+
+<!-- ═══ COORD MENU + TOGGLE TEMA ═══ -->
+<script>
+// ── Menú de coordinación (dropdown) ──────────────────────────
+function toggleCoordMenu() {
+  var dd = document.getElementById('coord-menu-dropdown');
+  if (!dd) return;
+  var visible = dd.style.display !== 'none';
+  dd.style.display = visible ? 'none' : 'block';
+  if (!visible) {
+    setTimeout(function() {
+      document.addEventListener('click', function _close(e) {
+        var wrap = document.getElementById('coord-menu-wrap');
+        if (wrap && !wrap.contains(e.target)) {
+          dd.style.display = 'none';
+          document.removeEventListener('click', _close);
+        }
+      });
+    }, 10);
+  }
+}
+window.toggleCoordMenu = toggleCoordMenu;
+
+// ── Toggle tema claro / oscuro ────────────────────────────────
+function toggleTema() {
+  var html = document.documentElement;
+  var esClaro = html.classList.contains('tema-claro');
+  if (esClaro) {
+    html.classList.remove('tema-claro');
+    localStorage.setItem('fitness-tema', 'oscuro');
+  } else {
+    html.classList.add('tema-claro');
+    localStorage.setItem('fitness-tema', 'claro');
+  }
+  var icono = document.getElementById('coord-tema-icon');
+  if (icono) {
+    if (html.classList.contains('tema-claro')) {
+      icono.innerHTML = '<svg class="ico" viewBox="0 0 20 20"><circle cx="10" cy="10" r="3" stroke="currentColor" stroke-width="1.4" fill="none"/><path d="M10 2 L10 5 M10 15 L10 18 M2 10 L5 10 M15 10 L18 10 M4.2 4.2 L6.4 6.4 M13.6 13.6 L15.8 15.8 M15.8 4.2 L13.6 6.4 M6.4 13.6 L4.2 15.8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>';
+    } else {
+      icono.innerHTML = '<svg class="ico" viewBox="0 0 20 20"><path d="M14 4 Q10 4 8 7 Q6 10 8 13 Q10 16 14 16 Q11 14 11 10 Q11 6 14 4" stroke="currentColor" stroke-width="1.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+    }
+  }
+  if (typeof temaActual !== 'undefined') {
+    window.temaActual = html.classList.contains('tema-claro') ? 'claro' : 'oscuro';
+  }
+  if (typeof renderDashboard === 'function') {
+    setTimeout(renderDashboard, 50);
+  }
+}
+window.toggleTema = toggleTema;
+
+// Aplicar tema guardado (o claro por defecto)
+(function() {
+  var guardado = localStorage.getItem('fitness-tema');
+  if (guardado === 'oscuro') {
+    document.documentElement.classList.remove('tema-claro');
+  } else {
+    document.documentElement.classList.add('tema-claro');
+  }
+})();
+</script>
 
 <!-- ═══ SWIPE NAV — deslizar header hacia abajo revela el menú ═══ -->
 <script>
