@@ -3464,18 +3464,30 @@ function toggleCoordMenu(ev) {
   var dd = document.getElementById('coord-menu-dropdown');
   if (!dd) return;
   var visible = dd.style.display !== 'none';
-  dd.style.display = visible ? 'none' : 'block';
-  if (!visible) {
-    setTimeout(function() {
-      document.addEventListener('click', function _close(e) {
-        var wrap = document.getElementById('coord-menu-wrap');
-        if (wrap && !wrap.contains(e.target)) {
-          dd.style.display = 'none';
-          document.removeEventListener('click', _close);
-        }
-      });
-    }, 0);
+  if (visible) {
+    dd.style.display = 'none';
+    return;
   }
+  // Posicionar con position:fixed para escapar de contenedores con overflow
+  var btn = document.getElementById('coord-menu-btn');
+  if (btn) {
+    var r = btn.getBoundingClientRect();
+    dd.style.position = 'fixed';
+    dd.style.top = (r.bottom + 6) + 'px';
+    dd.style.right = (window.innerWidth - r.right) + 'px';
+    dd.style.left = 'auto';
+    dd.style.zIndex = '99999';
+  }
+  dd.style.display = 'block';
+  setTimeout(function() {
+    document.addEventListener('click', function _close(e) {
+      var wrap = document.getElementById('coord-menu-wrap');
+      if (wrap && !wrap.contains(e.target)) {
+        dd.style.display = 'none';
+        document.removeEventListener('click', _close);
+      }
+    });
+  }, 0);
 }
 window.toggleCoordMenu = toggleCoordMenu;
 
