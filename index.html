@@ -147,6 +147,117 @@ window._cargarXLSX=function(){
   document.head.appendChild(link);
 })();
 </script>
+<style id="agenda-overlay-fix">
+/* ═══ FIX: Overlay de Agenda Móvil — reglas que no estaban en ningún CSS cargado ═══ */
+#mob-agenda-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 700;
+  background: var(--bg);
+  flex-direction: column;
+  overflow: hidden;
+}
+#mob-agenda-overlay.on {
+  display: flex;
+}
+/* Área scrollable del contenido de la agenda */
+#mob-agenda-overlay > div:last-child {
+  flex: 1;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+/* Botones de filtro de prioridad y tipo */
+.agenda-fil-btn,
+.agenda-pri-btn {
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 4px 12px;
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: .68rem;
+  font-weight: 700;
+  letter-spacing: .5px;
+  text-transform: uppercase;
+  background: var(--panel2);
+  color: var(--txt2);
+  cursor: pointer;
+  transition: all .15s;
+}
+.agenda-fil-btn.on,
+.agenda-pri-btn.on {
+  background: var(--verde);
+  color: #fff;
+  border-color: var(--verde);
+}
+/* Calendário mini de la agenda */
+.ag-cal-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 2px;
+}
+.ag-cal-dow {
+  font-family: 'DM Mono', monospace;
+  font-size: .55rem;
+  color: var(--txt3);
+  text-align: center;
+  padding: 2px 0 4px;
+  text-transform: uppercase;
+  letter-spacing: .4px;
+}
+.ag-cal-dow.fin { color: var(--gold2); }
+.ag-cal-day {
+  aspect-ratio: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  border-radius: 6px;
+  font-size: .7rem;
+  color: var(--txt2);
+  cursor: pointer;
+  border: 1px solid transparent;
+  transition: background .12s, border-color .12s;
+  position: relative;
+  user-select: none;
+}
+.ag-cal-day:hover { background: var(--panel2); }
+.ag-cal-day.vacio { pointer-events: none; }
+.ag-cal-day.fin { color: var(--gold2); }
+.ag-cal-day.hoy { border-color: var(--neon); color: var(--neon); font-weight: 700; }
+.ag-cal-day.selec { background: rgba(94,255,160,.15); border-color: var(--neon); color: var(--neon); font-weight: 700; }
+.ag-cal-dots { display: flex; gap: 2px; justify-content: center; margin-top: 1px; }
+.ag-cal-dot { width: 4px; height: 4px; border-radius: 50%; }
+.ag-cal-dot.nota-alta  { background: var(--red2); }
+.ag-cal-dot.nota-media { background: var(--gold2); }
+.ag-cal-dot.nota-baja  { background: var(--blue); }
+.ag-cal-dot.evento     { background: var(--neon); }
+/* Preview del día seleccionado */
+.ag-dia-preview { display: none; }
+.ag-dia-preview.on { display: block; }
+.ag-preview-item { display: flex; align-items: flex-start; gap: 8px; padding: 5px 0; border-bottom: 1px solid var(--border); }
+.ag-preview-item:last-child { border-bottom: none; }
+.ag-preview-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; margin-top: 4px; }
+/* Tarjetas de notas */
+.nota-card-mob {
+  background: var(--panel2);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 10px 12px;
+  margin-bottom: 6px;
+  transition: opacity .2s;
+}
+.nota-card-mob.nota-pri-alta  { border-left: 3px solid var(--red2); }
+.nota-card-mob.nota-pri-media { border-left: 3px solid var(--gold2); }
+.nota-card-mob.nota-pri-baja  { border-left: 3px solid var(--blue); }
+.nota-ts-mob {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 5px;
+  flex-wrap: wrap;
+}
+.nota-texto-mob { font-size: .8rem; color: var(--txt); line-height: 1.45; }
+</style>
 </head>
 
 
