@@ -1118,8 +1118,9 @@ html:not(.tema-oscuro) .mob-btn-agenda-row {
   position: fixed; inset: 0; z-index: 800;
   background: var(--bg);
   flex-direction: column;
-  padding: 14px 14px 16px;
+  padding: calc(var(--hdr-mob-h, 56px) + 14px) 14px calc(var(--nav-h, 68px) + var(--safe-bottom, 0px) + 16px);
   overflow: hidden;
+  overflow-y: auto;
 }
 #mob-agenda-overlay.on { display: flex; flex-direction: column; gap: 8px; }
 .nota-card-mob {
