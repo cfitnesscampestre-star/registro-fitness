@@ -1088,17 +1088,17 @@ window._cargarXLSX=function(){
     <div class="rep-grid-2" style="margin-top:.75rem">
       <div class="rep-field">
         <label>⭐ Profesor más destacado <span style="color:var(--neon);font-size:.7rem">⚡ sugerido</span></label>
-        <select id="rep-prof-destacado" onchange="repAutoguardar()" style="background:var(--panel2);border:1px solid var(--border);border-radius:8px;padding:.55rem .75rem;color:var(--txt);font-family:'Outfit',sans-serif;font-size:.84rem;outline:none;width:100%;margin-bottom:.4rem">
+        <select id="rep-prof-destacado" onchange="repMarcarEditado('destacado');repAutoguardar()" style="background:var(--panel2);border:1px solid var(--border);border-radius:8px;padding:.55rem .75rem;color:var(--txt);font-family:'Outfit',sans-serif;font-size:.84rem;outline:none;width:100%;margin-bottom:.4rem">
           <option value="">— Seleccionar instructor —</option>
         </select>
-        <textarea id="rep-prof-destacado-razon" rows="2" placeholder="¿Por qué fue el más destacado?" oninput="repAutoguardar()"></textarea>
+        <textarea id="rep-prof-destacado-razon" rows="2" placeholder="¿Por qué fue el más destacado?" oninput="repMarcarEditado('destacado');repAutoguardar()"></textarea>
       </div>
       <div class="rep-field">
         <label>⚠ Profesor menos destacado <span style="color:var(--neon);font-size:.7rem">⚡ sugerido</span></label>
-        <select id="rep-prof-menos" onchange="repAutoguardar()" style="background:var(--panel2);border:1px solid var(--border);border-radius:8px;padding:.55rem .75rem;color:var(--txt);font-family:'Outfit',sans-serif;font-size:.84rem;outline:none;width:100%;margin-bottom:.4rem">
+        <select id="rep-prof-menos" onchange="repMarcarEditado('menos');repAutoguardar()" style="background:var(--panel2);border:1px solid var(--border);border-radius:8px;padding:.55rem .75rem;color:var(--txt);font-family:'Outfit',sans-serif;font-size:.84rem;outline:none;width:100%;margin-bottom:.4rem">
           <option value="">— Seleccionar instructor —</option>
         </select>
-        <textarea id="rep-prof-menos-razon" rows="2" placeholder="¿Por qué fue el menos destacado?" oninput="repAutoguardar()"></textarea>
+        <textarea id="rep-prof-menos-razon" rows="2" placeholder="¿Por qué fue el menos destacado?" oninput="repMarcarEditado('menos');repAutoguardar()"></textarea>
       </div>
     </div>
   </div>
