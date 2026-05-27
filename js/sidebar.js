@@ -457,10 +457,128 @@ function repAutoguardar() {
   try { localStorage.setItem('fc_reporte_dep', JSON.stringify(_repDep)); } catch(e){}
 }
 
+// ─── Archivo de reportes guardados ──────────────────────────────
+// Cada reporte se guarda en un "slot" identificado por la fecha de inicio (YYYY-MM-DD).
+// Eso permite tener varios reportes (uno por semana) y reabrirlos cuando se vuelva
+// a seleccionar el mismo rango de fechas. La lista se administra desde "📂 Reportes".
+const REP_ARCHIVO_KEY = 'fc_reporte_dep_archivo';
+
+function _repLeerArchivo() {
+  try {
+    const raw = localStorage.getItem(REP_ARCHIVO_KEY);
+    if(!raw) return {};
+    const obj = JSON.parse(raw);
+    return (obj && typeof obj === 'object') ? obj : {};
+  } catch(e){ return {}; }
+}
+function _repEscribirArchivo(obj) {
+  try { localStorage.setItem(REP_ARCHIVO_KEY, JSON.stringify(obj)); } catch(e){}
+}
+
 function repGuardar() {
   repAutoguardar();
-  showToast('Reporte guardado ✔','ok');
+  // Guardar también en el archivo permanente, indexado por fecha de inicio
+  const slot = _repDep.iniDate || '';
+  if(!slot) {
+    showToast('Selecciona la semana antes de guardar','warn');
+    return;
+  }
+  const archivo = _repLeerArchivo();
+  archivo[slot] = {
+    iniDate: _repDep.iniDate,
+    finDate: _repDep.finDate,
+    semana:  _repDep.semana,
+    director: _repDep.director,
+    disciplina: _repDep.disciplina,
+    savedAt: Date.now(),
+    data: JSON.parse(JSON.stringify(_repDep))
+  };
+  _repEscribirArchivo(archivo);
+  showToast('Reporte guardado ✔ (' + _repFmtSemana(_repDep.iniDate, _repDep.finDate) + ')','ok');
+  // Re-render del selector si está abierto
+  _repRenderListaGuardados();
 }
+
+function _repRenderListaGuardados() {
+  const cont = document.getElementById('rep-guardados-list');
+  if(!cont) return;
+  const archivo = _repLeerArchivo();
+  const slots = Object.keys(archivo).sort().reverse(); // más recientes primero
+  if(slots.length === 0) {
+    cont.innerHTML = '<div style="color:var(--txt3);font-size:.78rem;padding:.7rem;text-align:center">Aún no has guardado ningún reporte. Cuando pulses 💾 Guardar, el reporte se archivará aquí.</div>';
+    return;
+  }
+  const actualSlot = _repDep.iniDate || '';
+  cont.innerHTML = slots.map((slot, idx) => {
+    const r = archivo[slot];
+    const sem = r.semana || _repFmtSemana(r.iniDate, r.finDate);
+    const esActual = slot === actualSlot;
+    const fechaGuardado = r.savedAt ? new Date(r.savedAt).toLocaleDateString('es-MX', {day:'2-digit', month:'short', year:'numeric'}) : '—';
+    return `
+      <div class="rep-arch-item" style="display:flex;align-items:center;gap:.6rem;padding:.55rem .7rem;border-radius:9px;background:${esActual?'rgba(26,122,69,.15)':'var(--panel2)'};border:1px solid ${esActual?'var(--verde)':'var(--border)'};margin-bottom:.4rem">
+        <div style="flex:1;min-width:0">
+          <div style="font-size:.78rem;font-weight:600;color:var(--txt);line-height:1.2">
+            <span style="color:var(--neon);font-family:'Bebas Neue',sans-serif;letter-spacing:1px;margin-right:.4rem">#${slots.length - idx}</span>
+            ${sem}
+          </div>
+          <div style="font-size:.65rem;color:var(--txt3);margin-top:2px">
+            ${r.disciplina ? r.disciplina + ' · ' : ''}${r.director ? r.director + ' · ' : ''}Guardado el ${fechaGuardado}
+          </div>
+        </div>
+        ${esActual
+          ? '<span style="font-size:.65rem;color:var(--neon);background:rgba(26,122,69,.15);border:1px solid var(--verde);border-radius:5px;padding:2px 7px;white-space:nowrap">● Actual</span>'
+          : `<button class="btn bo" onclick="repCargarGuardado('${slot}')" style="font-size:.68rem;padding:4px 9px">Abrir</button>`}
+        <button class="btn" onclick="repEliminarGuardado('${slot}')" title="Eliminar" style="background:none;border:1px solid var(--border);color:var(--red2);font-size:.78rem;padding:4px 8px;line-height:1">🗑</button>
+      </div>`;
+  }).join('');
+}
+
+function repAbrirArchivo() {
+  _repRenderListaGuardados();
+  const m = document.getElementById('m-rep-archivo');
+  if(m) m.classList.add('on');
+}
+function repCerrarArchivo() {
+  const m = document.getElementById('m-rep-archivo');
+  if(m) m.classList.remove('on');
+}
+
+function repCargarGuardado(slot) {
+  const archivo = _repLeerArchivo();
+  const r = archivo[slot];
+  if(!r || !r.data) { showToast('No se pudo cargar ese reporte','err'); return; }
+  // Si el reporte actual tiene cambios, guardarlo silenciosamente antes de cambiar
+  try {
+    if(_repDep.iniDate && _repDep.iniDate !== slot) {
+      const archivoActual = _repLeerArchivo();
+      archivoActual[_repDep.iniDate] = {
+        iniDate: _repDep.iniDate, finDate: _repDep.finDate,
+        semana: _repDep.semana, director: _repDep.director, disciplina: _repDep.disciplina,
+        savedAt: Date.now(), data: JSON.parse(JSON.stringify(_repDep))
+      };
+      _repEscribirArchivo(archivoActual);
+    }
+  } catch(e){}
+  _repDep = Object.assign({}, _repDep, r.data);
+  try { localStorage.setItem('fc_reporte_dep', JSON.stringify(_repDep)); } catch(e){}
+  renderReporteDep();
+  repCerrarArchivo();
+  showToast('Reporte cargado: ' + (r.semana || slot), 'ok');
+}
+
+function repEliminarGuardado(slot) {
+  if(!confirm('¿Eliminar este reporte guardado? Esta acción no se puede deshacer.')) return;
+  const archivo = _repLeerArchivo();
+  delete archivo[slot];
+  _repEscribirArchivo(archivo);
+  _repRenderListaGuardados();
+  showToast('Reporte eliminado','info');
+}
+
+window.repAbrirArchivo     = repAbrirArchivo;
+window.repCerrarArchivo    = repCerrarArchivo;
+window.repCargarGuardado   = repCargarGuardado;
+window.repEliminarGuardado = repEliminarGuardado;
 
 function repLimpiar() {
   if(!confirm('¿Limpiar todos los campos del reporte?')) return;
