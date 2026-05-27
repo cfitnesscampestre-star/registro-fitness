@@ -160,27 +160,67 @@ function _repCalcStats(ini, fin) {
   const totalAsis  = impartidas.reduce((a, r) => a + (parseInt(r.asistentes) || 0), 0);
 
   // Stats por instructor para sugerir destacado / menos destacado
+  // - El aforo se capa a 100% por clase: un sobrecupo (20 personas en sala de 15)
+  //   no debe sesgar el ranking semanal hacia quien dio solo 1 clase.
+  // - Mantener también el aforo "crudo" (sin capar) para mostrarlo cuando aporte contexto.
   const statsInsts = _insts.map(inst => {
     const iRegs = regs.filter(r => String(r.inst_id) === String(inst.id));
     const iImp  = iRegs.filter(r => r.estado === 'ok' || r.estado === 'sub');
     const iFalt = iRegs.filter(r => r.estado === 'falta').length;
     const iAfor = iImp.filter(r => parseInt(r.cap||0)>0);
-    const aforo = iAfor.length > 0
+    const aforoCap = iAfor.length > 0
+      ? Math.round(iAfor.reduce((a,r) => {
+          const pct = (parseInt(r.asistentes)||0) / parseInt(r.cap) * 100;
+          return a + Math.min(pct, 100); // capar a 100% por clase
+        }, 0) / iAfor.length)
+      : null;
+    const aforoCrudo = iAfor.length > 0
       ? Math.round(iAfor.reduce((a,r) => a + (parseInt(r.asistentes)||0)/parseInt(r.cap)*100, 0) / iAfor.length)
       : null;
     const iAsis = iImp.reduce((a,r) => a + (parseInt(r.asistentes)||0), 0);
-    return { inst, clases: iImp.length, faltas: iFalt, aforo, asistentes: iAsis };
+    return { inst, clases: iImp.length, faltas: iFalt, aforo: aforoCap, aforoCrudo, asistentes: iAsis };
   }).filter(s => s.clases > 0 || s.faltas > 0);
 
-  // Mejor aforo (al menos 1 clase)
-  const conAforo = statsInsts.filter(s => s.aforo !== null && s.clases > 0);
-  const mejor  = conAforo.length ? conAforo.reduce((a,b) => b.aforo > a.aforo ? b : a) : null;
-  // Más faltas o menor aforo
-  const peor   = conAforo.length ? conAforo.reduce((a,b) => {
-    const scoreA = (a.aforo||0) - a.faltas*15;
-    const scoreB = (b.aforo||0) - b.faltas*15;
-    return scoreB < scoreA ? b : a;
-  }) : (statsInsts.filter(s=>s.faltas>0).sort((a,b)=>b.faltas-a.faltas)[0] || null);
+  // Para ser elegible como "destacado" se requiere haber dado al menos 3 clases en el periodo.
+  // Esto evita que alguien con 1 sola clase (aunque sea con aforo perfecto) eclipse a quien
+  // sostiene buen desempeño en toda la semana.
+  const MIN_CLASES_DESTACADO = 3;
+  const elegibles = statsInsts.filter(s => s.aforo !== null && s.clases >= MIN_CLASES_DESTACADO);
+  const conAforo  = statsInsts.filter(s => s.aforo !== null && s.clases > 0);
+
+  // Mejor: prioriza elegibles (≥3 clases). Si nadie cumple, cae a "con al menos 1 clase"
+  // pero marca la sugerencia como tentativa para que el usuario sepa que el dato es ruidoso.
+  let mejor = null, mejorTentativo = false;
+  if(elegibles.length > 0) {
+    mejor = elegibles.reduce((a,b) => b.aforo > a.aforo ? b : a);
+  } else if(conAforo.length > 0) {
+    mejor = conAforo.reduce((a,b) => b.aforo > a.aforo ? b : a);
+    mejorTentativo = true;
+  }
+
+  // Peor: misma lógica, pero el "peor" pondera faltas y aforo bajo.
+  let peor = null, peorTentativo = false;
+  const peorElegibles = elegibles.filter(s => !mejor || s.inst.id !== mejor.inst.id);
+  const peorConAforo  = conAforo.filter(s => !mejor || s.inst.id !== mejor.inst.id);
+  if(peorElegibles.length > 0) {
+    peor = peorElegibles.reduce((a,b) => {
+      const scoreA = (a.aforo||0) - a.faltas*15;
+      const scoreB = (b.aforo||0) - b.faltas*15;
+      return scoreB < scoreA ? b : a;
+    });
+  } else if(peorConAforo.length > 0) {
+    peor = peorConAforo.reduce((a,b) => {
+      const scoreA = (a.aforo||0) - a.faltas*15;
+      const scoreB = (b.aforo||0) - b.faltas*15;
+      return scoreB < scoreA ? b : a;
+    });
+    peorTentativo = true;
+  } else {
+    peor = statsInsts.filter(s=>s.faltas>0).sort((a,b)=>b.faltas-a.faltas)[0] || null;
+    if(peor) peorTentativo = true;
+  }
+  if(mejor) mejor.tentativo = mejorTentativo;
+  if(peor)  peor.tentativo  = peorTentativo;
 
   // Exponer info de diagnóstico (último cálculo) para que el botón manual pueda mostrarlo
   try {
@@ -339,6 +379,10 @@ function repOnFechaChange() {
   _repDep.iniDate = ini;
   _repDep.finDate = fin;
 
+  // Al cambiar de rango, soltar la fijación manual de destacado/menos
+  // para que vuelva a sugerirse según la nueva semana.
+  window._repEditadoManual = { destacado:false, menos:false };
+
   if(ini && fin) {
     // Validar orden de fechas
     if(ini > fin) {
@@ -377,25 +421,60 @@ function _repAutoCargarSistema(ini, fin) {
   const asEl = document.getElementById('rep-alum-asistencia');
   if(asEl) asEl.value = stats.totalAsis;
 
-  // Sugerir destacados (sólo si los campos están vacíos, para no pisar lo que el usuario haya escrito)
+  // Sugerir destacados.
+  // Política: el sistema vuelve a sugerir cada vez que se recalcula con un rango distinto,
+  // SALVO que el usuario haya editado manualmente ese campo en esta sesión (marca _repEditadoManual).
+  // Eso resuelve el problema de que las sugerencias se quedaran "pegadas" entre semanas.
+  if(!window._repEditadoManual) window._repEditadoManual = {};
+
   const dSel = document.getElementById('rep-prof-destacado');
   const mSel = document.getElementById('rep-prof-menos');
-  if(dSel && stats.mejor && !dSel.value) {
+
+  function _formatRazonDestacado(s) {
+    const partes = [];
+    partes.push(`Aforo promedio del ${s.aforo}%`);
+    partes.push(`${s.clases} clase${s.clases===1?'':'s'} impartida${s.clases===1?'':'s'}`);
+    partes.push(`${s.asistentes} asistente${s.asistentes===1?'':'s'} totales`);
+    let txt = partes.join(' · ');
+    if(s.tentativo) {
+      txt += ` · ⚠ Sugerencia tentativa: sólo ${s.clases} clase${s.clases===1?'':'s'} en el periodo, el promedio puede no ser representativo.`;
+    }
+    if(s.aforoCrudo !== null && s.aforoCrudo > s.aforo) {
+      txt += ` (sin capar sobrecupo: ${s.aforoCrudo}%).`;
+    }
+    return txt;
+  }
+  function _formatRazonMenos(s) {
+    const partes = [];
+    if(s.faltas > 0) partes.push(`${s.faltas} falta${s.faltas===1?'':'s'} en el periodo`);
+    if(s.aforo !== null) partes.push(`aforo promedio del ${s.aforo}%`);
+    partes.push(`${s.clases} clase${s.clases===1?'':'s'} impartida${s.clases===1?'':'s'}`);
+    let txt = partes.join(', ');
+    if(s.tentativo) {
+      txt += ` · ⚠ Sugerencia tentativa: pocos datos en el periodo.`;
+    }
+    return txt;
+  }
+
+  if(dSel && stats.mejor && !window._repEditadoManual.destacado) {
     dSel.value = String(stats.mejor.inst.id);
     const razEl = document.getElementById('rep-prof-destacado-razon');
-    if(razEl && !razEl.value) {
-      razEl.value = `Aforo del ${stats.mejor.aforo}% · ${stats.mejor.clases} clases impartidas · ${stats.mejor.asistentes} asistentes totales`;
-    }
+    if(razEl) razEl.value = _formatRazonDestacado(stats.mejor);
+  } else if(dSel && !stats.mejor && !window._repEditadoManual.destacado) {
+    // No hay candidato en este rango → limpiar
+    dSel.value = '';
+    const razEl = document.getElementById('rep-prof-destacado-razon');
+    if(razEl) razEl.value = '';
   }
-  if(mSel && stats.peor && (!stats.mejor || stats.peor.inst.id !== stats.mejor.inst.id) && !mSel.value) {
+
+  if(mSel && stats.peor && (!stats.mejor || stats.peor.inst.id !== stats.mejor.inst.id) && !window._repEditadoManual.menos) {
     mSel.value = String(stats.peor.inst.id);
     const razEl = document.getElementById('rep-prof-menos-razon');
-    if(razEl && !razEl.value) {
-      const razon = [];
-      if(stats.peor.faltas > 0) razon.push(`${stats.peor.faltas} falta(s) en el periodo`);
-      if(stats.peor.aforo !== null) razon.push(`aforo del ${stats.peor.aforo}%`);
-      if(razon.length) razEl.value = razon.join(', ');
-    }
+    if(razEl) razEl.value = _formatRazonMenos(stats.peor);
+  } else if(mSel && !stats.peor && !window._repEditadoManual.menos) {
+    mSel.value = '';
+    const razEl = document.getElementById('rep-prof-menos-razon');
+    if(razEl) razEl.value = '';
   }
 
   _repActualizarPreview(stats);
@@ -456,6 +535,31 @@ function repAutoguardar() {
   _repLeerCampos();
   try { localStorage.setItem('fc_reporte_dep', JSON.stringify(_repDep)); } catch(e){}
 }
+
+// Marca que el usuario tocó un campo de destacado/menos para que el sistema
+// no lo sobrescriba al cambiar de semana. Se usa desde los handlers del HTML.
+function repMarcarEditado(cual) {
+  if(!window._repEditadoManual) window._repEditadoManual = {};
+  window._repEditadoManual[cual] = true;
+}
+window.repMarcarEditado = repMarcarEditado;
+
+// Permite al usuario "desfijar" una edición manual y volver a usar la sugerencia
+// automática del sistema. Llamada desde un botón pequeño junto a cada selector.
+function repRefrescarSugerencia(cual) {
+  if(!window._repEditadoManual) window._repEditadoManual = {};
+  window._repEditadoManual[cual] = false;
+  const ini = document.getElementById('rep-ini-date')?.value || '';
+  const fin = document.getElementById('rep-fin-date')?.value || '';
+  if(ini && fin) {
+    _repAutoCargarSistema(ini, fin);
+    repAutoguardar();
+    showToast('Sugerencia recalculada desde el sistema','ok');
+  } else {
+    showToast('Selecciona primero el rango de fechas','warn');
+  }
+}
+window.repRefrescarSugerencia = repRefrescarSugerencia;
 
 // ─── Archivo de reportes guardados ──────────────────────────────
 // Cada reporte se guarda en un "slot" identificado por la fecha de inicio (YYYY-MM-DD).
@@ -560,6 +664,9 @@ function repCargarGuardado(slot) {
     }
   } catch(e){}
   _repDep = Object.assign({}, _repDep, r.data);
+  // Al cargar un reporte guardado, los selects de destacado/menos vienen de _repDep,
+  // por lo tanto NO queremos que el autocálculo los sobrescriba después.
+  window._repEditadoManual = { destacado:true, menos:true };
   try { localStorage.setItem('fc_reporte_dep', JSON.stringify(_repDep)); } catch(e){}
   renderReporteDep();
   repCerrarArchivo();
@@ -582,6 +689,7 @@ window.repEliminarGuardado = repEliminarGuardado;
 
 function repLimpiar() {
   if(!confirm('¿Limpiar todos los campos del reporte?')) return;
+  window._repEditadoManual = { destacado:false, menos:false };
   _repDep = {
     iniDate:'', finDate:'',
     disciplina:'', semana:'', director:'',
