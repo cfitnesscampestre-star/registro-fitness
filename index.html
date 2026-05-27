@@ -147,117 +147,6 @@ window._cargarXLSX=function(){
   document.head.appendChild(link);
 })();
 </script>
-<style id="agenda-overlay-fix">
-/* ═══ FIX: Overlay de Agenda Móvil — reglas que no estaban en ningún CSS cargado ═══ */
-#mob-agenda-overlay {
-  display: none;
-  position: fixed;
-  inset: 0;
-  z-index: 700;
-  background: var(--bg);
-  flex-direction: column;
-  overflow: hidden;
-}
-#mob-agenda-overlay.on {
-  display: flex;
-}
-/* Área scrollable del contenido de la agenda */
-#mob-agenda-overlay > div:last-child {
-  flex: 1;
-  overflow-y: auto;
-  -webkit-overflow-scrolling: touch;
-}
-/* Botones de filtro de prioridad y tipo */
-.agenda-fil-btn,
-.agenda-pri-btn {
-  border: 1px solid var(--border);
-  border-radius: 20px;
-  padding: 4px 12px;
-  font-family: 'Barlow Condensed', sans-serif;
-  font-size: .68rem;
-  font-weight: 700;
-  letter-spacing: .5px;
-  text-transform: uppercase;
-  background: var(--panel2);
-  color: var(--txt2);
-  cursor: pointer;
-  transition: all .15s;
-}
-.agenda-fil-btn.on,
-.agenda-pri-btn.on {
-  background: var(--verde);
-  color: #fff;
-  border-color: var(--verde);
-}
-/* Calendário mini de la agenda */
-.ag-cal-grid {
-  display: grid;
-  grid-template-columns: repeat(7, 1fr);
-  gap: 2px;
-}
-.ag-cal-dow {
-  font-family: 'DM Mono', monospace;
-  font-size: .55rem;
-  color: var(--txt3);
-  text-align: center;
-  padding: 2px 0 4px;
-  text-transform: uppercase;
-  letter-spacing: .4px;
-}
-.ag-cal-dow.fin { color: var(--gold2); }
-.ag-cal-day {
-  aspect-ratio: 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-direction: column;
-  border-radius: 6px;
-  font-size: .7rem;
-  color: var(--txt2);
-  cursor: pointer;
-  border: 1px solid transparent;
-  transition: background .12s, border-color .12s;
-  position: relative;
-  user-select: none;
-}
-.ag-cal-day:hover { background: var(--panel2); }
-.ag-cal-day.vacio { pointer-events: none; }
-.ag-cal-day.fin { color: var(--gold2); }
-.ag-cal-day.hoy { border-color: var(--neon); color: var(--neon); font-weight: 700; }
-.ag-cal-day.selec { background: rgba(94,255,160,.15); border-color: var(--neon); color: var(--neon); font-weight: 700; }
-.ag-cal-dots { display: flex; gap: 2px; justify-content: center; margin-top: 1px; }
-.ag-cal-dot { width: 4px; height: 4px; border-radius: 50%; }
-.ag-cal-dot.nota-alta  { background: var(--red2); }
-.ag-cal-dot.nota-media { background: var(--gold2); }
-.ag-cal-dot.nota-baja  { background: var(--blue); }
-.ag-cal-dot.evento     { background: var(--neon); }
-/* Preview del día seleccionado */
-.ag-dia-preview { display: none; }
-.ag-dia-preview.on { display: block; }
-.ag-preview-item { display: flex; align-items: flex-start; gap: 8px; padding: 5px 0; border-bottom: 1px solid var(--border); }
-.ag-preview-item:last-child { border-bottom: none; }
-.ag-preview-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; margin-top: 4px; }
-/* Tarjetas de notas */
-.nota-card-mob {
-  background: var(--panel2);
-  border: 1px solid var(--border);
-  border-radius: 12px;
-  padding: 10px 12px;
-  margin-bottom: 6px;
-  transition: opacity .2s;
-}
-.nota-card-mob.nota-pri-alta  { border-left: 3px solid var(--red2); }
-.nota-card-mob.nota-pri-media { border-left: 3px solid var(--gold2); }
-.nota-card-mob.nota-pri-baja  { border-left: 3px solid var(--blue); }
-.nota-ts-mob {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  margin-bottom: 5px;
-  flex-wrap: wrap;
-}
-.nota-texto-mob { font-size: .8rem; color: var(--txt); line-height: 1.45; }
-</style>
 </head>
 
 
@@ -1106,6 +995,7 @@ window._cargarXLSX=function(){
     </div>
     <div style="display:flex;gap:.4rem;flex-wrap:wrap;align-items:center">
       <button class="btn" style="background:rgba(26,122,69,.18);border:1px solid var(--verde);color:var(--neon);font-size:.72rem;padding:6px 12px" onclick="repCargarSistema()">⚡ Cargar del sistema</button>
+      <button class="btn bo" onclick="repAbrirArchivo()" style="font-size:.72rem;padding:6px 10px" title="Ver y abrir reportes guardados">📂 Reportes</button>
       <button class="btn bo" onclick="repLimpiar()" style="font-size:.72rem;padding:6px 10px">🗑 Limpiar</button>
       <button class="btn" style="background:#0d2218;border:1px solid var(--verde);color:var(--neon);font-size:.72rem;padding:6px 10px" onclick="repGuardar()">💾 Guardar</button>
       <button class="btn bg" onclick="repImprimir()" style="font-size:.76rem;padding:6px 14px">🖨 Imprimir / PDF</button>
@@ -2961,6 +2851,22 @@ window._cargarXLSX=function(){
 </div>
 
 
+<!-- ═══ ARCHIVO DE REPORTES SEMANALES GUARDADOS ═══ -->
+<div class="ov" id="m-rep-archivo">
+<div class="modal" style="max-width:560px;max-height:85vh;display:flex;flex-direction:column">
+  <button class="mcls" onclick="repCerrarArchivo()"><svg class="ico" viewBox="0 0 20 20"><line x1="5" y1="5" x2="15" y2="15" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><line x1="15" y1="5" x2="5" y2="15" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></button>
+  <div class="mttl" style="margin-bottom:.4rem">📂 Reportes guardados</div>
+  <div style="font-size:.7rem;color:var(--txt2);margin-bottom:1rem;line-height:1.45">
+    Cada reporte que guardes con <b style="color:var(--neon)">💾 Guardar</b> queda archivado aquí, indexado por la semana. Toca <b>Abrir</b> para cargar uno y seguir editándolo, o <b>🗑</b> para eliminarlo definitivamente.
+  </div>
+  <div id="rep-guardados-list" style="overflow-y:auto;flex:1;min-height:120px;padding-right:2px"></div>
+  <div style="margin-top:.9rem;padding-top:.7rem;border-top:1px solid var(--border);display:flex;justify-content:flex-end;gap:.5rem">
+    <button class="btn bo" onclick="repCerrarArchivo()" style="font-size:.78rem;padding:6px 14px">Cerrar</button>
+  </div>
+</div>
+</div>
+
+
 <!-- ═══ PLANIFICADOR DE SUPLENCIAS ═══ -->
 <div class="ov" id="m-sup-planner">
 <div class="modal wide" style="max-width:820px;max-height:92vh;display:flex;flex-direction:column">
@@ -3234,6 +3140,8 @@ window._cargarXLSX=function(){
 <script defer src="js/portal.js"></script>
 <script defer src="js/pwa.js"></script>
 <script defer src="js/eventos.js"></script>
+<script defer src="js/suplencias_link.js"></script>
+<script defer src="js/suplencias_firmas_v2.js"></script>
 
 <div class="ov" id="m-nueva-sup">
 <div class="modal" style="width:560px">
