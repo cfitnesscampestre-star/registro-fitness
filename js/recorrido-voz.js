@@ -1,5 +1,4 @@
 
-
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 // ENTRADA POR VOZ — MODO TURBO
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -20,8 +19,8 @@ function _parsearNumeroVoz(texto) {
   const t = texto.toLowerCase().trim()
     .normalize('NFD').replace(/[\u0300-\u036f]/g,'')
     .replace(/[^a-z0-9 ]/g,'');
-  const digitos = parseInt(t.replace(/[^0-9]/g,''));
-  if (!isNaN(digitos) && t.replace(/[^0-9]/g,'').length > 0) return digitos;
+  const soloDigitos = t.replace(/[^0-9]/g,'');
+  if (soloDigitos.length > 0) return parseInt(soloDigitos);
   if (_numSpEs[t] !== undefined) return _numSpEs[t];
   const partes = t.split(/\s+y\s+/);
   if (partes.length === 2) {
@@ -32,47 +31,80 @@ function _parsearNumeroVoz(texto) {
   return null;
 }
 
+// Bloquea el foco del input durante el reconocimiento de voz
+function _vozBloquearFoco() {
+  const inp = document.getElementById('tc-asis');
+  if (!inp) return;
+  inp.setAttribute('inputmode','none');
+  inp.setAttribute('readonly','');
+  // Quitar foco si lo tiene
+  if (document.activeElement === inp) inp.blur();
+}
+
+// Restaura el input a su estado normal
+function _vozRestaurarFoco() {
+  const inp = document.getElementById('tc-asis');
+  if (!inp) return;
+  inp.removeAttribute('inputmode');
+  inp.removeAttribute('readonly');
+}
+
 function turboVozIniciar(e) {
   e.preventDefault();
   if (_vozEscuchando) return;
+
   const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
   if (!SpeechRecognition) {
     showToast('Tu navegador no soporta voz. Usa Chrome en Android.', 'err');
     return;
   }
+
+  // Cerrar teclado antes de arrancar
+  _vozBloquearFoco();
+  if (document.activeElement && document.activeElement.blur) {
+    document.activeElement.blur();
+  }
+
   const btn = document.getElementById('tc-voz-btn');
   if (btn) {
-    btn.style.background = 'rgba(224,80,80,.25)';
-    btn.style.borderColor = 'var(--red)';
-    btn.style.color = 'var(--red2)';
-    btn.style.transform = 'scale(1.12)';
+    btn.style.background = 'rgba(224,80,80,.9)';
+    btn.style.boxShadow = '0 0 0 6px rgba(224,80,80,.3)';
+    btn.style.transform = 'scale(1.08)';
+    btn.textContent = '🔴';
   }
   if (navigator.vibrate) navigator.vibrate(30);
+
   _vozRecognition = new SpeechRecognition();
   _vozRecognition.lang = 'es-MX';
   _vozRecognition.continuous = false;
   _vozRecognition.interimResults = false;
   _vozEscuchando = true;
+
   _vozRecognition.onresult = (event) => {
     const texto = event.results[0][0].transcript;
     const num = _parsearNumeroVoz(texto);
     if (num !== null && num >= 0) {
+      _vozRestaurarFoco();
       const inp = document.getElementById('tc-asis');
       if (inp) {
         inp.value = num;
         turboActualizarColor();
         if (navigator.vibrate) navigator.vibrate([20, 10, 20]);
-        setTimeout(() => turboGuardar(), 400);
+        setTimeout(() => turboGuardar(), 350);
       }
     } else {
       showToast(`No entendí "${texto}". Di solo un número.`, 'warn');
+      _vozRestaurarFoco();
     }
   };
-  _vozRecognition.onerror = (e) => {
-    if (e.error !== 'aborted') showToast('Error de micrófono: ' + e.error, 'err');
+
+  _vozRecognition.onerror = (evt) => {
+    if (evt.error !== 'aborted') showToast('Error de micrófono: ' + evt.error, 'err');
     _vozReset();
   };
+
   _vozRecognition.onend = () => { _vozReset(); };
+
   try { _vozRecognition.start(); } catch(err) { _vozReset(); }
 }
 
@@ -86,11 +118,12 @@ function turboVozDetener(e) {
 
 function _vozReset() {
   _vozEscuchando = false;
+  _vozRestaurarFoco();
   const btn = document.getElementById('tc-voz-btn');
   if (btn) {
-    btn.style.background = 'var(--panel2)';
-    btn.style.borderColor = 'var(--border)';
-    btn.style.color = 'var(--txt2)';
+    btn.style.background = 'var(--verde)';
+    btn.style.boxShadow = '0 4px 16px rgba(0,0,0,.35)';
     btn.style.transform = 'scale(1)';
+    btn.textContent = '🎤';
   }
 }
