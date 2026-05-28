@@ -995,7 +995,6 @@ window._cargarXLSX=function(){
     </div>
     <div style="display:flex;gap:.4rem;flex-wrap:wrap;align-items:center">
       <button class="btn" style="background:rgba(26,122,69,.18);border:1px solid var(--verde);color:var(--neon);font-size:.72rem;padding:6px 12px" onclick="repCargarSistema()">⚡ Cargar del sistema</button>
-      <button class="btn bo" onclick="repAbrirArchivo()" style="font-size:.72rem;padding:6px 10px" title="Ver y abrir reportes guardados">📂 Reportes</button>
       <button class="btn bo" onclick="repLimpiar()" style="font-size:.72rem;padding:6px 10px">🗑 Limpiar</button>
       <button class="btn" style="background:#0d2218;border:1px solid var(--verde);color:var(--neon);font-size:.72rem;padding:6px 10px" onclick="repGuardar()">💾 Guardar</button>
       <button class="btn bg" onclick="repImprimir()" style="font-size:.76rem;padding:6px 14px">🖨 Imprimir / PDF</button>
@@ -1088,17 +1087,17 @@ window._cargarXLSX=function(){
     <div class="rep-grid-2" style="margin-top:.75rem">
       <div class="rep-field">
         <label>⭐ Profesor más destacado <span style="color:var(--neon);font-size:.7rem">⚡ sugerido</span></label>
-        <select id="rep-prof-destacado" onchange="repMarcarEditado('destacado');repAutoguardar()" style="background:var(--panel2);border:1px solid var(--border);border-radius:8px;padding:.55rem .75rem;color:var(--txt);font-family:'Outfit',sans-serif;font-size:.84rem;outline:none;width:100%;margin-bottom:.4rem">
+        <select id="rep-prof-destacado" onchange="repAutoguardar()" style="background:var(--panel2);border:1px solid var(--border);border-radius:8px;padding:.55rem .75rem;color:var(--txt);font-family:'Outfit',sans-serif;font-size:.84rem;outline:none;width:100%;margin-bottom:.4rem">
           <option value="">— Seleccionar instructor —</option>
         </select>
-        <textarea id="rep-prof-destacado-razon" rows="2" placeholder="¿Por qué fue el más destacado?" oninput="repMarcarEditado('destacado');repAutoguardar()"></textarea>
+        <textarea id="rep-prof-destacado-razon" rows="2" placeholder="¿Por qué fue el más destacado?" oninput="repAutoguardar()"></textarea>
       </div>
       <div class="rep-field">
         <label>⚠ Profesor menos destacado <span style="color:var(--neon);font-size:.7rem">⚡ sugerido</span></label>
-        <select id="rep-prof-menos" onchange="repMarcarEditado('menos');repAutoguardar()" style="background:var(--panel2);border:1px solid var(--border);border-radius:8px;padding:.55rem .75rem;color:var(--txt);font-family:'Outfit',sans-serif;font-size:.84rem;outline:none;width:100%;margin-bottom:.4rem">
+        <select id="rep-prof-menos" onchange="repAutoguardar()" style="background:var(--panel2);border:1px solid var(--border);border-radius:8px;padding:.55rem .75rem;color:var(--txt);font-family:'Outfit',sans-serif;font-size:.84rem;outline:none;width:100%;margin-bottom:.4rem">
           <option value="">— Seleccionar instructor —</option>
         </select>
-        <textarea id="rep-prof-menos-razon" rows="2" placeholder="¿Por qué fue el menos destacado?" oninput="repMarcarEditado('menos');repAutoguardar()"></textarea>
+        <textarea id="rep-prof-menos-razon" rows="2" placeholder="¿Por qué fue el menos destacado?" oninput="repAutoguardar()"></textarea>
       </div>
     </div>
   </div>
@@ -2428,6 +2427,12 @@ window._cargarXLSX=function(){
             oninput="turboActualizarColor()">
           <button onclick="turboAjustar(1)" style="width:52px;height:52px;border-radius:50%;background:var(--panel2);border:2px solid var(--border);color:var(--txt);font-size:1.5rem;cursor:pointer;transition:all .15s;flex-shrink:0">+</button>
           <button onclick="turboAjustar(5)" style="width:44px;height:44px;border-radius:50%;background:var(--panel2);border:1px solid var(--border);color:var(--txt2);font-size:1rem;cursor:pointer;transition:all .15s;flex-shrink:0" title="+5">+5</button>
+          <button id="tc-voz-btn"
+            onpointerdown="turboVozIniciar(event)"
+            onpointerup="turboVozDetener(event)"
+            onpointercancel="turboVozDetener(event)"
+            style="width:52px;height:52px;border-radius:50%;background:var(--panel2);border:2px solid var(--border);color:var(--txt2);font-size:1.4rem;cursor:pointer;transition:all .2s;flex-shrink:0;display:flex;align-items:center;justify-content:center;-webkit-user-select:none;user-select:none;touch-action:none"
+            title="Mantén presionado y di el número">🎤</button>
         </div>
         <!-- Barra de aforo en tiempo real -->
         <div style="margin-top:.6rem;height:8px;background:var(--border);border-radius:4px;overflow:hidden;max-width:260px;margin-inline:auto">
@@ -2847,22 +2852,6 @@ window._cargarXLSX=function(){
 <div class="modal wide" style="max-height:88vh;overflow-y:auto">
   <button class="mcls" onclick="cerrarModal('m-diag-horario')"><svg class="ico" viewBox="0 0 20 20"><line x1="5" y1="5" x2="15" y2="15" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><line x1="15" y1="5" x2="5" y2="15" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></button>
   <div id="m-diag-horario-body"></div>
-</div>
-</div>
-
-
-<!-- ═══ ARCHIVO DE REPORTES SEMANALES GUARDADOS ═══ -->
-<div class="ov" id="m-rep-archivo">
-<div class="modal" style="max-width:560px;max-height:85vh;display:flex;flex-direction:column">
-  <button class="mcls" onclick="repCerrarArchivo()"><svg class="ico" viewBox="0 0 20 20"><line x1="5" y1="5" x2="15" y2="15" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><line x1="15" y1="5" x2="5" y2="15" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></button>
-  <div class="mttl" style="margin-bottom:.4rem">📂 Reportes guardados</div>
-  <div style="font-size:.7rem;color:var(--txt2);margin-bottom:1rem;line-height:1.45">
-    Cada reporte que guardes con <b style="color:var(--neon)">💾 Guardar</b> queda archivado aquí, indexado por la semana. Toca <b>Abrir</b> para cargar uno y seguir editándolo, o <b>🗑</b> para eliminarlo definitivamente.
-  </div>
-  <div id="rep-guardados-list" style="overflow-y:auto;flex:1;min-height:120px;padding-right:2px"></div>
-  <div style="margin-top:.9rem;padding-top:.7rem;border-top:1px solid var(--border);display:flex;justify-content:flex-end;gap:.5rem">
-    <button class="btn bo" onclick="repCerrarArchivo()" style="font-size:.78rem;padding:6px 14px">Cerrar</button>
-  </div>
 </div>
 </div>
 
@@ -3655,5 +3644,6 @@ window.addEventListener('DOMContentLoaded', function(){
   window.addEventListener('load', function(){ setTimeout(aplicarClaroPorDefecto, 100); });
 })();
 </script>
+<script src="js/recorrido-voz.js"></script>
 </body>
 </html>
