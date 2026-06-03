@@ -628,7 +628,8 @@ function guardarEvento(){
     resultados:   JSON.parse(JSON.stringify(_evtResultados)),
     creadoEn:     _evtEditing ? undefined : new Date().toISOString(),
     modificadoEn: new Date().toISOString(),
-    updatedAt:    Date.now(),
+    updatedAt:        Date.now(),
+    minRecordatorio:  parseInt(document.getElementById('evtMinRecordatorio')?.value) || 30,
   };
 
   let ev = evtCargarDatos();
@@ -642,6 +643,10 @@ function guardarEvento(){
   evtGuardarDatos(ev);
   cerrarOv('ov-evento');
   evtRenderAll();
+  // ── Notificación push ──
+  if (typeof programarRecordatorioEvento === 'function') {
+    programarRecordatorioEvento(evento);
+  }
 }
 
 function eliminarEvento(){
@@ -651,6 +656,10 @@ function eliminarEvento(){
   evtGuardarDatos(ev);
   cerrarOv('ov-evento');
   evtRenderAll();
+  // ── Cancelar notificación push ──
+  if (typeof cancelarRecordatorioEvento === 'function') {
+    cancelarRecordatorioEvento(_evtEditing);
+  }
 }
 
 // ── REPORTE ───────────────────────────────────────────────────
