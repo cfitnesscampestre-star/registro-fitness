@@ -32,8 +32,8 @@ async function initNotificaciones() {
   try {
     // Registrar el SW real (reemplaza el Blob de pwa.js si existiera)
     _swRegistration = await navigator.serviceWorker.register(
-      '/firebase-messaging-sw.js',
-      { scope: '/' }
+      new URL('firebase-messaging-sw.js', location.href).pathname,
+      { scope: new URL('./', location.href).pathname }
     );
     console.log('[Notif] Service Worker registrado:', _swRegistration.scope);
 
