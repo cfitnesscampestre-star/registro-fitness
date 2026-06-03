@@ -9,7 +9,7 @@
 if ('serviceWorker' in navigator) {
   // Registrar el SW real (debe estar en la raíz del sitio)
   navigator.serviceWorker
-    .register('/firebase-messaging-sw.js', { scope: '/' })
+    .register(new URL('firebase-messaging-sw.js', location.href).pathname, { scope: new URL('./', location.href).pathname })
     .then(reg => {
       console.log('[PWA] Service Worker registrado · scope:', reg.scope);
       // Inicializar notificaciones una vez el SW esté listo
