@@ -2088,21 +2088,58 @@ function guardarNotaMob() {
   const texto = el.value.trim();
   if(!texto){ _vErr('mob-nota-nueva','Escribe algo primero'); showToast('Escribe algo primero','warn'); return; }
   if(texto.length < 3){ showToast('La nota es demasiado corta','warn'); return; }
-  agendaNotas.push({
+
+  // Leer fecha, hora y recordatorio opcionales
+  const fechaEl = document.getElementById('mob-nota-fecha');
+  const horaEl  = document.getElementById('mob-nota-hora');
+  const recEl   = document.getElementById('mob-nota-recordatorio');
+  const fechaNota = fechaEl?.value || '';
+  const horaNota  = horaEl?.value  || '';
+  const minRec    = recEl?.value ? parseInt(recEl.value) : null;
+
+  // Si no pusieron fecha, usar hoy como ts pero sin hora programada
+  const tsBase = fechaNota
+    ? (fechaNota + (horaNota ? 'T' + horaNota + ':00' : 'T00:00:00'))
+    : new Date().toISOString();
+
+  const nota = {
     id: 'nota_' + Date.now() + '_' + Math.random().toString(36).slice(2,6),
-    ts: new Date().toISOString(),
+    ts: tsBase,
     updatedAt: Date.now(),
     texto,
     prioridad: _agendaPriActual,
-    resuelta: false
-  });
+    resuelta: false,
+    ...(fechaNota && { fecha: fechaNota }),
+    ...(horaNota  && { hora: horaNota  }),
+    ...(minRec    && { minRecordatorio: minRec })
+  };
+
+  agendaNotas.push(nota);
   _guardarAgenda();
+
+  // Programar notificación push si tiene hora
+  if (fechaNota && horaNota && minRec && typeof programarRecordatorioEvento === 'function') {
+    programarRecordatorioEvento({
+      id:               nota.id,
+      nombre:           texto.length > 60 ? texto.slice(0, 60) + '…' : texto,
+      fecha:            fechaNota,
+      horaIni:          horaNota,
+      minRecordatorio:  minRec,
+      estado:           'planificado'
+    });
+    showToast(`🔔 Recordatorio: ${minRec < 60 ? minRec + ' min' : minRec/60 + ' h'} antes`, 'ok');
+  }
+
   el.value = '';
   _vClear('mob-nota-nueva');
+  // Limpiar campos de fecha/hora
+  if(fechaEl) fechaEl.value = '';
+  if(horaEl)  horaEl.value  = '';
+  if(recEl)   recEl.value   = '30';
   renderAgendaCal();
   renderAgendaMob();
   renderMobileHome();
-  showToast('Nota guardada','ok');
+  if(!fechaNota || !horaNota || !minRec) showToast('Nota guardada','ok');
 }
 
 function resolverNota(idx) {
