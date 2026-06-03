@@ -284,3 +284,52 @@ function renderPanelNotifStatus() {
     }
   }
 })();
+
+// ═══════════════════════════════════════════════════════════════
+// 10. LISTENER AUTOMÁTICO para notas con aviso (fc_agenda)
+// Intercepta cuando guardarNotaMob() guarda en localStorage
+// sin necesidad de modificar app.js
+// ═══════════════════════════════════════════════════════════════
+(function _escucharCambiosAgenda() {
+  // Sobrescribir localStorage.setItem para detectar cambios en fc_agenda
+  const _setItemOriginal = localStorage.setItem.bind(localStorage);
+
+  localStorage.setItem = function(key, value) {
+    _setItemOriginal(key, value);
+
+    // Solo nos interesa fc_agenda
+    if (key !== 'fc_agenda') return;
+
+    try {
+      const notas = JSON.parse(value || '[]');
+      const ahora = Date.now();
+
+      notas.forEach(nota => {
+        // Solo notas con fecha, hora Y aviso configurado
+        if (!nota.fecha || !nota.hora || !nota.aviso || nota.aviso === '') return;
+        // Solo notas futuras
+        const fechaHora = nota.fecha + 'T' + nota.hora + ':00';
+        const msEvento = new Date(fechaHora).getTime();
+        const minAntes = parseInt(nota.aviso) || 15;
+        const msDisparo = msEvento - minAntes * 60 * 1000;
+        if (msDisparo <= ahora) return;
+
+        // Programar recordatorio usando el sistema de notificaciones
+        const notaComoEvento = {
+          id:              nota.id || ('nota_' + Date.now()),
+          nombre:          nota.texto || nota.titulo || 'Nota de agenda',
+          fecha:           nota.fecha,
+          horaIni:         nota.hora,
+          minRecordatorio: minAntes,
+          estado:          nota.completada ? 'cancelado' : 'planificado'
+        };
+
+        if (typeof programarRecordatorioEvento === 'function') {
+          programarRecordatorioEvento(notaComoEvento);
+        }
+      });
+    } catch(e) {
+      console.warn('[Notif] Error procesando fc_agenda:', e);
+    }
+  };
+})();
