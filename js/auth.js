@@ -245,6 +245,10 @@ function _loginExitoso(rol, instId) {
     renderAll();
     renderCal();
     if (window.innerWidth <= 640) switchSection('hoy');
+    // ── Inicializar notificaciones push ──
+    setTimeout(() => {
+      if (typeof initNotificaciones === 'function') initNotificaciones();
+    }, 2000);
   }
 }
 
@@ -268,6 +272,12 @@ function verificarSesionGuardada() {
   const fpActual = getDeviceFingerprint();
 
   if (sesRol && sesTTL > Date.now() && sesFP === fpActual) {
+    // ── Inicializar notificaciones si es sesión de coordinador ──
+    if (sesRol === 'admin' || sesRol === 'usuario') {
+      setTimeout(() => {
+        if (typeof initNotificaciones === 'function') initNotificaciones();
+      }, 3000);
+    }
     return { rol: sesRol, instId: localStorage.getItem('fc_ses_inst_id') };
   }
   // Sesión inválida, expirada o de otro dispositivo — limpiar
@@ -287,96 +297,3 @@ function aplicarRol(rol) {
     el.style.display = (rol === 'admin') ? '' : 'none';
   });
 }
-
-function cerrarSesion() {
-  if (!confirm('¿Cerrar sesión?')) return;
-  if (typeof instPararPoll === 'function') instPararPoll();
-  rolActual = null;
-  instActualId = null;
-  sessionStorage.removeItem('fc_rol');
-  sessionStorage.removeItem('fc_inst_id');
-  localStorage.removeItem('fc_ses_rol');
-  localStorage.removeItem('fc_ses_inst_id');
-  localStorage.removeItem('fc_ses_ttl');
-  localStorage.removeItem('fc_ses_fp');
-  document.getElementById('login-pass').value = '';
-  document.getElementById('login-error').style.display = 'none';
-
-  // Ocultar pantalla del instructor
-  const instScreen = document.getElementById('instructor-screen');
-  if (instScreen) instScreen.style.display = 'none';
-
-  // Restaurar TODOS los elementos que abrirPortalInstructorLocal ocultó
-  const hdr = document.getElementById('hdr');
-  if (hdr) hdr.style.display = '';
-  const bottomNav = document.getElementById('bottom-nav');
-  if (bottomNav) bottomNav.style.display = '';
-  const sidebar = document.getElementById('sidebar');
-  if (sidebar) sidebar.style.display = '';
-  const sectionNav = document.getElementById('section-nav');
-  if (sectionNav) sectionNav.style.display = '';
-  const backBar = document.getElementById('mob-back-bar');
-  if (backBar) backBar.style.display = '';
-
-  // Asegurar que al menos una vista esté activa para que no quede pantalla en blanco
-  const hayVistaActiva = document.querySelector('.vista.on');
-  if (!hayVistaActiva) {
-    // Activar la vista de inicio por defecto
-    const vInicio = document.getElementById('v-hoy') || document.querySelector('.vista');
-    if (vInicio) {
-      document.querySelectorAll('.vista').forEach(v => v.classList.remove('on'));
-      vInicio.classList.add('on');
-    }
-    const tabInicio = document.querySelector('[data-v="hoy"]') || document.querySelector('.tab');
-    if (tabInicio) {
-      document.querySelectorAll('.tab').forEach(t => t.classList.remove('on'));
-      tabInicio.classList.add('on');
-    }
-  }
-
-  document.getElementById('login-screen').classList.remove('oculto');
-  seleccionarRol('admin');
-}
-
-function abrirModalCambiarPass() {
-  ['cp-admin-actual','cp-admin-nueva','cp-admin-confirma','cp-user-nueva','cp-user-confirma']
-    .forEach(id => { document.getElementById(id).value = ''; });
-  document.getElementById('m-cambiar-pass').classList.add('on');
-}
-
-// ── Cambiar contraseña — guarda hash, nunca texto plano ──
-async function cambiarPass(tipo) {
-  if (tipo === 'admin') {
-    const actual = document.getElementById('cp-admin-actual').value;
-    const nueva  = document.getElementById('cp-admin-nueva').value.trim();
-    const conf   = document.getElementById('cp-admin-confirma').value.trim();
-    // Verificar contraseña actual comparando hashes
-    const hashActual   = await sha256(actual);
-    const hashGuardado = localStorage.getItem('fc_hash_admin');
-    if (hashActual !== hashGuardado) { showToast('La contraseña actual del Coordinador es incorrecta.', 'err'); return; }
-    if (!nueva || nueva.length < 6)  { showToast('La nueva contraseña debe tener al menos 6 caracteres.', 'err'); return; }
-    if (nueva !== conf)               { showToast('Las contraseñas nuevas no coinciden.', 'err'); return; }
-    const hashNueva = await sha256(nueva);
-    localStorage.setItem('fc_hash_admin', hashNueva);
-    localStorage.removeItem('fc_pass_admin'); // eliminar versión vieja si existía
-    showToast('✔ Contraseña de Coordinador actualizada correctamente.', 'ok');
-    cerrarModal('m-cambiar-pass');
-  } else {
-    const nueva = document.getElementById('cp-user-nueva').value.trim();
-    const conf  = document.getElementById('cp-user-confirma').value.trim();
-    if (!nueva || nueva.length < 6) { showToast('La nueva contraseña debe tener al menos 6 caracteres.', 'err'); return; }
-    if (nueva !== conf)             { showToast('Las contraseñas nuevas no coinciden.', 'err'); return; }
-    const hashNueva = await sha256(nueva);
-    localStorage.setItem('fc_hash_usuario', hashNueva);
-    localStorage.removeItem('fc_pass_usuario');
-    showToast('✔ Contraseña de Consulta actualizada correctamente.', 'ok');
-    cerrarModal('m-cambiar-pass');
-  }
-}
-
-// ── Animación shake ──
-(function () {
-  const s = document.createElement('style');
-  s.textContent = '@keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-8px)}75%{transform:translateX(8px)}}';
-  document.head.appendChild(s);
-})();
