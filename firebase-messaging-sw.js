@@ -101,7 +101,7 @@ self.addEventListener('message', event => {
   }
 
   // ── Cancelar recordatorio ─────────────────────────────────────
-  if (msg.tipo === 'CANCELAR_RECORDATORIO') {
+  if (msg.tipo === 'CANCELAR_RECORDATOSIO') {
     const { eventoId } = msg;
     if (recordatoriosPendientes.has(eventoId)) {
       clearTimeout(recordatoriosPendientes.get(eventoId));
