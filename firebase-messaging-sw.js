@@ -67,7 +67,7 @@ self.addEventListener('message', event => {
 
     const ahora      = Date.now();
     const msEvento   = new Date(fechaHora).getTime();
-    const msDisparo  = msEvento - (minAntes || 30) * 60 * 1000;
+    const msDisparo  = msEvento - (minAntes != null ? minAntes : 30) * 60 * 1000;
     const delay      = msDisparo - ahora;
 
     if (delay <= 0) {
