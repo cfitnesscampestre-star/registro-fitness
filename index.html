@@ -885,16 +885,6 @@ window._cargarXLSX=function(){
     <div class="fr">
       <div class="fg"><label>Hora de Inicio</label><input type="time" id="evtHoraIni" class="ctrl"></div>
       <div class="fg"><label>Hora de Término</label><input type="time" id="evtHoraFin" class="ctrl"></div>
-      <div class="fg"><label>⏰ Recordatorio</label>
-        <select id="evtMinRecordatorio" class="ctrl">
-          <option value="10">10 minutos antes</option>
-          <option value="15">15 minutos antes</option>
-          <option value="30" selected>30 minutos antes</option>
-          <option value="60">1 hora antes</option>
-          <option value="120">2 horas antes</option>
-          <option value="1440">1 día antes</option>
-        </select>
-      </div>
     </div>
     <div class="fr">
       <div class="fg"><label>Categoría / Nivel</label>
@@ -1514,6 +1504,28 @@ window._cargarXLSX=function(){
         <button class="agenda-pri-btn" id="agpri-baja" onclick="setAgendaPri('baja')" style="flex:1;font-size:.65rem;">
           <span style="width:6px;height:6px;border-radius:50%;background:var(--blue);display:inline-block;margin-right:3px"></span>Baja
         </button>
+      </div>
+      <!-- Fecha/hora y recordatorio para notificación -->
+      <div style="display:flex;gap:5px;margin-bottom:7px;">
+        <div style="flex:1">
+          <label style="font-size:.6rem;color:var(--txt3);display:block;margin-bottom:2px">📅 Fecha</label>
+          <input type="date" id="mob-nota-fecha" class="ctrl" style="font-size:.72rem;padding:4px 7px;width:100%">
+        </div>
+        <div style="flex:1">
+          <label style="font-size:.6rem;color:var(--txt3);display:block;margin-bottom:2px">🕐 Hora</label>
+          <input type="time" id="mob-nota-hora" class="ctrl" style="font-size:.72rem;padding:4px 7px;width:100%">
+        </div>
+        <div style="flex:1">
+          <label style="font-size:.6rem;color:var(--txt3);display:block;margin-bottom:2px">⏰ Aviso</label>
+          <select id="mob-nota-recordatorio" class="ctrl" style="font-size:.65rem;padding:4px 5px;width:100%">
+            <option value="">—</option>
+            <option value="10">10 min</option>
+            <option value="15">15 min</option>
+            <option value="30" selected>30 min</option>
+            <option value="60">1 hora</option>
+            <option value="1440">1 día</option>
+          </select>
+        </div>
       </div>
       <div class="nota-input-mob">
         <textarea class="nota-field-mob" id="mob-nota-nueva" placeholder="Escribe una nota..." rows="2"></textarea>
@@ -3152,10 +3164,6 @@ window._cargarXLSX=function(){
 <script defer src="js/mobile.js"></script>
 <script defer src="js/sidebar.js"></script>
 <script defer src="js/portal.js"></script>
-<!-- Firebase Cloud Messaging -->
-<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-messaging-compat.js"></script>
-<!-- Notificaciones push -->
-<script defer src="js/notificaciones.js"></script>
 <script defer src="js/pwa.js"></script>
 <script defer src="js/eventos.js"></script>
 <script defer src="js/suplencias_link.js"></script>
