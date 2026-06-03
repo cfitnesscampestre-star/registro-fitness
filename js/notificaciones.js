@@ -20,9 +20,9 @@ let _fcmToken       = null;   // token FCM de este dispositivo
 // ═══════════════════════════════════════════════════════════════
 async function initNotificaciones() {
   // Solo para coordinador
-  // Verificar rol desde localStorage (admin o usuario = coordinador)
+  // Verificar que haya sesión activa (cualquier rol)
   const _rolSesion = localStorage.getItem("fc_ses_rol");
-  if (!_rolSesion || _rolSesion === "instructor") return;
+  if (!_rolSesion) return; // Sin sesión, no inicializar
 
   if (!('serviceWorker' in navigator) || !('Notification' in window)) {
     console.warn('[Notif] Este navegador no soporta notificaciones push.');
@@ -30,12 +30,9 @@ async function initNotificaciones() {
   }
 
   try {
-    // Registrar el SW real (reemplaza el Blob de pwa.js si existiera)
-    _swRegistration = await navigator.serviceWorker.register(
-      new URL('firebase-messaging-sw.js', location.href).pathname,
-      { scope: new URL('./', location.href).pathname }
-    );
-    console.log('[Notif] Service Worker registrado:', _swRegistration.scope);
+    // Reutilizar el SW ya registrado por pwa.js (evita doble registro)
+    _swRegistration = await navigator.serviceWorker.ready;
+    console.log('[Notif] Service Worker listo:', _swRegistration.scope);
 
     // Escuchar mensajes de confirmación del SW
     navigator.serviceWorker.addEventListener('message', _onSwMessage);
@@ -278,16 +275,12 @@ window.initNotificaciones           = initNotificaciones;
 // 9. AUTO-ARRANQUE al cargar la página (si ya hay sesión activa)
 // ═══════════════════════════════════════════════════════════════
 (function _autoIniciarNotificaciones() {
-  const rol = localStorage.getItem('fc_ses_rol');
-  const ttl = parseInt(localStorage.getItem('fc_ses_ttl') || '0');
-  // Solo si hay sesión de coordinador vigente
-  if ((rol === 'admin' || rol === 'usuario') && ttl > Date.now()) {
-    // Esperar a que todos los scripts estén cargados
-    if (document.readyState === 'complete') {
-      setTimeout(initNotificaciones, 2500);
-    } else {
-      window.addEventListener('load', () => setTimeout(initNotificaciones, 2500));
-    }
+  // Iniciar siempre que haya Service Worker disponible
+  // La función initNotificaciones() verifica el rol internamente
+  if (document.readyState === 'complete') {
+    setTimeout(initNotificaciones, 1500);
+  } else {
+    window.addEventListener('load', () => setTimeout(initNotificaciones, 1500));
   }
 })();
 
