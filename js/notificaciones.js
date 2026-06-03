@@ -20,7 +20,9 @@ let _fcmToken       = null;   // token FCM de este dispositivo
 // ═══════════════════════════════════════════════════════════════
 async function initNotificaciones() {
   // Solo para coordinador
-  if (typeof _esCoordinador === 'function' && !_esCoordinador()) return;
+  // Verificar rol desde localStorage (admin o usuario = coordinador)
+  const _rolSesion = localStorage.getItem("fc_ses_rol");
+  if (!_rolSesion || _rolSesion === "instructor") return;
 
   if (!('serviceWorker' in navigator) || !('Notification' in window)) {
     console.warn('[Notif] Este navegador no soporta notificaciones push.');
@@ -265,3 +267,20 @@ function renderPanelNotifStatus() {
         : ''}
     </div>`;
 }
+
+// ═══════════════════════════════════════════════════════════════
+// 9. AUTO-ARRANQUE al cargar la página (si ya hay sesión activa)
+// ═══════════════════════════════════════════════════════════════
+(function _autoIniciarNotificaciones() {
+  const rol = localStorage.getItem('fc_ses_rol');
+  const ttl = parseInt(localStorage.getItem('fc_ses_ttl') || '0');
+  // Solo si hay sesión de coordinador vigente
+  if ((rol === 'admin' || rol === 'usuario') && ttl > Date.now()) {
+    // Esperar a que todos los scripts estén cargados
+    if (document.readyState === 'complete') {
+      setTimeout(initNotificaciones, 2500);
+    } else {
+      window.addEventListener('load', () => setTimeout(initNotificaciones, 2500));
+    }
+  }
+})();
