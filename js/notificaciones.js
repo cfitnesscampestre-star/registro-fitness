@@ -136,6 +136,7 @@ function _programarTodosLosRecordatorios() {
 
 // Programar (o reprogramar) el recordatorio de UN evento
 // Llama a esta función desde guardarEvento()
+
 function programarRecordatorioEvento(evento) {
   if (!evento || !evento.horaIni || !evento.fecha) return;
   if (evento.estado === 'cancelado') {
@@ -268,6 +269,11 @@ function renderPanelNotifStatus() {
     </div>`;
 }
 
+// Exponer funciones públicas globalmente
+window.programarRecordatorioEvento = programarRecordatorioEvento;
+window.cancelarRecordatorioEvento  = cancelarRecordatorioEvento;
+window.initNotificaciones           = initNotificaciones;
+
 // ═══════════════════════════════════════════════════════════════
 // 9. AUTO-ARRANQUE al cargar la página (si ya hay sesión activa)
 // ═══════════════════════════════════════════════════════════════
@@ -305,12 +311,20 @@ function renderPanelNotifStatus() {
       const ahora = Date.now();
 
       notas.forEach(nota => {
-        // Solo notas con fecha, hora Y aviso configurado
-        if (!nota.fecha || !nota.hora || !nota.aviso || nota.aviso === '') return;
-        // Solo notas futuras
-        const fechaHora = nota.fecha + 'T' + nota.hora + ':00';
+        // Soportar tanto ts (formato ISO) como fecha+hora separados
+        let fechaHora = null;
+        if (nota.ts) {
+          fechaHora = nota.ts; // '2026-06-03T12:11:00'
+        } else if (nota.fecha && nota.hora) {
+          fechaHora = nota.fecha + 'T' + nota.hora + ':00';
+        }
+        if (!fechaHora) return;
+
+        // Leer el aviso del campo correcto (mob-nota-recordatorio guarda en 'recordatorio' o 'aviso')
+        const minAntes = parseInt(nota.recordatorio || nota.aviso || nota.minRecordatorio) || 0;
+        if (!minAntes) return; // Sin aviso configurado
+
         const msEvento = new Date(fechaHora).getTime();
-        const minAntes = parseInt(nota.aviso) || 15;
         const msDisparo = msEvento - minAntes * 60 * 1000;
         if (msDisparo <= ahora) return;
 
@@ -318,8 +332,8 @@ function renderPanelNotifStatus() {
         const notaComoEvento = {
           id:              nota.id || ('nota_' + Date.now()),
           nombre:          nota.texto || nota.titulo || 'Nota de agenda',
-          fecha:           nota.fecha,
-          horaIni:         nota.hora,
+          fecha:           fechaHora.slice(0, 10),
+          horaIni:         fechaHora.slice(11, 16),
           minRecordatorio: minAntes,
           estado:          nota.completada ? 'cancelado' : 'planificado'
         };
