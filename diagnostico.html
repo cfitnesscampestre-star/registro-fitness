@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Diagnóstico de Notificaciones · Fitness</title>
+<style>
+  :root { --verde:#1a7a45; --neon:#5effa0; --panel:#0f1a14; --panel2:#16241c; --border:#244234; --txt:#e8f5ee; --txt2:#9fc4ad; --red:#e05050; --gold:#e8b84b; }
+  * { box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+  body { margin:0; font-family:system-ui,-apple-system,sans-serif; background:#081109; color:var(--txt); padding:16px; }
+  h1 { font-size:1.1rem; margin:0 0 4px; color:var(--neon); }
+  p.sub { margin:0 0 16px; font-size:.8rem; color:var(--txt2); }
+  .card { background:var(--panel); border:1px solid var(--border); border-radius:12px; padding:12px 14px; margin-bottom:12px; }
+  .row { display:flex; justify-content:space-between; gap:8px; font-size:.82rem; padding:4px 0; border-bottom:1px solid rgba(255,255,255,.05); }
+  .row:last-child { border-bottom:none; }
+  .row b { color:var(--txt2); font-weight:500; }
+  .ok { color:var(--neon); font-weight:700; }
+  .bad { color:var(--red); font-weight:700; }
+  .warn { color:var(--gold); font-weight:700; }
+  button { width:100%; margin:6px 0; padding:14px; font-size:.95rem; font-weight:700; border-radius:10px; border:1px solid var(--verde); background:var(--panel2); color:var(--neon); cursor:pointer; }
+  button:active { background:var(--verde); color:#fff; }
+  #log { background:#000; border:1px solid var(--border); border-radius:10px; padding:10px; font-family:ui-monospace,monospace; font-size:.72rem; line-height:1.5; white-space:pre-wrap; word-break:break-word; max-height:260px; overflow:auto; margin-top:8px; }
+  .step { font-size:.7rem; text-transform:uppercase; letter-spacing:1px; color:var(--txt2); margin:14px 0 2px; }
+</style>
+</head>
+<body>
+  <h1>🔔 Diagnóstico de Notificaciones</h1>
+  <p class="sub">Club Campestre · Fitness Control. Sigue los pasos 1 → 4 en orden, en este mismo teléfono.</p>
+
+  <div class="card" id="estado"></div>
+
+  <div class="step">Paso 1</div>
+  <button onclick="pedirPermiso()">1) Pedir permiso de notificaciones</button>
+
+  <div class="step">Paso 2</div>
+  <button onclick="registrarSW()">2) Registrar service worker</button>
+
+  <div class="step">Paso 3</div>
+  <button onclick="probarAhora()">3) Probar notificación AHORA</button>
+
+  <div class="step">Paso 4</div>
+  <button onclick="programar15()">4) Programar para dentro de 15 segundos</button>
+  <p class="sub" style="margin-top:4px">Tras tocar el paso 4, <b>bloquea el teléfono o cambia de app</b> y espera. La notificación debe llegar como un mensaje del sistema.</p>
+
+  <div id="log"></div>
+
+<script>
+let reg = null;
+const logEl = document.getElementById('log');
+function log(msg, tipo) {
+  const t = new Date().toLocaleTimeString();
+  const color = tipo === 'ok' ? '#5effa0' : tipo === 'bad' ? '#e05050' : tipo === 'warn' ? '#e8b84b' : '#9fc4ad';
+  logEl.innerHTML += `<span style="color:${color}">[${t}] ${msg}</span>\n`;
+  logEl.scrollTop = logEl.scrollHeight;
+}
+
+function fila(label, valor, clase) {
+  return `<div class="row"><b>${label}</b><span class="${clase||''}">${valor}</span></div>`;
+}
+
+function detectarEntorno() {
+  const ua = navigator.userAgent;
+  const esIOS = /iPad|iPhone|iPod/.test(ua) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+  const esAndroid = /Android/.test(ua);
+  const standalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
+  const soporteSW = 'serviceWorker' in navigator;
+  const soporteNotif = 'Notification' in window;
+  const soportePush = 'PushManager' in window;
+  const soporteTrigger = soporteNotif && 'showTrigger' in Notification.prototype && typeof TimestampTrigger !== 'undefined';
+
+  let html = '';
+  html += fila('Sistema', esIOS ? '🍎 iOS / iPhone' : esAndroid ? '🤖 Android' : '💻 Escritorio/otro', esIOS ? 'warn' : 'ok');
+  html += fila('Instalada (pantalla inicio)', standalone ? 'Sí' : 'No (abierta en navegador)', standalone ? 'ok' : 'warn');
+  html += fila('Soporta Service Worker', soporteSW ? 'Sí' : 'No', soporteSW ? 'ok' : 'bad');
+  html += fila('Soporta Notification', soporteNotif ? 'Sí' : 'No', soporteNotif ? 'ok' : 'bad');
+  html += fila('Soporta Push', soportePush ? 'Sí' : 'No', soportePush ? 'ok' : 'warn');
+  html += fila('Permiso actual', soporteNotif ? Notification.permission : 'n/d',
+               soporteNotif && Notification.permission === 'granted' ? 'ok' : soporteNotif && Notification.permission === 'denied' ? 'bad' : 'warn');
+  html += fila('TimestampTrigger (cerrada)', soporteTrigger ? 'Sí (confiable)' : 'No (usará setTimeout)', soporteTrigger ? 'ok' : 'warn');
+  html += fila('URL de esta página', location.href.length > 38 ? '…' + location.href.slice(-36) : location.href, '');
+  document.getElementById('estado').innerHTML = html;
+
+  if (esIOS && !standalone) {
+    log('iOS detectado SIN instalar: en iPhone las notificaciones web SOLO funcionan si agregas la app a la pantalla de inicio (Compartir → Agregar a inicio) y la abres desde ahí.', 'warn');
+  }
+}
+
+async function pedirPermiso() {
+  if (!('Notification' in window)) { log('Este navegador no soporta Notification.', 'bad'); return; }
+  try {
+    const r = await Notification.requestPermission();
+    log('Resultado del permiso: ' + r, r === 'granted' ? 'ok' : 'bad');
+    detectarEntorno();
+  } catch (e) { log('Error al pedir permiso: ' + e.message, 'bad'); }
+}
+
+async function registrarSW() {
+  if (!('serviceWorker' in navigator)) { log('No hay soporte de Service Worker.', 'bad'); return; }
+  try {
+    const url = new URL('firebase-messaging-sw.js', document.baseURI).href;
+    log('Registrando SW en: ' + url);
+    reg = await navigator.serviceWorker.register(url);
+    await navigator.serviceWorker.ready;
+    log('SW registrado ✔  scope: ' + reg.scope, 'ok');
+    log('Estado: ' + (reg.active ? 'activo' : reg.installing ? 'instalando' : reg.waiting ? 'esperando' : 'desconocido'),
+        reg.active ? 'ok' : 'warn');
+  } catch (e) {
+    log('FALLÓ el registro del SW: ' + e.message, 'bad');
+    log('→ Suele ser por ruta incorrecta. El archivo firebase-messaging-sw.js debe estar junto a esta página.', 'warn');
+  }
+}
+
+async function _asegurarReg() {
+  if (Notification.permission !== 'granted') { log('Primero concede el permiso (paso 1).', 'bad'); return null; }
+  if (!reg) { await registrarSW(); }
+  if (!reg) { log('No hay service worker; haz el paso 2.', 'bad'); return null; }
+  return reg;
+}
+
+async function probarAhora() {
+  const r = await _asegurarReg(); if (!r) return;
+  try {
+    await r.showNotification('✅ Prueba inmediata', {
+      body: 'Si ves esto, el permiso y el service worker funcionan.',
+      icon: 'img/icon-192.png', badge: 'img/icon-96.png', tag: 'diag-now', renotify: true
+    });
+    log('Notificación inmediata enviada. ¿La viste?', 'ok');
+  } catch (e) { log('Error al mostrar notificación: ' + e.message, 'bad'); }
+}
+
+async function programar15() {
+  const r = await _asegurarReg(); if (!r) return;
+  const cuando = Date.now() + 15000;
+  const opts = {
+    body: 'Recordatorio de prueba (15 s). Programado correctamente.',
+    icon: 'img/icon-192.png', badge: 'img/icon-96.png', tag: 'diag-15', renotify: true, requireInteraction: true
+  };
+  const soporteTrigger = 'showTrigger' in Notification.prototype && typeof TimestampTrigger !== 'undefined';
+  try {
+    if (soporteTrigger) {
+      await r.showNotification('⏰ Prueba programada', { ...opts, showTrigger: new TimestampTrigger(cuando) });
+      log('Programada con TimestampTrigger. Bloquea el teléfono y espera 15 s.', 'ok');
+    } else {
+      log('Sin TimestampTrigger: usaré setTimeout (solo llega si la app/SW siguen vivos).', 'warn');
+      setTimeout(() => {
+        r.showNotification('⏰ Prueba programada', opts)
+          .then(() => log('setTimeout disparó la notificación.', 'ok'))
+          .catch(e => log('Error en setTimeout: ' + e.message, 'bad'));
+      }, 15000);
+      log('Esperando 15 s… mantén esta página abierta.', 'warn');
+    }
+  } catch (e) { log('Error al programar: ' + e.message, 'bad'); }
+}
+
+detectarEntorno();
+log('Listo. Empieza por el paso 1.');
+</script>
+</body>
+</html>
