@@ -60,14 +60,15 @@ self.addEventListener('message', event => {
     const { eventoId, nombre, fechaHora, minAntes } = msg;
     if (!eventoId || !fechaHora) return;
 
-    // Cancelar si ya existía uno para este evento
+    // Cancelar si ya existía uno (timer o notificación con trigger) para este evento
     if (recordatoriosPendientes.has(eventoId)) {
       clearTimeout(recordatoriosPendientes.get(eventoId));
+      recordatoriosPendientes.delete(eventoId);
     }
 
     const ahora      = Date.now();
     const msEvento   = new Date(fechaHora).getTime();
-    const msDisparo  = msEvento - (minAntes != null ? minAntes : 30) * 60 * 1000;
+    const msDisparo  = msEvento - (minAntes || 30) * 60 * 1000;
     const delay      = msDisparo - ahora;
 
     if (delay <= 0) {
@@ -75,39 +76,58 @@ self.addEventListener('message', event => {
       return;
     }
 
-    console.log(`[SW] Recordatorio programado: "${nombre}" en ${Math.round(delay/60000)} min`);
+    const opciones = {
+      body:    `${nombre} comienza en ${minAntes} min`,
+      icon:    '/img/icon-192.png',
+      badge:   '/img/icon-96.png',
+      tag:     'rec_' + eventoId,
+      renotify: true,
+      requireInteraction: true,
+      data:    { eventoId, url: '/' },
+      actions: [
+        { action: 'ver',    title: '👁 Abrir app' },
+        { action: 'cerrar', title: '✕ Cerrar'     }
+      ]
+    };
 
-    const tid = setTimeout(() => {
+    // ── Vía confiable: Notification Triggers API (sobrevive al cierre del SW) ──
+    // El navegador agenda la notificación; funciona aunque la app/SW estén cerrados.
+    // Soportado en Chrome/Edge de escritorio y Android. iOS/Firefox usan el fallback.
+    if ('showTrigger' in Notification.prototype && typeof TimestampTrigger !== 'undefined') {
       self.registration.showNotification('📅 Recordatorio · Fitness', {
-        body:    `${nombre} comienza en ${minAntes} min`,
-        icon:    '/img/icon-192.png',
-        badge:   '/img/icon-96.png',
-        tag:     'rec_' + eventoId,
-        renotify: true,
-        requireInteraction: true,
-        data:    { eventoId, url: '/' },
-        actions: [
-          { action: 'ver',    title: '👁 Abrir app' },
-          { action: 'cerrar', title: '✕ Cerrar'     }
-        ]
+        ...opciones,
+        showTrigger: new TimestampTrigger(msDisparo)
       });
-      recordatoriosPendientes.delete(eventoId);
-    }, delay);
-
-    recordatoriosPendientes.set(eventoId, tid);
+      console.log(`[SW] Recordatorio agendado con TimestampTrigger: "${nombre}" para ${new Date(msDisparo).toLocaleString()}`);
+    } else {
+      // ── Fallback: setTimeout (solo dispara mientras el SW siga vivo) ──
+      const tid = setTimeout(() => {
+        self.registration.showNotification('📅 Recordatorio · Fitness', opciones);
+        recordatoriosPendientes.delete(eventoId);
+      }, delay);
+      recordatoriosPendientes.set(eventoId, tid);
+      console.log(`[SW] Recordatorio con setTimeout (fallback): "${nombre}" en ${Math.round(delay/60000)} min`);
+    }
 
     // Confirmar al cliente
     event.source?.postMessage({ tipo: 'RECORDATORIO_CONFIRMADO', eventoId, delay });
   }
 
   // ── Cancelar recordatorio ─────────────────────────────────────
-  if (msg.tipo === 'CANCELAR_RECORDATOSIO') {
+  if (msg.tipo === 'CANCELAR_RECORDATORIO') {
     const { eventoId } = msg;
+    // 1. Cancelar timer pendiente (fallback)
     if (recordatoriosPendientes.has(eventoId)) {
       clearTimeout(recordatoriosPendientes.get(eventoId));
       recordatoriosPendientes.delete(eventoId);
-      console.log('[SW] Recordatorio cancelado:', eventoId);
     }
+    // 2. Cancelar notificación agendada con TimestampTrigger (aún no disparada)
+    if (self.registration.getNotifications) {
+      self.registration.getNotifications({ tag: 'rec_' + eventoId, includeTriggered: true })
+        .then(lista => lista.forEach(n => n.close()))
+        .catch(() => {});
+    }
+    console.log('[SW] Recordatorio cancelado:', eventoId);
   }
 });
 
