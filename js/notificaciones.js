@@ -29,10 +29,9 @@ async function initNotificaciones() {
   }
 
   try {
-    // Registrar el SW real (reemplaza el Blob de pwa.js)
+    // Registrar el SW real (ruta relativa: funciona en raíz o subdirectorio)
     _swRegistration = await navigator.serviceWorker.register(
-      '/firebase-messaging-sw.js',
-      { scope: '/' }
+      new URL('firebase-messaging-sw.js', document.baseURI).href
     );
     console.log('[Notif] Service Worker registrado:', _swRegistration.scope);
 
@@ -54,8 +53,11 @@ async function initNotificaciones() {
     // Solicitar permiso y obtener token (con flujo suave)
     await _solicitarPermiso();
 
-    // Programar recordatorios de eventos próximos
+    // Programar recordatorios de eventos próximos (vía SW, best-effort)
     _programarTodosLosRecordatorios();
+
+    // Programador EN LA PÁGINA: la capa CONFIABLE mientras la app está abierta
+    _iniciarSchedulerPagina();
 
   } catch (err) {
     console.warn('[Notif] Error en initNotificaciones:', err);
@@ -265,6 +267,104 @@ function _cargarNotasAgenda() {
   } catch (e) { return []; }
 }
 
+// ════════════════════════════════════════════════════════════════
+//  PROGRAMADOR EN LA PÁGINA  ·  capa CONFIABLE mientras la app está abierta
+//  ----------------------------------------------------------------
+//  El setTimeout del Service Worker NO es confiable: el navegador detiene los
+//  service workers inactivos a los ~30 s aunque la app siga abierta, y el
+//  temporizador se pierde. Por eso revisamos los recordatorios desde la propia
+//  página con un intervalo. Mientras la app esté abierta, los avisos SÍ se
+//  disparan a tiempo. (Con la app cerrada se necesita push del servidor / FCM.)
+// ════════════════════════════════════════════════════════════════
+let _pageSchedulerId = null;
+const _recordatoriosDisparados = new Set(_cargarDisparados());
+
+function _cargarDisparados() {
+  try { return JSON.parse(localStorage.getItem('fc_notif_disparados') || '[]'); }
+  catch (e) { return []; }
+}
+function _marcarDisparado(id) {
+  _recordatoriosDisparados.add(id);
+  try {
+    // Conservar solo los últimos 200 para no crecer indefinidamente
+    localStorage.setItem('fc_notif_disparados', JSON.stringify([..._recordatoriosDisparados].slice(-200)));
+  } catch (e) {}
+}
+
+// Lista unificada de recordatorios pendientes (eventos + notas de agenda)
+function _recordatoriosPendientes() {
+  const out = [];
+  const hoyStr = new Date().toISOString().slice(0, 10);
+
+  _cargarEventos()
+    .filter(e => e.estado !== 'cancelado' && e.fecha >= hoyStr && e.horaIni && e.minRecordatorio)
+    .forEach(e => out.push({
+      id: 'rec_' + e.id,
+      nombre: e.nombre || e.deporte || 'Evento',
+      fecha: e.fecha, hora: e.horaIni, min: parseInt(e.minRecordatorio) || 30
+    }));
+
+  _cargarNotasAgenda()
+    .filter(n => !n.resuelta && n.fecha && n.fecha >= hoyStr && n.hora && n.minRecordatorio)
+    .forEach(n => out.push({
+      id: 'rec_' + n.id,
+      nombre: (n.texto || 'Nota').slice(0, 60),
+      fecha: n.fecha, hora: n.hora, min: parseInt(n.minRecordatorio) || 30
+    }));
+
+  return out;
+}
+
+function _revisarRecordatorios() {
+  if (!('Notification' in window) || Notification.permission !== 'granted') return;
+  const ahora = Date.now();
+
+  _recordatoriosPendientes().forEach(r => {
+    if (_recordatoriosDisparados.has(r.id)) return;
+    const msEvento = new Date(r.fecha + 'T' + r.hora + ':00').getTime();
+    if (isNaN(msEvento)) return;
+    const msDisparo = msEvento - r.min * 60 * 1000;
+    // Ventana: desde la hora del aviso hasta 1 min después del inicio del evento.
+    // Así, si abres la app un poco tarde, el aviso todavía se dispara una vez.
+    if (ahora >= msDisparo && ahora <= msEvento + 60000) {
+      _dispararNotificacionLocal(r);
+      _marcarDisparado(r.id);
+    }
+  });
+}
+
+async function _dispararNotificacionLocal(r) {
+  const titulo = '📅 Recordatorio · Fitness';
+  const opts = {
+    body: `${r.nombre} comienza en ${r.min} min`,
+    icon: 'img/icon-192.png',
+    badge: 'img/icon-96.png',
+    tag: r.id,                 // mismo tag que el SW → no se duplica
+    renotify: true,
+    requireInteraction: true,
+    data: { url: location.href }
+  };
+  try {
+    // En móvil la notificación DEBE mostrarse vía Service Worker
+    const reg = _swRegistration || await navigator.serviceWorker.ready;
+    await reg.showNotification(titulo, opts);
+    console.log('[Notif] Recordatorio disparado desde la página:', r.nombre);
+  } catch (e) {
+    console.warn('[Notif] No se pudo mostrar la notificación:', e.message);
+    _mostrarToastNotif(titulo, opts.body);   // último recurso visible en pantalla
+  }
+}
+
+function _iniciarSchedulerPagina() {
+  if (_pageSchedulerId) return;
+  _revisarRecordatorios();                                  // revisar de inmediato
+  _pageSchedulerId = setInterval(_revisarRecordatorios, 20000); // cada 20 s
+  // Revisar también al volver al frente (regresar de otra app / desbloquear)
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'visible') _revisarRecordatorios();
+  });
+}
+
 // Toast de notificación en foreground (cuando la app está abierta)
 function _mostrarToastNotif(titulo, cuerpo) {
   if (typeof showToast === 'function') {
@@ -345,3 +445,5 @@ window.programarRecordatorioEvento    = programarRecordatorioEvento;
 window.cancelarRecordatorioEvento     = cancelarRecordatorioEvento;
 window.renderPanelNotifStatus         = renderPanelNotifStatus;
 window._programarTodosLosRecordatorios = _programarTodosLosRecordatorios;
+window._revisarRecordatorios           = _revisarRecordatorios;
+window._iniciarSchedulerPagina         = _iniciarSchedulerPagina;
