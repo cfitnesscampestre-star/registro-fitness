@@ -7,41 +7,43 @@
 // ── VAPID public key ─────────────────────────────────────────
 // Generada en Firebase Console → Project Settings → Cloud Messaging
 // → Web Push certificates → Generate key pair → copiar "Key pair"
-// ⚠️  REEMPLAZA este valor con tu VAPID key real antes de subir.
+// IMPORTANTE: reemplaza este valor con tu VAPID key real.
 const FCM_VAPID_KEY = 'BNCbWz9IgFw2mBfN3ChI9zekBl3Vvz-16Ad2ckicHOT8U12IMh1a1Jf4bBIvQfLqUrJfWUyjyg5MQACaqKd9XBQ';
 
 // ── Estado del módulo ────────────────────────────────────────
 let _fcmMessaging   = null;   // instancia firebase.messaging()
 let _swRegistration = null;   // SW registration activo
-let _fcmToken       = null;   // token FCM de este dispositivo
+let _fcmToken       = null;   // token de este dispositivo
 
 // ═══════════════════════════════════════════════════════════════
 // 1. INICIALIZACIÓN  (llamar desde init() en app principal)
 // ═══════════════════════════════════════════════════════════════
 async function initNotificaciones() {
-  // Solo para coordinador
-  // Verificar que haya sesión activa (cualquier rol)
-  const _rolSesion = localStorage.getItem("fc_ses_rol");
-  if (!_rolSesion) return; // Sin sesión, no inicializar
+  // Solo para coordinador — si no hay sesión activa, salir
+  if (!_esCoordinador()) return;
 
+  // Verificar soporte del navegador
   if (!('serviceWorker' in navigator) || !('Notification' in window)) {
     console.warn('[Notif] Este navegador no soporta notificaciones push.');
     return;
   }
 
   try {
-    // Reutilizar el SW ya registrado por pwa.js (evita doble registro)
-    _swRegistration = await navigator.serviceWorker.ready;
-    console.log('[Notif] Service Worker listo:', _swRegistration.scope);
+    // Registrar el SW real (reemplaza el Blob de pwa.js)
+    _swRegistration = await navigator.serviceWorker.register(
+      '/firebase-messaging-sw.js',
+      { scope: '/' }
+    );
+    console.log('[Notif] Service Worker registrado:', _swRegistration.scope);
 
     // Escuchar mensajes de confirmación del SW
     navigator.serviceWorker.addEventListener('message', _onSwMessage);
 
-    // Inicializar Firebase Messaging si está disponible
+    // Inicializar Firebase Messaging (requiere que firebase esté cargado)
     if (typeof firebase !== 'undefined' && firebase.messaging) {
       _fcmMessaging = firebase.messaging();
 
-      // Mensajes cuando la app está en PRIMER PLANO
+      // Manejar mensajes cuando la app está EN PRIMER PLANO
       _fcmMessaging.onMessage(payload => {
         console.log('[Notif] Mensaje en foreground:', payload);
         const { title, body } = payload.notification || {};
@@ -49,10 +51,10 @@ async function initNotificaciones() {
       });
     }
 
-    // Solicitar permiso y obtener token FCM
+    // Solicitar permiso y obtener token (con flujo suave)
     await _solicitarPermiso();
 
-    // Programar recordatorios de todos los eventos futuros
+    // Programar recordatorios de eventos próximos
     _programarTodosLosRecordatorios();
 
   } catch (err) {
@@ -72,68 +74,96 @@ async function _solicitarPermiso() {
   }
 
   if (permiso === 'default') {
+    // Primera vez: mostrar explicación antes del prompt del navegador
     const acepto = await _mostrarDialogoPermiso();
     if (!acepto) return false;
 
     const resultado = await Notification.requestPermission();
     if (resultado !== 'granted') {
-      if (typeof showToast === 'function')
-        showToast('Notificaciones no activadas. Puedes activarlas en ajustes del navegador.', 'warn');
+      showToast('Notificaciones no activadas. Puedes activarlas en ajustes del navegador.', 'warn');
       return false;
     }
   }
 
+  // Permiso concedido — obtener token FCM
   await _obtenerTokenFCM();
   return true;
 }
 
 async function _obtenerTokenFCM() {
   if (!_fcmMessaging || !FCM_VAPID_KEY || FCM_VAPID_KEY === 'TU_VAPID_PUBLIC_KEY_AQUI') {
-    // Sin VAPID key configurada: modo solo-local (SW maneja recordatorios con setTimeout)
-    console.log('[Notif] Modo local activo (VAPID key no configurada).');
+    // Sin VAPID key: modo solo-local (notificaciones locales programadas desde SW)
+    console.log('[Notif] Modo local activo (sin VAPID key configurada).');
     return;
   }
 
   try {
-    const token = await _fcmMessaging.getToken({ vapidKey: FCM_VAPID_KEY });
-    if (!token) return;
+    const token = await _fcmMessaging.getToken({
+      vapidKey:            FCM_VAPID_KEY,
+      serviceWorkerRegistration: _swRegistration
+    });
 
-    _fcmToken = token;
-    console.log('[Notif] Token FCM obtenido:', token.substring(0, 20) + '...');
-
-    // Guardar token en Firebase para uso futuro de push remoto
-    if (typeof firebase !== 'undefined' && firebase.database) {
-      const uid = firebase.auth().currentUser?.uid || 'coordinador';
-      await firebase.database().ref(`fitness/notif_tokens/${uid}`).set({
-        token,
-        dispositivo: navigator.userAgent.substring(0, 80),
-        actualizado: new Date().toISOString()
-      });
+    if (token) {
+      _fcmToken = token;
+      console.log('[Notif] Token FCM obtenido:', token.slice(0, 20) + '…');
+      // Guardar en Firebase para poder enviar push remotas en el futuro
+      await _guardarTokenEnFirebase(token);
+      showToast('🔔 Notificaciones activadas para este dispositivo', 'ok');
     }
   } catch (err) {
-    console.warn('[Notif] Error obteniendo token FCM:', err);
+    console.warn('[Notif] No se pudo obtener token FCM:', err.message);
+    // Continuar en modo local — las notificaciones del SW siguen funcionando
   }
+}
+
+async function _guardarTokenEnFirebase(token) {
+  if (!fbDb) return;
+  try {
+    const dispositivo = {
+      token,
+      rol:       'coordinador',
+      ua:        navigator.userAgent.slice(0, 80),
+      actualizadoEn: Date.now()
+    };
+    await fbDb.ref('fitness/notif_tokens/' + _tokenKey(token)).set(dispositivo);
+  } catch (e) {
+    console.warn('[Notif] No se pudo guardar token en Firebase:', e.message);
+  }
+}
+
+// Key segura derivada del token (últimos 20 chars)
+function _tokenKey(token) {
+  return 'coord_' + token.slice(-20).replace(/[^a-zA-Z0-9]/g, '_');
 }
 
 // ═══════════════════════════════════════════════════════════════
 // 3. PROGRAMAR RECORDATORIOS DE EVENTOS
 // ═══════════════════════════════════════════════════════════════
 
-// Llama al iniciar la app — programa todos los eventos futuros pendientes
+// Llamar al guardar un evento O al abrir la app (programa todos los pendientes)
 function _programarTodosLosRecordatorios() {
   if (!_swRegistration || !_swRegistration.active) return;
 
-  const eventos  = typeof _cargarEventos === 'function' ? _cargarEventos() : _obtenerEventosLocales();
-  const hoyStr   = new Date().toISOString().slice(0, 10);
+  const hoyStr  = new Date().toISOString().slice(0, 10);
 
-  eventos
+  // 1. Eventos deportivos pendientes
+  _cargarEventos()
     .filter(e => e.estado !== 'cancelado' && e.fecha >= hoyStr && e.horaIni)
     .forEach(e => _programarRecordatorio(e));
+
+  // 2. Notas de agenda con fecha + hora + recordatorio configurado
+  _cargarNotasAgenda()
+    .filter(n => !n.resuelta && n.fecha && n.fecha >= hoyStr && n.hora && n.minRecordatorio)
+    .forEach(n => _programarRecordatorio({
+      id:              n.id,
+      nombre:          (n.texto || 'Nota').slice(0, 60),
+      fecha:           n.fecha,
+      horaIni:         n.hora,
+      minRecordatorio: n.minRecordatorio
+    }));
 }
 
 // Programar (o reprogramar) el recordatorio de UN evento
-// Llama a esta función desde guardarEvento()
-
 function programarRecordatorioEvento(evento) {
   if (!evento || !evento.horaIni || !evento.fecha) return;
   if (evento.estado === 'cancelado') {
@@ -152,8 +182,7 @@ function _programarRecordatorio(evento) {
   const sw = _swRegistration?.active;
   if (!sw) return;
 
-  // minRecordatorio viene del campo del modal (5, 10, 15, 30, 60 min)
-  const minAntes  = parseInt(evento.minRecordatorio) || 15;
+  const minAntes  = parseInt(evento.minRecordatorio) || 30; // campo nuevo en el modal
   const fechaHora = evento.fecha + 'T' + evento.horaIni + ':00';
 
   sw.postMessage({
@@ -166,7 +195,6 @@ function _programarRecordatorio(evento) {
 }
 
 // Cancelar recordatorio al eliminar o cancelar un evento
-// Llama a esta función desde eliminarEvento() y al cambiar estado a 'cancelado'
 function cancelarRecordatorioEvento(eventoId) {
   const sw = _swRegistration?.active;
   if (!sw || !eventoId) return;
@@ -174,66 +202,7 @@ function cancelarRecordatorioEvento(eventoId) {
 }
 
 // ═══════════════════════════════════════════════════════════════
-// 4. ESCUCHAR MENSAJES DEL SERVICE WORKER
-// ═══════════════════════════════════════════════════════════════
-function _onSwMessage(event) {
-  const msg = event.data;
-  if (!msg || !msg.tipo) return;
-
-  if (msg.tipo === 'RECORDATORIO_CONFIRMADO') {
-    const mins = Math.round(msg.delay / 60000);
-    console.log(`[Notif] ✅ Recordatorio confirmado para evento ${msg.eventoId} en ~${mins} min`);
-  }
-}
-
-// ═══════════════════════════════════════════════════════════════
-// 5. DIÁLOGO DE PERMISO (UI amigable antes del prompt del navegador)
-// ═══════════════════════════════════════════════════════════════
-function _mostrarDialogoPermiso() {
-  return new Promise(resolve => {
-    // Si existe un modal genérico en la app, usarlo; si no, usar confirm()
-    if (typeof mostrarModal === 'function') {
-      mostrarModal({
-        titulo:  '🔔 Activar recordatorios',
-        mensaje: 'Recibe notificaciones antes de tus eventos programados, aunque la app esté en segundo plano.',
-        btnOk:    'Activar',
-        btnCancel:'Ahora no',
-        onOk:    () => resolve(true),
-        onCancel:() => resolve(false)
-      });
-    } else {
-      const ok = confirm('¿Activar notificaciones para recordatorios de eventos?');
-      resolve(ok);
-    }
-  });
-}
-
-// ═══════════════════════════════════════════════════════════════
-// 6. TOAST DE NOTIFICACIÓN EN PRIMER PLANO
-// ═══════════════════════════════════════════════════════════════
-function _mostrarToastNotif(titulo, cuerpo) {
-  // Usar showToast de la app si existe
-  if (typeof showToast === 'function') {
-    showToast(`${titulo}: ${cuerpo}`, 'info', 6000);
-    return;
-  }
-  // Fallback: notificación nativa directa (app abierta)
-  if (Notification.permission === 'granted') {
-    new Notification(titulo, { body: cuerpo, icon: '/img/icon-192.png' });
-  }
-}
-
-// ═══════════════════════════════════════════════════════════════
-// 7. HELPER: obtener eventos desde localStorage si no hay función global
-// ═══════════════════════════════════════════════════════════════
-function _obtenerEventosLocales() {
-  try {
-    return JSON.parse(localStorage.getItem('fitness_eventos') || '[]');
-  } catch { return []; }
-}
-
-// ═══════════════════════════════════════════════════════════════
-// 8. PANEL DE ESTADO (para mostrar en ajustes del coordinador)
+// 4. PANEL DE CONFIGURACIÓN (para mostrar en ajustes del coord)
 // ═══════════════════════════════════════════════════════════════
 function renderPanelNotifStatus() {
   const el = document.getElementById('notif-status-panel');
@@ -253,90 +222,126 @@ function renderPanelNotifStatus() {
           Notificaciones: ${estadoTxt}
         </div>
         <div style="font-size:.65rem;color:var(--txt3);margin-top:1px">
-          ${_fcmToken ? 'Push remoto activo (FCM)' : 'Modo local (recordatorios programados)'}
+          ${_fcmToken ? 'Token FCM registrado ✔' : 'Solo notificaciones locales (app debe abrirse una vez al día)'}
         </div>
       </div>
       ${permiso !== 'granted'
-        ? `<button onclick="initNotificaciones()" 
-             style="font-size:.7rem;padding:.3rem .6rem;border-radius:6px;
-                    background:var(--neon);color:#000;border:none;cursor:pointer;font-weight:600;">
-             Activar
+        ? `<button class="btn bo" style="font-size:.65rem;padding:4px 10px"
+                   onclick="initNotificaciones()">Activar</button>`
+        : `<button class="btn bo" style="font-size:.65rem;padding:4px 10px"
+                   onclick="_programarTodosLosRecordatorios();showToast('Recordatorios actualizados','ok')">
+             ↺ Reprogramar
            </button>`
-        : ''}
+      }
     </div>`;
 }
 
-// Exponer funciones públicas globalmente
-window.programarRecordatorioEvento = programarRecordatorioEvento;
-window.cancelarRecordatorioEvento  = cancelarRecordatorioEvento;
-window.initNotificaciones           = initNotificaciones;
+// ═══════════════════════════════════════════════════════════════
+// 5. HELPERS INTERNOS
+// ═══════════════════════════════════════════════════════════════
 
-// ═══════════════════════════════════════════════════════════════
-// 9. AUTO-ARRANQUE al cargar la página (si ya hay sesión activa)
-// ═══════════════════════════════════════════════════════════════
-(function _autoIniciarNotificaciones() {
-  // Iniciar siempre que haya Service Worker disponible
-  // La función initNotificaciones() verifica el rol internamente
-  if (document.readyState === 'complete') {
-    setTimeout(initNotificaciones, 1500);
-  } else {
-    window.addEventListener('load', () => setTimeout(initNotificaciones, 1500));
+function _esCoordinador() {
+  // El coordinador inicia sesión como 'admin' o 'usuario' (auth.js).
+  // Se revisa sessionStorage.fc_rol (login fresco), localStorage.fc_ses_rol
+  // (sesión persistida) y fc_rol como respaldo.
+  const rol = sessionStorage.getItem('fc_rol')
+           || localStorage.getItem('fc_ses_rol')
+           || localStorage.getItem('fc_rol')
+           || '';
+  // Los instructores NO reciben recordatorios de coordinación.
+  if (rol === 'instructor') return false;
+  return rol === 'admin' || rol === 'usuario' || rol === 'coordinador' || rol === 'coord' || rol === '';
+}
+
+function _cargarEventos() {
+  try {
+    return JSON.parse(localStorage.getItem('fitness_eventos_v1') || '[]');
+  } catch (e) { return []; }
+}
+
+function _cargarNotasAgenda() {
+  try {
+    return JSON.parse(localStorage.getItem('fc_agenda') || '[]');
+  } catch (e) { return []; }
+}
+
+// Toast de notificación en foreground (cuando la app está abierta)
+function _mostrarToastNotif(titulo, cuerpo) {
+  if (typeof showToast === 'function') {
+    showToast(`${titulo}${cuerpo ? ' · ' + cuerpo : ''}`, 'info');
   }
-})();
+  // También mostrar notificación visual en pantalla si está disponible
+  const container = document.getElementById('notif-foreground-banner') || _crearBanner();
+  container.innerHTML = `
+    <div style="display:flex;align-items:center;gap:.7rem;padding:.7rem 1rem;
+                background:var(--panel2);border:1px solid var(--verde);border-radius:12px;
+                box-shadow:0 4px 20px rgba(0,0,0,.4);animation:slideDown .3s ease">
+      <span style="font-size:1.4rem">📅</span>
+      <div style="flex:1">
+        <div style="font-size:.82rem;font-weight:700;color:var(--neon)">${titulo}</div>
+        ${cuerpo ? `<div style="font-size:.72rem;color:var(--txt2);margin-top:2px">${cuerpo}</div>` : ''}
+      </div>
+      <button onclick="this.parentElement.parentElement.remove()"
+              style="background:none;border:none;color:var(--txt3);font-size:1rem;cursor:pointer;padding:4px">✕</button>
+    </div>`;
+  container.style.display = 'block';
+  setTimeout(() => { if (container) container.remove(); }, 8000);
+}
+
+function _crearBanner() {
+  const div = document.createElement('div');
+  div.id = 'notif-foreground-banner';
+  div.style.cssText = 'position:fixed;top:12px;left:50%;transform:translateX(-50%);z-index:9999;width:min(90vw,380px)';
+  document.body.appendChild(div);
+  return div;
+}
+
+// Diálogo explicativo antes de pedir permiso del navegador
+function _mostrarDialogoPermiso() {
+  return new Promise(resolve => {
+    const div = document.createElement('div');
+    div.style.cssText = `
+      position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:10000;
+      display:flex;align-items:center;justify-content:center;padding:1rem`;
+    div.innerHTML = `
+      <div style="background:var(--panel);border:1px solid var(--verde);border-radius:16px;
+                  padding:1.4rem;max-width:320px;width:100%;text-align:center">
+        <div style="font-size:2rem;margin-bottom:.5rem">🔔</div>
+        <div style="font-family:'Bebas Neue',sans-serif;font-size:1.2rem;color:var(--neon);
+                    letter-spacing:1px;margin-bottom:.6rem">Activar Recordatorios</div>
+        <div style="font-size:.78rem;color:var(--txt2);line-height:1.5;margin-bottom:1rem">
+          Recibe notificaciones en tu celular antes de cada evento programado,
+          aunque no tengas la app abierta.
+        </div>
+        <div style="display:flex;gap:.5rem;justify-content:center">
+          <button class="btn bg" style="flex:1" onclick="this.closest('div[style]').remove();_resolve(true)">
+            Sí, activar
+          </button>
+          <button class="btn bo" style="flex:1" onclick="this.closest('div[style]').remove();_resolve(false)">
+            Ahora no
+          </button>
+        </div>
+      </div>`;
+    // Exponer resolve al scope del HTML inline
+    window._resolve = v => { resolve(v); delete window._resolve; };
+    document.body.appendChild(div);
+  });
+}
+
+function _onSwMessage(event) {
+  const msg = event.data;
+  if (!msg) return;
+  if (msg.tipo === 'RECORDATORIO_CONFIRMADO') {
+    const mins = Math.round((msg.delay || 0) / 60000);
+    console.log(`[Notif] Recordatorio confirmado por SW (en ~${mins} min):`, msg.eventoId);
+  }
+}
 
 // ═══════════════════════════════════════════════════════════════
-// 10. LISTENER AUTOMÁTICO para notas con aviso (fc_agenda)
-// Intercepta cuando guardarNotaMob() guarda en localStorage
-// sin necesidad de modificar app.js
+// 6. EXPONER FUNCIONES GLOBALES
 // ═══════════════════════════════════════════════════════════════
-(function _escucharCambiosAgenda() {
-  // Sobrescribir localStorage.setItem para detectar cambios en fc_agenda
-  const _setItemOriginal = localStorage.setItem.bind(localStorage);
-
-  localStorage.setItem = function(key, value) {
-    _setItemOriginal(key, value);
-
-    // Solo nos interesa fc_agenda
-    if (key !== 'fc_agenda') return;
-
-    try {
-      const notas = JSON.parse(value || '[]');
-      const ahora = Date.now();
-
-      notas.forEach(nota => {
-        // Soportar tanto ts (formato ISO) como fecha+hora separados
-        let fechaHora = null;
-        if (nota.ts) {
-          fechaHora = nota.ts; // '2026-06-03T12:11:00'
-        } else if (nota.fecha && nota.hora) {
-          fechaHora = nota.fecha + 'T' + nota.hora + ':00';
-        }
-        if (!fechaHora) return;
-
-        // Leer el aviso del campo correcto (mob-nota-recordatorio guarda en 'recordatorio' o 'aviso')
-        const minAntes = parseInt(nota.recordatorio || nota.aviso || nota.minRecordatorio) || 0;
-        if (!minAntes) return; // Sin aviso configurado
-
-        const msEvento = new Date(fechaHora).getTime();
-        const msDisparo = msEvento - minAntes * 60 * 1000;
-        if (msDisparo <= ahora) return;
-
-        // Programar recordatorio usando el sistema de notificaciones
-        const notaComoEvento = {
-          id:              nota.id || ('nota_' + Date.now()),
-          nombre:          nota.texto || nota.titulo || 'Nota de agenda',
-          fecha:           fechaHora.slice(0, 10),
-          horaIni:         fechaHora.slice(11, 16),
-          minRecordatorio: minAntes,
-          estado:          nota.completada ? 'cancelado' : 'planificado'
-        };
-
-        if (typeof programarRecordatorioEvento === 'function') {
-          programarRecordatorioEvento(notaComoEvento);
-        }
-      });
-    } catch(e) {
-      console.warn('[Notif] Error procesando fc_agenda:', e);
-    }
-  };
-})();
+window.initNotificaciones             = initNotificaciones;
+window.programarRecordatorioEvento    = programarRecordatorioEvento;
+window.cancelarRecordatorioEvento     = cancelarRecordatorioEvento;
+window.renderPanelNotifStatus         = renderPanelNotifStatus;
+window._programarTodosLosRecordatorios = _programarTodosLosRecordatorios;
