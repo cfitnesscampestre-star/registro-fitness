@@ -358,12 +358,91 @@ async function _dispararNotificacionLocal(r) {
 function _iniciarSchedulerPagina() {
   if (_pageSchedulerId) return;
   _revisarRecordatorios();                                  // revisar de inmediato
+  _mostrarResumenDiario();                                  // resumen de pendientes del día
   _pageSchedulerId = setInterval(_revisarRecordatorios, 20000); // cada 20 s
-  // Revisar también al volver al frente (regresar de otra app / desbloquear)
+  // Al volver al frente (regresar de otra app / desbloquear / abrir en la tarde)
   document.addEventListener('visibilitychange', () => {
-    if (document.visibilityState === 'visible') _revisarRecordatorios();
+    if (document.visibilityState === 'visible') {
+      _revisarRecordatorios();
+      _mostrarResumenDiario();
+    }
   });
 }
+
+// ════════════════════════════════════════════════════════════════
+//  RESUMEN DE PENDIENTES DEL DÍA  ·  se muestra al abrir la app
+//  ----------------------------------------------------------------
+//  Cuando llegas en la mañana y abres la app, recibes una notificación con
+//  TODOS los pendientes de hoy (notas sin resolver + eventos). Si vuelves a
+//  abrirla en la tarde (pasadas ~3 h), te lo recuerda de nuevo. Entre aperturas
+//  cercanas no se repite, para no saturarte.
+// ════════════════════════════════════════════════════════════════
+const RESUMEN_THROTTLE_MS = 3 * 60 * 60 * 1000;   // 3 horas entre resúmenes
+
+function _pendientesDeHoy() {
+  const hoy = new Date().toISOString().slice(0, 10);
+  const items = [];
+
+  _cargarEventos()
+    .filter(e => e.estado !== 'cancelado' && e.fecha === hoy)
+    .forEach(e => items.push({ hora: e.horaIni || '', nombre: e.nombre || e.deporte || 'Evento', tipo: '🏆' }));
+
+  _cargarNotasAgenda()
+    .filter(n => !n.resuelta && n.fecha === hoy)
+    .forEach(n => items.push({ hora: n.hora || '', nombre: (n.texto || 'Nota').slice(0, 50), tipo: '📝' }));
+
+  // Ordenar: primero los que tienen hora (cronológico), luego los sin hora
+  items.sort((a, b) => {
+    if (a.hora && b.hora) return a.hora.localeCompare(b.hora);
+    if (a.hora) return -1;
+    if (b.hora) return 1;
+    return 0;
+  });
+  return items;
+}
+
+async function _mostrarResumenDiario(forzar) {
+  if (!('Notification' in window) || Notification.permission !== 'granted') return;
+
+  // Anti-spam: no repetir si ya se mostró hace menos de 3 h (salvo que se fuerce)
+  const ultimo = parseInt(localStorage.getItem('fc_resumen_last') || '0');
+  if (!forzar && (Date.now() - ultimo) < RESUMEN_THROTTLE_MS) return;
+
+  const pend = _pendientesDeHoy();
+  if (pend.length === 0) {
+    if (forzar) _mostrarToastNotif('✅ Sin pendientes', 'No tienes pendientes para hoy');
+    return;
+  }
+
+  // Construir el cuerpo: hasta 6 líneas, luego "y N más"
+  const lineas = pend.slice(0, 6).map(p =>
+    `${p.tipo} ${p.hora ? p.hora + '  ' : ''}${p.nombre}`
+  );
+  if (pend.length > 6) lineas.push(`… y ${pend.length - 6} más`);
+
+  const titulo = pend.length === 1
+    ? '📋 Tienes 1 pendiente hoy'
+    : `📋 Tienes ${pend.length} pendientes hoy`;
+
+  try {
+    const reg = _swRegistration || await navigator.serviceWorker.ready;
+    await reg.showNotification(titulo, {
+      body: lineas.join('\n'),
+      icon: 'img/icon-192.png',
+      badge: 'img/icon-96.png',
+      tag: 'resumen-dia',          // siempre reemplaza el anterior
+      renotify: true,
+      requireInteraction: true,
+      data: { url: location.href }
+    });
+    localStorage.setItem('fc_resumen_last', String(Date.now()));
+    console.log('[Notif] Resumen del día mostrado:', pend.length, 'pendientes');
+  } catch (e) {
+    console.warn('[Notif] No se pudo mostrar el resumen:', e.message);
+    _mostrarToastNotif(titulo, lineas.join(' · '));
+  }
+}
+
 
 // Toast de notificación en foreground (cuando la app está abierta)
 function _mostrarToastNotif(titulo, cuerpo) {
@@ -447,3 +526,4 @@ window.renderPanelNotifStatus         = renderPanelNotifStatus;
 window._programarTodosLosRecordatorios = _programarTodosLosRecordatorios;
 window._revisarRecordatorios           = _revisarRecordatorios;
 window._iniciarSchedulerPagina         = _iniciarSchedulerPagina;
+window.mostrarPendientesHoy            = () => _mostrarResumenDiario(true);
