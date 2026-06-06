@@ -370,33 +370,49 @@ function _iniciarSchedulerPagina() {
 }
 
 // ════════════════════════════════════════════════════════════════
-//  RESUMEN DE PENDIENTES DEL DÍA  ·  se muestra al abrir la app
+//  RESUMEN DE PENDIENTES  ·  se muestra al abrir la app
 //  ----------------------------------------------------------------
-//  Cuando llegas en la mañana y abres la app, recibes una notificación con
-//  TODOS los pendientes de hoy (notas sin resolver + eventos). Si vuelves a
-//  abrirla en la tarde (pasadas ~3 h), te lo recuerda de nuevo. Entre aperturas
+//  Al abrir la app recibes una notificación con TODOS tus pendientes:
+//   • todas las notas SIN resolver (de hoy, atrasadas o futuras) — siguen
+//     apareciendo cada 3 h hasta que las marques como resueltas en la app
+//   • los eventos de HOY
+//  Si vuelves a abrirla pasadas ~3 h, te lo recuerda otra vez. Entre aperturas
 //  cercanas no se repite, para no saturarte.
 // ════════════════════════════════════════════════════════════════
 const RESUMEN_THROTTLE_MS = 3 * 60 * 60 * 1000;   // 3 horas entre resúmenes
 
-function _pendientesDeHoy() {
+function _pendientesActivos() {
   const hoy = new Date().toISOString().slice(0, 10);
   const items = [];
 
+  // Notas: TODAS las no resueltas, sin importar la fecha (persisten hasta resolverse)
+  _cargarNotasAgenda()
+    .filter(n => !n.resuelta)
+    .forEach(n => items.push({
+      fecha:   n.fecha || '',
+      hora:    n.hora  || '',
+      nombre:  (n.texto || 'Nota').slice(0, 50),
+      tipo:    '📝',
+      vencida: !!(n.fecha && n.fecha < hoy)
+    }));
+
+  // Eventos de HOY (no cancelados)
   _cargarEventos()
     .filter(e => e.estado !== 'cancelado' && e.fecha === hoy)
-    .forEach(e => items.push({ hora: e.horaIni || '', nombre: e.nombre || e.deporte || 'Evento', tipo: '🏆' }));
+    .forEach(e => items.push({
+      fecha:   e.fecha,
+      hora:    e.horaIni || '',
+      nombre:  e.nombre || e.deporte || 'Evento',
+      tipo:    '🏆',
+      vencida: false
+    }));
 
-  _cargarNotasAgenda()
-    .filter(n => !n.resuelta && n.fecha === hoy)
-    .forEach(n => items.push({ hora: n.hora || '', nombre: (n.texto || 'Nota').slice(0, 50), tipo: '📝' }));
-
-  // Ordenar: primero los que tienen hora (cronológico), luego los sin hora
+  // Orden: por fecha (las sin fecha al final), luego por hora
   items.sort((a, b) => {
-    if (a.hora && b.hora) return a.hora.localeCompare(b.hora);
-    if (a.hora) return -1;
-    if (b.hora) return 1;
-    return 0;
+    const fa = a.fecha || '9999-12-31';
+    const fb = b.fecha || '9999-12-31';
+    if (fa !== fb) return fa.localeCompare(fb);
+    return (a.hora || '99:99').localeCompare(b.hora || '99:99');
   });
   return items;
 }
@@ -408,21 +424,29 @@ async function _mostrarResumenDiario(forzar) {
   const ultimo = parseInt(localStorage.getItem('fc_resumen_last') || '0');
   if (!forzar && (Date.now() - ultimo) < RESUMEN_THROTTLE_MS) return;
 
-  const pend = _pendientesDeHoy();
+  const pend = _pendientesActivos();
   if (pend.length === 0) {
-    if (forzar) _mostrarToastNotif('✅ Sin pendientes', 'No tienes pendientes para hoy');
+    if (forzar) _mostrarToastNotif('✅ Sin pendientes', 'No tienes pendientes por resolver');
     return;
   }
 
-  // Construir el cuerpo: hasta 6 líneas, luego "y N más"
+  const hoy = new Date().toISOString().slice(0, 10);
+  // Etiqueta de fecha corta (DD/MM) solo para pendientes que no son de hoy
+  const etiquetaFecha = (p) => {
+    if (!p.fecha || p.fecha === hoy) return '';
+    const [, m, d] = p.fecha.split('-');
+    return `${d}/${m} `;
+  };
+
+  // Cuerpo: hasta 6 líneas, luego "y N más". ⚠️ marca las atrasadas.
   const lineas = pend.slice(0, 6).map(p =>
-    `${p.tipo} ${p.hora ? p.hora + '  ' : ''}${p.nombre}`
+    `${p.vencida ? '⚠️ ' : ''}${p.tipo} ${etiquetaFecha(p)}${p.hora ? p.hora + ' ' : ''}${p.nombre}`
   );
   if (pend.length > 6) lineas.push(`… y ${pend.length - 6} más`);
 
   const titulo = pend.length === 1
-    ? '📋 Tienes 1 pendiente hoy'
-    : `📋 Tienes ${pend.length} pendientes hoy`;
+    ? '📋 Tienes 1 pendiente'
+    : `📋 Tienes ${pend.length} pendientes`;
 
   try {
     const reg = _swRegistration || await navigator.serviceWorker.ready;
@@ -436,7 +460,7 @@ async function _mostrarResumenDiario(forzar) {
       data: { url: location.href }
     });
     localStorage.setItem('fc_resumen_last', String(Date.now()));
-    console.log('[Notif] Resumen del día mostrado:', pend.length, 'pendientes');
+    console.log('[Notif] Resumen mostrado:', pend.length, 'pendientes');
   } catch (e) {
     console.warn('[Notif] No se pudo mostrar el resumen:', e.message);
     _mostrarToastNotif(titulo, lineas.join(' · '));
