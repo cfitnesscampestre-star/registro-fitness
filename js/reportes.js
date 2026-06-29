@@ -22,6 +22,32 @@ function initRptAnios(){
   });
 }
 
+// Poblar el selector de disciplina/clase con todas las clases reales en horarios + registros históricos
+function pobladoClasesRpt(){
+  const sel = document.getElementById('rpt-clase-sel');
+  if(!sel) return;
+  const cur = sel.value || '';
+  const deHorarios = instructores.flatMap(i=>(i.horario||[]).map(h=>h.clase));
+  const deRegistros = registros.map(r=>r.clase);
+  const clases = [...new Set([...deHorarios, ...deRegistros])].filter(Boolean).sort((a,b)=>a.localeCompare(b));
+  sel.innerHTML = '<option value="">— Todas las disciplinas —</option>' +
+    clases.map(c=>`<option value="${c}" ${c===cur?'selected':''}>${c}</option>`).join('');
+}
+
+// Mostrar/ocultar inputs de rango personalizado en Reporte Mensual
+function toggleRptMesRango(){
+  const esRango = document.getElementById('rpt-mes').value === 'rango';
+  document.getElementById('rpt-mes-rango-opt').style.display = esRango ? '' : 'none';
+  document.getElementById('rpt-anio-wrap').style.display = esRango ? 'none' : '';
+}
+
+// Mostrar/ocultar inputs de rango personalizado en Reporte por Instructor
+function toggleRptInstRango(){
+  const esRango = document.getElementById('rpt-inst-periodo').value === 'rango';
+  document.getElementById('rpt-inst-rango-opt').style.display = esRango ? '' : 'none';
+  document.getElementById('rpt-inst-anio-wrap').style.display = esRango ? 'none' : '';
+}
+
 function autoRptDia(){
   const fechaVal = document.getElementById('rpt-dia-fecha').value;
   if(!fechaVal) return;
@@ -33,6 +59,7 @@ function autoRptDia(){
 
 function toggleRpt(){
   initRptAnios();
+  pobladoClasesRpt();
   const t=document.getElementById('rpt-tipo').value;
   document.getElementById('rpt-dia-opt').style.display=t==='diario'?'':'none';
   document.getElementById('rpt-mes-opt').style.display=t==='mensual'?'':'none';
@@ -47,12 +74,14 @@ function toggleRpt(){
   if(t==='mensual'){
     // Mes actual por defecto
     document.getElementById('rpt-mes').value = String(new Date().getMonth());
+    toggleRptMesRango();
   }
   if(t==='instructor'){
     const sel=document.getElementById('rpt-inst-sel');
     sel.innerHTML='<option value="todos">— Todos los instructores —</option>'+
       [...instructores].sort((a,b)=>a.nombre.localeCompare(b.nombre))
         .map(i=>`<option value="${i.id}">${i.nombre}</option>`).join('');
+    toggleRptInstRango();
   }
 }
 function genReporte(){
@@ -68,6 +97,7 @@ function genReporte(){
 function genReporteDiario(){
   const fechaEsp = document.getElementById('rpt-dia-fecha').value; // YYYY-MM-DD
   const dia      = document.getElementById('rpt-dia').value;
+  const claseSel = document.getElementById('rpt-clase-sel')?.value || '';
   const fechaFmt = fechaEsp
     ? new Date(fechaEsp+'T12:00:00').toLocaleDateString('es-MX',{weekday:'long',day:'2-digit',month:'long',year:'numeric'})
     : dia;
@@ -75,7 +105,7 @@ function genReporteDiario(){
   // ── Construir lista de clases programadas ese día ──
   const horariosDelDia = [];
   instructores.forEach(inst=>{
-    (inst.horario||[]).filter(h=>h.dia===dia).forEach(h=>{
+    (inst.horario||[]).filter(h=>h.dia===dia && (!claseSel || h.clase===claseSel)).forEach(h=>{
       // Buscar registro de ESA FECHA EXACTA (o el más reciente de ese día si no hay fecha)
       let rec = null;
       if(fechaEsp){
@@ -118,7 +148,7 @@ function genReporteDiario(){
   const tAfo  = tAfoRecs.length>0 ? Math.round(tAfoRecs.reduce((a,h)=>a+h.asis/h.cap*100,0)/tAfoRecs.length) : 0;
 
   const html=`<div style="${printStyles()}">
-    ${pHdr(`REPORTE DIARIO — ${dia.toUpperCase()}`,
+    ${pHdr(`REPORTE DIARIO — ${dia.toUpperCase()}${claseSel?' · '+claseSel.toUpperCase():''}`,
       `Club Campestre Aguascalientes · ${fechaFmt} · Generado: ${new Date().toLocaleDateString('es-MX',{day:'2-digit',month:'long',year:'numeric'})}`)}
     <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:.7rem;margin-bottom:1rem">
       ${[
@@ -180,19 +210,20 @@ function genReporteSemanal(){
   const lunStr  = fechaLocalStr(lunes);
   const domDate = new Date(lunes); domDate.setDate(lunes.getDate()+6);
   const domStr  = fechaLocalStr(domDate);
+  const claseSel = document.getElementById('rpt-clase-sel')?.value || '';
 
-  const totalSem=instructores.reduce((a,i)=>a+(i.horario||[]).length,0);
+  const totalSem=instructores.reduce((a,i)=>a+(i.horario||[]).filter(h=>!claseSel||h.clase===claseSel).length,0);
 
   // ── Filtrar registros sólo de esta semana ──
   const regsSemanales = registros.filter(r=>{
     const f=r.fecha||'';
-    return f>=lunStr && f<=domStr && (r.estado==='ok'||r.estado==='sub');
+    return f>=lunStr && f<=domStr && (r.estado==='ok'||r.estado==='sub') && (!claseSel||r.clase===claseSel);
   });
 
   // ── Construir mapa con datos reales ──
   const mapa={};
   instructores.forEach(inst=>{
-    (inst.horario||[]).forEach(h=>{
+    (inst.horario||[]).filter(h=>!claseSel||h.clase===claseSel).forEach(h=>{
       const k=`${h.dia}||${h.hora}`;
       if(!mapa[k])mapa[k]=[];
       // Registros de ESTA semana para este slot
@@ -237,7 +268,7 @@ function genReporteSemanal(){
   });
 
   const html=`<div style="${printStyles()}">
-    ${pHdr('REPORTE SEMANAL — CALENDARIO',
+    ${pHdr(`REPORTE SEMANAL — CALENDARIO${claseSel?' · '+claseSel.toUpperCase():''}`,
       `Club Campestre Aguascalientes · ${semanaStr(lunes)} · ${totalSem} clases programadas`)}
     <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:.6rem;margin-bottom:.8rem">
       ${[
@@ -275,13 +306,33 @@ function genReporteSemanal(){
 
 // ── REPORTE MENSUAL ───────────────────────────────────────────────────────────
 function genReporteMensual(){
-  const mesIdx = parseInt(document.getElementById('rpt-mes').value);
-  const anio   = parseInt(document.getElementById('rpt-anio').value) || new Date().getFullYear();
-  const mesNom = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'][mesIdx];
+  const mesVal   = document.getElementById('rpt-mes').value;
+  const esRango  = mesVal === 'rango';
+  const claseSel = document.getElementById('rpt-clase-sel')?.value || '';
+  const mesIdx   = esRango ? null : parseInt(mesVal);
+  const anio     = esRango ? null : (parseInt(document.getElementById('rpt-anio').value) || new Date().getFullYear());
+  const mesNom   = esRango ? null : ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'][mesIdx];
 
-  // ── Filtrar registros REALES del mes y año seleccionados ──
+  // Rango de fechas si aplica
+  const rangoIni = esRango ? document.getElementById('rpt-mes-fecha-ini').value : null;
+  const rangoFin = esRango ? document.getElementById('rpt-mes-fecha-fin').value : null;
+  if(esRango && (!rangoIni || !rangoFin)){
+    if(typeof showToast==='function') showToast('Selecciona fecha de inicio y fin para el rango personalizado','err');
+    return;
+  }
+  if(esRango && rangoIni>rangoFin){
+    if(typeof showToast==='function') showToast('La fecha "Desde" no puede ser posterior a "Hasta"','err');
+    return;
+  }
+
+  // ── Filtrar registros REALES del periodo seleccionado ──
   const regsDelMes = registros.filter(r=>{
     if(!r.fecha) return false;
+    if(claseSel && r.clase!==claseSel) return false;
+    if(esRango){
+      if(!rangoIni || !rangoFin) return false;
+      return r.fecha>=rangoIni && r.fecha<=rangoFin;
+    }
     const d = new Date(r.fecha+'T12:00:00');
     return d.getMonth()===mesIdx && d.getFullYear()===anio;
   });
@@ -306,14 +357,16 @@ function genReporteMensual(){
   const tSups  = allS.reduce((a,i)=>a+i.supsMes,0);
   const tAforo = allS.filter(i=>i.impMes>0).length>0
     ? Math.round(allS.filter(i=>i.impMes>0).reduce((a,i)=>a+i.aforoMes,0)/allS.filter(i=>i.impMes>0).length) : 0;
-  const totalProg = instructores.reduce((a,i)=>a+(i.horario||[]).length,0);
-  // Semanas en el mes
-  const diasEnMes = new Date(anio,mesIdx+1,0).getDate();
-  const semsAprox = Math.round(diasEnMes/7);
+  const totalProg = instructores.reduce((a,i)=>a+(i.horario||[]).filter(h=>!claseSel||h.clase===claseSel).length,0);
+  // Semanas del periodo: en modo mes, por días del mes; en rango, por días reales del rango
+  const diasEnMes = esRango
+    ? (rangoIni && rangoFin ? Math.max(1, Math.round((new Date(rangoFin+'T12:00:00') - new Date(rangoIni+'T12:00:00'))/86400000)+1) : 0)
+    : new Date(anio,mesIdx+1,0).getDate();
+  const semsAprox = Math.max(1, Math.round(diasEnMes/7));
   const progMes = totalProg * semsAprox;
   const cumplimiento = progMes>0?Math.round(tImp/progMes*100):0;
 
-  // Resumen de clases del mes
+  // Resumen de clases del periodo
   const clasesMes={};
   regsDelMes.filter(r=>r.estado==='ok'||r.estado==='sub').forEach(r=>{
     if(!r.clase)return;
@@ -326,8 +379,14 @@ function genReporteMensual(){
     .map(([k,v])=>({clase:k,sesiones:v.total,asis:v.asis,afo:v.cnt>0?Math.round(v.asis/v.cap*v.cnt*100/(v.cnt)):0}))
     .sort((a,b)=>b.asis-a.asis).slice(0,8);
 
+  const tituloPeriodo = esRango
+    ? (rangoIni && rangoFin
+        ? `${new Date(rangoIni+'T12:00:00').toLocaleDateString('es-MX',{day:'2-digit',month:'short',year:'numeric'})} — ${new Date(rangoFin+'T12:00:00').toLocaleDateString('es-MX',{day:'2-digit',month:'short',year:'numeric'})}`
+        : 'Rango sin definir')
+    : `${mesNom} ${anio}`;
+
   const html=`<div style="${printStyles()}">
-    ${pHdr(`REPORTE MENSUAL — ${mesNom.toUpperCase()} ${anio}`,
+    ${pHdr(`REPORTE ${esRango?'POR RANGO':'MENSUAL'} — ${tituloPeriodo.toUpperCase()}${claseSel?' · '+claseSel.toUpperCase():''}`,
       `Club Campestre Aguascalientes · Coordinación Fitness · Total registros: ${regsDelMes.length}`)}
 
     <!-- KPIs -->
@@ -347,7 +406,7 @@ function genReporteMensual(){
 
     <!-- Tabla instructores -->
     <div style="font-size:.7rem;text-transform:uppercase;letter-spacing:1px;color:#1a7a45;margin-bottom:.4rem;font-weight:600">
-      Desempeño por Instructor — ${mesNom} ${anio}
+      Desempeño por Instructor — ${tituloPeriodo}
     </div>
     <table style="width:100%;border-collapse:collapse;font-size:.78rem;margin-bottom:1rem">
       <thead><tr style="background:#f0f7f3">
@@ -357,7 +416,7 @@ function genReporteMensual(){
       </tr></thead>
       <tbody>
       ${allS.map((i,n)=>{
-        const cls_prog = (i.horario||[]).length * semsAprox;
+        const cls_prog = (i.horario||[]).filter(h=>!claseSel||h.clase===claseSel).length * semsAprox;
         const est = i.faltMes===0?'✔ Cumple':i.faltMes<=2?'⚠ Revisar':'✖ Incidencia';
         const bg2 = i.faltMes===0?'#d4edda':i.faltMes<=2?'#fff3cd':'#f8d7da';
         const tc  = i.faltMes===0?'#155724':i.faltMes<=2?'#856404':'#842029';
@@ -401,24 +460,39 @@ function genReporteMensual(){
         </tr>`).join('')}
       </tbody>
     </table>`:''}
-    <div style="font-size:.68rem;color:#999;margin-bottom:.6rem">* Programadas = clases/semana × ${semsAprox} semanas aprox. del mes</div>
+    <div style="font-size:.68rem;color:#999;margin-bottom:.6rem">* Programadas = clases/semana × ${semsAprox} semanas aprox. del periodo</div>
     ${pFirma()}
   </div>`;
 
-  document.getElementById('print-ttl').textContent=`Reporte Mensual — ${mesNom} ${anio}`;
+  document.getElementById('print-ttl').textContent=`Reporte ${esRango?'por Rango':'Mensual'} — ${tituloPeriodo}`;
   document.getElementById('print-body').innerHTML=html;
   document.getElementById('m-print').classList.add('on');
 }
 
 // ── REPORTE POR INSTRUCTOR ────────────────────────────────────────────────────
 function genReporteInstructor(){
-  const instId  = document.getElementById('rpt-inst-sel').value;
-  const periodo = document.getElementById('rpt-inst-periodo').value;
-  const anioSel = parseInt(document.getElementById('rpt-inst-anio')?.value) || new Date().getFullYear();
-  const meses   = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+  const instId   = document.getElementById('rpt-inst-sel').value;
+  const periodo  = document.getElementById('rpt-inst-periodo').value;
+  const anioSel  = parseInt(document.getElementById('rpt-inst-anio')?.value) || new Date().getFullYear();
+  const claseSel = document.getElementById('rpt-clase-sel')?.value || '';
+  const meses    = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+
+  // Rango personalizado
+  const rangoIni = periodo==='rango' ? document.getElementById('rpt-inst-fecha-ini').value : null;
+  const rangoFin = periodo==='rango' ? document.getElementById('rpt-inst-fecha-fin').value : null;
+  if(periodo==='rango' && (!rangoIni || !rangoFin)){
+    if(typeof showToast==='function') showToast('Selecciona fecha de inicio y fin para el rango personalizado','err');
+    return;
+  }
+  if(periodo==='rango' && rangoIni>rangoFin){
+    if(typeof showToast==='function') showToast('La fecha "Desde" no puede ser posterior a "Hasta"','err');
+    return;
+  }
 
   function filtrarPeriodo(r){
+    if(claseSel && r.clase!==claseSel) return false;
     if(!r.fecha) return periodo==='todo';
+    if(periodo==='rango') return r.fecha>=rangoIni && r.fecha<=rangoFin;
     const d = new Date(r.fecha+'T12:00:00');
     const hoyD = new Date();
     const lun  = new Date(hoyD); lun.setDate(hoyD.getDate()-((hoyD.getDay()+6)%7));
@@ -433,6 +507,7 @@ function genReporteInstructor(){
   const periodoLabel = periodo==='todo'?'Historial completo'
     :periodo==='semana'?'Semana actual'
     :periodo==='mes'?'Mes actual'
+    :periodo==='rango'?`${new Date(rangoIni+'T12:00:00').toLocaleDateString('es-MX',{day:'2-digit',month:'short',year:'numeric'})} — ${new Date(rangoFin+'T12:00:00').toLocaleDateString('es-MX',{day:'2-digit',month:'short',year:'numeric'})}`
     :`${meses[parseInt(periodo)]||''} ${anioSel}`;
 
   const listaInst = instId==='todos'
@@ -500,7 +575,7 @@ function genReporteInstructor(){
           <div style="font-family:'Bebas Neue',sans-serif;font-size:1.5rem;letter-spacing:1px;color:#1a7a45">${inst.nombre}</div>
           <div style="font-size:.76rem;color:#555;margin-top:1px">
             ${inst.tipo==='planta'?'Instructor de Planta':'Honorarios'} · ${inst.esp||'—'}
-            · Horario: ${(inst.horario||[]).length} clase(s)/semana
+            · Horario: ${(inst.horario||[]).filter(h=>!claseSel||h.clase===claseSel).length} clase(s)/semana${claseSel?' (filtrado)':''}
           </div>
         </div>
         <span style="background:${estBg};color:${estColor};padding:4px 12px;border-radius:20px;font-size:.75rem;font-weight:700">${estLabel}</span>
@@ -552,7 +627,7 @@ function genReporteInstructor(){
     </div>`;
   });
 
-  const titulo = instId==='todos'?'REPORTE DE INSTRUCTORES':`REPORTE: ${listaInst[0]?.nombre.toUpperCase()||''}`;
+  const titulo = (instId==='todos'?'REPORTE DE INSTRUCTORES':`REPORTE: ${listaInst[0]?.nombre.toUpperCase()||''}`) + (claseSel?` · ${claseSel.toUpperCase()}`:'');
   const html=`<div style="${printStyles()}">
     <div style="border-bottom:3px solid #1a7a45;padding-bottom:.8rem;margin-bottom:1.2rem;display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:.5rem">
       <div>
