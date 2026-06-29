@@ -64,6 +64,9 @@ function toggleRpt(){
   document.getElementById('rpt-dia-opt').style.display=t==='diario'?'':'none';
   document.getElementById('rpt-mes-opt').style.display=t==='mensual'?'':'none';
   document.getElementById('rpt-inst-opt').style.display=t==='instructor'?'':'none';
+  document.getElementById('rpt-disc-opt').style.display=t==='disciplina'?'':'none';
+  const reqLbl = document.getElementById('rpt-clase-req-lbl');
+  if(reqLbl) reqLbl.textContent = t==='disciplina' ? '(requerido)' : '(opcional)';
   if(t==='diario'){
     // Poner fecha de hoy por defecto
     if(!document.getElementById('rpt-dia-fecha').value){
@@ -83,6 +86,15 @@ function toggleRpt(){
         .map(i=>`<option value="${i.id}">${i.nombre}</option>`).join('');
     toggleRptInstRango();
   }
+  if(t==='disciplina'){
+    // Por defecto: mes actual completo como rango inicial sugerido
+    if(!document.getElementById('rpt-disc-fecha-ini').value){
+      const hoy = new Date();
+      const inicioMes = new Date(hoy.getFullYear(), hoy.getMonth(), 1);
+      document.getElementById('rpt-disc-fecha-ini').value = fechaLocalStr(inicioMes);
+      document.getElementById('rpt-disc-fecha-fin').value = fechaLocalStr(hoy);
+    }
+  }
 }
 function genReporte(){
   const t=document.getElementById('rpt-tipo').value;
@@ -90,7 +102,22 @@ function genReporte(){
   if(t==='diario')genReporteDiario();
   else if(t==='semanal')genReporteSemanal();
   else if(t==='mensual')genReporteMensual();
+  else if(t==='disciplina')genReporteDisciplina();
   else genReporteInstructor();
+}
+
+// Mostrar en pantalla las sesiones extra (13+) de un instructor y ocultar el botón
+function rptExpandirSesiones(btn, instId, total){
+  const tbody = document.querySelector(`tbody.rpt-extra-rows[data-inst="${instId}"]`);
+  if(tbody) tbody.style.display = '';
+  if(btn) btn.style.display = 'none';
+}
+
+// Antes de imprimir/exportar: asegurar que TODAS las sesiones (incluso las colapsadas) estén visibles,
+// y ocultar los botones "Ver más" que no deben aparecer en el documento final.
+function _rptPrepararParaImpresion(){
+  document.querySelectorAll('#print-body tbody.rpt-extra-rows').forEach(tb=>tb.style.display='');
+  document.querySelectorAll('#print-body .btn-print-hide').forEach(b=>b.style.display='none');
 }
 
 // ── REPORTE DIARIO ────────────────────────────────────────────────────────────
@@ -543,8 +570,8 @@ function genReporteInstructor(){
         afo:v.cnt>0?Math.round(v.asis/v.cap*v.cnt*100/v.cnt):0}))
       .sort((a,b)=>b.asis-a.asis);
 
-    // Últimas 12 sesiones con detalle
-    const detalle=recs.slice(0,12).map(r=>{
+    // Detalle de sesiones: primeras 12 visibles + resto expandible (siempre completo para impresión/PDF)
+    const filaDetalle = (r) => {
       const pct=parseInt(r.cap||0)>0?Math.round((parseInt(r.asistentes)||0)/parseInt(r.cap)*100):0;
       const bg=pct>=70?'#d4edda':pct>=40?'#fff3cd':'#f8d7da';
       const tc=pct>=70?'#155724':pct>=40?'#856404':'#842029';
@@ -561,7 +588,10 @@ function genReporteInstructor(){
         <td style="padding:3px 7px;border:1px solid #ddd;color:#1a5a8a;font-size:.7rem">${supNom}</td>
         <td style="padding:3px 7px;border:1px solid #ddd;color:#555;font-size:.7rem">${motivoNom}</td>
       </tr>`;
-    }).join('');
+    }
+    const detalleVisible = recs.slice(0,12).map(filaDetalle).join('');
+    const detalleExtra   = recs.slice(12).map(filaDetalle).join('');
+    const hayExtra       = recs.length>12;
 
     const estColor=faltasPeriodo===0?'#155724':faltasPeriodo<=2?'#856404':'#842029';
     const estBg   =faltasPeriodo===0?'#d4edda':faltasPeriodo<=2?'#fff3cd':'#f8d7da';
@@ -613,7 +643,7 @@ function genReporteInstructor(){
       <!-- Historial sesiones -->
       ${recs.length>0?`
       <div style="font-size:.63rem;text-transform:uppercase;letter-spacing:1px;color:#777;margin-bottom:.3rem">
-        Últimas ${Math.min(recs.length,12)} sesiones (de ${recs.length} en el periodo)
+        ${hayExtra?`Mostrando 12 de ${recs.length} sesiones del periodo`:`${recs.length} sesión(es) del periodo`}
       </div>
       <table style="width:100%;border-collapse:collapse;font-size:.76rem">
         <thead><tr style="background:#f0f7f3">
@@ -621,8 +651,13 @@ function genReporteInstructor(){
             `<th style="padding:3px 7px;border:1px solid #ccc;color:#1a7a45;font-size:.62rem;text-transform:uppercase">${h}</th>`
           ).join('')}
         </tr></thead>
-        <tbody>${detalle}</tbody>
-      </table>`
+        <tbody>${detalleVisible}</tbody>
+        ${hayExtra?`<tbody class="rpt-extra-rows" data-inst="${inst.id}" style="display:none">${detalleExtra}</tbody>`:''}
+      </table>
+      ${hayExtra?`<button class="btn-print-hide" onclick="rptExpandirSesiones(this,${inst.id},${recs.length})"
+        style="margin-top:.4rem;background:#f0f7f3;border:1px solid #1a7a45;color:#1a7a45;border-radius:6px;padding:5px 12px;font-size:.72rem;cursor:pointer">
+        ▾ Ver las ${recs.length} sesiones
+      </button>`:''}`
       :`<div style="color:#999;font-size:.8rem;text-align:center;padding:.5rem">Sin sesiones registradas en este periodo</div>`}
     </div>`;
   });
@@ -644,6 +679,193 @@ function genReporteInstructor(){
   </div>`;
 
   document.getElementById('print-ttl').textContent=`Reporte Instructor — ${instId==='todos'?'Todos':listaInst[0]?.nombre||''}`;
+  document.getElementById('print-body').innerHTML=html;
+  document.getElementById('m-print').classList.add('on');
+}
+
+// ── REPORTE POR DISCIPLINA (rango libre, sesión por sesión) ──────────────────
+function genReporteDisciplina(){
+  const claseSel = document.getElementById('rpt-clase-sel')?.value || '';
+  const rangoIni = document.getElementById('rpt-disc-fecha-ini').value;
+  const rangoFin = document.getElementById('rpt-disc-fecha-fin').value;
+
+  if(!claseSel){
+    if(typeof showToast==='function') showToast('Selecciona una disciplina/clase para este reporte','err');
+    return;
+  }
+  if(!rangoIni || !rangoFin){
+    if(typeof showToast==='function') showToast('Selecciona fecha de inicio y fin','err');
+    return;
+  }
+  if(rangoIni>rangoFin){
+    if(typeof showToast==='function') showToast('La fecha "Desde" no puede ser posterior a "Hasta"','err');
+    return;
+  }
+
+  // Sesiones reales de esta disciplina en el rango (impartidas u con suplente)
+  const sesiones = registros
+    .filter(r=>r.clase===claseSel && r.fecha && r.fecha>=rangoIni && r.fecha<=rangoFin && (r.estado==='ok'||r.estado==='sub'))
+    .sort((a,b)=>(a.fecha||'').localeCompare(b.fecha||'') || (a.hora||'').localeCompare(b.hora||''));
+
+  const fmtFecha = f => new Date(f+'T12:00:00').toLocaleDateString('es-MX',{day:'2-digit',month:'short',year:'numeric'});
+  const tituloPeriodo = `${fmtFecha(rangoIni)} — ${fmtFecha(rangoFin)}`;
+
+  // KPIs generales
+  const totSes  = sesiones.length;
+  const totAsis = sesiones.reduce((a,r)=>a+(parseInt(r.asistentes)||0),0);
+  const conCap  = sesiones.filter(r=>parseInt(r.cap||0)>0);
+  const afoProm = conCap.length>0
+    ? Math.round(conCap.reduce((a,r)=>a+(parseInt(r.asistentes)||0)/parseInt(r.cap)*100,0)/conCap.length) : 0;
+  const totFaltas = registros.filter(r=>r.clase===claseSel && r.estado==='falta' && r.fecha && r.fecha>=rangoIni && r.fecha<=rangoFin).length;
+
+  // Agrupación por horario (día+hora) para identificar mejor/peor slot
+  const porHorario = {};
+  sesiones.forEach(r=>{
+    const k = `${r.dia||'—'} ${r.hora||'—'}`;
+    if(!porHorario[k]) porHorario[k] = {sesiones:0, asis:0, cap:0, cnt:0};
+    porHorario[k].sesiones++;
+    porHorario[k].asis += (parseInt(r.asistentes)||0);
+    if(parseInt(r.cap||0)>0){ porHorario[k].cap += parseInt(r.cap); porHorario[k].cnt++; }
+  });
+  const resumenHorarios = Object.entries(porHorario)
+    .map(([k,v])=>({horario:k, sesiones:v.sesiones, asisProm:Math.round(v.asis/v.sesiones), afo:v.cnt>0?Math.round(v.asis/v.cap*v.cnt*100/v.cnt):0}))
+    .sort((a,b)=>b.afo-a.afo);
+
+  // Agrupación por instructor para identificar mejor/peor instructor
+  const porInst = {};
+  sesiones.forEach(r=>{
+    const inst = instructores.find(i=>i.id===r.inst_id);
+    const nom = inst?.nombre || '—';
+    if(!porInst[nom]) porInst[nom] = {sesiones:0, asis:0, cap:0, cnt:0};
+    porInst[nom].sesiones++;
+    porInst[nom].asis += (parseInt(r.asistentes)||0);
+    if(parseInt(r.cap||0)>0){ porInst[nom].cap += parseInt(r.cap); porInst[nom].cnt++; }
+  });
+  const resumenInst = Object.entries(porInst)
+    .map(([k,v])=>({instructor:k, sesiones:v.sesiones, asisProm:Math.round(v.asis/v.sesiones), afo:v.cnt>0?Math.round(v.asis/v.cap*v.cnt*100/v.cnt):0}))
+    .sort((a,b)=>b.afo-a.afo);
+
+  const mejorHorario = resumenHorarios[0];
+  const peorHorario   = resumenHorarios[resumenHorarios.length-1];
+  const mejorInst     = resumenInst[0];
+  const peorInst       = resumenInst[resumenInst.length-1];
+
+  // Tabla de sesiones individuales (cronológica)
+  const filasSesiones = sesiones.map((r,n)=>{
+    const inst = instructores.find(i=>i.id===r.inst_id);
+    const nomInst = inst?.nombre || '—';
+    const pct = parseInt(r.cap||0)>0 ? Math.round((parseInt(r.asistentes)||0)/parseInt(r.cap)*100) : null;
+    const col = pct===null?'#555':pctColPrint(pct);
+    return `<tr style="background:${n%2?'#f9fdf9':'#fff'}">
+      <td style="padding:4px 8px;border:1px solid #e0ede5;font-family:monospace;font-size:.74rem">${r.fecha}</td>
+      <td style="padding:4px 8px;border:1px solid #e0ede5;font-size:.75rem">${r.dia||'—'}</td>
+      <td style="padding:4px 8px;border:1px solid #e0ede5;font-family:monospace;font-size:.74rem">${r.hora||'—'}</td>
+      <td style="padding:4px 8px;border:1px solid #e0ede5;font-weight:600">${nomInst}${r.estado==='sub'?' <span style="color:#856404;font-size:.65rem">⇄sup</span>':''}</td>
+      <td style="padding:4px 8px;border:1px solid #e0ede5;text-align:center;font-weight:700;color:${col}">${parseInt(r.asistentes)||0}</td>
+      <td style="padding:4px 8px;border:1px solid #e0ede5;text-align:center;color:${col};font-weight:600">${pct!==null?pct+'%':'—'}</td>
+    </tr>`;
+  }).join('');
+
+  const filaResumenHorario = (h,esMejor) => h ? `
+    <div style="background:${esMejor?'#d4edda':'#f8d7da'};border-radius:8px;padding:.6rem .8rem;flex:1;min-width:220px">
+      <div style="font-size:.62rem;text-transform:uppercase;letter-spacing:1px;color:${esMejor?'#155724':'#842029'}">${esMejor?'✔ Mejor horario':'✖ Horario más débil'}</div>
+      <div style="font-weight:700;margin-top:2px">${h.horario}</div>
+      <div style="font-size:.74rem;color:#555">${h.sesiones} sesión(es) · ${h.asisProm} asis. prom. · <strong>${h.afo}% aforo</strong></div>
+    </div>` : '';
+
+  const filaResumenInst = (i,esMejor) => i ? `
+    <div style="background:${esMejor?'#d4edda':'#f8d7da'};border-radius:8px;padding:.6rem .8rem;flex:1;min-width:220px">
+      <div style="font-size:.62rem;text-transform:uppercase;letter-spacing:1px;color:${esMejor?'#155724':'#842029'}">${esMejor?'✔ Mejor instructor':'✖ Instructor a revisar'}</div>
+      <div style="font-weight:700;margin-top:2px">${i.instructor}</div>
+      <div style="font-size:.74rem;color:#555">${i.sesiones} sesión(es) · ${i.asisProm} asis. prom. · <strong>${i.afo}% aforo</strong></div>
+    </div>` : '';
+
+  const html=`<div style="${printStyles()}">
+    ${pHdr(`REPORTE POR DISCIPLINA — ${claseSel.toUpperCase()}`,
+      `Club Campestre Aguascalientes · ${tituloPeriodo} · ${totSes} sesión(es) registrada(s)`)}
+
+    <!-- KPIs -->
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:.6rem;margin-bottom:1rem">
+      ${[
+        ['Sesiones', totSes, '#1a7a45'],
+        ['Total asistentes', totAsis.toLocaleString(), '#0d6a9e'],
+        ['Aforo promedio', afoProm+'%', afoProm>=60?'#1a7a45':afoProm>=35?'#b87a00':'#c00'],
+        ['Faltas en el periodo', totFaltas, totFaltas===0?'#1a7a45':'#c00'],
+      ].map(([l,v,c])=>`
+        <div style="border:1px solid #ccc;border-radius:7px;padding:.7rem;text-align:center;border-top:3px solid ${c}">
+          <div style="font-size:.6rem;text-transform:uppercase;color:#777;letter-spacing:1px">${l}</div>
+          <div style="font-family:'Bebas Neue',sans-serif;font-size:1.6rem;color:${c}">${v}</div>
+        </div>`).join('')}
+    </div>
+
+    ${totSes===0?`<div style="text-align:center;padding:2rem;color:#999">Sin sesiones registradas de "${claseSel}" en este periodo.</div>`:`
+
+    <!-- Tabla de sesiones -->
+    <div style="font-size:.7rem;text-transform:uppercase;letter-spacing:1px;color:#1a7a45;margin-bottom:.4rem;font-weight:600">
+      Detalle de sesiones (orden cronológico)
+    </div>
+    <table style="width:100%;border-collapse:collapse;font-size:.78rem;margin-bottom:1.2rem">
+      <thead><tr style="background:#f0f7f3">
+        ${['Fecha','Día','Hora','Instructor','Asist.','Aforo%'].map(h=>
+          `<th style="padding:5px 8px;border:1px solid #ccc;color:#1a7a45;font-size:.64rem;text-transform:uppercase">${h}</th>`
+        ).join('')}
+      </tr></thead>
+      <tbody>${filasSesiones}</tbody>
+    </table>
+
+    <!-- Mini-resumen / hallazgos -->
+    <div style="font-size:.7rem;text-transform:uppercase;letter-spacing:1px;color:#1a7a45;margin-bottom:.5rem;font-weight:600">
+      Resumen del periodo
+    </div>
+    <div style="display:flex;gap:.6rem;flex-wrap:wrap;margin-bottom:.8rem">
+      ${filaResumenHorario(mejorHorario,true)}
+      ${resumenHorarios.length>1?filaResumenHorario(peorHorario,false):''}
+    </div>
+    <div style="display:flex;gap:.6rem;flex-wrap:wrap;margin-bottom:1rem">
+      ${filaResumenInst(mejorInst,true)}
+      ${resumenInst.length>1?filaResumenInst(peorInst,false):''}
+    </div>
+
+    <!-- Tabla resumen por horario -->
+    <div style="font-size:.68rem;text-transform:uppercase;letter-spacing:1px;color:#777;margin-bottom:.4rem">Aforo por horario (de mejor a peor)</div>
+    <table style="width:100%;border-collapse:collapse;font-size:.76rem;margin-bottom:1rem">
+      <thead><tr style="background:#f0f7f3">
+        ${['Horario','Sesiones','Asist. Prom.','Aforo Prom.'].map(h=>
+          `<th style="padding:4px 8px;border:1px solid #ccc;color:#1a7a45;font-size:.62rem;text-transform:uppercase">${h}</th>`
+        ).join('')}
+      </tr></thead>
+      <tbody>
+      ${resumenHorarios.map((h,n)=>`<tr style="background:${n%2?'#f9fdf9':'#fff'}">
+        <td style="padding:4px 8px;border:1px solid #e0ede5;font-weight:600">${h.horario}</td>
+        <td style="padding:4px 8px;border:1px solid #e0ede5;text-align:center">${h.sesiones}</td>
+        <td style="padding:4px 8px;border:1px solid #e0ede5;text-align:center">${h.asisProm}</td>
+        <td style="padding:4px 8px;border:1px solid #e0ede5;text-align:center;color:${pctColPrint(h.afo)};font-weight:700">${h.afo}%</td>
+      </tr>`).join('')}
+      </tbody>
+    </table>
+
+    <!-- Tabla resumen por instructor -->
+    <div style="font-size:.68rem;text-transform:uppercase;letter-spacing:1px;color:#777;margin-bottom:.4rem">Aforo por instructor (de mejor a peor)</div>
+    <table style="width:100%;border-collapse:collapse;font-size:.76rem;margin-bottom:1rem">
+      <thead><tr style="background:#f0f7f3">
+        ${['Instructor','Sesiones','Asist. Prom.','Aforo Prom.'].map(h=>
+          `<th style="padding:4px 8px;border:1px solid #ccc;color:#1a7a45;font-size:.62rem;text-transform:uppercase">${h}</th>`
+        ).join('')}
+      </tr></thead>
+      <tbody>
+      ${resumenInst.map((i,n)=>`<tr style="background:${n%2?'#f9fdf9':'#fff'}">
+        <td style="padding:4px 8px;border:1px solid #e0ede5;font-weight:600">${i.instructor}</td>
+        <td style="padding:4px 8px;border:1px solid #e0ede5;text-align:center">${i.sesiones}</td>
+        <td style="padding:4px 8px;border:1px solid #e0ede5;text-align:center">${i.asisProm}</td>
+        <td style="padding:4px 8px;border:1px solid #e0ede5;text-align:center;color:${pctColPrint(i.afo)};font-weight:700">${i.afo}%</td>
+      </tr>`).join('')}
+      </tbody>
+    </table>
+    `}
+    ${pFirma()}
+  </div>`;
+
+  document.getElementById('print-ttl').textContent=`Reporte ${claseSel} — ${tituloPeriodo}`;
   document.getElementById('print-body').innerHTML=html;
   document.getElementById('m-print').classList.add('on');
 }
@@ -710,6 +932,7 @@ window.addEventListener('resize', () => {
 // IMPRIMIR DESDE MODAL
 // ═══════════════════════════════════════════
 function imprimirDesdeModal() {
+  _rptPrepararParaImpresion();
   const titulo = document.getElementById('print-ttl').textContent;
   const cuerpo = document.getElementById('print-body').innerHTML;
   const esClaro = temaActual === 'claro';
@@ -764,6 +987,7 @@ function imprimirDesdeModal() {
 // EXPORTAR PDF (jsPDF)
 // ═══════════════════════════════════════════
 function exportarPDF() {
+  _rptPrepararParaImpresion();
   const titulo = document.getElementById('print-ttl').textContent;
   const body = document.getElementById('print-body');
   const tabla = body.querySelector('table');
@@ -1386,6 +1610,7 @@ function generarHojaFirmasPDF(){
 // EXPORTAR EXCEL (mejorado con estilos)
 // ═══════════════════════════════════════════
 function exportarPrintExcel() {
+  _rptPrepararParaImpresion();
   const titulo = document.getElementById('print-ttl').textContent;
   const body = document.getElementById('print-body');
   const tabla = body.querySelector('table');
@@ -1430,6 +1655,7 @@ function exportarPrintExcel() {
 // EXPORTAR CSV
 // ═══════════════════════════════════════════
 function exportarPrintCSV() {
+  _rptPrepararParaImpresion();
   const titulo = document.getElementById('print-ttl').textContent;
   const tabla = document.querySelector('#print-body table');
   if(!tabla){showToast('No hay tabla para exportar como CSV.','warn');return;}
