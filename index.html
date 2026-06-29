@@ -2671,6 +2671,7 @@ window._cargarXLSX=function(){
       <option value="semanal">Reporte Semanal (Calendario)</option>
       <option value="mensual">Reporte Mensual</option>
       <option value="instructor">Reporte por Instructor</option>
+      <option value="disciplina">Reporte por Disciplina (rango libre)</option>
     </select>
   </div>
   <div id="rpt-dia-opt" style="display:none">
@@ -2734,8 +2735,21 @@ window._cargarXLSX=function(){
       </div>
     </div>
   </div>
+  <div id="rpt-disc-opt" style="display:none">
+    <div style="background:var(--panel2);border:1px solid var(--border);border-radius:8px;padding:.6rem .8rem;margin-bottom:.7rem;font-size:.74rem;color:var(--txt2)">
+      Selecciona la disciplina abajo (campo "Disciplina / Clase") y el rango de fechas. Verás cada sesión individual — fecha, día, hora, instructor y aforo — para identificar los mejores y peores horarios.
+    </div>
+    <div class="fr">
+      <div class="fg"><label>Desde</label>
+        <input type="date" id="rpt-disc-fecha-ini" class="ctrl">
+      </div>
+      <div class="fg"><label>Hasta</label>
+        <input type="date" id="rpt-disc-fecha-fin" class="ctrl">
+      </div>
+    </div>
+  </div>
   <div class="fg">
-    <label>Disciplina / Clase <span style="color:var(--txt3);font-size:.65rem">(opcional)</span></label>
+    <label>Disciplina / Clase <span id="rpt-clase-req-lbl" style="color:var(--txt3);font-size:.65rem">(opcional)</span></label>
     <select id="rpt-clase-sel">
       <option value="">— Todas las disciplinas —</option>
     </select>
