@@ -88,7 +88,7 @@ function renderHistorial(){
 
   document.getElementById('tb-historial').innerHTML=pagina.map(r=>{
     const inst=instructores.find(i=>i.id===r.inst_id);
-    const sup=r.suplente_id?instructores.find(i=>i.id===r.suplente_id):null;
+    const sup=getSuplenteReg(r);
     const afoP=r.cap>0?Math.round((r.asistentes||0)/r.cap*100):0;
     const fd=r.fecha?new Date(r.fecha+'T12:00:00').toLocaleDateString('es-MX',{day:'2-digit',month:'short',year:'numeric'}):'—';
     const estChip=r.estado==='ok'?'<span class="chip cok"><svg class="ico ico-ok" viewBox="0 0 20 20"><circle cx="10" cy="10" r="8" stroke="currentColor" stroke-width="1.5" fill="none"/><polyline points="6,10 9,13 14,7" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg> Impartida</span>':
@@ -197,6 +197,7 @@ function abrirEditarRegistro(regId){
   const opts=instructores.filter(i=>i.id!==r.inst_id&&(instActivo(i)||String(i.id)===String(r.suplente_id))).map(i=>`<option value="${i.id}">${i.nombre}</option>`).join('');
   document.getElementById('er-suplente').innerHTML='<option value="">— Sin suplente —</option>'+opts;
   if(r.suplente_id)document.getElementById('er-suplente').value=r.suplente_id;
+  else if(r.suplente_nombre)suplenteExtSet('er-suplente',r.suplente_nombre);
   if(r.motivo_suplencia)document.getElementById('er-motivo').value=r.motivo_suplencia;
   toggleErSuplente();
   document.getElementById('m-edit-reg').classList.add('on');
@@ -213,13 +214,16 @@ function guardarEdicionRegistro(){
   if(idx<0)return;
   const est=document.getElementById('er-est').value;
   const isSub=(est==='sub');
+  const _sup=isSub?leerSuplenteSel('er-suplente'):{id:null,nombre:null,externo:false};
+  if(isSub&&_sup.externo&&!_sup.nombre){showToast('Escribe el nombre del suplente externo','err');return;}
   registros[idx]={
     ...registros[idx],
     asistentes:parseInt(document.getElementById('er-asis').value)||0,
     cap:parseInt(document.getElementById('er-cap').value)||20,
     estado:est,
     obs:document.getElementById('er-obs').value.trim(),
-    suplente_id:isSub?(parseInt(document.getElementById('er-suplente').value)||null):null,
+    suplente_id:isSub?_sup.id:null,
+    suplente_nombre:(isSub&&_sup.externo)?_sup.nombre:null,
     motivo_suplencia:isSub?(document.getElementById('er-motivo').value||'permiso'):null
   };
   cerrarModal('m-edit-reg');

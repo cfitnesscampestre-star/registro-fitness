@@ -609,7 +609,7 @@ function verDiagHorario(dia, hora) {
           : c.registros.map(r => {
               const afoP = r.cap > 0 ? Math.round(parseInt(r.asistentes)/parseInt(r.cap)*100) : null;
               const instNom = r.estado === 'sub'
-                ? (instructores.find(i => i.id === r.suplente_id)?.nombre.split(' ')[0] || '?') + ' (sub)'
+                ? ((getSuplenteReg(r)||{}).nombre||'?').split(' ')[0] + ' (sub)'
                 : c.inst.split(' ')[0];
               return `<tr>
                 <td style="padding:3px 8px;font-size:.73rem;color:var(--txt2)">${r.fecha}</td>

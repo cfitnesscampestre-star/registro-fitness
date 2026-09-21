@@ -190,8 +190,8 @@ function instRenderHoy() {
     const est = estadoMap[estado] || estadoMap.pendiente;
 
     // Suplente si aplica
-    const suplementoRow = (reg && reg.suplente_id)
-      ? `<div style="font-size:.65rem;color:var(--blue);margin-top:4px">⇄ Suplente: <strong>${instructores.find(i=>i.id===reg.suplente_id)?.nombre||'—'}</strong></div>`
+    const suplementoRow = (reg && (reg.suplente_id || reg.suplente_nombre))
+      ? `<div style="font-size:.65rem;color:var(--blue);margin-top:4px">⇄ Suplente: <strong>${nombreSuplenteReg(reg)}</strong></div>`
       : '';
 
     // Barra de aforo

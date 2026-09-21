@@ -386,7 +386,7 @@ function renderReporteSuplencias(){
       <tbody>
       ${lastSuplencias.map((r,n)=>{
         const instOrig=instructores.find(i=>i.id===r.inst_id);
-        const sup=instructores.find(i=>i.id===r.suplente_id);
+        const sup=getSuplenteReg(r);
         const afoP=r.cap>0?Math.round(r.asistentes/r.cap*100):0;
         const fd=new Date(r.fecha+'T12:00:00').toLocaleDateString('es-MX',{day:'2-digit',month:'short',year:'numeric'});
         const motivoNom=r.motivo_suplencia?({'permiso':'Permiso','vacaciones':'Vacaciones','falta':'Falta','incapacidad':'Incapacidad','otro':'Otro'}[r.motivo_suplencia]||r.motivo_suplencia):'—';
@@ -425,7 +425,7 @@ function imprimirSuplencias(){
       <tbody>
       ${lastSuplencias.map((r,n)=>{
         const instOrig=instructores.find(i=>i.id===r.inst_id);
-        const sup=instructores.find(i=>i.id===r.suplente_id);
+        const sup=getSuplenteReg(r);
         const afoP=r.cap>0?Math.round(r.asistentes/r.cap*100):0;
         const fd=new Date(r.fecha+'T12:00:00').toLocaleDateString('es-MX',{day:'2-digit',month:'short',year:'numeric'});
         const col=pctColPrint(afoP);
@@ -464,7 +464,7 @@ function exportarSuplenciasExcel(){
   const rows=[['Fecha','Clase','Horario','Instructor Original','Suplente','Asistentes','Aforo %','Día']];
   lastSuplencias.forEach(r=>{
     const instOrig=instructores.find(i=>i.id===r.inst_id);
-    const sup=instructores.find(i=>i.id===r.suplente_id);
+    const sup=getSuplenteReg(r);
     const afoP=r.cap>0?Math.round(r.asistentes/r.cap*100):0;
     rows.push([r.fecha,r.clase,r.hora,instOrig?instOrig.nombre:'—',sup?sup.nombre:'—',r.asistentes,afoP+'%',r.dia]);
   });
@@ -544,7 +544,7 @@ function _calsupGetData() {
       clase:    s.clase || '—',
       dia:      s.dia  || '',
       original: instOrig ? instOrig.nombre : '—',
-      suplente: sup     ? sup.nombre      : '—',
+      suplente: sup     ? sup.nombre      : (s.suplente_nombre || '—'),
       motivo:   s.motivo || '',
       fuente:   'plan',
       estado:   s.estado || ''
@@ -558,7 +558,7 @@ function _calsupGetData() {
         String(r.suplente_id) !== _calsupFiltInst) return;
     if (!resultado[r.fecha]) resultado[r.fecha] = [];
     const instOrig = (instructores || []).find(i => i.id === r.inst_id);
-    const sup      = (instructores || []).find(i => i.id === r.suplente_id);
+    const sup      = getSuplenteReg(r);
     resultado[r.fecha].push({
       hora:     r.hora    || '—',
       clase:    r.clase   || '—',

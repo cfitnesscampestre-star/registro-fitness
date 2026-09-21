@@ -161,6 +161,7 @@ function genReporteDiario(){
         cap:rec ? rec.cap : capSalon,
         estado:rec ? rec.estado : (fechaEsp ? 'pendiente' : '—'),
         suplente_id: rec ? rec.suplente_id : null,
+        suplente_nombre: rec ? rec.suplente_nombre : null,
         histProm, histAfo, histSesiones:histRecs.length
       });
     });
@@ -216,7 +217,7 @@ function genReporteDiario(){
             ${pct!==null?pct+'%':'—'}</td>
           <td style="padding:5px 8px;border:1px solid #e0ede5;text-align:center;color:${estCol};font-weight:600">${estTxt}</td>
           <td style="padding:5px 8px;border:1px solid #e0ede5;color:#1a5a8a;font-size:.75rem">
-            ${h.estado==='sub'?nombreSuplente(h.suplente_id):'—'}</td>
+            ${h.estado==='sub'?nombreSuplenteReg(h):'—'}</td>
           <td style="padding:5px 8px;border:1px solid #e0ede5;color:#777;font-size:.74rem;font-style:italic">
             ${histTxt}${h.histSesiones>0?` (${h.histSesiones}ses)`:''}</td>
         </tr>`;
@@ -575,7 +576,7 @@ function genReporteInstructor(){
       const pct=parseInt(r.cap||0)>0?Math.round((parseInt(r.asistentes)||0)/parseInt(r.cap)*100):0;
       const bg=pct>=70?'#d4edda':pct>=40?'#fff3cd':'#f8d7da';
       const tc=pct>=70?'#155724':pct>=40?'#856404':'#842029';
-      const supNom=r.estado==='sub'?nombreSuplente(r.suplente_id):'—';
+      const supNom=r.estado==='sub'?nombreSuplenteReg(r):'—';
       const motivoNom=r.estado==='sub'&&r.motivo_suplencia?({'permiso':'Permiso','vacaciones':'Vacaciones','falta':'Falta','incapacidad':'Incapacidad','otro':'Otro'}[r.motivo_suplencia]||r.motivo_suplencia):'—';
       const fd=r.fecha?new Date(r.fecha+'T12:00:00').toLocaleDateString('es-MX',{day:'2-digit',month:'short'}):'—';
       return`<tr style="background:${bg}">
@@ -1710,7 +1711,7 @@ function exportarExcelCompleto() {
   const histRows = [['Fecha','Día','Clase','Instructor','Hora','Asistentes','Capacidad','Aforo %','Estado','Suplente','Motivo Suplencia','Fuente']];
   [...registros].sort((a,b)=>b.fecha?.localeCompare(a.fecha||'')||0).forEach(r=>{
     const inst=instructores.find(i=>i.id===r.inst_id);
-    const sup=r.suplente_id?instructores.find(i=>i.id===r.suplente_id):null;
+    const sup=getSuplenteReg(r);
     const afoP=r.cap>0?Math.round((r.asistentes||0)/r.cap*100):0;
     const est=r.estado==='ok'?'Impartida':r.estado==='sub'?'Con Suplente':'Falta';
     const motivoLabel=r.estado==='sub'&&r.motivo_suplencia?({'permiso':'Permiso','vacaciones':'Vacaciones','falta':'Falta','incapacidad':'Incapacidad','otro':'Otro'}[r.motivo_suplencia]||r.motivo_suplencia):'—';
@@ -1722,7 +1723,7 @@ function exportarExcelCompleto() {
   const supRows = [['Fecha','Clase','Horario','Día','Instructor Original','Suplente','Motivo','Asistentes','Aforo %']];
   registros.filter(r=>r.estado==='sub').sort((a,b)=>b.fecha?.localeCompare(a.fecha||'')||0).forEach(r=>{
     const inst=instructores.find(i=>i.id===r.inst_id);
-    const sup=instructores.find(i=>i.id===r.suplente_id);
+    const sup=getSuplenteReg(r);
     const afoP=r.cap>0?Math.round(r.asistentes/r.cap*100):0;
     const motivoLabel=r.motivo_suplencia?({'permiso':'Permiso','vacaciones':'Vacaciones','falta':'Falta','incapacidad':'Incapacidad','otro':'Otro'}[r.motivo_suplencia]||r.motivo_suplencia):'—';
     supRows.push([r.fecha||'',r.clase||'',r.hora||'',r.dia||'',inst?inst.nombre:'?',sup?sup.nombre:'?',motivoLabel,r.asistentes||0,afoP+'%']);

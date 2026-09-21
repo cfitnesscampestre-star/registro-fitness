@@ -1559,7 +1559,7 @@ function _renderSuplencias(area, ini, fin, periodoLbl, instF, claseF){
   <div class="srch-section-lbl">Detalle</div>`;
   html+=regs.slice(0,6).map(r=>{
     const inst=instructores.find(i=>String(i.id)===String(r.inst_id));
-    const sup=r.suplente_id?instructores.find(i=>String(i.id)===String(r.suplente_id)):null;
+    const sup=getSuplenteReg(r);
     const fd=new Date(r.fecha+'T12:00:00').toLocaleDateString('es-MX',{day:'2-digit',month:'short'});
     const motivo=r.motivo_suplencia?motivoLabels[r.motivo_suplencia]||r.motivo_suplencia:'—';
     return `<div style="background:var(--panel2);border:1px solid var(--border);border-left:3px solid var(--blue);border-radius:10px;padding:8px 11px;margin-bottom:5px;font-size:.75rem">

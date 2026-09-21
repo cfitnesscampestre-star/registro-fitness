@@ -178,6 +178,79 @@ function nombreSuplente(sid){
   return s?s.nombre:'—';
 }
 
+
+// ═══════════════════════════════════════════════════════════════
+// SUPLENTES EXTERNOS (sin alta en base de datos)
+// En cualquier selector de suplente aparece "➕ Suplente externo…";
+// al elegirlo se escribe el nombre. El registro guarda suplente_id:null
+// y suplente_nombre:'Nombre', y los reportes lo muestran igual que a un instructor.
+// ═══════════════════════════════════════════════════════════════
+const SUP_EXT_VAL = '__ext__';
+function _supExtEnsure(sel){
+  if(!sel) return;
+  if(!sel.querySelector('option[value="'+SUP_EXT_VAL+'"]')){
+    const o=document.createElement('option');
+    o.value=SUP_EXT_VAL; o.textContent='➕ Suplente externo (escribir nombre)…';
+    sel.appendChild(o);
+  }
+  let inp=document.getElementById(sel.id+'-ext');
+  if(!inp){
+    inp=document.createElement('input');
+    inp.type='text'; inp.id=sel.id+'-ext'; inp.className='ctrl';
+    inp.placeholder='Nombre completo del suplente externo';
+    inp.autocomplete='off';
+    inp.style.cssText='display:none;width:100%;margin-top:6px;padding:7px 10px;box-sizing:border-box';
+    sel.insertAdjacentElement('afterend', inp);
+  }
+  return inp;
+}
+function _supExtToggle(sel){
+  const inp=_supExtEnsure(sel);
+  const ext=sel.value===SUP_EXT_VAL;
+  inp.style.display=ext?'block':'none';
+  if(!ext) inp.value='';
+  return ext;
+}
+function suplenteExtSetup(selId){
+  const sel=document.getElementById(selId);
+  if(!sel || sel._supExt) return;
+  sel._supExt=true;
+  _supExtEnsure(sel);
+  sel.addEventListener('change', ()=>{ if(_supExtToggle(sel)) setTimeout(()=>document.getElementById(selId+'-ext').focus(),50); });
+  // Si otra parte del código reescribe las opciones, se vuelve a agregar la opción externa
+  new MutationObserver(()=>{ _supExtEnsure(sel); _supExtToggle(sel); }).observe(sel,{childList:true});
+}
+// Selecciona "externo" con un nombre ya conocido (p. ej. suplencia planificada o registro existente)
+function suplenteExtSet(selId, nombre){
+  const sel=document.getElementById(selId); if(!sel) return;
+  const inp=_supExtEnsure(sel);
+  sel.value=SUP_EXT_VAL;
+  inp.style.display='block';
+  inp.value=nombre||'';
+}
+// Lee el selector → {id, nombre, externo}
+function leerSuplenteSel(selId){
+  const sel=document.getElementById(selId);
+  if(!sel) return {id:null,nombre:null,externo:false};
+  if(sel.value===SUP_EXT_VAL){
+    const inp=document.getElementById(selId+'-ext');
+    return {id:null, nombre:((inp&&inp.value)||'').trim().replace(/\s+/g,' '), externo:true};
+  }
+  return {id:parseInt(sel.value)||null, nombre:null, externo:false};
+}
+// Suplente de un registro: instructor del sistema o externo (objeto con .nombre)
+function getSuplenteReg(r){
+  if(!r) return null;
+  const byId=r.suplente_id?instructores.find(i=>String(i.id)===String(r.suplente_id)):null;
+  if(byId) return byId;
+  return r.suplente_nombre?{id:null,nombre:r.suplente_nombre,externo:true}:null;
+}
+function nombreSuplenteReg(r){ const s=getSuplenteReg(r); return s?s.nombre:'—'; }
+document.addEventListener('DOMContentLoaded', ()=>{
+  ['rc-suplente','tc-suplente','rcc-suplente','er-suplente'].forEach(suplenteExtSetup);
+});
+if(document.readyState!=='loading'){ ['rc-suplente','tc-suplente','rcc-suplente','er-suplente'].forEach(suplenteExtSetup); }
+
 // ═══ GESTIÓN DE CLASES PERSONALIZADAS ═══
 function syncClaseInput(){
   const sel=document.getElementById('s-clase');

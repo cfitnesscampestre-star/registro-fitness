@@ -1,6 +1,6 @@
 // ═══ GUARDAR CLASE ═══
 function guardarClase(){
-  _vClearAll(['rc-inst','rc-horario','rc-asis','rc-cap','rc-fecha','rc-suplente']);
+  _vClearAll(['rc-inst','rc-horario','rc-asis','rc-cap','rc-fecha','rc-suplente','rc-suplente-ext']);
 
   const instId=parseInt(document.getElementById('rc-inst').value);
   const inst=instructores.find(i=>i.id===instId);
@@ -12,7 +12,9 @@ function guardarClase(){
   const capDefault=getCapClase(claseNombre);
   const capInput=parseInt(document.getElementById('rc-cap').value)||capDefault;
   const est=document.getElementById('rc-est').value;
-  const supId=est==='sub'?parseInt(document.getElementById('rc-suplente').value)||null:null;
+  const _sup=est==='sub'?leerSuplenteSel('rc-suplente'):{id:null,nombre:null,externo:false};
+  const supId=_sup.id;
+  const supNombre=_sup.externo?_sup.nombre:null;
   const motivoSup=est==='sub'?(document.getElementById('rc-motivo').value||'permiso_personal'):null;
   const motivoFalta=est==='falta'?(document.getElementById('rc-falta-motivo').value||'injustificada'):null;
 
@@ -31,9 +33,12 @@ function guardarClase(){
     showToast(`⚠ Asistentes (${asisVal}) supera 150% de la capacidad (${capInput}). Verifica el dato.`,'warn');
     // Advertencia pero no bloquea
   }
-  if(est==='sub' && !supId){
+  if(est==='sub' && _sup.externo && !supNombre){
+    _vErr('rc-suplente-ext','Escribe el nombre del suplente externo');
+    showToast('Escribe el nombre del suplente externo','err'); ok=false;
+  } else if(est==='sub' && !supId && !_sup.externo){
     _vErr('rc-suplente','Selecciona un suplente');
-    showToast('Selecciona el instructor suplente','err'); ok=false;
+    showToast('Selecciona el instructor suplente o "Suplente externo"','err'); ok=false;
   }
   if(est==='sub' && supId && supId===instId){
     _vErr('rc-suplente','El suplente no puede ser el mismo instructor');
@@ -58,7 +63,7 @@ function guardarClase(){
     dia:diaVal, clase:claseNombre, hora:horaVal,
     asistentes:asisVal, cap:capInput,
     dur:parseInt(document.getElementById('rc-dur').value)||60,
-    estado:est, fecha:fechaVal, tipo:'clase', suplente_id:supId,
+    estado:est, fecha:fechaVal, tipo:'clase', suplente_id:supId, suplente_nombre:supNombre,
     motivo_suplencia:motivoSup,
     motivo_falta:motivoFalta,
     updatedAt:Date.now()});

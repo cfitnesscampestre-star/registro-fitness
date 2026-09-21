@@ -120,10 +120,11 @@ function turboMostrar(){
       // Pre-seleccionar estado sub y suplente automáticamente
       turboSetPres('sub');
       const selSup=document.getElementById('tc-suplente');
-      if(selSup&&supPlan.suplente_id){
+      if(selSup&&(supPlan.suplente_id||supPlan.suplente_nombre)){
         const opts=instructoresActivos().filter(i=>i.id!==c.inst_id).map(i=>`<option value="${i.id}">${i.nombre}</option>`).join('');
         selSup.innerHTML='<option value="">— Seleccionar suplente —</option>'+opts;
-        selSup.value=String(supPlan.suplente_id);
+        if(supPlan.suplente_id) selSup.value=String(supPlan.suplente_id);
+        else suplenteExtSet('tc-suplente', supPlan.suplente_nombre); // suplente externo planificado
       }
       const selMot=document.getElementById('tc-motivo');
       if(selMot) selMot.value=supPlan.motivo||'permiso';
@@ -261,7 +262,10 @@ function turboGuardar(){
   const c=recActual.clasesActivas[recIdx];
   if(!c)return;
   const asis=parseInt(document.getElementById('tc-asis').value)||0;
-  const supId=turboPresEstado==='sub'?(parseInt(document.getElementById('tc-suplente').value)||null):null;
+  const _sup=turboPresEstado==='sub'?leerSuplenteSel('tc-suplente'):{id:null,nombre:null,externo:false};
+  if(turboPresEstado==='sub'&&_sup.externo&&!_sup.nombre){showToast('Escribe el nombre del suplente externo','err');const _i=document.getElementById('tc-suplente-ext');if(_i)_i.focus();return;}
+  const supId=_sup.id;
+  const supNombre=_sup.externo?_sup.nombre:null;
   // Capturar motivo: para sub usa tc-motivo, para falta usa tc-motivo-falta
   let motivoSup=null;
   if(turboPresEstado==='sub'){
@@ -276,7 +280,7 @@ function turboGuardar(){
   // Normalizar inst_id a número para evitar mismatch con Firebase
   const instIdNum=parseInt(c.inst_id)||c.inst_id;
   const existeIdx=recActual.items.findIndex(it=>String(it.inst_id)===String(c.inst_id)&&it.hora===c.hora&&it.clase===c.clase);
-  const item={...c,inst_id:instIdNum,asis,presente:turboPresEstado,suplente_id:supId,motivo_suplencia:motivoSup,obs,saltado:false,cap};
+  const item={...c,inst_id:instIdNum,asis,presente:turboPresEstado,suplente_id:supId,suplente_nombre:supNombre,motivo_suplencia:motivoSup,obs,saltado:false,cap};
   if(existeIdx>=0)recActual.items[existeIdx]=item;
   else recActual.items.push(item);
   if(navigator.vibrate) navigator.vibrate([20,10,20]);
@@ -408,6 +412,7 @@ function mostrarClaseRec(){
     toggleSuplenteRec();
     setTimeout(()=>{
       if(supPlan.suplente_id) document.getElementById('rcc-suplente').value=String(supPlan.suplente_id);
+      else if(supPlan.suplente_nombre) suplenteExtSet('rcc-suplente', supPlan.suplente_nombre);
       if(supPlan.motivo) document.getElementById('rcc-motivo').value=supPlan.motivo;
     },50);
   } else {
@@ -426,14 +431,17 @@ function ajustarAsis(delta){
 function siguienteClaseRec(){
   const c=recActual.clasesActivas[recIdx];
   const pres=document.getElementById('rcc-pres').value;
-  const supId=pres==='sub'?parseInt(document.getElementById('rcc-suplente').value)||null:null;
+  const _sup=pres==='sub'?leerSuplenteSel('rcc-suplente'):{id:null,nombre:null,externo:false};
+  if(pres==='sub'&&_sup.externo&&!_sup.nombre){showToast('Escribe el nombre del suplente externo','err');const _i=document.getElementById('rcc-suplente-ext');if(_i)_i.focus();return;}
+  const supId=_sup.id;
+  const supNombre=_sup.externo?_sup.nombre:null;
   // Capturar motivo tanto para suplencia como para falta
   const motivoSup=(pres==='sub'||pres==='no')
     ?(document.getElementById('rcc-motivo')?document.getElementById('rcc-motivo').value||(pres==='sub'?'permiso':'falta'):null)
     :null;
   const cap=parseInt(document.getElementById('rcc-cap').value)||getCapClase(c.clase)||20;
   recActual.items.push({...c,asis:parseInt(document.getElementById('rcc-asis').value)||0,
-    presente:pres,suplente_id:supId,motivo_suplencia:motivoSup,obs:document.getElementById('rcc-obs').value.trim(),saltado:false,cap});
+    presente:pres,suplente_id:supId,suplente_nombre:supNombre,motivo_suplencia:motivoSup,obs:document.getElementById('rcc-obs').value.trim(),saltado:false,cap});
   avanzarRec();
 }
 function saltarClaseRec(){
@@ -477,7 +485,7 @@ function terminarRecorrido(){
           <td style="padding:4px 8px;text-align:center;color:${col};font-weight:700">${i.asis}</td>
           <td style="padding:4px 8px;text-align:center;color:${col};font-size:.72rem">${afoP}%</td>
           <td style="padding:4px 8px;text-align:center">${pres}</td>
-          <td style="padding:4px 8px;color:var(--blue);font-size:.72rem">${i.presente==='sub'?nombreSuplente(i.suplente_id):'—'}</td>
+          <td style="padding:4px 8px;color:var(--blue);font-size:.72rem">${i.presente==='sub'?nombreSuplenteReg(i):'—'}</td>
           <td style="padding:4px 8px;color:var(--txt2);font-size:.7rem">${i.obs||'—'}</td>
         </tr>`;
       }).join('')}
@@ -516,6 +524,7 @@ function guardarRecorrido(){
       ex.asistentes=parseInt(item.asis)||0;
       ex.estado=nuevoEst;
       ex.suplente_id=item.suplente_id||null;
+      ex.suplente_nombre=(nuevoEst==='sub'&&!item.suplente_id)?(item.suplente_nombre||null):null;
       ex.motivo_suplencia=(nuevoEst==='sub'||nuevoEst==='falta')?(item.motivo_suplencia||null):null;
       ex.cap=cap;
       ex.updatedAt=Date.now();
@@ -531,6 +540,7 @@ function guardarRecorrido(){
         fecha:recActual.fecha,
         tipo:'recorrido',
         suplente_id:item.suplente_id||null,
+        suplente_nombre:(nuevoEst==='sub'&&!item.suplente_id)?(item.suplente_nombre||null):null,
         motivo_suplencia:(nuevoEst==='sub'||nuevoEst==='falta')?(item.motivo_suplencia||null):null,
         updatedAt:Date.now()
       });
@@ -579,7 +589,7 @@ function imprimirRecorrido(){
           <td style="padding:5px 8px;border:1px solid #e0ede5;text-align:center;color:${col};font-weight:700">${i.asis}</td>
           <td style="padding:5px 8px;border:1px solid #e0ede5;text-align:center;color:${col};font-weight:600">${afoP}%</td>
           <td style="padding:5px 8px;border:1px solid #e0ede5;text-align:center">${i.presente==='si'?'<svg class="ico ico-ok" viewBox="0 0 20 20"><circle cx="10" cy="10" r="8" stroke="currentColor" stroke-width="1.5" fill="none"/><polyline points="6,10 9,13 14,7" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg> Sí':i.presente==='no'?'<svg class="ico ico-err" viewBox="0 0 20 20"><circle cx="10" cy="10" r="8" stroke="currentColor" stroke-width="1.5" fill="none"/><line x1="7" y1="7" x2="13" y2="13" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><line x1="13" y1="7" x2="7" y2="13" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg> Ausente':'<svg class="ico" viewBox="0 0 20 20"><path d="M4 10a6 6 0 0 1 6-6 6 6 0 0 1 5.2 3" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round"/><path d="M16 10a6 6 0 0 1-6 6 6 6 0 0 1-5.2-3" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round"/><polyline points="14.5,7 15.5,3.8 18.5,5" stroke="currentColor" stroke-width="1.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/><polyline points="5.5,13 4.5,16.2 1.5,15" stroke="currentColor" stroke-width="1.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg> Sustituto'}</td>
-          <td style="padding:5px 8px;border:1px solid #e0ede5;color:#1a5a8a">${i.presente==='sub'?nombreSuplente(i.suplente_id):'—'}</td>
+          <td style="padding:5px 8px;border:1px solid #e0ede5;color:#1a5a8a">${i.presente==='sub'?nombreSuplenteReg(i):'—'}</td>
           <td style="padding:5px 8px;border:1px solid #e0ede5;color:#555;font-size:.74rem">${i.obs||'—'}</td>
         </tr>`;
       }).join('')}
