@@ -128,7 +128,7 @@ function instRenderHoy() {
   if(fechaEl)  fechaEl.textContent  = fecha.toLocaleDateString('es-MX',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
 
   // Clases del instructor para este día
-  const slots = (inst.horario||[]).filter(s => s.dia === diaStr).sort((a,b)=>a.hora.localeCompare(b.hora));
+  const slots = getHorarioEn(inst, fechaStr).filter(s => s.dia === diaStr).sort((a,b)=>a.hora.localeCompare(b.hora));
 
   const clasesData = slots.map(slot => {
     const regs = registros.filter(r =>

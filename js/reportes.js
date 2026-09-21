@@ -132,7 +132,7 @@ function genReporteDiario(){
   // ── Construir lista de clases programadas ese día ──
   const horariosDelDia = [];
   instructores.forEach(inst=>{
-    (inst.horario||[]).filter(h=>h.dia===dia && (!claseSel || h.clase===claseSel)).forEach(h=>{
+    (fechaEsp?getHorarioEn(inst,fechaEsp):(inst.horario||[])).filter(h=>h.dia===dia && (!claseSel || h.clase===claseSel)).forEach(h=>{
       // Buscar registro de ESA FECHA EXACTA (o el más reciente de ese día si no hay fecha)
       let rec = null;
       if(fechaEsp){
@@ -239,7 +239,7 @@ function genReporteSemanal(){
   const domStr  = fechaLocalStr(domDate);
   const claseSel = document.getElementById('rpt-clase-sel')?.value || '';
 
-  const totalSem=instructores.reduce((a,i)=>a+(i.horario||[]).filter(h=>!claseSel||h.clase===claseSel).length,0);
+  const totalSem=instructores.reduce((a,i)=>a+getHorarioSemana(i,lunStr).filter(h=>!claseSel||h.clase===claseSel).length,0);
 
   // ── Filtrar registros sólo de esta semana ──
   const regsSemanales = registros.filter(r=>{
@@ -250,7 +250,7 @@ function genReporteSemanal(){
   // ── Construir mapa con datos reales ──
   const mapa={};
   instructores.forEach(inst=>{
-    (inst.horario||[]).filter(h=>!claseSel||h.clase===claseSel).forEach(h=>{
+    getHorarioSemana(inst,lunStr).filter(h=>!claseSel||h.clase===claseSel).forEach(h=>{
       const k=`${h.dia}||${h.hora}`;
       if(!mapa[k])mapa[k]=[];
       // Registros de ESTA semana para este slot

@@ -57,6 +57,71 @@ function fechaLocalStr(d){
   return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
 }
 
+
+// ═══════════════════════════════════════════════════════════════
+// HORARIOS CON VIGENCIA (cambios "a partir de" una fecha)
+// inst.horario  = horario vigente HOY (lo usan todas las vistas "actuales")
+// inst.hv       = versiones [{desde:'YYYY-MM-DD', slots:[...]}] → horario por fecha
+// inst.baja     = 'YYYY-MM-DD' → primer día en que ya NO forma parte del equipo
+// El historial (registros/recorridos) nunca se toca.
+// ═══════════════════════════════════════════════════════════════
+const _HV_INICIO = '1970-01-01';
+function getHorarioEn(inst, fechaStr){
+  if(!inst) return [];
+  const hv = Array.isArray(inst.hv) ? inst.hv.filter(v=>v) : [];
+  if(hv.length===0 || !fechaStr) return inst.horario || [];
+  let vig = null, min = null;
+  hv.forEach(v=>{
+    const d = v.desde || _HV_INICIO;
+    if(!min || d < (min.desde||_HV_INICIO)) min = v;
+    if(d <= fechaStr && (!vig || d >= (vig.desde||_HV_INICIO))) vig = v;
+  });
+  return ((vig || min).slots) || [];
+}
+function fechaDeDiaSemana(lunesStr, dia){
+  const d = new Date(lunesStr + 'T12:00:00');
+  d.setDate(d.getDate() + Math.max(0, DIAS.indexOf(dia)));
+  return fechaLocalStr(d);
+}
+// Slots de una semana completa respetando el horario que regía cada día
+function getHorarioSemana(inst, lunesStr){
+  const out = [];
+  DIAS.forEach(dia=>{
+    getHorarioEn(inst, fechaDeDiaSemana(lunesStr, dia)).forEach(h=>{ if(h.dia===dia) out.push(h); });
+  });
+  return out;
+}
+function refrescarHorariosVigentes(){
+  const h = fechaLocalStr(new Date());
+  (instructores||[]).forEach(i=>{
+    if(Array.isArray(i.hv) && i.hv.length) i.horario = [...getHorarioEn(i, h)];
+  });
+}
+function instActivo(i, fecha){
+  const f = fecha || fechaLocalStr(new Date());
+  return !i.baja || i.baja > f;
+}
+function instructoresActivos(){ return (instructores||[]).filter(i=>instActivo(i)); }
+function _slotsKey(arr){
+  return JSON.stringify((arr||[]).map(s=>s.dia+'|'+s.hora+'|'+s.clase).sort());
+}
+// Aplica un nuevo horario a partir de "desde" sin alterar fechas anteriores.
+// Devuelve true si hubo cambio.
+function aplicarCambioHorario(inst, nuevosSlots, desde){
+  const nuevos = (nuevosSlots||[]).map(s=>({dia:s.dia, hora:s.hora, clase:s.clase}));
+  const base = getHorarioEn(inst, desde);
+  if(_slotsKey(base) === _slotsKey(nuevos)) return false;
+  if(!Array.isArray(inst.hv) || inst.hv.length===0){
+    inst.hv = [{desde:_HV_INICIO, slots:(inst.horario||[]).map(s=>({dia:s.dia, hora:s.hora, clase:s.clase}))}];
+  }
+  const idx = inst.hv.findIndex(v=>(v.desde||_HV_INICIO)===desde);
+  const ver = {desde, slots:nuevos};
+  if(idx>=0) inst.hv[idx] = ver; else inst.hv.push(ver);
+  inst.hv.sort((a,b)=>(a.desde||'').localeCompare(b.desde||''));
+  inst.horario = [...getHorarioEn(inst, fechaLocalStr(new Date()))];
+  return true;
+}
+
 // ── Navegación de fecha en vista "Hoy" ──────────────────────────────────────
 function setVistaFecha(val){
   if(!val) return;
@@ -149,7 +214,7 @@ function actualizarSelectoresClase(){
 // ═══ MODALES ═══
 function abrirModal(id){
   document.getElementById(id).classList.add('on');
-  const opts=instructores.map(i=>`<option value="${i.id}">${i.nombre}</option>`).join('');
+  const opts=instructoresActivos().map(i=>`<option value="${i.id}">${i.nombre}</option>`).join('');
   if(id==='m-clase'){
     document.getElementById('rc-inst').innerHTML=opts;
     document.getElementById('rc-fecha').value=fechaLocalStr(hoy);
@@ -306,7 +371,7 @@ function toggleSuplenteRec(){
   if(faltaRow) faltaRow.style.display=isNo?'flex':'none';
   if(isSub){
     const c=recActual.clasesActivas[recIdx];
-    const opts=instructores.filter(i=>i.id!==c.inst_id).map(i=>`<option value="${i.id}">${i.nombre}</option>`).join('');
+    const opts=instructoresActivos().filter(i=>i.id!==c.inst_id).map(i=>`<option value="${i.id}">${i.nombre}</option>`).join('');
     document.getElementById('rcc-suplente').innerHTML='<option value="">— Seleccionar —</option>'+opts;
   }
 }
@@ -368,6 +433,7 @@ function abrirModalInstructor(id){
     _miMostrarFotoPreview(inst.foto||null);
     tmpSlots=[...(inst.horario||[])];
     document.getElementById('mi-del').style.display='block';
+    _miPrepararVigencia(inst);
     // Cargar PIN guardado del instructor
     const pinEl=document.getElementById('mi-pin');
     if(pinEl) pinEl.value=inst.pin||localStorage.getItem(`fc_pin_${id}`)||'1234';
@@ -383,12 +449,26 @@ function abrirModalInstructor(id){
     _miMostrarFotoPreview(null);
     tmpSlots=[];
     document.getElementById('mi-del').style.display='none';
+    _miPrepararVigencia(null);
     // PIN por defecto para nuevo instructor
     const pinEl=document.getElementById('mi-pin');
     if(pinEl) pinEl.value='1234';
   }
   renderSlots();
   document.getElementById('m-instructor').classList.add('on');
+}
+function _miPrepararVigencia(inst){
+  const wrap=document.getElementById('mi-vigencia-wrap');
+  const fEl=document.getElementById('mi-vigencia');
+  if(wrap) wrap.style.display = inst ? 'block' : 'none';
+  if(fEl) fEl.value = fechaLocalStr(new Date());
+  const txt=document.getElementById('mi-del-txt');
+  if(txt) txt.textContent = (inst && inst.baja && inst.baja<=fechaLocalStr(new Date())) ? 'Reactivar instructor' : (inst ? 'Dar de baja instructor' : 'Eliminar Instructor');
+  const info=document.getElementById('mi-baja-info');
+  if(info){
+    if(inst && inst.baja){ info.style.display='block'; info.textContent='Baja desde '+inst.baja.split('-').reverse().join('/')+' — su historial se conserva.'; }
+    else info.style.display='none';
+  }
 }
 function renderSlots(){
   const cont=document.getElementById('mi-slots');
@@ -457,43 +537,65 @@ function guardarInstructor(){
   const data={nombre,tipo:document.getElementById('mi-tipo').value,
     turno:document.getElementById('mi-turno').value,
     esp:document.getElementById('mi-esp').value.trim(),
-    foto:fotoData,horario:[...tmpSlots],pin:pinVal};
+    foto:fotoData,pin:pinVal};
+  let cambioHorario=false, desdeStr='';
   if(id){
     const idx=instructores.findIndex(i=>String(i.id)===String(id));
-    if(idx>=0) instructores[idx]={...instructores[idx],...data};
-    else{ showToast('No se encontró el instructor. Intenta de nuevo.','err'); return; }
+    if(idx>=0){
+      instructores[idx]={...instructores[idx],...data};
+      // Horario: se aplica A PARTIR de la fecha elegida; lo anterior queda intacto
+      desdeStr=(document.getElementById('mi-vigencia')||{}).value||fechaLocalStr(new Date());
+      cambioHorario=aplicarCambioHorario(instructores[idx], tmpSlots, desdeStr);
+    } else{ showToast('No se encontró el instructor. Intenta de nuevo.','err'); return; }
     // Sincronizar también el localStorage de PIN para que auth.js lo encuentre
     localStorage.setItem(`fc_pin_${id}`, pinVal);
   } else {
     const nid=instructores.reduce((m,i)=>Math.max(m,i.id||0),0)+1;
-    instructores.push({id:nid,...data});
+    instructores.push({id:nid,...data,horario:[...tmpSlots]});
     localStorage.setItem(`fc_pin_${nid}`, pinVal);
   }
   cerrarModal('m-instructor');renderAll();
-  registrarLog('instructor', `${id?'Editado':'Nuevo'}: ${nombre} · ${data.tipo}`);
-  showToast(`Instructor ${id?'actualizado':'agregado'}`,'ok');
+  registrarLog('instructor', `${id?'Editado':'Nuevo'}: ${nombre} · ${data.tipo}${cambioHorario?' · horario desde '+desdeStr:''}`);
+  showToast(cambioHorario?`Instructor actualizado · nuevo horario desde ${desdeStr.split('-').reverse().join('/')} (lo anterior se conserva)`:`Instructor ${id?'actualizado':'agregado'}`,'ok');
 }
 function eliminarInstructor(){
   const id=parseInt(document.getElementById('mi-id').value);
   const inst=instructores.find(i=>String(i.id)===String(id));
-  const nomInst=inst?inst.nombre:'este instructor';
+  if(!inst) return;
+  const nomInst=inst.nombre;
+  const hoyStr=fechaLocalStr(new Date());
+  const fmt=f=>f.split('-').reverse().join('/');
+
+  // Reactivar
+  if(inst.baja && inst.baja<=hoyStr){
+    if(!confirm(`¿Reactivar a ${nomInst}? Volverá a aparecer en listas de selección. Su horario quedará vacío hasta que le asignes clases.`)) return;
+    delete inst.baja;
+    cerrarModal('m-instructor');renderAll();
+    registrarLog('instructor',`Reactivado: ${nomInst}`);
+    showToast(`${nomInst} reactivado`,'ok');
+    return;
+  }
+
   const regsAfectados=registros.filter(r=>String(r.inst_id)===String(id)).length;
-  const msg=regsAfectados>0
-    ? `¿Eliminar a ${nomInst}?\n\nSe eliminarán también sus ${regsAfectados} registro(s) de clases y su historial de asistencia.\n\nEsta acción no se puede deshacer.`
-    : `¿Eliminar a ${nomInst}? Esta acción no se puede deshacer.`;
-  if(!confirm(msg))return;
-  // Bug fix 5: limpiar registros y recorridos del instructor antes de eliminarlo
-  registros=registros.filter(r=>String(r.inst_id)!==String(id));
-  recorridos=recorridos.map(rec=>({
-    ...rec,
-    items:(rec.items||[]).filter(it=>String(it.inst_id)!==String(id))
-  }));
-  instructores=instructores.filter(i=>String(i.id)!==String(id));
+  const recsAfectados=recorridos.some(rec=>(rec.items||[]).some(it=>String(it.inst_id)===String(id)));
+
+  // Sin historial → se puede borrar por completo
+  if(regsAfectados===0 && !recsAfectados){
+    if(!confirm(`¿Eliminar a ${nomInst}? No tiene registros, así que se borra por completo.`)) return;
+    instructores=instructores.filter(i=>String(i.id)!==String(id));
+    cerrarModal('m-instructor');renderAll();
+    registrarLog('instructor',`Eliminado: ${nomInst}`);
+    showToast(`${nomInst} eliminado`,'ok');
+    return;
+  }
+
+  // Con historial → BAJA a partir de una fecha (el historial se conserva)
+  const desde=(document.getElementById('mi-vigencia')||{}).value||hoyStr;
+  if(!confirm(`¿Dar de baja a ${nomInst} a partir del ${fmt(desde)}?\n\nSus ${regsAfectados} registro(s) y estadísticas anteriores se CONSERVAN.\nDesde esa fecha dejará de aparecer en horarios, recorridos y listas de selección.`)) return;
+  inst.baja=desde;
+  aplicarCambioHorario(inst, [], desde);
   cerrarModal('m-instructor');renderAll();
-  registrarLog('instructor',`Eliminado: ${nomInst} · ${regsAfectados} registro(s) borrados`);
-  const msgToast = regsAfectados>0
-    ? `${nomInst} eliminado · ${regsAfectados} registro(s) borrados`
-    : `${nomInst} eliminado`;
-  showToast(msgToast,'ok');
+  registrarLog('instructor',`Baja: ${nomInst} desde ${desde} · historial conservado (${regsAfectados} registros)`);
+  showToast(`${nomInst} dado de baja desde ${fmt(desde)} · historial conservado`,'ok');
 }
 

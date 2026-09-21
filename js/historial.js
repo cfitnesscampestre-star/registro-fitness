@@ -194,7 +194,7 @@ function abrirEditarRegistro(regId){
   document.getElementById('er-est').value=r.estado||'ok';
   document.getElementById('er-obs').value=r.obs||'';
   // Suplentes
-  const opts=instructores.filter(i=>i.id!==r.inst_id).map(i=>`<option value="${i.id}">${i.nombre}</option>`).join('');
+  const opts=instructores.filter(i=>i.id!==r.inst_id&&(instActivo(i)||String(i.id)===String(r.suplente_id))).map(i=>`<option value="${i.id}">${i.nombre}</option>`).join('');
   document.getElementById('er-suplente').innerHTML='<option value="">— Sin suplente —</option>'+opts;
   if(r.suplente_id)document.getElementById('er-suplente').value=r.suplente_id;
   if(r.motivo_suplencia)document.getElementById('er-motivo').value=r.motivo_suplencia;

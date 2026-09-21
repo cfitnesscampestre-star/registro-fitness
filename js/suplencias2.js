@@ -185,7 +185,7 @@ function renderTablaSuplencias(){
 
 // ── Modal nueva/editar suplencia ───────────
 function abrirModalNuevaSuplencia(id){
-  const opts=instructores.map(i=>`<option value="${i.id}">${i.nombre}</option>`).join('');
+  const opts=instructoresActivos().map(i=>`<option value="${i.id}">${i.nombre}</option>`).join('');
   document.getElementById('nsup-inst').innerHTML='<option value="">— Instructor —</option>'+opts;
   document.getElementById('nsup-suplente').innerHTML='<option value="">— Seleccionar suplente —</option>'+opts;
   document.getElementById('nsup-clase').innerHTML='<option value="">— Selecciona instructor primero —</option>';

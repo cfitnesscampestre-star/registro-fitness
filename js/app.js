@@ -9,9 +9,21 @@ initDiagClases();
 // SALONES — CAPACIDAD POR SALÓN
 // ═══════════════════════════════════════════
 
+// Normaliza nombres de clase (mayúsculas, acentos, espacios) para que "Box", "BOX " y "Bóx" coincidan
+function _normClase(s) {
+  return String(s == null ? '' : s).normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/\s+/g, ' ').trim().toLowerCase();
+}
+// Salón asignado a una clase (o null si no tiene)
+function getSalonDeClase(nombreClase) {
+  const n = _normClase(nombreClase);
+  if (!n) return null;
+  return salones.find(s => (s.clases || []).some(c => _normClase(c) === n)) || null;
+}
+// Capacidad de la clase = capacidad de su salón; 20 solo si no tiene salón asignado
 function getCapClase(nombreClase) {
-  const salon = salones.find(s => s.clases && s.clases.some(c => c.toLowerCase() === nombreClase.toLowerCase()));
-  return salon ? salon.cap : 20;
+  const salon = getSalonDeClase(nombreClase);
+  const cap = salon ? parseInt(salon.cap) : 0;
+  return cap > 0 ? cap : 20;
 }
 
 function getTipoIcon(tipo) {
@@ -47,21 +59,41 @@ function renderSalones() {
       }).join('')}
     </div>`;
 
-  // Tabla de asignación clase → salón
+  // Tabla de asignación clase → salón (con selector directo para asignar sin abrir el salón)
   const todasClases = [...new Set(instructores.flatMap(i=>(i.horario||[]).map(h=>h.clase)))].sort();
   const rows = todasClases.map(clase => {
-    const salon = salones.find(s=>s.clases&&s.clases.some(c=>c.toLowerCase()===clase.toLowerCase()));
-    const cap = salon ? salon.cap : 20;
+    const salon = getSalonDeClase(clase);
+    const cap = getCapClase(clase);
     const col = salon ? 'var(--neon)' : 'var(--txt3)';
-    const badge = !salon ? `<span style="font-size:.6rem;background:rgba(224,80,80,.15);color:var(--red2);border-radius:4px;padding:1px 5px;margin-left:4px">Sin salón → cap. 20 por defecto</span>` : '';
+    const claseAttr = String(clase).replace(/&/g,'&amp;').replace(/"/g,'&quot;');
+    const opts = '<option value="">— Sin salón (cap. 20) —</option>' +
+      salones.map(sl => `<option value="${sl.id}" ${salon && salon.id===sl.id ? 'selected' : ''}>${sl.nombre} · ${sl.cap}p</option>`).join('');
     return `<div class="arow">
       <div class="adot" style="background:${col}"></div>
       <span style="flex:1;font-size:.83rem">${clase}</span>
-      <span style="font-size:.75rem;color:var(--txt2)">${salon?salon.nombre:'<span style="color:var(--txt3)">Sin salón asignado</span>'}${badge}</span>
-      <span class="mono" style="color:${col};font-size:.77rem;margin-left:.5rem">${cap}p</span>
+      <select class="ctrl" data-clase="${claseAttr}" onchange="asignarClaseSalon(this.dataset.clase, this.value)" style="padding:3px 6px;font-size:.72rem;max-width:170px;${salon?'':'border-color:rgba(224,80,80,.5)'}">${opts}</select>
+      <span class="mono" style="color:${col};font-size:.77rem;margin-left:.5rem;min-width:34px;text-align:right">${cap}p</span>
     </div>`;
   }).join('');
   document.getElementById('asignacion-body').innerHTML = rows || '<div class="empty">Sin clases en horarios aún</div>';
+}
+
+// Asigna una clase a UN solo salón (la quita de cualquier otro)
+function asignarClaseSalon(clase, salonId) {
+  const n = _normClase(clase);
+  salones.forEach(sl => { sl.clases = (sl.clases || []).filter(c => _normClase(c) !== n); });
+  if (salonId) {
+    const sl = salones.find(x => String(x.id) === String(salonId));
+    if (sl) { sl.clases = [...(sl.clases || []), clase]; }
+  }
+  _persistirSalones(`Clase "${clase}" → ${salonId ? (salones.find(x=>String(x.id)===String(salonId))||{}).nombre : 'sin salón'}`);
+}
+function _persistirSalones(logMsg) {
+  localStorage.setItem('fc_salones', JSON.stringify(salones));
+  renderSalones();
+  if (logMsg) registrarLog('sistema', logMsg);
+  if (typeof guardarLocal === 'function') guardarLocal();
+  if (typeof sincronizarFirebase === 'function') setTimeout(sincronizarFirebase, 800);
 }
 
 // Lista de clases extra agregadas manualmente al modal (que no están en horarios)
@@ -154,6 +186,14 @@ function guardarSalon() {
     : tipoSel;
 
   const clases = [...document.querySelectorAll('#ms-clases-check input:checked')].map(c=>c.value);
+
+  // Una clase solo puede pertenecer a UN salón: si la marcaste aquí, se quita de los demás
+  // (antes, si estaba en dos salones, ganaba el primero y la capacidad "no se actualizaba")
+  const normSel = new Set(clases.map(_normClase));
+  salones.forEach(sl => {
+    if (sl.id === id) return;
+    sl.clases = (sl.clases || []).filter(c => !normSel.has(_normClase(c)));
+  });
 
   if(id){
     const idx = salones.findIndex(s=>s.id===id);
@@ -892,6 +932,7 @@ async function sincronizarFirebase(){
 // IMPORTANTE: sobreescribimos renderAll UNA SOLA VEZ aquí
 const _renderAllBase = renderAll;
 renderAll = function(){
+  refrescarHorariosVigentes(); // aplica cambios de horario cuya fecha ya llegó
   _renderAllBase();
   guardarLocal();
   // Subir a Firebase con un pequeño debounce para no saturar en ediciones rápidas
@@ -1013,7 +1054,7 @@ function calcularAlertas() {
   });
   const sinRegistro = [];
   instructores.forEach(inst => {
-    (inst.horario||[]).forEach(h => {
+    getHorarioSemana(inst, iniSemStr).forEach(h => {
       if(!diasSemana.includes(h.dia)) return;
       const tieneReg = registros.some(r=>r.inst_id===inst.id&&r.dia===h.dia&&r.hora===h.hora&&
         (r.fecha||'')>=iniSemStr&&(r.fecha||'')<finSemStr&&(r.estado==='ok'||r.estado==='sub'||r.estado==='falta'));

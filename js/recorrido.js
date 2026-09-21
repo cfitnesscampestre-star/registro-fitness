@@ -30,7 +30,7 @@ function previewClasesActivas(){
   const hora=document.getElementById('ri-hora').value;
   const dia=document.getElementById('ri-dia').value;
   if(!hora||!dia)return;
-  const clases=getClasesActivas(dia,hora);
+  const clases=getClasesActivas(dia,hora,(document.getElementById('ri-fecha')||{}).value);
   const prev=document.getElementById('ri-preview');
   if(clases.length===0){
     prev.innerHTML=`<div style="font-size:.75rem;color:var(--txt2);padding:.5rem;background:var(--panel2);border-radius:8px">Sin clases activas en ${dia} ${hora}</div>`;
@@ -40,10 +40,11 @@ function previewClasesActivas(){
       (clases.length>5?`<div style="font-size:.72rem;color:var(--txt3)">...y ${clases.length-5} más</div>`:'');
   }
 }
-function getClasesActivas(dia,horaRec){
+function getClasesActivas(dia,horaRec,fecha){
   const minRec=horaToMin(horaRec);const resultado=[];
   instructores.forEach(inst=>{
-    (inst.horario||[]).forEach(h=>{
+    // Horario que regía en ESA fecha (si se movió al profesor, lo anterior no cambia)
+    (fecha?getHorarioEn(inst,fecha):(inst.horario||[])).forEach(h=>{
       if(h.dia!==dia)return;
       const minIni=horaToMin(h.hora);const minFin=minIni+55;
       if(minRec>=minIni&&minRec<=minFin)resultado.push({inst_id:inst.id,inst_nombre:inst.nombre,clase:h.clase,hora:h.hora,dia:h.dia});
@@ -56,7 +57,7 @@ function comenzarRecorrido(){
   const hora=document.getElementById('ri-hora').value;
   const dia=document.getElementById('ri-dia').value;
   if(!fecha){showToast('Selecciona la fecha','err');return;}
-  const clases=getClasesActivas(dia,hora);
+  const clases=getClasesActivas(dia,hora,fecha);
   if(clases.length===0){showToast(`No hay clases activas el ${dia} a las ${hora}`,'warn');return;}
   recActual={fecha,hora,dia,items:[],clasesActivas:clases};
   recIdx=0;
@@ -97,7 +98,7 @@ function turboMostrar(){
   document.getElementById('tc-clase').textContent=c.clase;
   document.getElementById('tc-inst').textContent=c.inst_nombre;
   document.getElementById('tc-hora').textContent=c.hora;
-  const salon=salones.find(s=>s.clases&&s.clases.some(cl=>cl.toLowerCase()===c.clase.toLowerCase()));
+  const salon=getSalonDeClase(c.clase);
   document.getElementById('tc-salon').textContent=salon?`📍 ${salon.nombre} · ${salon.cap}p`:'';
 
   // Ocultar avisos de suplencia al inicio — evita que persistan de clase anterior
@@ -120,7 +121,7 @@ function turboMostrar(){
       turboSetPres('sub');
       const selSup=document.getElementById('tc-suplente');
       if(selSup&&supPlan.suplente_id){
-        const opts=instructores.filter(i=>i.id!==c.inst_id).map(i=>`<option value="${i.id}">${i.nombre}</option>`).join('');
+        const opts=instructoresActivos().filter(i=>i.id!==c.inst_id).map(i=>`<option value="${i.id}">${i.nombre}</option>`).join('');
         selSup.innerHTML='<option value="">— Seleccionar suplente —</option>'+opts;
         selSup.value=String(supPlan.suplente_id);
       }
@@ -131,10 +132,10 @@ function turboMostrar(){
     }
   }
 
-  // Capacidad desde salón (o del último registro histórico si existe)
+  // Capacidad: si la clase tiene salón asignado se respeta SIEMPRE su capacidad; solo si no tiene, se usa el último registro
   const capSalon=getCapClase(c.clase)||20;
   const histRecsAll=registros.filter(r=>String(r.inst_id)===String(c.inst_id)&&r.clase===c.clase&&r.dia===c.dia).sort((a,b)=>(b.fecha||'').localeCompare(a.fecha||''));
-  const capPrev=histRecsAll.length>0&&parseInt(histRecsAll[0].cap)>0?parseInt(histRecsAll[0].cap):capSalon;
+  const capPrev=getSalonDeClase(c.clase)?capSalon:(histRecsAll.length>0&&parseInt(histRecsAll[0].cap)>0?parseInt(histRecsAll[0].cap):capSalon);
   document.getElementById('tc-cap').value=capPrev;
   const histRecs=histRecsAll.filter(r=>r.estado==='ok'||r.estado==='sub');
   const sugerido=histRecs.length>0?histRecs[0].asistentes:0;
@@ -146,7 +147,7 @@ function turboMostrar(){
     turboSetPres('si');
     document.getElementById('tc-obs').value='';
     document.getElementById('tc-suplente-row').style.display='none';
-    const opts=instructores.filter(i=>i.id!==c.inst_id).map(i=>`<option value="${i.id}">${i.nombre}</option>`).join('');
+    const opts=instructoresActivos().filter(i=>i.id!==c.inst_id).map(i=>`<option value="${i.id}">${i.nombre}</option>`).join('');
     document.getElementById('tc-suplente').innerHTML='<option value="">— Seleccionar suplente —</option>'+opts;
   } else {
     document.getElementById('tc-obs').value='';
@@ -390,7 +391,7 @@ function mostrarClaseRec(){
   document.getElementById('rcc-obs').value='';
   // Inicializar capacidad: del último registro histórico si existe, si no del salón
   const histCap=registros.filter(r=>r.inst_id===c.inst_id&&r.clase===c.clase&&r.dia===c.dia&&parseInt(r.cap)>0).sort((a,b)=>(b.fecha||'').localeCompare(a.fecha||''));
-  const capDefault=histCap.length>0?parseInt(histCap[0].cap):getCapClase(c.clase)||20;
+  const capDefault=getSalonDeClase(c.clase)?getCapClase(c.clase):(histCap.length>0?parseInt(histCap[0].cap):getCapClase(c.clase)||20);
   document.getElementById('rcc-cap').value=capDefault;
 
   // Fix: aviso de suplencia planificada específico para esta clase

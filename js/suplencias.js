@@ -6,7 +6,7 @@ function abrirSupPlanner(){
   // Poblar selector de instructores
   const sel = document.getElementById('spl-inst');
   sel.innerHTML = '<option value="">— Seleccionar instructor —</option>' +
-    instructores.map(i=>`<option value="${i.id}">${i.nombre}</option>`).join('');
+    instructoresActivos().map(i=>`<option value="${i.id}">${i.nombre}</option>`).join('');
   // Fechas por defecto: semana actual
   const hoyL = new Date();
   const lun = new Date(hoyL); lun.setDate(hoyL.getDate()-((hoyL.getDay()+6)%7));
@@ -88,7 +88,7 @@ function splCargarClases(){
   fechas.forEach(fStr => {
     const dObj = new Date(fStr+'T12:00:00');
     const diaNom = DIAS[(dObj.getDay()+6)%7];
-    (inst.horario||[]).forEach(slot => {
+    getHorarioEn(inst, fStr).forEach(slot => {
       if(slot.dia !== diaNom) return;
       filas.push({ fecha:fStr, dia:diaNom, hora:slot.hora, clase:slot.clase, inst });
     });

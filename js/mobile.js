@@ -92,7 +92,7 @@ function renderHoy() {
   // Construir lista de clases programadas hoy
   const clasesHoy = [];
   instructores.forEach(inst => {
-    (inst.horario || []).forEach(slot => {
+    getHorarioEn(inst, hoyStr).forEach(slot => {
       if(slot.dia !== diaHoy) return;
       const regs = registros.filter(r =>
         String(r.inst_id)===String(inst.id) && r.fecha === hoyStr &&
@@ -181,7 +181,7 @@ function renderHoy() {
     const estado     = reg ? reg.estado : 'pendiente';
     const asis       = tieneReg ? (parseInt(reg.asistentes) || 0) : '—';
     const afoP       = tieneReg && capN > 0 ? Math.round((parseInt(reg.asistentes)||0) / capN * 100) : null;
-    const salonNombre = (salones.find(s => s.clases && s.clases.some(c => c.toLowerCase() === slot.clase.toLowerCase())) || {}).nombre || '—';
+    const salonNombre = (getSalonDeClase(slot.clase) || {}).nombre || '—';
 
     const estadoChip = {
       ok:      '<span class="chip cok"><svg class="ico ico-ok" viewBox="0 0 20 20"><circle cx="10" cy="10" r="8" stroke="currentColor" stroke-width="1.5" fill="none"/><polyline points="6,10 9,13 14,7" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg> Ok</span>',
@@ -1026,7 +1026,7 @@ function renderMobileHome() {
   // KPIs
   const clasesHoy = [];
   instructores.forEach(inst => {
-    (inst.horario||[]).forEach(slot => {
+    getHorarioEn(inst, hoyStr).forEach(slot => {
       if(slot.dia !== diaHoy) return;
       const reg = registros.filter(r =>
         String(r.inst_id)===String(inst.id) && r.fecha===hoyStr && r.dia===slot.dia && r.hora===slot.hora

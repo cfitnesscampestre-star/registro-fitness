@@ -112,7 +112,7 @@ function seleccionarRol(rol) {
   if (rol === 'instructor') {
     const sel = document.getElementById('login-instructor-sel');
     sel.innerHTML = '<option value="">— Selecciona tu nombre —</option>' +
-      (instructores || []).map(i => `<option value="${i.id}">${i.nombre}</option>`).join('');
+      (instructores || []).filter(i => instActivo(i)).map(i => `<option value="${i.id}">${i.nombre}</option>`).join('');
     instWrap.style.display = 'block';
     passLbl.textContent = 'PIN (4 dígitos)';
     document.getElementById('login-pass').placeholder = 'Ingresa tu PIN...';

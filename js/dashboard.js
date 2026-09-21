@@ -244,8 +244,10 @@ function renderDashboard(){
 // ═══ INSTRUCTORES ═══
 let instFil='';
 function renderInst(){
-  const lista=instFil?instructores.filter(i=>i.nombre.toLowerCase().includes(instFil)):instructores;
+  let lista=instFil?instructores.filter(i=>i.nombre.toLowerCase().includes(instFil)):[...instructores];
+  lista.sort((a,b)=>(instActivo(a)?0:1)-(instActivo(b)?0:1)); // bajas al final
   document.getElementById('tb-inst').innerHTML=lista.map(inst=>{
+    const _baja=!instActivo(inst);
     const s=statsInst(inst);
     const clasesList=(inst.horario||[]).slice(0,3).map(h=>`${h.dia.slice(0,3)} ${h.hora} ${h.clase}`).join(' · ');
     const mas=(inst.horario||[]).length>3?` +${(inst.horario||[]).length-3} más`:'';
@@ -254,8 +256,8 @@ function renderInst(){
     const avatarHtml = inst.foto
       ? `<img src="${inst.foto}" style="width:32px;height:32px;border-radius:50%;object-fit:cover;flex-shrink:0;border:2px solid rgba(94,255,160,.25)">`
       : `<div style="width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,var(--v2),var(--v3));display:flex;align-items:center;justify-content:center;font-family:'Bebas Neue',sans-serif;font-size:.8rem;color:#fff;flex-shrink:0">${inst.nombre.charAt(0)}</div>`;
-    return `<tr>
-      <td><div style="display:flex;align-items:center;gap:8px">${avatarHtml}<div><strong>${inst.nombre}</strong><br><span style="font-size:.68rem;color:var(--txt2)">${inst.esp||''}</span></div></div></td>
+    return `<tr${_baja?' style="opacity:.55"':''}>
+      <td><div style="display:flex;align-items:center;gap:8px">${avatarHtml}<div><strong>${inst.nombre}</strong>${_baja?` <span class="chip cbd" style="font-size:.6rem">Baja ${inst.baja.split('-').reverse().join('/')}</span>`:''}<br><span style="font-size:.68rem;color:var(--txt2)">${inst.esp||''}</span></div></div></td>
       <td><span class="chip ${inst.tipo==='planta'?'cpl':'cho'}">${inst.tipo==='planta'?'Planta':'Honor.'}</span></td>
       <td>${(inst.horario||[]).length}</td>
       <td style="font-size:.72rem;color:var(--txt2);max-width:200px">${clasesList}${mas?`<span style="color:var(--neon)">${mas}</span>`:''}</td>
@@ -280,7 +282,7 @@ function renderCal(){
 
   const mapa={};
   instructores.forEach(inst=>{
-    (inst.horario||[]).forEach(h=>{
+    getHorarioSemana(inst,lunesStr).forEach(h=>{
       const k=`${h.dia}||${h.hora}`;
       if(!mapa[k])mapa[k]=[];
       // Comparar fechas como strings para evitar bugs de zona horaria
