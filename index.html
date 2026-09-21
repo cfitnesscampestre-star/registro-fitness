@@ -2217,6 +2217,12 @@ window._cargarXLSX=function(){
   </div>
 
   <div style="font-size:.7rem;text-transform:uppercase;letter-spacing:1.5px;color:var(--txt2);margin:.8rem 0 .4rem">Horario de Clases</div>
+  <div id="mi-baja-info" style="display:none;font-size:.72rem;color:var(--red2);margin-bottom:.4rem"></div>
+  <div id="mi-vigencia-wrap" style="display:none;margin-bottom:.6rem;padding:.55rem .7rem;background:var(--panel2);border:1px solid var(--border);border-radius:10px">
+    <label style="font-size:.7rem;color:var(--txt2);display:block;margin-bottom:.25rem">Los cambios de horario / baja aplican a partir de:</label>
+    <input type="date" id="mi-vigencia" class="ctrl" style="padding:6px 8px">
+    <div style="font-size:.63rem;color:var(--txt3);margin-top:.3rem">Todo lo registrado antes de esta fecha se conserva tal cual (mismo profesor, misma clase y mismo horario).</div>
+  </div>
   <div id="mi-slots"></div>
 
   <div class="sch-add-row">
@@ -2245,7 +2251,7 @@ window._cargarXLSX=function(){
 
   <input type="hidden" id="mi-id" value="">
   <button class="bsave" onclick="guardarInstructor()"><svg class="ico" viewBox="0 0 20 20"><rect x="3" y="3" width="14" height="14" rx="2" stroke="currentColor" stroke-width="1.4" fill="none"/><rect x="7" y="3" width="6" height="5" rx="0.5" stroke="currentColor" stroke-width="1.3" fill="none"/><rect x="5" y="11" width="10" height="5" rx="1" stroke="currentColor" stroke-width="1.3" fill="none"/><line x1="10" y1="4" x2="10" y2="7.5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg> Guardar</button>
-  <button class="bdel" id="mi-del" style="display:none" onclick="eliminarInstructor()"><svg class="ico" viewBox="0 0 20 20"><polyline points="5,6 15,6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><path d="M8 6V4h4v2" stroke="currentColor" stroke-width="1.4" fill="none" stroke-linecap="round"/><rect x="6" y="6" width="8" height="10" rx="1.5" stroke="currentColor" stroke-width="1.4" fill="none"/><line x1="9" y1="9" x2="9" y2="14" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/><line x1="11" y1="9" x2="11" y2="14" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg> Eliminar Instructor</button>
+  <button class="bdel" id="mi-del" style="display:none" onclick="eliminarInstructor()"><svg class="ico" viewBox="0 0 20 20"><polyline points="5,6 15,6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><path d="M8 6V4h4v2" stroke="currentColor" stroke-width="1.4" fill="none" stroke-linecap="round"/><rect x="6" y="6" width="8" height="10" rx="1.5" stroke="currentColor" stroke-width="1.4" fill="none"/><line x1="9" y1="9" x2="9" y2="14" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/><line x1="11" y1="9" x2="11" y2="14" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg> <span id="mi-del-txt">Eliminar Instructor</span></button>
 </div>
 </div>
 
