@@ -288,6 +288,21 @@ function verificarSesionGuardada() {
   return null;
 }
 
+// ── Cerrar sesión — usado por los botones "Salir" del portal de instructor,
+// del encabezado y del menú del coordinador. Limpia la sesión guardada y
+// recarga para volver limpio a la pantalla de login. ──
+function cerrarSesion() {
+  try {
+    localStorage.removeItem('fc_ses_rol');
+    localStorage.removeItem('fc_ses_ttl');
+    localStorage.removeItem('fc_ses_fp');
+    localStorage.removeItem('fc_ses_inst_id');
+    sessionStorage.removeItem('fc_rol');
+    sessionStorage.removeItem('fc_inst_id');
+  } catch (e) { console.warn('Error limpiando sesión:', e); }
+  location.reload();
+}
+
 function aplicarRol(rol) {
   rolActual = rol;
   document.body.classList.toggle('rol-usuario', rol === 'usuario');
