@@ -1749,6 +1749,7 @@ window._cargarXLSX=function(){
           <option value="sub">⇄ Con Suplente</option>
           <option value="falta">✖ Faltas</option>
         </select>
+        <button class="btn bo" onclick="abrirAuditoria()" title="Buscar registros huérfanos (clases o instructores que ya no existen)"><svg class="ico" viewBox="0 0 20 20"><circle cx="10" cy="10" r="7.5" stroke="currentColor" stroke-width="1.4" fill="none"/><path d="M10 6.5v4M10 13.2v.1" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg> Auditoría</button>
         <button class="btn bo" onclick="limpiarFiltrosHistorial()"><svg class="ico" viewBox="0 0 20 20"><line x1="5" y1="5" x2="15" y2="15" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><line x1="15" y1="5" x2="5" y2="15" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg> Limpiar</button>
       </div>
     </div>
@@ -3169,6 +3170,27 @@ window._cargarXLSX=function(){
 </div>
 </div>
 
+<!-- AUDITORÍA DE REGISTROS HUÉRFANOS -->
+<div class="ov" id="m-auditoria">
+<div class="modal wide">
+  <button class="mcls" onclick="cerrarModal('m-auditoria')"><svg class="ico" viewBox="0 0 20 20"><line x1="5" y1="5" x2="15" y2="15" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><line x1="15" y1="5" x2="5" y2="15" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></button>
+  <div class="mttl"><svg class="ico" viewBox="0 0 20 20"><circle cx="10" cy="10" r="7.5" stroke="currentColor" stroke-width="1.4" fill="none"/><path d="M10 6.5v4M10 13.2v.1" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg> Auditoría de Registros</div>
+  <div style="font-size:.75rem;color:var(--txt2);margin-bottom:.8rem">Detecta clases registradas cuyo instructor ya no existe, o cuya clase ya no está asignada a ningún profesor activo ni a ningún salón. Revisa cada grupo antes de eliminar — la acción no se puede deshacer.</div>
+
+  <div id="aud-resumen" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:.6rem;margin-bottom:1rem"></div>
+
+  <div id="aud-todo-wrap" style="display:none;margin-bottom:.8rem;text-align:right">
+    <button class="btn bd" onclick="eliminarTodosHuerfanos()">🗑 Eliminar todos los huérfanos</button>
+  </div>
+
+  <div style="font-size:.72rem;text-transform:uppercase;letter-spacing:1.5px;color:var(--txt2);margin:.6rem 0 .4rem">Registros de instructores que ya no existen</div>
+  <div id="aud-inst-body"></div>
+
+  <div style="font-size:.72rem;text-transform:uppercase;letter-spacing:1.5px;color:var(--txt2);margin:1rem 0 .4rem">Clases sin profesor ni salón asignado</div>
+  <div id="aud-clase-body"></div>
+</div>
+</div>
+
 <!-- PRINT MODAL -->
 <div class="ov" id="m-print">
 <div class="modal wide" style="max-height:95vh;width:760px">
@@ -3203,6 +3225,7 @@ window._cargarXLSX=function(){
 <script defer src="js/suplencias.js"></script>
 <script defer src="js/reportes.js"></script>
 <script defer src="js/historial.js"></script>
+<script defer src="js/auditoria.js"></script>
 <script defer src="js/firmas.js"></script>
 <script defer src="js/app.js"></script>
 <script defer src="js/auth.js"></script>
