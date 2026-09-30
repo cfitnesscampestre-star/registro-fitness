@@ -1750,6 +1750,8 @@ window._cargarXLSX=function(){
           <option value="falta">✖ Faltas</option>
         </select>
         <button class="btn bo" onclick="abrirAuditoria()" title="Buscar registros huérfanos (clases o instructores que ya no existen)"><svg class="ico" viewBox="0 0 20 20"><circle cx="10" cy="10" r="7.5" stroke="currentColor" stroke-width="1.4" fill="none"/><path d="M10 6.5v4M10 13.2v.1" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg> Auditoría</button>
+        <button class="btn bo" onclick="importarEstimadosAbrir()" title="Agregar registros estimados desde un archivo JSON (no modifica los existentes)">⬆ Importar estimados</button>
+        <button class="btn bo" onclick="quitarEstimados()" title="Quitar en bloque los registros marcados como estimados">🗑 Quitar estimados</button>
         <button class="btn bo" onclick="limpiarFiltrosHistorial()"><svg class="ico" viewBox="0 0 20 20"><line x1="5" y1="5" x2="15" y2="15" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><line x1="15" y1="5" x2="5" y2="15" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg> Limpiar</button>
       </div>
     </div>
@@ -3226,6 +3228,7 @@ window._cargarXLSX=function(){
 <script defer src="js/reportes.js"></script>
 <script defer src="js/historial.js"></script>
 <script defer src="js/auditoria.js"></script>
+<script defer src="js/importar-estimados.js"></script>
 <script defer src="js/firmas.js"></script>
 <script defer src="js/app.js"></script>
 <script defer src="js/auth.js"></script>
