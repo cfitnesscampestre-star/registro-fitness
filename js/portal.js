@@ -64,6 +64,9 @@ function abrirPortalInstructorLocal() {
   // Iniciar polling para detectar cuando coordinador publica hoja
   if(typeof instIniciarPoll === 'function') instIniciarPoll();
 
+  // Mantenimiento: arranca en segundo plano (contador rojo de la pestaña)
+  if(typeof mantIniciar === 'function') { try { mantIniciar(); } catch(e) { console.warn('[Mant]', e); } }
+
   // Renderizar tab inicial
   instSwitchTab('hoy');
 }
@@ -90,6 +93,7 @@ function instSwitchTab(tab) {
   if(tab === 'hoy')     instRenderHoy();
   if(tab === 'reporte') instRenderReporte();
   if(tab === 'firma')   instRenderFirmaTab();
+  if(tab === 'mant' && typeof mantRenderTab === 'function') mantRenderTab();
 }
 
 // ── Cambio de periodo en reporte ──────────────
