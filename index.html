@@ -289,6 +289,11 @@ window._cargarXLSX=function(){
       <svg class="ico tab-ico" viewBox="0 0 20 20" style="width:.9em;height:.9em"><circle cx="10" cy="10" r="7" stroke="currentColor" stroke-width="1.4" fill="none"/><polyline points="10,6 10,10 13,12" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
       Mis Clases
     </button>
+    <button class="inst-tab-btn" onclick="instSwitchTab('mant')" data-t="mant" id="inst-tabn-mant" style="position:relative">
+      <svg class="ico tab-ico" viewBox="0 0 20 20" style="width:.9em;height:.9em" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M13.5 3.5a3.5 3.5 0 0 0-3.2 4.8L3.8 14.8a1.4 1.4 0 0 0 2 2l6.5-6.5a3.5 3.5 0 0 0 4.8-3.2l-2.2 2.2-1.9-.4-.4-1.9z"/></svg>
+      Mantenimiento
+      <span id="inst-mant-badge" style="display:none;position:absolute;top:4px;right:4px;min-width:16px;height:16px;border-radius:8px;background:var(--red2);color:#fff;font-size:.52rem;font-weight:700;align-items:center;justify-content:center;padding:0 4px;line-height:1"></span>
+    </button>
     <button class="inst-tab-btn" onclick="instSwitchTab('reporte')" data-t="reporte">
       <svg class="ico tab-ico" viewBox="0 0 20 20" style="width:.9em;height:.9em"><rect x="3" y="12" width="3" height="5" rx="1" stroke="currentColor" stroke-width="1.4" fill="none"/><rect x="8.5" y="8" width="3" height="9" rx="1" stroke="currentColor" stroke-width="1.4" fill="none"/><rect x="14" y="4" width="3" height="13" rx="1" stroke="currentColor" stroke-width="1.4" fill="none"/></svg>
       Mi Reporte
@@ -302,12 +307,10 @@ window._cargarXLSX=function(){
       Suplencias
       <span id="inst-sup-badge" style="display:none;position:absolute;top:4px;right:4px;min-width:16px;height:16px;border-radius:8px;background:var(--red2);color:#fff;font-size:.52rem;font-weight:700;align-items:center;justify-content:center;padding:0 4px;line-height:1"></span>
     </button>
-    <button class="inst-tab-btn" onclick="instSwitchTab('mant')" data-t="mant" id="inst-tabn-mant" style="position:relative">
-      <svg class="ico tab-ico" viewBox="0 0 20 20" style="width:.9em;height:.9em" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M13.5 3.5a3.5 3.5 0 0 0-3.2 4.8L3.8 14.8a1.4 1.4 0 0 0 2 2l6.5-6.5a3.5 3.5 0 0 0 4.8-3.2l-2.2 2.2-1.9-.4-.4-1.9z"/></svg>
-      Mantenimiento
-      <span id="inst-mant-badge" style="display:none;position:absolute;top:4px;right:4px;min-width:16px;height:16px;border-radius:8px;background:var(--red2);color:#fff;font-size:.52rem;font-weight:700;align-items:center;justify-content:center;padding:0 4px;line-height:1"></span>
-    </button>
   </div>
+
+  <!-- Avisos del portal: hoja de firmas / suplencias y equipos en mantenimiento -->
+  <div id="inst-alertas"></div>
 
   <!-- Contenido del portal (scrollable) -->
   <div style="flex:1;overflow-y:auto;padding:1rem;max-width:900px;width:100%;margin:0 auto;box-sizing:border-box" id="inst-content">
@@ -3241,6 +3244,7 @@ window._cargarXLSX=function(){
 <script defer src="js/auditoria.js"></script>
 <script defer src="js/importar-estimados.js"></script>
 <script defer src="js/mantenimiento.js"></script>
+<script defer src="js/alertas-portal.js?v=1"></script>
 <script defer src="js/firmas.js"></script>
 <script defer src="js/app.js"></script>
 <script defer src="js/auth.js"></script>
