@@ -301,6 +301,11 @@ window._cargarXLSX=function(){
       Suplencias
       <span id="inst-sup-badge" style="display:none;position:absolute;top:4px;right:4px;min-width:16px;height:16px;border-radius:8px;background:var(--red2);color:#fff;font-size:.52rem;font-weight:700;align-items:center;justify-content:center;padding:0 4px;line-height:1"></span>
     </button>
+    <button class="inst-tab-btn" onclick="instSwitchTab('mant')" data-t="mant" id="inst-tabn-mant" style="position:relative">
+      <svg class="ico tab-ico" viewBox="0 0 20 20" style="width:.9em;height:.9em" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M13.5 3.5a3.5 3.5 0 0 0-3.2 4.8L3.8 14.8a1.4 1.4 0 0 0 2 2l6.5-6.5a3.5 3.5 0 0 0 4.8-3.2l-2.2 2.2-1.9-.4-.4-1.9z"/></svg>
+      Mantenimiento
+      <span id="inst-mant-badge" style="display:none;position:absolute;top:4px;right:4px;min-width:16px;height:16px;border-radius:8px;background:var(--red2);color:#fff;font-size:.52rem;font-weight:700;align-items:center;justify-content:center;padding:0 4px;line-height:1"></span>
+    </button>
   </div>
 
   <!-- Contenido del portal (scrollable) -->
@@ -475,6 +480,11 @@ window._cargarXLSX=function(){
         </button>
       </div>
     </div><!-- /inst-panel-suplencias -->
+
+    <!-- ── TAB: Mantenimiento ── -->
+    <div id="inst-panel-mant" class="inst-panel" style="display:none">
+      <div id="mant-root"></div>
+    </div>
 
   </div><!-- /inst-content -->
 </div><!-- /instructor-screen -->
@@ -3229,6 +3239,7 @@ window._cargarXLSX=function(){
 <script defer src="js/historial.js"></script>
 <script defer src="js/auditoria.js"></script>
 <script defer src="js/importar-estimados.js"></script>
+<script defer src="js/mantenimiento.js"></script>
 <script defer src="js/firmas.js"></script>
 <script defer src="js/app.js"></script>
 <script defer src="js/auth.js"></script>
