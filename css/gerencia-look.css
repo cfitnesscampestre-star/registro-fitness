@@ -1,0 +1,339 @@
+/* =====================================================================
+   gerencia-look.css — misma imagen que Control Gerencia de Deportes.
+   SOLO ESTILO: no cambia HTML ni JS ni el funcionamiento de Fitness.
+   Se carga al final de todo (después de contrast.css), por eso gana.
+   Para volver al aspecto anterior basta quitar la línea
+   <link rel="stylesheet" href="css/gerencia-look.css"> de index.html.
+
+   · Tema claro (el de siempre): paleta, tipografía, tarjetas, menú
+     lateral, encabezado y botones iguales a Gerencia.
+   · Tema oscuro (opcional, desde el menú de Coordinación): no se toca,
+     solo comparte tipografía y pantalla de acceso.
+   ===================================================================== */
+
+/* ---------- 1. Paleta de Gerencia (tema claro) ---------- */
+html.tema-claro{
+  --b1:#5fb336; --b2:#0f7a5a; --b3:#0a6fbd; --b4:#2aaed6;
+  --grad:linear-gradient(135deg,#2f9a3f 0%,#0f7a5a 42%,#0a62b0 100%);
+  --surf:linear-gradient(160deg,#00251f 0%,#014d38 24%,#016a55 44%,#016a8c 64%,#0269a8 82%,#033e78 100%);
+  --sb:rgba(15,122,90,.30); --sb2:rgba(1,60,70,.34);
+  --tint1:rgba(95,179,54,.13); --tint2:rgba(42,174,214,.15);
+  --line:#dde7e6; --line-2:#c9d8d7;
+  --sh:0 1px 2px rgba(8,34,40,.05),0 10px 28px rgba(8,34,40,.08);
+  --f:'Outfit',system-ui,-apple-system,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;
+
+  /* tokens propios de Fitness, remapeados a la paleta de Gerencia */
+  --bg:#edf3f2; --bg2:#e3edec;
+  --panel:#ffffff; --panel2:#f4f8f7;
+  --border:#dde7e6; --border2:#e8efee;
+  --verde:#0f7a5a; --v2:#0f7a5a; --v3:#3aa06e; --neon:#0f7a5a; --neon2:#0a4d3a;
+  --gold:#a86a00; --gold2:#d98a00; --red:#c62d22; --red2:#d63b2f; --blue:#0a6fbd;
+  --txt:#10222b; --txt2:#3f5560; --txt3:#748792; --w:#ffffff;
+  --shadow:0 1px 2px rgba(8,34,40,.05),0 10px 28px rgba(8,34,40,.08);
+  --shadow-sm:0 1px 2px rgba(8,34,40,.05),0 4px 12px rgba(8,34,40,.06);
+}
+
+/* ---------- 2. Tipografía: una sola familia (Outfit), como Gerencia ---------- */
+html :where(body,button,input,select,textarea,div,span,td,th,label,h1,h2,h3,h4,p,a,small,b,strong,li){
+  font-family:'Outfit',system-ui,-apple-system,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif!important;
+}
+html.tema-claro body{font-variant-numeric:tabular-nums;-webkit-font-smoothing:antialiased}
+html.tema-claro :is(.htit,.pttl,.mttl,.login-title,.login-btn,.kval,.vtit,.vtitle,h1,h2,h3){
+  letter-spacing:-.01em!important;text-transform:none!important;font-weight:700!important;
+}
+
+/* ---------- 3. Fondo de página: textura clara + brillos suaves ---------- */
+html.tema-claro body{
+  background:
+    url(../img/textura-clara.svg) 0 0/352px 352px,
+    radial-gradient(720px 420px at -8% -6%,var(--tint1),transparent 62%),
+    radial-gradient(760px 480px at 108% 104%,var(--tint2),transparent 62%),
+    var(--bg)!important;
+  background-attachment:fixed!important;
+  color:var(--txt);
+}
+
+/* ---------- 4. Encabezado: superficie de marca (degradado + textura) ---------- */
+html.tema-claro #hdr{
+  background:url(../img/textura.svg) 0 0/352px 352px,
+    radial-gradient(420px 200px at 0% 0%,rgba(95,179,54,.28),transparent 70%),
+    var(--surf)!important;
+  border-bottom:0!important;
+  box-shadow:0 8px 24px var(--sb2)!important;
+  color:#fff;
+}
+html.tema-claro #hdr .htit,
+html.tema-claro #hdr .hsub{color:#fff!important}
+html.tema-claro #hdr .hsub{opacity:.82;text-shadow:none!important}
+html.tema-claro #hdr #sync-indicator{color:rgba(255,255,255,.88)!important;opacity:1!important}
+html.tema-claro #hdr img[alt="Club Campestre"]{
+  background:#fff!important;border-radius:10px!important;padding:3px 7px!important;
+  box-shadow:0 4px 12px rgba(0,30,30,.35);
+}
+/* botones del encabezado: vidrio sobre fondo oscuro */
+html.tema-claro #hdr .btn{
+  background:rgba(255,255,255,.16)!important;color:#fff!important;
+  border:1px solid rgba(255,255,255,.34)!important;box-shadow:none!important;
+  border-radius:11px!important;font-weight:600!important;
+}
+html.tema-claro #hdr .btn:hover{background:rgba(255,255,255,.28)!important}
+html.tema-claro #hdr .btn.bg{background:#fff!important;color:#0a4d3a!important;border-color:#fff!important;box-shadow:0 6px 16px rgba(0,0,0,.22)!important}
+html.tema-claro #hdr .btn svg{color:inherit}
+html.tema-claro #hdr .mob-hdr-menu{border-top-color:rgba(255,255,255,.22)!important}
+/* menú desplegable de Coordinación: tarjeta blanca */
+html.tema-claro #coord-menu-dropdown{
+  background:#fff!important;border:1px solid var(--line)!important;border-radius:16px!important;
+  box-shadow:0 18px 44px rgba(8,34,40,.28)!important;
+}
+html.tema-claro #coord-menu-dropdown button{color:var(--txt)!important}
+html.tema-claro #coord-menu-dropdown button:hover{background:#e3f4ec!important}
+html.tema-claro #coord-menu-dropdown > div{color:var(--txt3)!important}
+
+/* ---------- 5. Menú lateral: igual al de Gerencia ---------- */
+html.tema-claro #sidebar{
+  background:url(../img/textura.svg) 0 0/352px 352px,
+    radial-gradient(300px 260px at 0% 0%,rgba(95,179,54,.28),transparent 70%),
+    var(--surf)!important;
+  border-right:0!important;
+  box-shadow:6px 0 24px var(--sb2)!important;
+  color:#e6f1ef;
+}
+html.tema-claro #sidebar .sb-item{
+  color:#d3e6e3!important;font-weight:500;border-radius:12px;margin:2px 10px;
+}
+html.tema-claro #sidebar .sb-item:hover{background:rgba(255,255,255,.1)!important;box-shadow:none!important;color:#fff!important}
+html.tema-claro #sidebar .sb-item.on{
+  background:linear-gradient(90deg,rgba(95,179,54,.55),rgba(42,174,214,.38))!important;
+  color:#fff!important;font-weight:600;box-shadow:0 6px 16px rgba(0,0,0,.22)!important;
+}
+html.tema-claro #sidebar .sb-item.on::before{display:none!important}
+html.tema-claro #sidebar .sb-section-lbl{color:#8fb7b3!important;letter-spacing:.14em!important;font-weight:600!important}
+html.tema-claro #sidebar .sb-divider{background:rgba(255,255,255,.16)!important;border-color:rgba(255,255,255,.16)!important}
+html.tema-claro #sidebar .sb-collapse-btn,
+html.tema-claro #sidebar .sb-collapse-lbl{color:#cfe3e0!important}
+html.tema-claro #sidebar .sb-sub,
+html.tema-claro #sidebar .snav-item{color:#cfe3e0!important}
+html.tema-claro #sidebar .snav-item:hover{background:rgba(255,255,255,.1)!important;color:#fff!important}
+html.tema-claro #sidebar .snav-item.on{background:rgba(255,255,255,.16)!important;color:#fff!important}
+
+/* ---------- 6. Tarjetas y paneles ---------- */
+html.tema-claro .panel,
+html.tema-claro .rep-card,
+html.tema-claro .mob-glass-card{
+  background:#fff!important;border:1px solid var(--line)!important;border-radius:18px!important;
+  box-shadow:var(--sh)!important;backdrop-filter:none!important;-webkit-backdrop-filter:none!important;
+}
+html.tema-claro .phdr{background:transparent!important;border-bottom:1px solid var(--line)!important}
+html.tema-claro .pttl{color:var(--txt)!important;font-size:1.02rem!important}
+
+/* indicadores (KPI): franja superior de color, número grande */
+html.tema-claro .kpi{
+  background:#fff!important;border:1px solid var(--line)!important;border-radius:18px!important;
+  box-shadow:var(--sh)!important;backdrop-filter:none!important;-webkit-backdrop-filter:none!important;
+  border-top:4px solid var(--b2)!important;
+}
+html.tema-claro .kpi::after{display:none!important}
+html.tema-claro .kpi.gd{border-top-color:var(--b4)!important}
+html.tema-claro .kpi.rd{border-top-color:var(--bad,#d63b2f)!important}
+html.tema-claro .kpi.bl{border-top-color:var(--b3)!important}
+html.tema-claro .kpi.nn{border-top-color:var(--b1)!important}
+html.tema-claro .klbl{color:var(--txt2)!important;letter-spacing:.09em!important;font-weight:600!important;text-transform:uppercase}
+html.tema-claro .kval{color:var(--txt)!important;font-weight:700!important;letter-spacing:-.02em!important}
+html.tema-claro .ksub,html.tema-claro .kpi-meta{color:var(--txt3)!important}
+
+/* ---------- 7. Botones ---------- */
+html.tema-claro .btn{border-radius:12px!important;font-weight:600!important}
+html.tema-claro #layout-wrap .btn.bg,
+html.tema-claro .btn.bsave,
+html.tema-claro .modal .btn.bg{
+  background:var(--grad)!important;color:#fff!important;border:0!important;
+  box-shadow:0 6px 16px var(--sb)!important;
+}
+html.tema-claro #layout-wrap .btn.bg:hover,
+html.tema-claro .btn.bsave:hover{filter:brightness(1.06)}
+html.tema-claro #layout-wrap .btn.bo,
+html.tema-claro .modal .btn.bo{background:#fff!important;border:1.5px solid var(--line-2)!important;color:var(--txt)!important}
+html.tema-claro #layout-wrap .btn.bo:hover,
+html.tema-claro .modal .btn.bo:hover{background:#f4f8f7!important}
+
+/* ---------- 8. Campos de formulario ---------- */
+html.tema-claro .ctrl,
+html.tema-claro input:not([type=checkbox]):not([type=radio]):not([type=range]):not([type=color]),
+html.tema-claro select,
+html.tema-claro textarea{
+  background:#fff!important;border:1.5px solid var(--line-2)!important;border-radius:12px!important;color:var(--txt)!important;
+}
+html.tema-claro .ctrl:focus,
+html.tema-claro input:focus,
+html.tema-claro select:focus,
+html.tema-claro textarea:focus{border-color:var(--b2)!important;box-shadow:0 0 0 3px rgba(15,122,90,.18)!important;outline:none}
+
+/* ---------- 9. Tablas ---------- */
+html.tema-claro th{
+  background:#f4f8f7!important;color:var(--txt2)!important;font-size:.72rem!important;
+  letter-spacing:.08em!important;text-transform:uppercase;font-weight:600!important;border-bottom:1.5px solid var(--line)!important;
+}
+html.tema-claro td{border-bottom:1px solid var(--line)!important;color:var(--txt)}
+
+/* ---------- 10. Pestañas ---------- */
+html.tema-claro #tabs{background:rgba(255,255,255,.7)!important;border-bottom:1px solid var(--line)!important}
+html.tema-claro .tab{color:var(--txt2)!important;font-weight:600!important}
+html.tema-claro .tab.on{color:var(--b2)!important;border-bottom-color:var(--b2)!important}
+
+/* ---------- 11. Ventanas emergentes ---------- */
+html.tema-claro .ov{background:rgba(15,27,51,.58)!important;backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px)}
+html.tema-claro .modal{
+  background:#fff!important;border:1px solid var(--line)!important;border-radius:26px!important;
+  box-shadow:0 -12px 44px rgba(0,0,0,.28)!important;
+}
+html.tema-claro .mttl{color:var(--txt)!important;font-size:1.3rem!important}
+html.tema-claro .mcls{color:var(--txt2)!important}
+
+/* ---------- 12. Avisos ---------- */
+html.tema-claro .toast-ok{background:#dcf5ee!important;border-color:#0e9f7e!important;color:#087a60!important}
+html.tema-claro .toast-err{background:#fde7e4!important;border-color:#d63b2f!important;color:#b3281e!important}
+html.tema-claro .toast-warn{background:#fdf0d5!important;border-color:#d98a00!important;color:#8a5a00!important}
+html.tema-claro .toast-info{background:#e0eef9!important;border-color:#0a6fbd!important;color:#175a83!important}
+
+/* ---------- 13. Vista de celular ---------- */
+/* tarjeta principal "Iniciar recorrido": superficie de marca con textura */
+html.tema-claro .mob-hero-rec{
+  background:url(../img/textura.svg) 0 0/352px 352px,
+    radial-gradient(360px 200px at 100% 0%,rgba(255,255,255,.2),transparent 60%),
+    var(--surf)!important;
+  border-radius:24px!important;box-shadow:0 16px 36px var(--sb2)!important;overflow:hidden;
+}
+html.tema-claro .mob-hero-bg,
+html.tema-claro .mob-hero-bg-overlay{background:transparent!important}
+html.tema-claro .mob-hero-bg::before{opacity:.35}
+html.tema-claro .mob-hero-cta{background:#fff!important;color:#0a4d3a!important;font-weight:700!important;border-radius:14px!important;box-shadow:0 8px 20px rgba(0,0,0,.22)!important}
+/* tarjeta de agenda: blanca, con franja de color */
+html.tema-claro .mob-agenda-card{
+  background:#fff!important;border:1px solid var(--line)!important;border-left:5px solid var(--b3)!important;
+  border-radius:18px!important;box-shadow:var(--sh)!important;
+}
+html.tema-claro .mob-agenda-card::before{display:none!important}
+html.tema-claro .mob-ag-title{color:var(--b3)!important;font-weight:700!important;letter-spacing:.06em!important}
+html.tema-claro .mob-ag-sub{color:var(--txt3)!important}
+html.tema-claro .mob-ag-icon{background:var(--g-l,#e3f4ec)!important;border-color:transparent!important;color:var(--b2)!important}
+/* botones circulares de acciones rápidas */
+html.tema-claro .mob-radial-btn.primary .mob-radial-circle{
+  background:var(--grad)!important;border:0!important;box-shadow:0 10px 24px var(--sb)!important;color:#fff!important;
+}
+html.tema-claro .mob-radial-btn:not(.primary) .mob-radial-circle{
+  background:#fff!important;border:1.5px solid var(--line-2)!important;box-shadow:var(--sh-sm,0 4px 12px rgba(8,34,40,.08))!important;color:var(--b2)!important;
+}
+html.tema-claro .mob-radial-lbl{color:var(--txt2)!important;font-weight:600!important}
+html.tema-claro .mob-sec-lbl.pildora{background:#e3f4ec!important;color:var(--b2)!important;border-color:transparent!important}
+html.tema-claro .mob-dot.on{background:var(--b2)!important}
+html.tema-claro .mob-gc-date-today{background:var(--grad)!important}
+html.tema-claro .mob-mic-btn{background:#e3f4ec!important;color:var(--b2)!important;border-color:transparent!important}
+
+/* ---------- 14. Pantalla de acceso (login): como la de Gerencia ---------- */
+#login-screen{
+  background:url(../img/textura.svg) 0 0/352px 352px,var(--surf)!important;
+  background-color:#014d38!important;
+}
+#login-screen::before,#login-screen::after{content:""!important;position:absolute!important;border-radius:50%!important;pointer-events:none!important;inset:auto!important}
+#login-screen::before{width:560px!important;height:560px!important;left:-190px!important;top:-170px!important;background:radial-gradient(circle,rgba(150,215,90,.26),transparent 66%)!important}
+#login-screen::after{width:620px!important;height:620px!important;right:-230px!important;bottom:-230px!important;background:radial-gradient(circle,rgba(70,190,235,.38),transparent 66%)!important}
+#login-screen .login-box{
+  background:rgba(255,255,255,.92)!important;border:1px solid rgba(255,255,255,.75)!important;
+  border-radius:28px!important;box-shadow:0 30px 70px rgba(0,25,30,.5)!important;
+  backdrop-filter:blur(18px) saturate(1.2)!important;-webkit-backdrop-filter:blur(18px) saturate(1.2)!important;
+  width:440px!important;max-width:100%!important;
+}
+#login-screen .login-box::before,#login-screen .login-box::after{display:none!important}
+#login-screen .login-logo-icon{
+  background:var(--grad)!important;border:0!important;border-radius:18px!important;
+  width:64px!important;height:64px!important;box-shadow:0 10px 24px rgba(0,60,50,.38)!important;
+}
+#login-screen .login-logo-icon img{width:64px!important;height:64px!important;border-radius:18px!important}
+#login-screen .login-title{
+  font-size:clamp(22px,6.6vw,28px)!important;color:var(--txt,#10222b)!important;letter-spacing:-.01em!important;
+  text-shadow:none!important;font-weight:700!important;line-height:1.1!important;
+}
+#login-screen .login-sub{
+  font-size:11px!important;font-weight:600!important;letter-spacing:.1em!important;color:#0a6fbd!important;
+  text-shadow:none!important;order:-1;margin:0 0 3px!important;
+}
+#login-screen .login-logo > div:last-child{display:flex!important;flex-direction:column!important}
+#login-screen .login-perfil-lbl,
+#login-screen .login-field label{
+  color:#3f5560!important;font-size:13px!important;font-weight:600!important;letter-spacing:0!important;
+  text-transform:none!important;text-shadow:none!important;
+}
+#login-screen .login-role-btns{background:#e3edec!important;border:0!important;box-shadow:none!important;border-radius:16px!important;padding:5px!important}
+#login-screen .role-btn{border:2px solid transparent!important;border-radius:12px!important}
+#login-screen .role-btn:hover{background:rgba(255,255,255,.55)!important}
+#login-screen .role-btn.selected{
+  background:#fff!important;border-color:#0f7a5a!important;box-shadow:0 2px 10px rgba(16,26,51,.16)!important;
+}
+#login-screen .role-btn .role-icon{color:#3f5560!important}
+#login-screen .role-btn.selected .role-icon{color:#0f7a5a!important}
+#login-screen .role-btn .role-name{color:#10222b!important;font-weight:700!important;letter-spacing:0!important;text-shadow:none!important;font-size:.72rem!important}
+#login-screen .role-btn.selected .role-name{color:#0a4d3a!important}
+#login-screen .role-btn .role-desc,
+#login-screen .role-btn.selected .role-desc{color:#748792!important;text-shadow:none!important}
+#login-screen .login-input,
+#login-screen .login-select,
+#login-screen .login-field input,
+#login-screen .login-field select{
+  background:#fff!important;border:1.5px solid #c9d8d7!important;border-radius:14px!important;
+  padding:14px 16px!important;font-size:16px!important;box-shadow:none!important;color:#10222b!important;
+}
+#login-screen .login-field input:focus,
+#login-screen .login-input:focus{border-color:#0f7a5a!important;box-shadow:0 0 0 3px rgba(15,122,90,.18)!important;background:#fff!important}
+#login-screen .login-btn{
+  background:var(--grad,linear-gradient(135deg,#2f9a3f,#0f7a5a 42%,#0a62b0))!important;border:0!important;border-radius:14px!important;
+  font-size:17px!important;font-weight:700!important;letter-spacing:.02em!important;padding:15px 18px!important;
+  box-shadow:0 10px 24px rgba(15,122,90,.30)!important;
+}
+#login-screen .login-btn:hover{filter:brightness(1.06);background:var(--grad,linear-gradient(135deg,#2f9a3f,#0f7a5a 42%,#0a62b0))!important}
+#login-screen .login-info{color:#748792!important;text-shadow:none!important}
+#login-screen .login-error{background:#fde7e4!important;color:#b3281e!important;border-radius:12px!important}
+
+@media (max-width:640px){
+  #login-screen{background:url(../img/textura.svg) 0 0/352px 352px,var(--surf)!important;background-color:#014d38!important}
+  #login-screen .login-box{background:rgba(255,255,255,.92)!important;border:1px solid rgba(255,255,255,.75)!important;box-shadow:0 30px 70px rgba(0,25,30,.5)!important}
+  #login-screen .login-input,#login-screen .login-select,
+  #login-screen .login-field input,#login-screen .login-field select{background:#fff!important;border:1.5px solid #c9d8d7!important}
+  #login-screen .login-box::before,#login-screen .login-box::after{display:none!important}
+  #login-screen .role-btn.selected{box-shadow:0 2px 10px rgba(16,26,51,.16)!important}
+}
+
+/* ---------- 15. Ajustes finos ---------- */
+/* campos que viven dentro de otra pieza (buscador y fecha del celular): sin borde propio */
+html.tema-claro .mob-search-input,
+html.tema-claro .mob-date-input{
+  background:transparent!important;border:0!important;box-shadow:none!important;border-radius:0!important;
+}
+html.tema-claro .mob-search-input:focus,
+html.tema-claro .mob-date-input:focus{box-shadow:none!important}
+/* título de la fecha (escritorio): grande, oscuro y en Outfit como "Control Gerencia" */
+html.tema-claro #hoy-fecha-lbl{
+  color:var(--txt)!important;font-size:1.6rem!important;font-weight:700!important;
+  letter-spacing:-.02em!important;text-transform:none!important;line-height:1.1;
+}
+html.tema-claro #hoy-dia-lbl{color:var(--txt3)!important}
+/* botón "Hoy" de las fechas */
+html.tema-claro #hoy-btn-hoy,
+html.tema-claro #mob-btn-hoy{
+  background:#e3f4ec!important;color:#0a4d3a!important;border:1px solid transparent!important;font-weight:700!important;opacity:1!important;
+}
+html.tema-claro #mob-btn-hoy{background:var(--grad)!important;color:#fff!important}
+/* etiqueta del PIN en el acceso: sin mayúsculas forzadas */
+#login-screen label,#login-screen .login-field label{text-transform:none!important;letter-spacing:0!important}
+/* botón Guardar y etiquetas de formularios como en Gerencia */
+html.tema-claro .bsave,
+html.tema-claro button.bsave{
+  background:var(--grad)!important;color:#fff!important;border:0!important;border-radius:14px!important;
+  box-shadow:0 10px 24px var(--sb)!important;font-weight:700!important;
+}
+html.tema-claro .fg label,
+html.tema-claro .modal label{
+  color:var(--txt2)!important;font-size:.8rem!important;font-weight:600!important;
+  letter-spacing:0!important;text-transform:none!important;
+}
+html.tema-claro .modal select,
+html.tema-claro .modal .ctrl{background:#fff!important}
