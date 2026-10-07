@@ -56,7 +56,7 @@ function abrirPortalInstructorLocal() {
 
   // Fecha de hoy en el datepicker
   const dp = document.getElementById('inst-date-picker');
-  if(dp) dp.value = fechaLocalStr(new Date());
+  if(dp) dp.value = (typeof instCapHoy === 'function') ? instCapHoy() : fechaLocalStr(new Date());
 
   // Cargar hoja de firmas activa si existe
   instCargarHojaFirmas();
@@ -120,11 +120,14 @@ function instRenderHoy() {
   if(!inst) return;
 
   const dp = document.getElementById('inst-date-picker');
-  const fechaStr = dp ? dp.value : fechaLocalStr(new Date());
+  // "Hoy" sale del reloj del servidor (ver captura-prof.js) para que el teléfono
+  // no pueda adelantar/atrasar el día en el que se permite capturar.
+  const hoyReal  = (typeof instCapHoy === 'function') ? instCapHoy() : fechaLocalStr(new Date());
+  const fechaStr = dp && dp.value ? dp.value : hoyReal;
   const fecha = new Date(fechaStr + 'T12:00:00');
   const diaIdx = (fecha.getDay() + 6) % 7; // 0=Lun
   const diaStr = DIAS[diaIdx];
-  const esHoy  = fechaStr === fechaLocalStr(new Date());
+  const esHoy  = fechaStr === hoyReal;
 
   const tituloEl = document.getElementById('inst-hoy-titulo');
   const fechaEl  = document.getElementById('inst-hoy-fecha');
@@ -178,7 +181,10 @@ function instRenderHoy() {
     return;
   }
 
-  listaEl.innerHTML = clasesData.map(({ slot, reg, capN }) => {
+  // Contexto para la tarjeta de captura (captura-prof.js)
+  window._instHoyCtx = { fecha: fechaStr, items: clasesData };
+
+  listaEl.innerHTML = clasesData.map(({ slot, reg, capN }, idx) => {
     const tieneReg = !!reg;
     const estado   = reg ? reg.estado : 'pendiente';
     const asis     = tieneReg ? (parseInt(reg.asistentes)||0) : null;
@@ -211,7 +217,9 @@ function instRenderHoy() {
       : '';
 
     return `
-      <div style="background:${est.bg};border:1px solid ${est.border};border-radius:14px;padding:.9rem 1rem;margin-bottom:.5rem;transition:all .15s">
+      <div class="inst-cap-card" role="button" tabindex="0" onclick="instCapAbrir(${idx})"
+           onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();instCapAbrir(${idx})}"
+           style="background:${est.bg};border:1px solid ${est.border};border-radius:14px;padding:.9rem 1rem;margin-bottom:.5rem;transition:all .15s">
         <div style="display:flex;align-items:flex-start;gap:.8rem">
           <div style="min-width:44px;text-align:center">
             <div style="font-family:'DM Mono',monospace;font-size:.8rem;color:var(--gold2);font-weight:700">${slot.hora}</div>
@@ -225,6 +233,7 @@ function instRenderHoy() {
             ${suplementoRow}
             ${aforoBar}
             ${reg && reg.obs ? `<div style="font-size:.65rem;color:var(--txt3);margin-top:4px;font-style:italic">${reg.obs}</div>` : ''}
+            ${typeof instCapBadge === 'function' ? instCapBadge(reg, fechaStr, slot) : ''}
           </div>
         </div>
       </div>`;

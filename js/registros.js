@@ -63,7 +63,7 @@ function guardarClase(){
     dia:diaVal, clase:claseNombre, hora:horaVal,
     asistentes:asisVal, cap:capInput,
     dur:parseInt(document.getElementById('rc-dur').value)||60,
-    estado:est, fecha:fechaVal, tipo:'clase', suplente_id:supId, suplente_nombre:supNombre,
+    estado:est, fecha:fechaVal, tipo:'clase', captura_por:'coord', suplente_id:supId, suplente_nombre:supNombre,
     motivo_suplencia:motivoSup,
     motivo_falta:motivoFalta,
     updatedAt:Date.now()});

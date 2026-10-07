@@ -527,6 +527,7 @@ function guardarRecorrido(){
       ex.suplente_nombre=(nuevoEst==='sub'&&!item.suplente_id)?(item.suplente_nombre||null):null;
       ex.motivo_suplencia=(nuevoEst==='sub'||nuevoEst==='falta')?(item.motivo_suplencia||null):null;
       ex.cap=cap;
+      ex.captura_por='coord';   // el número principal ahora es el de coordinación
       ex.updatedAt=Date.now();
     } else {
       const maxId=registros.reduce((m,r)=>Math.max(m,parseInt(r.id)||0),0);
@@ -539,6 +540,7 @@ function guardarRecorrido(){
         estado:nuevoEst,
         fecha:recActual.fecha,
         tipo:'recorrido',
+        captura_por:'coord',
         suplente_id:item.suplente_id||null,
         suplente_nombre:(nuevoEst==='sub'&&!item.suplente_id)?(item.suplente_nombre||null):null,
         motivo_suplencia:(nuevoEst==='sub'||nuevoEst==='falta')?(item.motivo_suplencia||null):null,

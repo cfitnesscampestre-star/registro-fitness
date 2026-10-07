@@ -216,15 +216,21 @@ function guardarEdicionRegistro(){
   const isSub=(est==='sub');
   const _sup=isSub?leerSuplenteSel('er-suplente'):{id:null,nombre:null,externo:false};
   if(isSub&&_sup.externo&&!_sup.nombre){showToast('Escribe el nombre del suplente externo','err');return;}
+  const _asisNuevo=parseInt(document.getElementById('er-asis').value)||0;
+  const _cambioAsis=_asisNuevo!==(parseInt(registros[idx].asistentes)||0);
   registros[idx]={
     ...registros[idx],
-    asistentes:parseInt(document.getElementById('er-asis').value)||0,
+    asistentes:_asisNuevo,
     cap:parseInt(document.getElementById('er-cap').value)||20,
     estado:est,
     obs:document.getElementById('er-obs').value.trim(),
     suplente_id:isSub?_sup.id:null,
     suplente_nombre:(isSub&&_sup.externo)?_sup.nombre:null,
-    motivo_suplencia:isSub?(document.getElementById('er-motivo').value||'permiso'):null
+    motivo_suplencia:isSub?(document.getElementById('er-motivo').value||'permiso'):null,
+    // si coordinación cambia el número principal, queda como suyo (bloquea al profesor)
+    ...(_cambioAsis?{captura_por:'coord'}:{}),
+    // sin esto la edición no se propagaba a otros dispositivos (el merge compara updatedAt)
+    updatedAt:Date.now()
   };
   cerrarModal('m-edit-reg');
   renderAll();
