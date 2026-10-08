@@ -76,6 +76,7 @@ function renderSalones() {
     </div>`;
   }).join('');
   document.getElementById('asignacion-body').innerHTML = rows || '<div class="empty">Sin clases en horarios aún</div>';
+  renderRevisionCap();
 }
 
 // Asigna una clase a UN solo salón (la quita de cualquier otro)
@@ -90,10 +91,104 @@ function asignarClaseSalon(clase, salonId) {
 }
 function _persistirSalones(logMsg) {
   localStorage.setItem('fc_salones', JSON.stringify(salones));
+  _capTrasCambioSalones();
   renderSalones();
   if (logMsg) registrarLog('sistema', logMsg);
   if (typeof guardarLocal === 'function') guardarLocal();
   if (typeof sincronizarFirebase === 'function') setTimeout(sincronizarFirebase, 800);
+  _subirSalonesNube();
+}
+
+// ───────────────────────────────────────────────────────────────────
+// CAPACIDAD GUARDADA EN CADA REGISTRO vs CAPACIDAD DEL SALÓN
+//
+// Cada registro guarda su propia capacidad ("cap") el día que se captura, y las
+// vistas (Hoy, reportes, Control Gerencia…) usan ESE número, no el del salón.
+// Si ese día la clase no tenía salón (20 por omisión) o el salón tenía otra
+// capacidad, el registro se quedaba con ese valor aunque después se asignara o
+// editara el salón. Por eso un cambio de salón "no se reflejaba".
+// Solo se revisan clases que HOY tienen salón asignado (sin salón, 20 es el
+// valor por omisión y no hay con qué comparar).
+// ───────────────────────────────────────────────────────────────────
+function capRegistrosDesfasados(desde) {
+  const d = desde || '0000-00-00';
+  return registros.filter(r =>
+    (r.fecha || '') >= d &&
+    (r.estado === 'ok' || r.estado === 'sub') &&
+    getSalonDeClase(r.clase) &&
+    (parseInt(r.cap) || 0) !== getCapClase(r.clase));
+}
+function aplicarCapacidadSalon(desde) {
+  const lista = capRegistrosDesfasados(desde);
+  const t = Date.now();                       // updatedAt nuevo: así el cambio gana al sincronizar
+  lista.forEach(r => { r.cap = getCapClase(r.clase); r.updatedAt = t; });
+  return lista.length;
+}
+// Al guardar/asignar un salón, las clases de HOY en adelante siguen al salón.
+// Lo anterior se corrige a propósito desde "Revisión de capacidades".
+function _capTrasCambioSalones() {
+  const n = aplicarCapacidadSalon(fechaLocalStr(new Date()));
+  if (n > 0) showToast(`Capacidad actualizada en ${n} registro${n === 1 ? '' : 's'} de hoy en adelante`, 'ok');
+  return n;
+}
+// Sube los salones directo a Firebase (la subida general puede saltarse en silencio
+// si en ese momento hay otra en curso) y avisa si falla.
+function _subirSalonesNube() {
+  try {
+    if (typeof fbDb === 'undefined' || !fbDb) return;
+    fbDb.ref('fitness/salones').set(JSON.parse(JSON.stringify(salones)))
+      .then(() => { if (typeof setIndicador === 'function') setIndicador('🟢 Salones guardados en la nube ✔'); })
+      .catch(e => showToast('⚠ Los salones no se subieron a la nube: ' + ((e && e.message) || e), 'warn'));
+  } catch (e) { console.warn('[Salones] subida directa:', e); }
+}
+
+let _revCapDesde = '';
+function setRevCapDesde(v) { _revCapDesde = v || ''; renderRevisionCap(); }
+function _escRev(s) {
+  return String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+}
+function renderRevisionCap() {
+  const box = document.getElementById('revision-cap-body');
+  if (!box) return;
+  if (!_revCapDesde) { const h = new Date(); _revCapDesde = fechaLocalStr(new Date(h.getFullYear(), h.getMonth(), 1)); }
+  const lista = capRegistrosDesfasados(_revCapDesde);
+  const porClase = {};
+  lista.forEach(r => {
+    const k = _normClase(r.clase);
+    const g = porClase[k] || (porClase[k] = { clase: r.clase, salon: getSalonDeClase(r.clase), capSalon: getCapClase(r.clase), n: 0, caps: new Set() });
+    g.n++; g.caps.add(parseInt(r.cap) || 0);
+  });
+  const grupos = Object.values(porClase).sort((a, b) => String(a.clase).localeCompare(String(b.clase)));
+  const selector = `<div style="display:flex;align-items:center;gap:.6rem;flex-wrap:wrap;margin-bottom:.7rem;font-size:.78rem;color:var(--txt2)">
+      <span>Revisar registros desde</span>
+      <input type="date" class="ctrl" value="${_escRev(_revCapDesde)}" onchange="setRevCapDesde(this.value)" style="padding:3px 8px;font-size:.76rem">
+    </div>`;
+  if (!grupos.length) {
+    box.innerHTML = selector + `<div style="font-size:.82rem;color:var(--neon)">✔ Todos los registros desde esa fecha tienen la capacidad de su salón.</div>
+      <div style="font-size:.68rem;color:var(--txt3);margin-top:.4rem">Las clases sin salón asignado no se revisan (usan 20 por omisión).</div>`;
+    return;
+  }
+  const filas = grupos.map(g => `<div class="arow">
+      <div class="adot" style="background:var(--gold2)"></div>
+      <span style="flex:1;font-size:.83rem">${_escRev(g.clase)} <span style="color:var(--txt3);font-size:.7rem">· ${_escRev(g.salon.nombre)}</span></span>
+      <span class="mono" style="font-size:.74rem;color:var(--txt2);text-align:right">${g.n} registro${g.n === 1 ? '' : 's'} con ${[...g.caps].join('/')} → salón ${g.capSalon}</span>
+    </div>`).join('');
+  box.innerHTML = selector +
+    `<div style="font-size:.8rem;color:var(--gold2);margin-bottom:.5rem">⚠ ${lista.length} registro${lista.length === 1 ? '' : 's'} guardado${lista.length === 1 ? '' : 's'} con una capacidad distinta a la de su salón</div>` +
+    filas +
+    `<div style="margin-top:.8rem"><button class="btn bg" onclick="corregirCapacidades()">Corregir ${lista.length} registro${lista.length === 1 ? '' : 's'}</button></div>
+     <div style="font-size:.68rem;color:var(--txt3);margin-top:.5rem">Cambia la capacidad guardada en esos registros y recalcula su % de aforo. Control Gerencia lo recibe al sincronizar.</div>`;
+}
+function corregirCapacidades() {
+  const lista = capRegistrosDesfasados(_revCapDesde);
+  if (!lista.length) { renderRevisionCap(); return; }
+  const clases = [...new Set(lista.map(r => r.clase))];
+  if (!confirm(`Se cambiará la capacidad de ${lista.length} registro(s) de ${clases.join(', ')} (desde ${_revCapDesde}) para que coincida con su salón.\nEl % de aforo de esos días se recalcula.\n\n¿Continuar?`)) return;
+  const n = aplicarCapacidadSalon(_revCapDesde);
+  registrarLog('sistema', `Capacidades corregidas: ${n} registro(s) desde ${_revCapDesde} (${clases.join(', ')})`);
+  renderAll();                      // guarda, sincroniza y refresca las vistas
+  renderRevisionCap();
+  showToast(`Listo: ${n} registro${n === 1 ? '' : 's'} con la capacidad de su salón`, 'ok');
 }
 
 // Lista de clases extra agregadas manualmente al modal (que no están en horarios)
@@ -203,12 +298,14 @@ function guardarSalon() {
   }
   localStorage.setItem('fc_salones', JSON.stringify(salones));
   cerrarModal('m-salon');
+  _capTrasCambioSalones();
   renderSalones();
   showToast(`Salón "${nombre}" guardado · ${cap} personas · ${clases.length} clase(s) asignada(s)`,'ok');
   registrarLog('sistema',`Salón guardado: "${nombre}" cap:${cap} tipo:${tipo} clases:[${clases.join(', ')}]`);
   // Sincronizar con Firebase si está disponible
   if(typeof guardarLocal === 'function') guardarLocal();
   if(typeof sincronizarFirebase === 'function') setTimeout(sincronizarFirebase, 800);
+  _subirSalonesNube();
 }
 
 function eliminarSalon() {
@@ -223,6 +320,7 @@ function eliminarSalon() {
   if(salon) registrarLog('sistema',`Salón eliminado: "${salon.nombre}"`);
   if(typeof guardarLocal === 'function') guardarLocal();
   if(typeof sincronizarFirebase === 'function') setTimeout(sincronizarFirebase, 800);
+  _subirSalonesNube();
 }
 
 // ═══════════════════════════════════════════
