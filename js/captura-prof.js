@@ -79,9 +79,25 @@
       r.dia === slot.dia && r.hora === slot.hora);
     return regs.length ? regs[regs.length - 1] : null;
   }
-  function estadoCaptura(reg, fecha, hoy) {
+  // Minutos desde medianoche en hora de México (reloj del servidor)
+  function minAhora() {
+    try {
+      const p = new Intl.DateTimeFormat('en-GB', { timeZone: TZ, hour: '2-digit', minute: '2-digit', hourCycle: 'h23' })
+        .formatToParts(new Date(ahora()));
+      const h = parseInt(p.find(x => x.type === 'hour').value, 10), m = parseInt(p.find(x => x.type === 'minute').value, 10);
+      if (!isNaN(h) && !isNaN(m)) return h * 60 + m;
+    } catch (e) {}
+    const d = new Date(ahora()); return d.getHours() * 60 + d.getMinutes();
+  }
+  function aunNoEmpieza(slot) {
+    const m = /^(\d{1,2}):(\d{2})/.exec(String((slot && slot.hora) || ''));
+    if (!m) return false;
+    return minAhora() < (parseInt(m[1], 10) * 60 + parseInt(m[2], 10));
+  }
+  function estadoCaptura(reg, fecha, hoy, slot) {
     if (fecha > hoy) return 'futura';
     if (fecha < hoy) return 'pasada';
+    if (aunNoEmpieza(slot)) return 'temprano';           // hoy, pero la clase aún no comienza
     if (reg && (reg.estado === 'falta' || reg.estado === 'sub')) return 'estado';
     if (!reg) return 'nueva';
     if (reg.captura_por === 'inst') return 'propia';     // la fijó el profesor: puede corregir hoy
@@ -92,13 +108,14 @@
   // ── Aviso dentro de la tarjeta de la clase (lista "Mis Clases") ──
   window.instCapBadge = function (reg, fecha, slot) {
     const hoy = hoyStr();
-    const modo = estadoCaptura(reg, fecha, hoy);
+    const modo = estadoCaptura(reg, fecha, hoy, slot);
     let txt = '', cls = '';
     const mio = reg && hayNum(reg.asis_prof) ? parseInt(reg.asis_prof, 10) : null;
     if (modo === 'nueva')        { txt = '✎ Toca para capturar tus alumnos'; cls = 'go'; }
     else if (modo === 'propia')  { txt = '✔ Capturada por ti · toca para corregir'; cls = 'ok'; }
     else if (modo === 'aforo')   { txt = mio !== null ? `Tu aforo: ${mio} · en revisión` : '🔒 Coordinación ya registró · toca si tu conteo es distinto'; cls = mio !== null ? 'rev' : 'lock'; }
     else if (modo === 'resuelta'){ txt = `Tu aforo (${mio}): ${reg.asis_prof_aut === 'autorizado' ? 'autorizado ✔' : 'se mantuvo el número oficial'}`; cls = 'lock'; }
+    else if (modo === 'temprano'){ txt = `🕒 Se podrá capturar a las ${esc(slot.hora)}, cuando comience`; cls = 'off'; }
     else if (modo === 'futura')  { txt = 'Se captura el día de la clase'; cls = 'off'; }
     else if (modo === 'pasada' && !reg) { txt = 'Sin captura · el plazo era el día de la clase'; cls = 'off'; }
     const nota = reg && reg.asis_prof_nota ? `<div class="cp-hint-nota">Tu nota: ${esc(reg.asis_prof_nota)}</div>` : '';
@@ -211,7 +228,7 @@
     const reg = regDe(inst, slot, ctx.fecha);                    // estado vigente, no el del render
     const capN = (reg && parseInt(reg.cap, 10) > 0) ? parseInt(reg.cap, 10) : (getCapClase(slot.clase) || 20);
     Object.assign(S, { inst, slot, fecha: ctx.fecha, capN, touched: false, guardando: false,
-                       modo: estadoCaptura(reg, ctx.fecha, hoyStr()) });
+                       modo: estadoCaptura(reg, ctx.fecha, hoyStr(), slot) });
     pintarSheet(reg);
     $('cp-sheet').hidden = false;
     const card = $('cp-sheet').querySelector('.cp-card');
@@ -250,7 +267,8 @@
       pintarCap();
     } else {
       let msg = '';
-      if (S.modo === 'futura') msg = bloqueAviso('info', 'Esta clase se captura el día en que se imparte.');
+      if (S.modo === 'temprano') msg = bloqueAviso('info', `Aún no comienza esta clase. Podrás capturarla a partir de las <b>${esc(S.slot.hora)}</b>.`);
+      else if (S.modo === 'futura') msg = bloqueAviso('info', 'Esta clase se captura el día en que se imparte.');
       else if (S.modo === 'pasada') msg = bloqueAviso('info', 'El plazo para capturar esta clase era el mismo día. Ya no se puede modificar.');
       else if (S.modo === 'estado') msg = bloqueAviso('info', `Coordinación marcó esta clase como <b>${reg.estado === 'falta' ? 'falta' : 'suplencia'}</b>; no lleva captura de alumnos.`);
       else if (S.modo === 'resuelta') msg = bloqueAviso(reg.asis_prof_aut === 'autorizado' ? 'ok' : 'info',
@@ -315,7 +333,12 @@
     const inst = instructores.find(i => i.id === instActualId);
     if (!inst) return;
     const reg = regDe(inst, S.slot, S.fecha);
-    const modo = estadoCaptura(reg, S.fecha, hoy);
+    const modo = estadoCaptura(reg, S.fecha, hoy, S.slot);
+    if (modo === 'temprano') {
+      aviso(`Esta clase aún no comienza. Podrás capturarla a las ${S.slot.hora}.`, 'warn');
+      cerrar(); if (typeof instRenderHoy === 'function') instRenderHoy();
+      return;
+    }
     if (modo === 'estado' || modo === 'resuelta') {
       aviso(modo === 'estado' ? 'Coordinación marcó esta clase como falta/suplencia.' : 'Coordinación ya revisó tu aforo.', 'warn');
       cerrar(); if (typeof instRenderHoy === 'function') instRenderHoy();
