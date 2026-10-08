@@ -294,6 +294,11 @@ window._cargarXLSX=function(){
       Mantenimiento
       <span id="inst-mant-badge" style="display:none;position:absolute;top:4px;right:4px;min-width:16px;height:16px;border-radius:8px;background:var(--red2);color:#fff;font-size:.52rem;font-weight:700;align-items:center;justify-content:center;padding:0 4px;line-height:1"></span>
     </button>
+    <button class="inst-tab-btn" onclick="instSwitchTab('pruebas')" data-t="pruebas" id="inst-tabn-pruebas" style="display:none;position:relative">
+      <svg class="ico tab-ico" viewBox="0 0 20 20" style="width:.9em;height:.9em" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2 10h4l2-5 3 10 2-5h5"/></svg>
+      Pruebas
+      <span id="inst-pruebas-badge" style="display:none;position:absolute;top:4px;right:4px;min-width:16px;height:16px;border-radius:8px;background:var(--red2);color:#fff;font-size:.52rem;font-weight:700;align-items:center;justify-content:center;padding:0 4px;line-height:1">0</span>
+    </button>
     <button class="inst-tab-btn" onclick="instSwitchTab('reporte')" data-t="reporte">
       <svg class="ico tab-ico" viewBox="0 0 20 20" style="width:.9em;height:.9em"><rect x="3" y="12" width="3" height="5" rx="1" stroke="currentColor" stroke-width="1.4" fill="none"/><rect x="8.5" y="8" width="3" height="9" rx="1" stroke="currentColor" stroke-width="1.4" fill="none"/><rect x="14" y="4" width="3" height="13" rx="1" stroke="currentColor" stroke-width="1.4" fill="none"/></svg>
       Mi Reporte
@@ -488,6 +493,11 @@ window._cargarXLSX=function(){
     <!-- ── TAB: Mantenimiento ── -->
     <div id="inst-panel-mant" class="inst-panel" style="display:none">
       <div id="mant-root"></div>
+    </div>
+
+    <!-- ── TAB: Pruebas físicas de Metodología (Control Gerencia) ── -->
+    <div id="inst-panel-pruebas" class="inst-panel" style="display:none">
+      <div id="pruebas-root"></div>
     </div>
 
   </div><!-- /inst-content -->
@@ -3251,6 +3261,7 @@ window._cargarXLSX=function(){
 <script defer src="js/auditoria.js"></script>
 <script defer src="js/importar-estimados.js"></script>
 <script defer src="js/mantenimiento.js"></script>
+<script defer src="js/pruebas-metodologia.js?v=1"></script>
 <script defer src="js/alertas-portal.js?v=1"></script>
 <script defer src="js/firmas.js"></script>
 <script defer src="js/app.js"></script>

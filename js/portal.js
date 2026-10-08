@@ -67,6 +67,9 @@ function abrirPortalInstructorLocal() {
   // Mantenimiento: arranca en segundo plano (contador rojo de la pestaña)
   if(typeof mantIniciar === 'function') { try { mantIniciar(); } catch(e) { console.warn('[Mant]', e); } }
 
+  // Pruebas físicas de Metodología (Control Gerencia): escucha en segundo plano
+  if(typeof pruebasIniciar === 'function') { try { pruebasIniciar(); } catch(e) { console.warn('[Pruebas]', e); } }
+
   // Renderizar tab inicial
   instSwitchTab('hoy');
 }
@@ -94,6 +97,7 @@ function instSwitchTab(tab) {
   if(tab === 'reporte') instRenderReporte();
   if(tab === 'firma')   instRenderFirmaTab();
   if(tab === 'mant' && typeof mantRenderTab === 'function') mantRenderTab();
+  if(tab === 'pruebas' && typeof pruebasRenderTab === 'function') pruebasRenderTab();
 }
 
 // ── Cambio de periodo en reporte ──────────────
