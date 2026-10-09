@@ -1621,6 +1621,8 @@ window._cargarXLSX=function(){
       <span class="pttl" id="inst-count-lbl"><svg class="ico" viewBox="0 0 20 20"><circle cx="8" cy="6" r="3" stroke="currentColor" stroke-width="1.4" fill="none"/><path d="M2 17 Q2 12 8 12 Q14 12 14 17" stroke="currentColor" stroke-width="1.4" fill="none" stroke-linecap="round"/><circle cx="14" cy="6" r="2.5" stroke="currentColor" stroke-width="1.3" fill="none"/><path d="M14 11 Q18 11 18 16" stroke="currentColor" stroke-width="1.3" fill="none" stroke-linecap="round"/></svg> Instructores</span>
       <div style="display:flex;gap:.5rem;flex-wrap:wrap">
         <input class="ctrl" type="text" placeholder="🔍 Buscar instructor..." oninput="filterInst(this.value)" style="width:180px">
+        <button class="btn solo-admin" onclick="pinesGenerar()" title="Genera PIN aleatorios para todos los profesores y descarga la lista">🔑 Generar PINs</button>
+        <button class="btn solo-admin" onclick="pinesDescargarLista()" title="Descarga la lista con los PIN actuales">⬇ Lista de PINs</button>
         <button class="btn bg" onclick="abrirModalInstructor(null)">+ Nuevo</button>
       </div>
     </div>
@@ -3273,6 +3275,7 @@ window._cargarXLSX=function(){
 <script defer src="js/portal.js"></script>
 <script defer src="js/captura-prof.js?v=1"></script>
 <script defer src="js/gimnasia-gerencia.js?v=1"></script>
+<script defer src="js/pines.js?v=1"></script>
 <script defer src="js/pwa.js"></script>
 <script defer src="js/eventos.js"></script>
 <script defer src="js/suplencias_link.js"></script>
