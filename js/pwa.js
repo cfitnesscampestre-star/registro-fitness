@@ -6,6 +6,20 @@
 //   • Programación de recordatorios locales
 // ════════════════════════════════════════════════════════════════════════════
 
+// ── Limpieza: si en este equipo quedó registrado un service worker ajeno (p. ej. el de Control Gerencia,
+//    sw.js / gd-*), se desinstala para que no sirva páginas o archivos que no son de Fitness. ──
+if ('serviceWorker' in navigator && navigator.serviceWorker.getRegistrations) {
+  navigator.serviceWorker.getRegistrations().then(function (regs) {
+    regs.forEach(function (r) {
+      try {
+        var w = r.active || r.waiting || r.installing;
+        var url = (w && w.scriptURL) || '';
+        if (url && !/firebase-messaging-sw\.js/.test(url) && r.scope.indexOf(location.origin + location.pathname.replace(/[^\/]*$/, '')) === 0) r.unregister();
+      } catch (e) {}
+    });
+  }).catch(function () {});
+}
+
 if ('serviceWorker' in navigator) {
   // Registrar el SW real (debe estar en la raíz del sitio)
   navigator.serviceWorker
