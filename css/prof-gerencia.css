@@ -1,0 +1,221 @@
+/* =====================================================================
+   prof-gerencia.css — Portal del instructor con la misma imagen que el
+   portal del profesor de Control Gerencia de Deportes.
+
+   · Celular (menos de 900 px): tarjeta de encabezado con degradado,
+     barra de navegación inferior flotante y tarjetas blancas.
+   · Computadora (900 px o más): menú lateral con degradado a la
+     izquierda (marca, pestañas, usuario y "Salir") y el contenido a
+     la derecha con el nombre del instructor como título.
+
+   Todo va bajo #instructor-screen para ganarle al <style> que está
+   dentro de index.html. No cambia cómo se capturan ni se guardan los
+   datos: solo el aspecto.
+   ===================================================================== */
+
+#instructor-screen{
+  --ipg-surf:var(--surf,linear-gradient(160deg,#00251f 0%,#014d38 24%,#016a55 44%,#016a8c 64%,#0269a8 82%,#033e78 100%));
+  --ipg-grad:var(--grad,linear-gradient(135deg,#2f9a3f 0%,#0f7a5a 42%,#0a62b0 100%));
+  --ipg-sh:0 1px 2px rgba(8,34,40,.05),0 10px 28px rgba(8,34,40,.08);
+  font-family:'Outfit',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
+}
+html.tema-claro #instructor-screen{
+  background:
+    url(../img/textura-clara.svg) 0 0/352px 352px,
+    radial-gradient(720px 420px at -8% -6%,rgba(95,179,54,.13),transparent 62%),
+    radial-gradient(760px 480px at 108% 104%,rgba(42,174,214,.15),transparent 62%),
+    #edf3f2!important;
+}
+
+/* ---------- Encabezado / marca ---------- */
+#instructor-screen .inst-portal-header{
+  background:url(../img/textura.svg) 0 0/352px 352px,radial-gradient(260px 140px at 100% 0%,rgba(255,255,255,.18),transparent 60%),var(--ipg-surf);
+  border:0;color:#fff;overflow:hidden;
+}
+#instructor-screen .inst-portal-header::before,
+#instructor-screen .inst-portal-header::after{display:none}
+#instructor-screen .ipg-logo{position:relative;flex:none;width:46px;height:46px;border-radius:13px;overflow:hidden;box-shadow:0 4px 12px rgba(0,30,30,.3);background:var(--ipg-grad)}
+#instructor-screen .ipg-logo img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+#instructor-screen .ipg-brand{display:flex;align-items:center;gap:12px}
+#instructor-screen .ipg-brand b{display:block;font-size:19px;font-weight:700;line-height:1.15;color:#fff}
+#instructor-screen .ipg-brand small{display:block;color:#a9c6c4;font-size:13px;margin-top:2px}
+#instructor-screen .ipg-who{display:flex;align-items:center;gap:12px;min-width:0;flex:1}
+#instructor-screen .ipg-who-t{min-width:0;flex:1}
+#instructor-screen .ipg-who-t b{display:block;font-family:'Outfit',sans-serif!important;font-size:19px;font-weight:700;letter-spacing:0;line-height:1.15;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#instructor-screen .ipg-who-t small{display:block;font-size:13px;color:rgba(255,255,255,.86);margin-top:1px}
+/* El avatar solo aparece si el instructor tiene foto; si no, se ve el logo como en Gerencia */
+#instructor-screen .inst-avatar-ring{display:none}
+#instructor-screen .inst-avatar-ring:has(#inst-avatar-img[style*="block"]){display:flex;width:46px;height:46px;box-shadow:0 0 0 2px rgba(255,255,255,.45)}
+#instructor-screen .ipg-who:has(#inst-avatar-img[style*="block"]) .ipg-logo-m{display:none}
+#instructor-screen .ipg-foot{display:flex;align-items:center;gap:8px}
+#instructor-screen .ipg-user{display:none}
+#instructor-screen .inst-salir-btn{
+  display:flex;align-items:center;justify-content:center;gap:8px;color:#fff;font-weight:600;
+  background:rgba(255,255,255,.18);border:1.5px solid rgba(255,255,255,.35);border-radius:12px;
+}
+#instructor-screen .inst-salir-btn:hover{background:rgba(255,255,255,.28);border-color:rgba(255,255,255,.5);color:#fff}
+#instructor-screen .inst-salir-btn .ico{width:18px!important;height:18px!important}
+
+/* ---------- Pestañas ---------- */
+#instructor-screen .inst-tab-btn .tab-ico{width:22px!important;height:22px!important;opacity:1}
+#instructor-screen .inst-tab-btn .ts{display:none}
+
+/* ---------- Contenido ---------- */
+#instructor-screen #inst-content{max-width:none!important;padding:0!important}
+#instructor-screen #inst-alertas{padding:0!important}
+#instructor-screen #inst-alertas>div:not(:empty){margin:0 0 10px}
+#instructor-screen .inst-panel{padding:0}
+
+#instructor-screen .ipg-h2{font-size:19px;font-weight:700;color:var(--txt);margin:26px 0 12px;display:flex;align-items:center;gap:10px;line-height:1.2}
+#instructor-screen .ipg-h2::before{content:"";width:4px;height:18px;border-radius:4px;background:var(--ipg-grad);flex:none;margin-right:2px}
+#instructor-screen .ipg-h2.sm{font-size:16px;margin:20px 0 8px}
+#instructor-screen .ipg-h2.sm::before{height:14px}
+#instructor-screen .ipg-h2.hoy{color:var(--blue)}
+#instructor-screen .ipg-sub{color:var(--txt3);font-size:13.5px;margin:0 0 12px}
+#instructor-screen .ipg-h2+.ipg-sub{margin-top:-4px}
+
+/* Fecha: ‹  Lunes 5 de octubre  ›  [Hoy] */
+#instructor-screen .ipg-date{display:flex;align-items:center;gap:10px;margin:8px 0 14px}
+#instructor-screen .ipg-ibtn{width:42px;height:42px;border-radius:12px;display:grid;place-items:center;flex:none;cursor:pointer;
+  border:1.5px solid var(--border);background:var(--panel);color:var(--txt2)}
+#instructor-screen .ipg-ibtn:hover{background:var(--panel2)}
+#instructor-screen .ipg-ibtn svg{width:20px;height:20px}
+#instructor-screen .ipg-date-lbl{position:relative;flex:1;min-width:0;text-align:center;cursor:pointer}
+#instructor-screen .ipg-date-lbl b{font-size:17px;font-weight:700;color:var(--txt);line-height:1.2}
+/* El calendario queda encima del texto, invisible: al tocar la fecha se abre para saltar a cualquier día */
+#instructor-screen .ipg-date-lbl input{position:absolute;inset:0;width:100%;height:100%;opacity:0;cursor:pointer;border:0;padding:0}
+#instructor-screen .ipg-date-lbl input::-webkit-calendar-picker-indicator{position:absolute;inset:0;width:100%;height:100%;cursor:pointer}
+#instructor-screen .ipg-btn-sm{flex:none;padding:9px 14px;border-radius:10px;border:1.5px solid var(--border);background:var(--panel);
+  color:var(--txt);font:600 13px 'Outfit',sans-serif;cursor:pointer}
+#instructor-screen .ipg-btn-sm:hover{background:var(--panel2)}
+
+/* Tarjetas de resumen */
+#instructor-screen .ipg-kpis{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+#instructor-screen .ipg-kpis.k4{grid-template-columns:repeat(2,1fr);margin-bottom:6px}
+#instructor-screen .ipg-kpi{background:var(--panel);border-radius:18px;padding:12px;box-shadow:var(--ipg-sh);border:1px solid var(--border);
+  border-top:4px solid var(--kc,var(--v2));display:flex;flex-direction:column;gap:3px;min-height:94px;min-width:0}
+#instructor-screen .ipg-kpi .k-l{font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--txt2);font-weight:600}
+#instructor-screen .ipg-kpi b{font-size:28px;font-weight:700;line-height:1.1;color:var(--txt);letter-spacing:-.02em}
+#instructor-screen .ipg-kpi b.ok{color:#0a7f63}
+#instructor-screen .ipg-kpi b.bad{color:#c62d22}
+#instructor-screen .ipg-kpi .k-c{font-style:normal;font-size:12.5px;color:var(--txt3)}
+
+/* "Ahora": clase en curso o próxima */
+#instructor-screen .ipg-hero{border-radius:22px;padding:16px;color:#fff;display:flex;flex-direction:column;gap:12px;
+  background:url(../img/textura.svg) 0 0/352px 352px,radial-gradient(260px 140px at 100% 0%,rgba(255,255,255,.18),transparent 60%),var(--ipg-surf);
+  box-shadow:0 12px 28px rgba(1,60,70,.34)}
+#instructor-screen .ipg-hero-t span{display:block;font-size:13px;color:rgba(255,255,255,.86)}
+#instructor-screen .ipg-hero-t b{display:block;font-size:22px;font-weight:700;line-height:1.2;margin:2px 0}
+#instructor-screen .ipg-hero-b{align-self:flex-start;padding:11px 18px;border-radius:12px;border:0;background:#fff;color:#0a4d3a;
+  font:700 14px 'Outfit',sans-serif;cursor:pointer;box-shadow:0 4px 12px rgba(0,30,30,.3)}
+
+/* Renglón de clase: tarjeta blanca con franja de color a la izquierda */
+#instructor-screen .ipg-line{display:flex;gap:14px;align-items:center;padding:13px 14px;border-radius:16px;background:var(--panel);
+  border:1px solid var(--border);box-shadow:0 1px 2px rgba(16,26,51,.04);border-left:5px solid var(--ac,var(--v2));margin-bottom:10px;width:100%;box-sizing:border-box}
+#instructor-screen .ipg-line.inst-cap-card{cursor:pointer;transition:transform .12s,box-shadow .12s}
+#instructor-screen .ipg-line.inst-cap-card:hover{box-shadow:var(--ipg-sh)}
+#instructor-screen .ipg-line .t{min-width:56px;font-weight:700;color:var(--blue);font-size:14.5px}
+#instructor-screen .ipg-line .b{flex:1;min-width:0}
+#instructor-screen .ipg-line .b>b{display:block;font-weight:600;font-size:16px;color:var(--txt)}
+#instructor-screen .ipg-line .b small{display:block;font-size:13px;color:var(--txt3);margin-top:1px}
+#instructor-screen .ipg-line .b small.ipg-obs{font-style:italic}
+#instructor-screen .ipg-line .r{text-align:right;font-size:14px;flex:none;font-weight:600}
+#instructor-screen .ipg-line .r .ok{color:#0a7f63}
+#instructor-screen .ipg-line .r .info{color:var(--blue)}
+#instructor-screen .ipg-line .r .bad{color:#c62d22}
+#instructor-screen .ipg-line .r .warn{color:#a86a00}
+#instructor-screen .ipg-bar{height:5px;border-radius:3px;background:var(--border);overflow:hidden;margin-top:7px;max-width:260px}
+#instructor-screen .ipg-bar i{display:block;height:100%;border-radius:3px}
+#instructor-screen .ipg-empty{padding:22px 16px;border:1.5px dashed var(--border);border-radius:18px;color:var(--txt3);text-align:center;margin:8px 0;background:rgba(255,255,255,.55)}
+html:not(.tema-claro) #instructor-screen .ipg-empty{background:transparent}
+
+/* Paneles del reporte con el mismo aspecto de tarjeta */
+#instructor-screen #inst-panel-reporte .panel{border-radius:18px;box-shadow:var(--ipg-sh)}
+#instructor-screen .inst-periodo-pill.on{background:var(--ipg-grad);border-color:transparent;color:#fff}
+
+/* ================== CELULAR ================== */
+@media (max-width:899px){
+  #instructor-screen .inst-portal-header{
+    margin:calc(10px + env(safe-area-inset-top)) 12px 0;padding:12px 14px;border-radius:24px;
+    box-shadow:0 12px 28px rgba(1,60,70,.34);flex-shrink:0;display:flex;align-items:center;gap:12px;
+  }
+  #instructor-screen .ipg-brand{display:none}
+  #instructor-screen .inst-salir-btn{width:40px;height:40px;padding:0}
+  #instructor-screen .inst-salir-btn span{display:none}
+  #instructor-screen #inst-content{padding:16px 14px calc(136px + env(safe-area-inset-bottom))!important}
+
+  /* Barra inferior flotante */
+  #instructor-screen .inst-tabs-bar{
+    position:fixed;left:10px;right:10px;bottom:calc(8px + env(safe-area-inset-bottom));z-index:40;
+    display:flex;gap:4px;padding:7px;border-radius:28px;overflow:visible;
+    background:url(../img/textura.svg) 0 0/352px 352px,var(--ipg-surf);
+    border:2px solid rgba(255,255,255,.55);
+    box-shadow:0 16px 36px rgba(0,35,40,.5),0 3px 10px rgba(0,35,40,.3),0 0 0 4px rgba(255,255,255,.55);
+  }
+  #instructor-screen::after{content:"";position:fixed;left:0;right:0;bottom:0;height:calc(110px + env(safe-area-inset-bottom));z-index:39;pointer-events:none;
+    background:linear-gradient(to top,var(--bg,#e2eeec) 40%,transparent)}
+  #instructor-screen .inst-tab-btn{
+    flex:1;min-width:0;display:flex;flex-direction:column;align-items:center;gap:4px;padding:10px 2px 9px;border:0!important;border-radius:22px;
+    color:rgba(255,255,255,.86);font-size:12px;font-weight:700;text-align:center;letter-spacing:0;transition:background .12s,color .12s;
+  }
+  #instructor-screen .inst-tab-btn:hover{background:rgba(255,255,255,.08);color:#fff}
+  #instructor-screen .inst-tab-btn.on{background:#fff;color:#0a4d3a;box-shadow:0 4px 12px rgba(0,30,30,.35)}
+  #instructor-screen .inst-tab-btn .tl{display:none}
+  #instructor-screen .inst-tab-btn .ts{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
+  #instructor-screen .inst-tab-btn [id$="-badge"]{top:2px!important;right:10px!important}
+}
+@media (max-width:380px){
+  #instructor-screen .ipg-logo-m{display:none}
+  #instructor-screen .inst-tab-btn{font-size:10.5px}
+  #instructor-screen .inst-tab-btn .tab-ico{width:20px!important;height:20px!important}
+  #instructor-screen .ipg-kpi b{font-size:24px}
+}
+
+/* ================== COMPUTADORA ================== */
+@media (min-width:900px){
+  /* Columna izquierda = menú lateral (marca, pestañas, usuario); derecha = título y contenido */
+  #instructor-screen[style*="display: flex"]{display:grid!important}
+  #instructor-screen{
+    grid-template-columns:272px minmax(0,1fr);
+    grid-template-rows:auto auto minmax(0,1fr) auto;
+    grid-template-areas:"brand who" "tabs main" "fill main" "foot main";
+  }
+  #instructor-screen::before{content:"";grid-column:1;grid-row:1/-1;z-index:0;
+    background:url(../img/textura.svg) 0 0/352px 352px,radial-gradient(300px 260px at 0% 0%,rgba(95,179,54,.28),transparent 70%),var(--ipg-surf)}
+  #instructor-screen .inst-portal-header{display:contents}
+  #instructor-screen .ipg-brand{grid-area:brand;z-index:1;margin:22px 16px 10px;padding:4px 6px 18px;border-bottom:1px solid rgba(255,255,255,.16)}
+  #instructor-screen .ipg-brand .ipg-logo{width:52px;height:52px;border-radius:15px;box-shadow:0 6px 16px rgba(0,30,30,.4)}
+  #instructor-screen .ipg-who{grid-area:who;padding:26px 40px 6px;max-width:1260px;box-sizing:border-box}
+  #instructor-screen .ipg-who .ipg-logo-m{display:none}
+  #instructor-screen .ipg-who-t b{font-size:30px;letter-spacing:-.02em;color:var(--txt)}
+  #instructor-screen .ipg-who-t small{font-size:14px;color:var(--txt3)}
+  #instructor-screen .inst-avatar-ring:has(#inst-avatar-img[style*="block"]){width:56px;height:56px;box-shadow:0 0 0 2px var(--border)}
+  #instructor-screen .ipg-foot{grid-area:foot;z-index:1;flex-direction:column;align-items:stretch;gap:10px;margin:0 16px 22px;padding-top:14px;border-top:1px solid rgba(255,255,255,.14)}
+  #instructor-screen .ipg-user{display:block;font-size:13px;color:#b7c0e6;padding:0 6px;color:rgba(255,255,255,.75)}
+  #instructor-screen .ipg-user b{display:block;color:#fff;font-size:16px;font-weight:700}
+  #instructor-screen .inst-salir-btn{padding:7px 13px;font-size:13px;border-radius:10px;background:rgba(255,255,255,.1);border-color:rgba(255,255,255,.25)}
+  #instructor-screen .inst-salir-btn:hover{background:rgba(255,255,255,.2)}
+
+  #instructor-screen .inst-tabs-bar{grid-area:tabs;z-index:1;display:flex;flex-direction:column;gap:3px;padding:0 16px;background:none;border:0;overflow:visible}
+  #instructor-screen .inst-tab-btn{display:flex;align-items:center;gap:12px;width:100%;padding:11px 14px;border:0!important;border-radius:12px;
+    color:#d3e6e3;font-size:15px;font-weight:500;letter-spacing:0;text-align:left}
+  #instructor-screen .inst-tab-btn:hover{background:rgba(255,255,255,.08);color:#fff}
+  #instructor-screen .inst-tab-btn.on{background:linear-gradient(90deg,rgba(95,179,54,.55),rgba(42,174,214,.38));color:#fff;font-weight:600;box-shadow:0 6px 16px rgba(0,0,0,.22)}
+  #instructor-screen .inst-tab-btn .tab-ico{width:21px!important;height:21px!important}
+  #instructor-screen .inst-tab-btn [id$="-badge"]{position:static!important;margin-left:auto}
+
+  #instructor-screen #inst-content{grid-area:main;grid-row:2/-1;padding:8px 40px 40px!important;box-sizing:border-box}
+  #instructor-screen #inst-content>*{max-width:1260px}
+  #instructor-screen .ipg-h2{font-size:21px}
+  #instructor-screen .ipg-kpis.k4{grid-template-columns:repeat(4,1fr);gap:16px}
+  #instructor-screen .ipg-kpis{gap:16px}
+}
+
+/* Títulos que todavía traen Bebas Neue en línea (firma, suplencias): mismo tipo que Gerencia */
+#instructor-screen [style*="Bebas Neue"]{font-family:'Outfit',sans-serif!important;letter-spacing:0!important;font-weight:700!important}
+#instructor-screen #inst-rep-kpis{margin-bottom:16px}
+@media (max-width:899px){
+  /* En celular van de dos en dos, como en Gerencia; si sobra una, ocupa todo el ancho */
+  #instructor-screen .ipg-kpis{grid-template-columns:repeat(2,1fr)}
+  #instructor-screen .ipg-kpis>.ipg-kpi:last-child:nth-child(odd){grid-column:1/-1;min-height:0}
+}

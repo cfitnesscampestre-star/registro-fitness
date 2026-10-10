@@ -36,6 +36,8 @@ function abrirPortalInstructorLocal() {
   // Nombre en el header
   const nombreEl = document.getElementById('inst-portal-nombre');
   if(nombreEl) nombreEl.textContent = inst ? inst.nombre : 'Instructor';
+  const pieEl = document.getElementById('inst-portal-nombre-pie');
+  if(pieEl) pieEl.textContent = inst ? inst.nombre : '';
 
   // Foto en el avatar del header
   const avatarRing = document.getElementById('inst-avatar-ring');
@@ -94,6 +96,7 @@ function instSwitchTab(tab) {
   if(panel) panel.style.display = 'block';
 
   if(tab === 'hoy')     instRenderHoy();
+  if(tab === 'horario') instRenderHorario();
   if(tab === 'reporte') instRenderReporte();
   if(tab === 'firma')   instRenderFirmaTab();
   if(tab === 'mant' && typeof mantRenderTab === 'function') mantRenderTab();
@@ -119,6 +122,44 @@ function instSelPeriodo(btn, dias) {
 // ─────────────────────────────────────────────
 // TAB 1: MIS CLASES HOY
 // ─────────────────────────────────────────────
+// Tarjeta de resumen con el mismo formato que Control Gerencia (etiqueta, número grande, nota)
+function instKpi(label, valor, nota, color, cls) {
+  return `<div class="ipg-kpi" style="--kc:${color||'var(--v2)'}">
+    <span class="k-l">${label}</span><b class="${cls||''}">${valor}</b>${nota?`<em class="k-c">${nota}</em>`:''}
+  </div>`;
+}
+
+// ── Navegación de fecha (flechas y "Hoy") ─────
+function instNavDia(n) {
+  const dp = document.getElementById('inst-date-picker');
+  if(!dp) return;
+  const base = dp.value || ((typeof instCapHoy === 'function') ? instCapHoy() : fechaLocalStr(new Date()));
+  const d = new Date(base + 'T12:00:00');
+  d.setDate(d.getDate() + n);
+  dp.value = fechaLocalStr(d);
+  instRenderHoy();
+}
+function instIrHoy() {
+  const dp = document.getElementById('inst-date-picker');
+  if(dp) dp.value = (typeof instCapHoy === 'function') ? instCapHoy() : fechaLocalStr(new Date());
+  instRenderHoy();
+}
+
+// Clase en curso o la próxima de hoy (las clases duran 1 hora)
+function instClaseAhora(clasesData) {
+  const now = new Date(), m = now.getHours()*60 + now.getMinutes();
+  const min = h => { const [a,b] = String(h||'').split(':').map(Number); return isNaN(a) ? null : a*60 + (b||0); };
+  for(let i = 0; i < clasesData.length; i++) {
+    const s = min(clasesData[i].slot.hora);
+    if(s !== null && m >= s && m <= s + 60) return { idx:i, estado:'curso' };
+  }
+  for(let i = 0; i < clasesData.length; i++) {
+    const s = min(clasesData[i].slot.hora);
+    if(s !== null && s > m) return { idx:i, estado:'proxima' };
+  }
+  return null;
+}
+
 function instRenderHoy() {
   const inst = instructores.find(i => i.id === instActualId);
   if(!inst) return;
@@ -135,8 +176,11 @@ function instRenderHoy() {
 
   const tituloEl = document.getElementById('inst-hoy-titulo');
   const fechaEl  = document.getElementById('inst-hoy-fecha');
-  if(tituloEl) tituloEl.textContent = esHoy ? 'HOY' : diaStr.toUpperCase();
-  if(fechaEl)  fechaEl.textContent  = fecha.toLocaleDateString('es-MX',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
+  if(tituloEl) tituloEl.textContent = esHoy ? 'Estas son tus clases de hoy. La que va según el horario aparece arriba.' : 'Estás viendo otro día.';
+  if(fechaEl) {
+    const t = fecha.toLocaleDateString('es-MX',{weekday:'long',day:'numeric',month:'long'});
+    fechaEl.textContent = t.charAt(0).toUpperCase() + t.slice(1);
+  }
 
   // Clases del instructor para este día
   const slots = getHorarioEn(inst, fechaStr).filter(s => s.dia === diaStr).sort((a,b)=>a.hora.localeCompare(b.hora));
@@ -159,34 +203,35 @@ function instRenderHoy() {
                                  .reduce((a,c)=>a+(parseInt(c.reg.asistentes)||0), 0);
 
   const kpiEl = document.getElementById('inst-kpis-hoy');
-  if(kpiEl) kpiEl.innerHTML = `
-    <div style="background:var(--panel2);border:1px solid var(--border);border-radius:12px;padding:.8rem .9rem;text-align:center;position:relative;overflow:hidden">
-      <div style="position:absolute;top:0;left:0;right:0;height:2px;background:var(--v3)"></div>
-      <div style="font-family:'Bebas Neue',sans-serif;font-size:1.8rem;line-height:1;color:var(--neon)">${total}</div>
-      <div style="font-size:.58rem;text-transform:uppercase;letter-spacing:1px;color:var(--txt3);margin-top:3px">Programadas</div>
-    </div>
-    <div style="background:var(--panel2);border:1px solid var(--border);border-radius:12px;padding:.8rem .9rem;text-align:center;position:relative;overflow:hidden">
-      <div style="position:absolute;top:0;left:0;right:0;height:2px;background:${pendientes>0?'var(--red2)':'var(--neon)'}"></div>
-      <div style="font-family:'Bebas Neue',sans-serif;font-size:1.8rem;line-height:1;color:${pendientes>0?'var(--red2)':'var(--neon)'}">${registradas}</div>
-      <div style="font-size:.58rem;text-transform:uppercase;letter-spacing:1px;color:var(--txt3);margin-top:3px">Registradas</div>
-    </div>
-    <div style="background:var(--panel2);border:1px solid var(--border);border-radius:12px;padding:.8rem .9rem;text-align:center;position:relative;overflow:hidden">
-      <div style="position:absolute;top:0;left:0;right:0;height:2px;background:var(--blue)"></div>
-      <div style="font-family:'Bebas Neue',sans-serif;font-size:1.8rem;line-height:1;color:var(--blue)">${totalAsis}</div>
-      <div style="font-size:.58rem;text-transform:uppercase;letter-spacing:1px;color:var(--txt3);margin-top:3px">Asistentes</div>
-    </div>`;
+  if(kpiEl) kpiEl.innerHTML =
+    instKpi('Clases del día', total, 'programadas para ti', 'var(--blue)') +
+    instKpi('Registradas', `${registradas}/${total}`, total && !pendientes ? 'Todo al día' : 'Faltan por registrar', 'var(--b1,#5fb336)', total && !pendientes ? 'ok' : '') +
+    instKpi('Asistentes', totalAsis, 'en las clases del día', 'var(--v2)');
 
   // Lista de clases
   const listaEl = document.getElementById('inst-lista-clases');
+  const ahoraEl = document.getElementById('inst-ahora');
   if(!listaEl) return;
-
-  if(clasesData.length === 0) {
-    listaEl.innerHTML = `<div class="empty" style="padding:2rem">No tienes clases programadas para el ${diaStr}.</div>`;
-    return;
-  }
 
   // Contexto para la tarjeta de captura (captura-prof.js)
   window._instHoyCtx = { fecha: fechaStr, items: clasesData };
+
+  // "Ahora": clase en curso o próxima, con acceso directo a registrar asistentes
+  const act = esHoy ? instClaseAhora(clasesData) : null;
+  if(ahoraEl) ahoraEl.innerHTML = act ? (() => {
+    const { slot, reg, capN } = clasesData[act.idx];
+    return `<div class="ipg-h2">Ahora</div>
+      <div class="ipg-hero">
+        <div class="ipg-hero-t"><span>${act.estado==='curso'?'Clase en curso':'Próxima clase'}</span><b>${slot.clase}</b>
+          <span>${slot.hora}${capN?' · cupo '+capN:''}</span></div>
+        <button class="ipg-hero-b" onclick="instCapAbrir(${act.idx})">${reg?'Ver registro':'Registrar asistentes'}</button>
+      </div>`;
+  })() : '';
+
+  if(clasesData.length === 0) {
+    listaEl.innerHTML = `<div class="empty ipg-empty">No tienes clases programadas este día.</div>`;
+    return;
+  }
 
   listaEl.innerHTML = clasesData.map(({ slot, reg, capN }, idx) => {
     const tieneReg = !!reg;
@@ -194,53 +239,58 @@ function instRenderHoy() {
     const asis     = tieneReg ? (parseInt(reg.asistentes)||0) : null;
     const afoP     = (tieneReg && capN > 0 && asis !== null) ? Math.round(asis/capN*100) : null;
 
-    // Colores de estado
+    // Colores de estado (franja izquierda y texto de la derecha, como en Gerencia)
     const estadoMap = {
-      ok:       { txt:'✔ Impartida',   color:'var(--neon)',   bg:'rgba(94,255,160,.08)',  border:'rgba(94,255,160,.25)' },
-      sub:      { txt:'⇄ Con Suplente', color:'var(--blue)',  bg:'rgba(77,184,232,.07)',  border:'rgba(77,184,232,.25)' },
-      falta:    { txt:'✖ Falta',        color:'var(--red2)',  bg:'rgba(224,80,80,.07)',   border:'rgba(224,80,80,.25)'  },
-      pendiente:{ txt:'⏳ Pendiente',   color:'var(--gold2)', bg:'rgba(232,184,75,.06)',  border:'rgba(232,184,75,.2)'  }
+      ok:       { txt:'Impartida',     cls:'ok',   ac:'var(--v2)'   },
+      sub:      { txt:'Con suplente',  cls:'info', ac:'var(--blue)' },
+      falta:    { txt:'Falta',         cls:'bad',  ac:'var(--red2)' },
+      pendiente:{ txt:'Pendiente',     cls:'warn', ac:'var(--gold2)'}
     };
     const est = estadoMap[estado] || estadoMap.pendiente;
 
-    // Suplente si aplica
-    const suplementoRow = (reg && (reg.suplente_id || reg.suplente_nombre))
-      ? `<div style="font-size:.65rem;color:var(--blue);margin-top:4px">⇄ Suplente: <strong>${nombreSuplenteReg(reg)}</strong></div>`
-      : '';
-
-    // Barra de aforo
-    const aforoBar = afoP !== null
-      ? `<div style="margin-top:6px">
-           <div style="display:flex;justify-content:space-between;font-size:.6rem;color:var(--txt3);margin-bottom:2px">
-             <span>Aforo</span><span style="color:${pctCol(afoP)};font-weight:700">${afoP}%</span>
-           </div>
-           <div style="height:4px;background:var(--border);border-radius:2px;overflow:hidden">
-             <div style="height:100%;width:${Math.min(afoP,100)}%;background:${pctCol(afoP)};border-radius:2px;transition:width .5s"></div>
-           </div>
-         </div>`
-      : '';
+    const detalle = [
+      tieneReg && asis !== null ? `${asis}${capN?' / '+capN:''} personas` : (capN ? `Cupo ${capN}` : ''),
+      (reg && (reg.suplente_id || reg.suplente_nombre)) ? `Suplente: ${nombreSuplenteReg(reg)}` : ''
+    ].filter(Boolean).join(' · ');
 
     return `
-      <div class="inst-cap-card" role="button" tabindex="0" onclick="instCapAbrir(${idx})"
+      <div class="inst-cap-card ipg-line" role="button" tabindex="0" onclick="instCapAbrir(${idx})"
            onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();instCapAbrir(${idx})}"
-           style="background:${est.bg};border:1px solid ${est.border};border-radius:14px;padding:.9rem 1rem;margin-bottom:.5rem;transition:all .15s">
-        <div style="display:flex;align-items:flex-start;gap:.8rem">
-          <div style="min-width:44px;text-align:center">
-            <div style="font-family:'DM Mono',monospace;font-size:.8rem;color:var(--gold2);font-weight:700">${slot.hora}</div>
-          </div>
-          <div style="flex:1;min-width:0">
-            <div style="font-weight:700;font-size:.9rem;margin-bottom:3px">${slot.clase}</div>
-            <div style="display:flex;align-items:center;gap:.5rem;flex-wrap:wrap">
-              <span style="font-size:.68rem;font-weight:700;color:${est.color};background:var(--panel2);border-radius:10px;padding:2px 8px">${est.txt}</span>
-              ${tieneReg && asis !== null ? `<span style="font-size:.68rem;color:var(--txt2)">👥 ${asis}${capN?' / '+capN:''} personas</span>` : ''}
-            </div>
-            ${suplementoRow}
-            ${aforoBar}
-            ${reg && reg.obs ? `<div style="font-size:.65rem;color:var(--txt3);margin-top:4px;font-style:italic">${reg.obs}</div>` : ''}
-            ${typeof instCapBadge === 'function' ? instCapBadge(reg, fechaStr, slot) : ''}
-          </div>
+           style="--ac:${est.ac}">
+        <div class="t">${slot.hora}</div>
+        <div class="b">
+          <b>${slot.clase}</b>
+          ${detalle ? `<small>${detalle}</small>` : ''}
+          ${afoP !== null ? `<div class="ipg-bar"><i style="width:${Math.min(afoP,100)}%;background:${pctCol(afoP)}"></i></div>` : ''}
+          ${reg && reg.obs ? `<small class="ipg-obs">${reg.obs}</small>` : ''}
+          ${typeof instCapBadge === 'function' ? instCapBadge(reg, fechaStr, slot) : ''}
         </div>
+        <div class="r"><span class="${est.cls}">${est.txt}${afoP!==null?'<br>'+afoP+'%':''}</span></div>
       </div>`;
+  }).join('');
+}
+
+// ─────────────────────────────────────────────
+// TAB: MI HORARIO (la semana completa, igual que en Gerencia)
+// ─────────────────────────────────────────────
+function instRenderHorario() {
+  const inst = instructores.find(i => i.id === instActualId);
+  const el = document.getElementById('inst-horario-semana');
+  if(!inst || !el) return;
+  const hoyReal = (typeof instCapHoy === 'function') ? instCapHoy() : fechaLocalStr(new Date());
+  const slots = getHorarioEn(inst, hoyReal);
+  if(!slots.length) {
+    el.innerHTML = '<div class="empty ipg-empty">Todavía no tienes clases asignadas. Pide a la coordinación que te las asigne.</div>';
+    return;
+  }
+  const hoyIdx = (new Date(hoyReal + 'T12:00:00').getDay() + 6) % 7;
+  el.innerHTML = DIAS.map((dia, i) => {
+    const del = slots.filter(s => s.dia === dia).sort((a,b) => a.hora.localeCompare(b.hora));
+    return `<div class="ipg-h2 sm${i===hoyIdx?' hoy':''}">${dia}${i===hoyIdx?' · hoy':''}</div>` +
+      (del.length ? del.map(s => {
+        const cap = getCapClase(s.clase);
+        return `<div class="ipg-line"><div class="t">${s.hora}</div><div class="b"><b>${s.clase}</b>${cap?`<small>Cupo ${cap}</small>`:''}</div></div>`;
+      }).join('') : '<div class="ipg-sub">Sin clases</div>');
   }).join('');
 }
 
@@ -273,27 +323,11 @@ function instRenderReporte() {
 
   // KPIs
   const kpisEl = document.getElementById('inst-rep-kpis');
-  if(kpisEl) kpisEl.innerHTML = `
-    <div style="background:var(--panel2);border:1px solid var(--border);border-radius:12px;padding:.8rem .9rem;text-align:center;position:relative;overflow:hidden">
-      <div style="position:absolute;top:0;left:0;right:0;height:2px;background:var(--neon)"></div>
-      <div style="font-family:'Bebas Neue',sans-serif;font-size:2rem;line-height:1;color:var(--neon)">${impartidas.length}</div>
-      <div style="font-size:.6rem;text-transform:uppercase;letter-spacing:1px;color:var(--txt3);margin-top:3px">Clases impartidas</div>
-    </div>
-    <div style="background:var(--panel2);border:1px solid var(--border);border-radius:12px;padding:.8rem .9rem;text-align:center;position:relative;overflow:hidden">
-      <div style="position:absolute;top:0;left:0;right:0;height:2px;background:${faltas.length>0?'var(--red2)':'var(--v3)'}"></div>
-      <div style="font-family:'Bebas Neue',sans-serif;font-size:2rem;line-height:1;color:${faltas.length>0?'var(--red2)':'var(--neon)'}">${faltas.length}</div>
-      <div style="font-size:.6rem;text-transform:uppercase;letter-spacing:1px;color:var(--txt3);margin-top:3px">Faltas</div>
-    </div>
-    <div style="background:var(--panel2);border:1px solid var(--border);border-radius:12px;padding:.8rem .9rem;text-align:center;position:relative;overflow:hidden">
-      <div style="position:absolute;top:0;left:0;right:0;height:2px;background:var(--blue)"></div>
-      <div style="font-family:'Bebas Neue',sans-serif;font-size:2rem;line-height:1;color:var(--blue)">${totalAsis}</div>
-      <div style="font-size:.6rem;text-transform:uppercase;letter-spacing:1px;color:var(--txt3);margin-top:3px">Total asistentes</div>
-    </div>
-    <div style="background:var(--panel2);border:1px solid var(--border);border-radius:12px;padding:.8rem .9rem;text-align:center;position:relative;overflow:hidden">
-      <div style="position:absolute;top:0;left:0;right:0;height:2px;background:${aforProm!==null?pctCol(aforProm):'var(--txt3)'}"></div>
-      <div style="font-family:'Bebas Neue',sans-serif;font-size:2rem;line-height:1;color:${aforProm!==null?pctCol(aforProm):'var(--txt3)'}">${aforProm!==null?aforProm+'%':'—'}</div>
-      <div style="font-size:.6rem;text-transform:uppercase;letter-spacing:1px;color:var(--txt3);margin-top:3px">Aforo promedio</div>
-    </div>`;
+  if(kpisEl) kpisEl.innerHTML =
+    instKpi('Clases impartidas', impartidas.length, 'en el periodo', 'var(--v2)') +
+    instKpi('Faltas', faltas.length, faltas.length ? 'revisa con coordinación' : 'sin faltas', faltas.length ? 'var(--red2)' : 'var(--b1,#5fb336)', faltas.length ? 'bad' : 'ok') +
+    instKpi('Total asistentes', totalAsis, 'personas atendidas', 'var(--blue)') +
+    instKpi('Aforo promedio', aforProm!==null ? aforProm+'%' : '—', 'del cupo de tus clases', aforProm!==null ? pctCol(aforProm) : 'var(--txt3)');
 
   // Gráfica: aforo por clase (agrupar)
   const claseStats = {};
