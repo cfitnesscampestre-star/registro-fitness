@@ -475,6 +475,7 @@ function guardarSupLocal(){
       }, 100);
     }
   } else {
+    document.documentElement.classList.remove('boot-inst');
     // Limpiar sesión expirada
     localStorage.removeItem('fc_ses_rol');
     localStorage.removeItem('fc_ses_inst_id');

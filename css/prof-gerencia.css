@@ -233,3 +233,7 @@ html:not(.tema-claro) #instructor-screen .ipg-empty{background:transparent}
 #instructor-screen .ipg-prox-r b{color:var(--txt);font-weight:600;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 #instructor-screen .ipg-prox-r em{grid-column:2;font-style:normal;color:var(--txt2);font-size:13px}
 #instructor-screen .ipg-prox-r.cubro em{color:var(--blue);font-weight:600}
+
+/* Firma y Suplencias se abren desde los avisos (alertas-portal.js). Se ocultan aquí también
+   para que no aparezcan un instante en la barra antes de que cargue ese archivo. */
+#inst-tabn-firma,#inst-tabn-suplencias{display:none!important}
