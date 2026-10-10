@@ -128,3 +128,19 @@
   #cm-menu .cm-mi small{display:block;font-size:12.5px;color:var(--txt3,#748792);margin-top:1px}
   #cm-menu .cm-mi.danger b{color:#c62d22}
 }
+
+/* ---------- Secciones en celular: barras de herramientas más compactas ----------
+   Los botones y filtros de cada panel se acomodan en renglones parejos, con la
+   misma separación entre sí, en lugar de quedar sueltos con huecos grandes. */
+@media (max-width:640px){
+  .vista .phdr{flex-wrap:wrap!important;align-items:center!important;justify-content:flex-start!important;gap:10px!important;row-gap:10px!important}
+  .vista .phdr>div[style*="flex"]{gap:8px!important;row-gap:8px!important;width:100%}
+  .vista .phdr>div[style*="flex"]>*{margin:0!important}
+  .vista .phdr>div[style*="flex"]>input.ctrl[type="text"]{flex:1 1 100%;width:auto!important}
+  .vista .phdr>div[style*="flex"]>.btn{flex:1 1 auto;justify-content:center;min-height:38px}
+  /* Aviso "Portal del Instructor" (Suplencias planificadas): el texto ocupa el ancho y los botones van abajo */
+  #v-sup-plan>div:first-child{flex-wrap:wrap!important;gap:10px!important}
+  #v-sup-plan>div:first-child>div[style*="flex:1"]{flex:1 1 calc(100% - 52px)!important;min-width:0}
+  #v-sup-plan>div:first-child>div:last-child{width:100%;gap:8px!important}
+  #v-sup-plan>div:first-child>div:last-child>.btn{flex:1;justify-content:center}
+}

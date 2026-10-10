@@ -3,6 +3,18 @@
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1.0, user-scalable=no">
 <title>Fitness Control — Club Campestre</title>
+<!-- Tema: se aplica antes de pintar para que no parpadee. Una sola clase a la vez. -->
+<script>
+window.fcSetTema=function(t){
+  t = t==='oscuro' ? 'oscuro' : 'claro';
+  var h=document.documentElement;
+  h.classList.toggle('tema-oscuro', t==='oscuro');
+  h.classList.toggle('tema-claro', t==='claro');
+  var m=document.querySelector('meta[name="theme-color"]'); if(m) m.setAttribute('content', t==='oscuro' ? '#071417' : '#0f7a5a');
+  try{ localStorage.setItem('fitness-tema', t); localStorage.setItem('fc_tema', t); }catch(e){}
+};
+try{ window.fcSetTema(localStorage.getItem('fitness-tema')||'claro'); }catch(e){}
+</script>
 
 <!-- Arranque del portal del instructor: si en este teléfono hay una sesión de instructor
      vigente, se tapa la pantalla con el fondo y el logo mientras carga, para que al
@@ -179,7 +191,8 @@ window._cargarXLSX=function(){
 </script>
 <link rel="stylesheet" href="css/gerencia-look.css?v=1">
 <link rel="stylesheet" href="css/prof-gerencia.css?v=3">
-<link rel="stylesheet" href="css/coord-mobile.css?v=1">
+<link rel="stylesheet" href="css/coord-mobile.css?v=3">
+<link rel="stylesheet" href="css/tema-oscuro.css?v=2">
 </head>
 
 
@@ -3658,37 +3671,11 @@ function toggleCoordMenu(ev) {
 }
 window.toggleCoordMenu = toggleCoordMenu;
 
-// ── Toggle tema claro / oscuro ────────────────────────────────
+// ── Toggle tema claro / oscuro (delega en aplicarTema de reportes.js) ──
 function toggleTema() {
-  var html = document.documentElement;
-  var esOscuro = html.classList.contains('tema-oscuro');
-  if (esOscuro) {
-    // Cambiar a CLARO
-    html.classList.remove('tema-oscuro');
-    html.classList.remove('tema-claro'); // limpiar por si acaso
-    localStorage.setItem('fitness-tema', 'claro');
-  } else {
-    // Cambiar a OSCURO
-    html.classList.add('tema-oscuro');
-    html.classList.remove('tema-claro');
-    localStorage.setItem('fitness-tema', 'oscuro');
-  }
-  var icono = document.getElementById('coord-tema-icon');
-  if (icono) {
-    if (html.classList.contains('tema-oscuro')) {
-      // Está en oscuro → mostrar sol (para volver a claro)
-      icono.innerHTML = '<svg class="ico" viewBox="0 0 20 20"><circle cx="10" cy="10" r="3" stroke="currentColor" stroke-width="1.4" fill="none"/><path d="M10 2 L10 5 M10 15 L10 18 M2 10 L5 10 M15 10 L18 10 M4.2 4.2 L6.4 6.4 M13.6 13.6 L15.8 15.8 M15.8 4.2 L13.6 6.4 M6.4 13.6 L4.2 15.8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>';
-    } else {
-      // Está en claro → mostrar luna (para ir a oscuro)
-      icono.innerHTML = '<svg class="ico" viewBox="0 0 20 20"><path d="M14 4 Q10 4 8 7 Q6 10 8 13 Q10 16 14 16 Q11 14 11 10 Q11 6 14 4" stroke="currentColor" stroke-width="1.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>';
-    }
-  }
-  if (typeof temaActual !== 'undefined') {
-    window.temaActual = html.classList.contains('tema-oscuro') ? 'oscuro' : 'claro';
-  }
-  if (typeof renderDashboard === 'function') {
-    setTimeout(renderDashboard, 50);
-  }
+  var oscuro = document.documentElement.classList.contains('tema-oscuro');
+  if (typeof aplicarTema === 'function') aplicarTema(oscuro ? 'claro' : 'oscuro');
+  else if (typeof window.fcSetTema === 'function') window.fcSetTema(oscuro ? 'claro' : 'oscuro');
 }
 window.toggleTema = toggleTema;
 
