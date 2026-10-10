@@ -955,30 +955,6 @@ function imprimirDesdeModal() {
       .no-print{display:none!important;}
     </style>
   </head><body>${cuerpo}<script>window.onload=()=>{window.print();}<\/script>
-<!-- ═══ BOTTOM NAV (móvil/tablet) ═══ -->
-<nav id="bottom-nav">
-  <div class="bnav-item on" data-s="hoy" onclick="switchSection('hoy')">
-    <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="10" cy="10" r="7"/><polyline points="10,6 10,10 13,12" stroke-width="1.7"/></svg>
-    <span>Hoy</span>
-    <span class="bnav-dot" id="bnav-hoy-dot"></span>
-  </div>
-  <div class="bnav-item" data-s="programa" onclick="switchSection('programa')">
-    <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><rect x="3" y="4" width="14" height="13" rx="2"/><line x1="3" y1="9" x2="17" y2="9"/><line x1="7" y1="2" x2="7" y2="6"/><line x1="13" y1="2" x2="13" y2="6"/></svg>
-    <span>Programa</span>
-  </div>
-  <div class="bnav-item" data-s="equipo" onclick="switchSection('equipo')">
-    <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="8" cy="6" r="3"/><path d="M2 17 Q2 12 8 12 Q14 12 14 17"/><circle cx="14" cy="6" r="2.5"/><path d="M14 11 Q18 11 18 16"/></svg>
-    <span>Equipo</span>
-  </div>
-  <div class="bnav-item" data-s="analisis" onclick="switchSection('analisis')">
-    <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><rect x="3" y="12" width="3" height="5" rx="1"/><rect x="8.5" y="8" width="3" height="9" rx="1"/><rect x="14" y="4" width="3" height="13" rx="1"/></svg>
-    <span>Análisis</span>
-  </div>
-  <div class="bnav-item" data-s="mas" onclick="switchSection('mas')">
-    <svg viewBox="0 0 20 20" fill="currentColor"><circle cx="5" cy="10" r="1.4"/><circle cx="10" cy="10" r="1.4"/><circle cx="15" cy="10" r="1.4"/></svg>
-    <span>Más</span>
-  </div>
-</nav>
 
 </body></html>`);
   w.document.close();

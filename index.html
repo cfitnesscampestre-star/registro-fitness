@@ -179,6 +179,7 @@ window._cargarXLSX=function(){
 </script>
 <link rel="stylesheet" href="css/gerencia-look.css?v=1">
 <link rel="stylesheet" href="css/prof-gerencia.css?v=3">
+<link rel="stylesheet" href="css/coord-mobile.css?v=1">
 </head>
 
 
@@ -1231,20 +1232,47 @@ window._cargarXLSX=function(){
     </div>
   </div>
 
-  <!-- Indicadores de página -->
-  <div id="mob-dots">
-    <div class="mob-dot on" onclick="irSlide(0)"></div>
-    <div class="mob-dot" onclick="irSlide(1)"></div>
-    <div class="mob-dot" onclick="irSlide(2)"></div>
+  <!-- Pestañas del inicio (antes eran puntitos y había que deslizar para descubrirlas).
+       Conservan la clase .mob-dot para que irSlide() las marque. -->
+  <div id="mob-dots" class="cm-seg" role="tablist" aria-label="Vistas del inicio">
+    <button class="mob-dot on" onclick="irSlide(0)" role="tab">Hoy</button>
+    <button class="mob-dot" onclick="irSlide(1)" role="tab">Horarios</button>
+    <button class="mob-dot" onclick="irSlide(2)" role="tab">Ranking</button>
   </div>
 
   <!-- CARRUSEL -->
   <div id="mob-carousel">
     <div id="mob-track">
 
-      <!-- ── SLIDE 1: Inicio / Hoy ── -->
+      <!-- ── SLIDE 1: Inicio / Hoy ──
+           Orden: 1) resumen del día  2) recorrido  3) acciones rápidas  4) pendientes -->
       <div class="mob-slide" id="mob-slide-1">
 
+        <!-- ══ 1. RESUMEN DEL DÍA ══ -->
+        <div class="cm-h2" style="margin-top:4px">Resumen del día</div>
+        <div class="cm-date">
+          <button class="cm-ibtn" onclick="cambiarVistaFecha(-1)" aria-label="Día anterior"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="15,6 9,12 15,18"/></svg></button>
+          <input type="date" id="mob-date-picker" class="mob-date-input cm-date-input" onchange="setVistaFecha(this.value)" aria-label="Fecha">
+          <button class="cm-ibtn" onclick="cambiarVistaFecha(1)" aria-label="Día siguiente"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="9,6 15,12 9,18"/></svg></button>
+          <button id="mob-btn-hoy" class="cm-btn-sm" onclick="resetVistaFecha()">Hoy</button>
+        </div>
+        <div class="cm-kpis">
+          <div class="cm-kpi" style="--kc:var(--v2,#0f7a5a)">
+            <span class="k-l">Registradas</span><b id="mob-k-reg">—</b>
+            <div class="mob-sparkline" id="mob-sparkline-reg"></div>
+          </div>
+          <div class="cm-kpi" style="--kc:var(--red2,#d63b2f)">
+            <span class="k-l">Pendientes</span><b id="mob-k-pend" class="bad">—</b>
+            <div class="mob-dots-track" id="mob-dots-pend"></div>
+          </div>
+          <div class="cm-kpi" style="--kc:var(--blue,#0a6fbd)">
+            <span class="k-l">Aforo</span><b id="mob-k-aforo">—</b>
+            <div class="mob-aforo-bar-wrap"><div class="mob-aforo-bar" id="mob-aforo-bar"></div></div>
+          </div>
+        </div>
+
+        <!-- ══ 2. RECORRIDO ══ -->
+        <div class="cm-h2 solo-admin">Recorrido</div>
         <!-- ══ HERO RECORRIDO PREMIUM ══ -->
         <button class="mob-hero-rec solo-admin" onclick="iniciarRecorrido()">
           <div class="mob-hero-bg"></div>
@@ -1267,119 +1295,17 @@ window._cargarXLSX=function(){
           </div>
         </button>
 
-        <!-- ══ AGENDA ══ -->
-        <div class="mob-agenda-card" onclick="abrirAgendaMob()" style="margin-top:8px">
-          <div class="mob-ag-icon">
-            <svg viewBox="0 0 28 28" fill="none" width="22" height="22">
-              <rect x="3" y="5" width="22" height="20" rx="3.5" fill="rgba(26,122,69,.12)" stroke="rgba(26,122,69,.4)" stroke-width="1.2"/>
-              <line x1="8" y1="4" x2="8" y2="7" stroke="#1a7a45" stroke-width="2" stroke-linecap="round"/>
-              <line x1="20" y1="4" x2="20" y2="7" stroke="#1a7a45" stroke-width="2" stroke-linecap="round"/>
-              <line x1="8" y1="14" x2="16" y2="14" stroke="rgba(26,122,69,.8)" stroke-width="1.5" stroke-linecap="round"/>
-              <line x1="8" y1="18" x2="13" y2="18" stroke="rgba(26,122,69,.55)" stroke-width="1.5" stroke-linecap="round"/>
-            </svg>
-          </div>
-          <div class="mob-ag-text">
-            <div class="mob-ag-title">Agenda</div>
-            <div class="mob-ag-sub">Notas y recordatorios</div>
-          </div>
-          <div class="mob-agenda-badge" id="mob-agenda-badge" style="display:none">0</div>
-          <svg viewBox="0 0 20 20" fill="none" width="14" height="14" style="opacity:.4;flex-shrink:0">
-            <polyline points="7,4 13,10 7,16" stroke="rgba(26,122,69,.4)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
-          </svg>
-        </div>
-
-        <!-- ══ LAYOUT: MÉTRICAS + MENÚ RADIAL ══ -->
-        <div class="mob-premium-layout" style="margin-top:8px">
-
-          <div class="mob-metrics-panel">
-            <div class="mob-glass-card">
-              <!-- Fecha integrada -->
-              <div class="mob-gc-date-row">
-                <button class="mob-gc-date-nav" onclick="cambiarVistaFecha(-1)">‹</button>
-                <div style="flex:1;text-align:center">
-                  <input type="date" id="mob-date-picker" class="mob-date-input mob-gc-date-input" onchange="setVistaFecha(this.value)">
-                </div>
-                <button class="mob-gc-date-nav" onclick="cambiarVistaFecha(1)">›</button>
-                <button id="mob-btn-hoy" class="mob-gc-date-today" onclick="resetVistaFecha()">Hoy</button>
-              </div>
-              <div class="mob-gc-divider"></div>
-              <div class="mob-gc-title">RESUMEN HOY</div>
-
-              <div class="mob-gc-metric">
-                <span class="mob-gc-lbl">Clases Registradas</span>
-                <div class="mob-gc-row">
-                  <span class="mob-gc-val gold" id="mob-k-reg">—</span>
-                  <div class="mob-sparkline" id="mob-sparkline-reg"></div>
-                </div>
-              </div>
-
-              <div class="mob-gc-metric">
-                <span class="mob-gc-lbl">Tareas Pendientes</span>
-                <div class="mob-gc-row">
-                  <span class="mob-gc-val" style="color:#e05050;font-size:1.5rem" id="mob-k-pend">—</span>
-                  <div class="mob-dots-track" id="mob-dots-pend"></div>
-                </div>
-              </div>
-
-              <div class="mob-gc-metric" style="margin-bottom:4px">
-                <span class="mob-gc-lbl">Aforo</span>
-                <div style="display:flex;align-items:center;gap:8px;margin-top:2px">
-                  <div class="mob-aforo-bar-wrap" style="flex:1">
-                    <div class="mob-aforo-bar" id="mob-aforo-bar"></div>
-                  </div>
-                  <span class="mob-gc-val gold" style="font-size:1.4rem;min-width:42px;text-align:right" id="mob-k-aforo">—</span>
-                </div>
-              </div>
-
-              <div class="mob-gc-sub">Clases<br>y Tareas</div>
-            </div>
-          </div>
-
-          <!-- Menú radial -->
-          <div class="mob-radial-menu solo-admin">
-
-            <div class="mob-radial-btn primary" onclick="abrirModal('m-clase')">
-              <div class="mob-radial-circle">
-                <svg viewBox="0 0 44 44" fill="none" width="36" height="36">
-                  <rect x="9" y="11" width="26" height="26" rx="4" fill="rgba(26,122,69,.1)" stroke="rgba(26,122,69,.45)" stroke-width="1.3"/>
-                  <rect x="15" y="8" width="14" height="7" rx="3" fill="rgba(26,122,69,.2)" stroke="rgba(26,122,69,.5)" stroke-width="1"/>
-                  <line x1="22" y1="19" x2="22" y2="30" stroke="#ffffff" stroke-width="2.8" stroke-linecap="round"/>
-                  <line x1="16" y1="24.5" x2="28" y2="24.5" stroke="#ffffff" stroke-width="2.8" stroke-linecap="round"/>
-                </svg>
-              </div>
-              <span class="mob-radial-lbl">+&thinsp;Clase</span>
-            </div>
-
-            <div class="mob-radial-btn" onclick="abrirHubSuplencias()">
-              <div class="mob-radial-circle">
-                <svg viewBox="0 0 44 44" fill="none" width="36" height="36">
-                  <defs><linearGradient id="sup-g" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#3db870"/><stop offset="100%" stop-color="#1a7a45"/></linearGradient></defs>
-                  <circle cx="14" cy="14" r="5.5" fill="url(#sup-g)" opacity=".95"/>
-                  <path d="M6 34 Q6 25 14 25 Q17 25 19 27" stroke="#1a7a45" stroke-width="2.5" stroke-linecap="round" fill="none"/>
-                  <circle cx="30" cy="14" r="5.5" fill="url(#sup-g)" opacity=".8"/>
-                  <path d="M24 27 Q26 25 30 25 Q38 25 38 34" stroke="rgba(26,122,69,.8)" stroke-width="2.3" stroke-linecap="round" fill="none"/>
-                  <path d="M18 20 L26 20" stroke="#1a7a45" stroke-width="2" stroke-linecap="round"/>
-                  <polyline points="24,18 26,20 24,22" stroke="#1a7a45" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                </svg>
-              </div>
-              <span class="mob-radial-lbl">Suplencia</span>
-            </div>
-
-            <div class="mob-radial-btn" onclick="abrirFirmasDigitalesDirecto()" style="position:relative">
-              <div class="mob-radial-circle">
-                <svg viewBox="0 0 44 44" fill="none" width="36" height="36">
-                  <defs><linearGradient id="sig-g" x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stop-color="#1a7a45"/><stop offset="100%" stop-color="#3db870" stop-opacity=".6"/></linearGradient></defs>
-                  <path d="M11 7 L29 7 L36 13 L36 37 L11 37 Z" fill="rgba(26,122,69,.08)" stroke="rgba(26,122,69,.35)" stroke-width="1.3" stroke-linejoin="round"/>
-                  <path d="M29 7 L29 13 L36 13" fill="rgba(26,122,69,.12)" stroke="rgba(26,122,69,.35)" stroke-width="1" stroke-linejoin="round"/>
-                  <path d="M16 25 Q18 21 20 24 Q22 27 25 21 Q26 18 28 19" stroke="url(#sig-g)" stroke-width="2.5" stroke-linecap="round" fill="none"/>
-                  <line x1="14" y1="30" x2="28" y2="30" stroke="rgba(26,122,69,.35)" stroke-width="1.5" stroke-linecap="round"/>
-                </svg>
-              </div>
-              <span class="mob-radial-lbl">Firmas</span>
-              <span id="mob-firmas-badge" style="display:none;position:absolute;top:4px;right:4px;background:var(--red2);color:#fff;font-size:.5rem;font-weight:700;border-radius:8px;padding:1px 5px;line-height:14px;min-width:16px;text-align:center;"></span>
-            </div>
-
-          </div>
+        <!-- ══ 3. ACCIONES RÁPIDAS ══ -->
+        <div class="cm-h2">Acciones rápidas</div>
+        <div class="cm-actions">
+          <button class="cm-act solo-admin" onclick="abrirModal('m-clase')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="4" width="14" height="17" rx="2"/><line x1="12" y1="9" x2="12" y2="16"/><line x1="8.5" y1="12.5" x2="15.5" y2="12.5"/></svg><span>Registrar clase</span></button>
+          <button class="cm-act solo-admin" onclick="abrirModal('m-falta')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4 L21 19 H3 Z"/><line x1="12" y1="10" x2="12" y2="14"/><circle cx="12" cy="16.6" r=".6" fill="currentColor"/></svg><span>Registrar falta</span></button>
+          <button class="cm-act solo-admin" onclick="abrirHubSuplencias()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="8" r="3"/><path d="M3 19 Q3 14 8 14 Q10.5 14 12 15.5"/><circle cx="16.5" cy="11" r="2.5"/><path d="M12.5 20 Q12.5 16 16.5 16 Q20.5 16 20.5 20"/></svg><span>Suplencias</span></button>
+          <button class="cm-act solo-admin" onclick="abrirFirmasDigitalesDirecto()" style="position:relative"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3 H15 L19 7 V21 H6 Z"/><path d="M9 15 Q10.5 12 12 14 Q13.5 16 15.5 12"/><line x1="9" y1="18" x2="16" y2="18"/></svg><span>Firmas</span>
+            <span id="mob-firmas-badge" class="cm-badge" style="display:none"></span></button>
+          <button class="cm-act" onclick="abrirAgendaMob()" style="position:relative"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="5" width="16" height="16" rx="2"/><line x1="4" y1="10" x2="20" y2="10"/><line x1="9" y1="3" x2="9" y2="7"/><line x1="15" y1="3" x2="15" y2="7"/><line x1="8" y1="14" x2="14" y2="14"/></svg><span>Agenda</span>
+            <span class="mob-agenda-badge cm-badge" id="mob-agenda-badge" style="display:none">0</span></button>
+          <button class="cm-act" onclick="abrirModal('m-reports');toggleRpt()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="9" width="12" height="8" rx="1.5"/><path d="M8 9 V4 H16 V9"/><rect x="8.5" y="14" width="7" height="6" rx="1"/></svg><span>Generar reporte</span></button>
         </div>
 
         <!-- KPI hidden compatibilidad JS -->
@@ -1392,6 +1318,7 @@ window._cargarXLSX=function(){
         <!-- Observaciones: aforo del profe distinto al capturado por coordinación (captura-prof.js) -->
         <div id="mob-obs-prof"></div>
 
+        <!-- ══ 4. PENDIENTES ══ -->
         <div class="mob-sec-lbl pildora" id="mob-lista-lbl" style="margin-top:10px">⚠ PENDIENTE(S) HOY</div>
         <div id="mob-clases-lista"></div>
       </div>
@@ -1467,6 +1394,37 @@ window._cargarXLSX=function(){
   </div><!-- /mob-carousel -->
 
 </div>
+
+<!-- ═══ NAVEGACIÓN MÓVIL DEL COORDINADOR ═══════════════════════════════════
+     Barra inferior (Hoy · Programa · Equipo · Análisis · Menú) y el Menú con todas
+     las secciones del sistema agrupadas. Estilos en css/coord-mobile.css. -->
+<nav id="bottom-nav" aria-label="Navegación">
+  <button class="bnav-item on" data-s="hoy" onclick="switchSection('hoy')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8.5"/><polyline points="12,7.5 12,12 15,14"/></svg><span>Hoy</span><span class="bnav-dot" id="bnav-hoy-dot"></span></button>
+  <button class="bnav-item" data-s="programa" onclick="switchSection('programa')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="2"/><line x1="3" y1="10" x2="21" y2="10"/><line x1="8" y1="3" x2="8" y2="7"/><line x1="16" y1="3" x2="16" y2="7"/></svg><span>Programa</span></button>
+  <button class="bnav-item" data-s="equipo" onclick="switchSection('equipo')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3.2"/><path d="M3 20 Q3 14 9 14 Q15 14 15 20"/><circle cx="17" cy="8" r="2.6"/><path d="M17 13 Q21 13 21 18"/></svg><span>Equipo</span></button>
+  <button class="bnav-item" data-s="analisis" onclick="switchSection('analisis')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="13" width="3.5" height="7" rx="1"/><rect x="10.25" y="8" width="3.5" height="12" rx="1"/><rect x="16.5" y="4" width="3.5" height="16" rx="1"/></svg><span>Análisis</span></button>
+  <button class="bnav-item" data-s="mas" onclick="abrirMenuCoord()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><line x1="4" y1="7" x2="20" y2="7"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="17" x2="20" y2="17"/></svg><span>Menú</span></button>
+</nav>
+
+<div id="cm-menu" aria-hidden="true">
+  <div class="cm-menu-fondo" onclick="cerrarMenuCoord()"></div>
+  <div class="cm-menu-hoja" role="dialog" aria-label="Menú">
+    <div class="cm-menu-h"><b>Menú</b><small>Todo Fitness Control en un solo lugar</small>
+      <button class="cm-menu-x" onclick="cerrarMenuCoord()" aria-label="Cerrar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><line x1="6" y1="6" x2="18" y2="18"/><line x1="18" y1="6" x2="6" y2="18"/></svg></button></div>
+    <div class="cm-menu-body">
+    <div class="cm-mg"><div class="cm-mg-t">Operación del día</div><div class="cm-mg-l"><button class="cm-mi solo-admin" onclick="cerrarMenuCoord();iniciarRecorrido()"><b>Iniciar recorrido</b><small>Pasar por las clases y registrar</small></button><button class="cm-mi solo-admin" onclick="cerrarMenuCoord();abrirModal('m-clase')"><b>Registrar clase</b><small>Captura manual de una clase</small></button><button class="cm-mi solo-admin" onclick="cerrarMenuCoord();abrirModal('m-falta')"><b>Registrar falta</b></button><button class="cm-mi solo-admin" onclick="cerrarMenuCoord();abrirHubSuplencias()"><b>Suplencias</b><small>Registrar, planificar y firmas</small></button><button class="cm-mi solo-admin" onclick="cerrarMenuCoord();abrirFirmasDigitalesDirecto()"><b>Firmas</b><small>Hojas de firma de los instructores</small></button><button class="cm-mi" onclick="cerrarMenuCoord();abrirAgendaMob()"><b>Agenda</b><small>Notas, recordatorios y eventos</small></button></div></div>
+    <div class="cm-mg"><div class="cm-mg-t">Programa</div><div class="cm-mg-l"><button class="cm-mi" onclick="cerrarMenuCoord();navegarA('calendario')"><b>Calendario</b><small>Clases y registros por día</small></button><button class="cm-mi" onclick="cerrarMenuCoord();navegarA('sup-plan')"><b>Suplencias planificadas</b></button></div></div>
+    <div class="cm-mg"><div class="cm-mg-t">Equipo</div><div class="cm-mg-l"><button class="cm-mi" onclick="cerrarMenuCoord();navegarA('instructores')"><b>Instructores</b><small>Horarios, datos y PIN</small></button><button class="cm-mi" onclick="cerrarMenuCoord();navegarA('salones')"><b>Salones</b><small>Capacidad por salón</small></button></div></div>
+    <div class="cm-mg"><div class="cm-mg-t">Análisis</div><div class="cm-mg-l"><button class="cm-mi" onclick="cerrarMenuCoord();navegarA('dashboard')"><b>Dashboard</b><small>Resumen general</small></button><button class="cm-mi" onclick="cerrarMenuCoord();navegarA('historial')"><b>Historial</b><small>Todos los registros</small></button><button class="cm-mi" onclick="cerrarMenuCoord();navegarA('ranking')"><b>Ranking</b><small>Mejores clases e instructores</small></button><button class="cm-mi" onclick="cerrarMenuCoord();navegarA('heatmap')"><b>Mapa de calor</b><small>Aforo por día y hora</small></button><button class="cm-mi" onclick="cerrarMenuCoord();navegarA('diagnostico')"><b>Diagnóstico</b><small>Qué clases ajustar</small></button><button class="cm-mi" onclick="cerrarMenuCoord();navegarA('comparar')"><b>Comparar</b><small>Periodos, clases o instructores</small></button></div></div>
+    <div class="cm-mg"><div class="cm-mg-t">Reportes y seguimiento</div><div class="cm-mg-l"><button class="cm-mi" onclick="cerrarMenuCoord();abrirModal('m-reports');toggleRpt()"><b>Generar reporte</b><small>PDF o impresión</small></button><button class="cm-mi solo-admin" onclick="cerrarMenuCoord();navegarA('reporte-dep')"><b>Reporte deportivo</b></button><button class="cm-mi" onclick="cerrarMenuCoord();navegarA('eventos')"><b>Eventos</b></button><button class="cm-mi" onclick="cerrarMenuCoord();navegarA('recorridos')"><b>Recorridos</b><small>Recorridos realizados</small></button><button class="cm-mi" onclick="cerrarMenuCoord();navegarA('alertas')"><b>Alertas</b></button><button class="cm-mi" onclick="cerrarMenuCoord();navegarA('log')"><b>Bitácora de cambios</b></button></div></div>
+    <div class="cm-mg"><div class="cm-mg-t">Cuenta</div><div class="cm-mg-l"><button class="cm-mi solo-admin" onclick="cerrarMenuCoord();toggleTema()"><b>Cambiar apariencia</b><small>Tema claro u oscuro</small></button><button class="cm-mi solo-admin" onclick="cerrarMenuCoord();abrirModal('m-cambiar-pass')"><b>Cambiar contraseña</b></button><button class="cm-mi solo-admin danger" onclick="cerrarMenuCoord();confirmarLimpiezaTotal()"><b>Borrar todos los datos</b></button><button class="cm-mi" onclick="cerrarMenuCoord();cerrarSesion()"><b>Salir</b><small>Cerrar sesión en este teléfono</small></button></div></div>
+    </div>
+  </div>
+</div>
+<script>
+function abrirMenuCoord(){ var m=document.getElementById('cm-menu'); if(m){ m.classList.add('on'); m.setAttribute('aria-hidden','false'); } }
+function cerrarMenuCoord(){ var m=document.getElementById('cm-menu'); if(m){ m.classList.remove('on'); m.setAttribute('aria-hidden','true'); } }
+</script>
 
 <!-- ═══ SEARCH OVERLAY (MÓVIL) ════════════════════════════════════════════ -->
 <div id="mob-search-overlay">
@@ -3744,86 +3702,6 @@ window.toggleTema = toggleTema;
 })();
 </script>
 
-<!-- ═══ SWIPE NAV — deslizar header hacia abajo revela el menú ═══ -->
-<script>
-window.addEventListener('DOMContentLoaded', function(){
-  var isMob = function(){ return window.innerWidth <= 640; };
-  var hdr = document.getElementById('hdr');
-  var bar = document.getElementById('mob-nav-bar');
-  if(!hdr || !bar){ return; }
-
-  var touchStartY = 0;
-  var touchStartX = 0;
-  var menuVisible = false;
-  var autoHideTimer = null;
-
-  // Inicializar oculto via display:none, pero preparado para mostrar
-  bar.style.display = 'none';
-  bar.style.transition = 'opacity .25s ease, transform .28s cubic-bezier(.4,0,.2,1)';
-  bar.style.opacity = '0';
-  bar.style.transform = 'translateY(-8px)';
-
-  function showMenu(){
-    bar.style.display = 'flex';
-    requestAnimationFrame(function(){
-      bar.style.opacity = '1';
-      bar.style.transform = 'translateY(0)';
-    });
-    menuVisible = true;
-    resetAutoHide();
-  }
-
-  function hideMenu(){
-    bar.style.opacity = '0';
-    bar.style.transform = 'translateY(-8px)';
-    setTimeout(function(){ 
-      if(!menuVisible) bar.style.display = 'none'; 
-    }, 280);
-    menuVisible = false;
-    if(autoHideTimer){ clearTimeout(autoHideTimer); autoHideTimer = null; }
-  }
-
-  function resetAutoHide(){
-    if(autoHideTimer) clearTimeout(autoHideTimer);
-    autoHideTimer = setTimeout(hideMenu, 4000);
-  }
-
-  hdr.addEventListener('touchstart', function(e){
-    touchStartY = e.touches[0].clientY;
-    touchStartX = e.touches[0].clientX;
-  }, { passive: true });
-
-  hdr.addEventListener('touchend', function(e){
-    if(!isMob()) return;
-    var dy = e.changedTouches[0].clientY - touchStartY;
-    var dx = Math.abs(e.changedTouches[0].clientX - touchStartX);
-    if(Math.abs(dy) > dx){
-      if(dy > 15 && !menuVisible){ showMenu(); }
-      else if(dy < -10 && menuVisible){ hideMenu(); }
-    }
-  }, { passive: true });
-
-  // Tap en logo/título también alterna el menú
-  hdr.addEventListener('click', function(e){
-    if(!isMob()) return;
-    var tag = e.target.tagName.toLowerCase();
-    if(tag === 'button' || e.target.closest('button')) return;
-    menuVisible ? hideMenu() : showMenu();
-  });
-
-  // Cerrar al tocar fuera
-  document.addEventListener('touchstart', function(e){
-    if(menuVisible && !hdr.contains(e.target) && !bar.contains(e.target)){
-      hideMenu();
-    }
-  }, { passive: true });
-
-  // Botones del menú cierran al navegar
-  bar.querySelectorAll('button').forEach(function(btn){
-    btn.addEventListener('click', function(){ setTimeout(hideMenu, 150); });
-  });
-});
-</script>
 
 
 <script>
