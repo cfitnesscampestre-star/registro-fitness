@@ -4,6 +4,36 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1.0, user-scalable=no">
 <title>Fitness Control — Club Campestre</title>
 
+<!-- Arranque del portal del instructor: si en este teléfono hay una sesión de instructor
+     vigente, se tapa la pantalla con el fondo y el logo mientras carga, para que al
+     recargar no se alcancen a ver las pantallas de coordinación. portal.js lo quita
+     en cuanto el portal está listo (abrirPortalInstructorLocal). -->
+<script>
+(function(){
+  try{
+    var ls=localStorage;
+    if(ls.getItem('fc_ses_rol')!=='instructor'||!ls.getItem('fc_ses_inst_id')) return;
+    if(parseInt(ls.getItem('fc_ses_ttl')||'0',10)<=Date.now()) return;
+    var fp=btoa(navigator.userAgent+'|'+navigator.language+'|'+Intl.DateTimeFormat().resolvedOptions().timeZone+'|'+screen.width+'x'+screen.height).slice(0,32);
+    if(ls.getItem('fc_ses_fp')!==fp) return;
+    var h=document.documentElement;
+    h.classList.add('boot-inst');
+    // Por si algo falla al cargar, nunca dejar la pantalla tapada
+    setTimeout(function(){ h.classList.remove('boot-inst'); },10000);
+  }catch(e){}
+})();
+</script>
+<style>
+html.boot-inst body{overflow:hidden}
+html.boot-inst body::before{content:"";position:fixed;inset:0;z-index:2147483646;
+  background:url(img/login-logo.png) center calc(50% - 30px)/96px 96px no-repeat,
+    radial-gradient(720px 420px at -8% -6%,rgba(95,179,54,.13),transparent 62%),
+    radial-gradient(760px 480px at 108% 104%,rgba(42,174,214,.15),transparent 62%),#edf3f2}
+html.boot-inst body::after{content:"";position:fixed;left:50%;top:calc(50% + 50px);width:30px;height:30px;margin-left:-15px;
+  z-index:2147483647;border-radius:50%;border:3px solid rgba(15,122,90,.2);border-top-color:#0f7a5a;animation:boot-giro .8s linear infinite}
+@keyframes boot-giro{to{transform:rotate(360deg)}}
+</style>
+
 <!-- PWA -->
 <meta name="application-name" content="Fitness Control">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -148,7 +178,7 @@ window._cargarXLSX=function(){
 })();
 </script>
 <link rel="stylesheet" href="css/gerencia-look.css?v=1">
-<link rel="stylesheet" href="css/prof-gerencia.css?v=2">
+<link rel="stylesheet" href="css/prof-gerencia.css?v=3">
 </head>
 
 
@@ -3296,7 +3326,7 @@ window._cargarXLSX=function(){
 <script defer src="js/suplencias2.js"></script>
 <script defer src="js/mobile.js"></script>
 <script defer src="js/sidebar.js"></script>
-<script defer src="js/portal.js?v=3"></script>
+<script defer src="js/portal.js?v=4"></script>
 <script defer src="js/captura-prof.js?v=1"></script>
 <script defer src="js/gimnasia-gerencia.js?v=1"></script>
 <script defer src="js/pines.js?v=1"></script>

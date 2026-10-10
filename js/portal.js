@@ -72,6 +72,10 @@ function abrirPortalInstructorLocal() {
   // Pruebas físicas de Metodología (Control Gerencia): escucha en segundo plano
   if(typeof pruebasIniciar === 'function') { try { pruebasIniciar(); } catch(e) { console.warn('[Pruebas]', e); } }
 
+  // Quitar la pantalla de carga (ver <head> de index.html) en el siguiente cuadro,
+  // ya con el portal pintado
+  requestAnimationFrame(() => document.documentElement.classList.remove('boot-inst'));
+
   // Renderizar tab inicial
   instSwitchTab('hoy');
 }
