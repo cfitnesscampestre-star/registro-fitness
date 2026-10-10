@@ -1,0 +1,154 @@
+/* =====================================================================
+   tema-oscuro.css — Tema oscuro de Fitness Control (celular y computadora).
+
+   Misma familia de color que el tema claro y que Control Gerencia
+   (verde → azul), sobre fondos azul-petróleo profundos en lugar de
+   negro puro, con textos claros y bordes suaves.
+
+   Por qué se veía mal: el CSS del celular fuerza los colores del tema
+   claro con !important en :root. Aquí se redefinen con más prioridad
+   (html.tema-oscuro:root) y se corrigen los elementos que traían
+   blanco o verde oscuro escrito directo.
+
+   Solo aplica con html.tema-oscuro. Se carga al final.
+   ===================================================================== */
+
+/* ---------- 1. Paleta ---------- */
+html.tema-oscuro,
+html.tema-oscuro:root{
+  --bg:#0a171a !important; --bg2:#0d1d21 !important;
+  --panel:#11242a !important; --panel2:#163038 !important; --panel3:#1b3841 !important;
+  --border:#23404a !important; --border2:#1b353d !important;
+  --verde:#2fae74 !important; --v2:#2a9d6a !important; --v3:#41c189 !important;
+  --neon:#5fd59b !important; --neon2:#93e8bf !important;
+  --gold:#d9a23a !important; --gold2:#ebb852 !important;
+  --red:#e0564b !important; --red2:#f07065 !important;
+  --blue:#56afe9 !important;
+  --txt:#e6f0ee !important; --txt2:#a9c0c1 !important; --txt3:#7d9799 !important; --w:#ffffff !important;
+  --shadow:0 1px 2px rgba(0,0,0,.35),0 10px 28px rgba(0,0,0,.35) !important;
+  --shadow-sm:0 1px 2px rgba(0,0,0,.3),0 4px 12px rgba(0,0,0,.25) !important;
+  --grad:linear-gradient(135deg,#2f9a3f 0%,#0f7a5a 42%,#0a62b0 100%) !important;
+  --surf:linear-gradient(160deg,#00221d 0%,#01402f 26%,#015a49 46%,#015a77 66%,#02598f 84%,#033668 100%) !important;
+  color-scheme:dark;
+}
+
+/* ---------- 2. Fondo de página ---------- */
+html.tema-oscuro body{
+  background:
+    radial-gradient(760px 460px at -10% -8%,rgba(47,154,63,.16),transparent 62%),
+    radial-gradient(820px 520px at 110% 106%,rgba(10,98,176,.20),transparent 62%),
+    #0a171a !important;
+  background-attachment:fixed !important;
+  color:var(--txt);
+}
+html.tema-oscuro #mobile-home.on{background:transparent !important}
+
+/* ---------- 3. Encabezado: superficie de marca, igual que en claro ---------- */
+html.tema-oscuro #hdr{
+  background:url(../img/textura.svg) 0 0/352px 352px,var(--surf) !important;
+  border:0 !important;border-bottom:1px solid rgba(255,255,255,.08) !important;
+  box-shadow:0 10px 26px rgba(0,0,0,.45) !important;
+}
+html.tema-oscuro #hdr .htit{color:#fff !important;letter-spacing:.02em}
+html.tema-oscuro #hdr .hsub,html.tema-oscuro #sync-indicator{color:rgba(255,255,255,.8) !important}
+
+/* ---------- 4. Superficies (tarjetas y paneles) ---------- */
+html.tema-oscuro :is(.panel,.kpi,.rec-card,.diag-card,.alert-card,.rep-card,.mob-glass-card){
+  background:linear-gradient(180deg,rgba(255,255,255,.025),transparent 40%),var(--panel) !important;
+  border-color:var(--border) !important;box-shadow:var(--shadow-sm) !important;
+}
+html.tema-oscuro .phdr{border-bottom-color:var(--border) !important}
+html.tema-oscuro :is(.phdr span,.kpi .klbl,.mob-sec-lbl,.empty){color:var(--txt3) !important}
+html.tema-oscuro .kpi .kval{color:var(--txt) !important}
+
+/* ---------- 5. Campos de captura ---------- */
+html.tema-oscuro :is(input,select,textarea,.ctrl,.fg input,.fg select,.fg textarea,.mob-date-input,.rep-field input,.rep-field select,.rep-field textarea){
+  background:var(--panel2) !important;border-color:var(--border) !important;color:var(--txt) !important;
+}
+html.tema-oscuro :is(input,textarea)::placeholder{color:var(--txt3) !important;opacity:1}
+html.tema-oscuro :is(input,select,textarea):focus{border-color:var(--v3) !important;box-shadow:0 0 0 3px rgba(65,193,137,.2) !important;outline:none}
+html.tema-oscuro option{background:#11242a;color:#e6f0ee}
+
+/* ---------- 6. Tablas ---------- */
+html.tema-oscuro table{color:var(--txt)}
+html.tema-oscuro th{background:var(--panel2) !important;color:var(--txt2) !important;border-color:var(--border) !important}
+html.tema-oscuro td{border-color:var(--border2) !important}
+html.tema-oscuro :is(td:not(.hmap-cell),td:not(.hmap-cell) strong,td:not(.hmap-cell) .mono,td:not(.hmap-cell)>div,td:not(.hmap-cell)>span:not([class*="chip"]):not([style*="color"])){color:var(--txt)}
+html.tema-oscuro tbody tr:hover{background:rgba(86,175,233,.06) !important}
+
+/* ---------- 7. Chips de estado ---------- */
+html.tema-oscuro .chip.cok,html.tema-oscuro .chip.cpl{background:rgba(65,193,137,.16) !important;color:#7fe0b0 !important}
+html.tema-oscuro .chip.cbd{background:rgba(240,112,101,.16) !important;color:#ff9a90 !important}
+html.tema-oscuro .chip.cho{background:rgba(235,184,82,.16) !important;color:#f3c977 !important}
+
+/* ---------- 8. Botones secundarios ---------- */
+html.tema-oscuro :is(.btn.bo,.abtn){background:var(--panel2) !important;border-color:var(--border) !important;color:var(--txt) !important}
+html.tema-oscuro .btn.solo-admin:not(.bg):not(.br):not(.bb):not([style*="gradient"]){background:var(--panel2) !important;color:var(--txt) !important;border-color:var(--border) !important}
+
+/* ---------- 9. Navegación secundaria (celular) ---------- */
+html.tema-oscuro #sub-tabs{background:rgba(10,23,26,.92) !important;border-bottom:1px solid var(--border) !important;backdrop-filter:blur(14px)}
+html.tema-oscuro #sub-tabs .stab{color:var(--txt3) !important}
+html.tema-oscuro #sub-tabs .stab.on{color:var(--neon) !important;border-bottom-color:var(--neon) !important}
+html.tema-oscuro #mob-back-bar{background:rgba(10,23,26,.92) !important;border-bottom:1px solid var(--border) !important}
+html.tema-oscuro #mob-back-bar .mob-back-btn{background:var(--panel2) !important;border-color:var(--border) !important;color:var(--neon) !important}
+html.tema-oscuro #mob-back-bar .mob-back-section{color:var(--txt2) !important}
+
+/* ---------- 10. Inicio del coordinador (celular) ---------- */
+html.tema-oscuro #mob-search-bar{background:var(--panel) !important;border-color:var(--border) !important}
+html.tema-oscuro #mob-search-input{color:var(--txt) !important}
+html.tema-oscuro #mobile-home #mob-dots.cm-seg{background:var(--panel) !important;border-color:var(--border) !important}
+html.tema-oscuro #mobile-home #mob-dots.cm-seg .mob-dot{color:var(--txt3) !important}
+html.tema-oscuro #mobile-home #mob-dots.cm-seg .mob-dot.on{background:var(--panel3) !important;color:var(--neon) !important;box-shadow:0 2px 10px rgba(0,0,0,.35) !important}
+html.tema-oscuro #mobile-home .cm-h2{color:var(--txt) !important}
+html.tema-oscuro #mobile-home :is(.cm-kpi,.cm-act,.cm-ibtn){background:linear-gradient(180deg,rgba(255,255,255,.03),transparent 50%),var(--panel) !important;border-color:var(--border) !important;box-shadow:0 1px 2px rgba(0,0,0,.3),0 8px 22px rgba(0,0,0,.28) !important}
+html.tema-oscuro #mobile-home .cm-ibtn{color:var(--txt2) !important}
+html.tema-oscuro #mobile-home .cm-kpi .k-l{color:var(--txt2) !important}
+html.tema-oscuro #mobile-home .cm-kpi b{color:var(--txt) !important}
+html.tema-oscuro #mobile-home .cm-kpi b.bad{color:#ff8a80 !important}
+html.tema-oscuro #mobile-home .cm-act{color:var(--neon) !important}
+html.tema-oscuro #mobile-home .cm-act span{color:var(--txt) !important}
+html.tema-oscuro #mobile-home .cm-date-input{background:var(--panel) !important}
+html.tema-oscuro #mobile-home .mob-aforo-bar-wrap{background:var(--border) !important}
+html.tema-oscuro #mobile-home .mob-hero-rec{box-shadow:0 14px 34px rgba(0,0,0,.45) !important}
+html.tema-oscuro .mob-c-nombre{color:var(--txt) !important}
+html.tema-oscuro .mob-c-inst{color:var(--txt3) !important}
+html.tema-oscuro .mob-sec-lbl.pildora{background:rgba(240,112,101,.12) !important;color:#ff9a90 !important;border-color:rgba(240,112,101,.3) !important}
+html.tema-oscuro :is(.mob-clase-card,.mob-c-card,#mob-clases-lista>div){background-color:var(--panel) !important;border-color:var(--border) !important}
+html.tema-oscuro #mob-slide-2>div,html.tema-oscuro #mob-slide-3>div{background-color:transparent}
+html.tema-oscuro .mob-slide-title,html.tema-oscuro .mob-slide-hdr{color:var(--txt) !important}
+
+/* Barra inferior: degradado de marca con contorno discreto (sin el halo blanco del tema claro) */
+html.tema-oscuro:root body #bottom-nav{
+  border-color:rgba(255,255,255,.14) !important;
+  box-shadow:0 16px 36px rgba(0,0,0,.6),0 3px 10px rgba(0,0,0,.4),0 0 0 4px rgba(10,23,26,.85) !important;
+}
+html.tema-oscuro:root body #bottom-nav .bnav-item.on{background:rgba(255,255,255,.95) !important;color:#0a4d3a !important}
+@media (max-width:640px){
+  html.tema-oscuro body::after{background:linear-gradient(to top,#0a171a 35%,transparent) !important}
+}
+
+/* Menú (hoja) */
+html.tema-oscuro #cm-menu .cm-menu-hoja{background:#0d1d21 !important;box-shadow:0 -12px 40px rgba(0,0,0,.6) !important}
+html.tema-oscuro #cm-menu .cm-mg-l{background:var(--panel) !important;border-color:var(--border) !important}
+html.tema-oscuro #cm-menu .cm-mi{border-top-color:var(--border2) !important}
+html.tema-oscuro #cm-menu .cm-mi b{color:var(--txt) !important}
+html.tema-oscuro #cm-menu .cm-mi.danger b{color:#ff8a80 !important}
+html.tema-oscuro #cm-menu .cm-mi:active{background:var(--panel2) !important}
+
+/* ---------- 11. Otros elementos con blanco escrito directo ---------- */
+html.tema-oscuro :is(.dash-filter-bar,#hist-resumen,#hmap-insight>div,#evtCalGrid>div,.rep-row-dyn){background:var(--panel2) !important;border-color:var(--border) !important;color:var(--txt2)}
+html.tema-oscuro .toast{background:var(--panel2) !important;color:var(--txt) !important;border-color:var(--border) !important}
+html.tema-oscuro .modal,html.tema-oscuro .msheet{background:#0f2126 !important;border-color:var(--border) !important;color:var(--txt)}
+html.tema-oscuro .mttl{color:var(--txt) !important}
+
+/* ---------- 12. Portal del instructor ---------- */
+html.tema-oscuro #instructor-screen{background:
+    radial-gradient(720px 420px at -8% -6%,rgba(47,154,63,.16),transparent 62%),
+    radial-gradient(760px 480px at 108% 104%,rgba(10,98,176,.2),transparent 62%),#0a171a !important}
+html.tema-oscuro #instructor-screen .ipg-empty{background:transparent !important}
+
+/* ---------- 13. Ajustes finos de contraste ---------- */
+html.tema-oscuro .comp-tipo-btn.active{background:#1f8a5b !important;color:#fff !important}
+html.tema-oscuro .btn.bb{background:#123a5c !important;color:#cfe7fa !important;border-color:#1f5a88 !important}
+/* Mapa de calor: las celdas llevan su propio color; el texto lo decide la celda */
+html.tema-oscuro td.hmap-cell :is(div,span){color:inherit}

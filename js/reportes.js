@@ -874,27 +874,22 @@ function genReporteDisciplina(){
 // ═══════════════════════════════════════════
 // TEMA — OSCURO / CLARO
 // ═══════════════════════════════════════════
-let temaActual = localStorage.getItem('fc_tema') || 'oscuro';
+let temaActual = (localStorage.getItem('fitness-tema') || 'claro') === 'oscuro' ? 'oscuro' : 'claro';
 
 // En móvil siempre tema claro — sin opción de cambio
 function _esMobil() { return window.innerWidth <= 640; }
 
+// Tema claro / oscuro: una sola preferencia ("fitness-tema") para celular y computadora.
+// La página lleva siempre UNA de las dos clases: tema-claro o tema-oscuro.
 function aplicarTema(t) {
-  // Forzar tema claro en móvil independientemente de la preferencia
-  const temaEfectivo = _esMobil() ? 'claro' : t;
-  temaActual = t; // Guardar preferencia real (para tablet/desktop)
+  temaActual = t === 'oscuro' ? 'oscuro' : 'claro';
+  if(typeof window.fcSetTema === 'function') window.fcSetTema(temaActual);
   const iconEl = document.getElementById('coord-tema-icon');
+  if(iconEl) iconEl.innerHTML = temaActual === 'claro'
+    ? '<svg class="ico" viewBox="0 0 20 20"><path d="M14 4 Q10 4 8 7 Q6 10 8 13 Q10 16 14 16 Q11 14 11 10 Q11 6 14 4" stroke="currentColor" stroke-width="1.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>'
+    : '<svg class="ico" viewBox="0 0 20 20"><circle cx="10" cy="10" r="3.5" stroke="currentColor" stroke-width="1.4" fill="none"/><path d="M10 2 L10 4.5 M10 15.5 L10 18 M2 10 L4.5 10 M15.5 10 L18 10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>';
   const btnTema = document.getElementById('coord-tema-btn');
-  if(temaEfectivo === 'claro') {
-    document.documentElement.classList.add('tema-claro');
-    if(iconEl) iconEl.innerHTML = '<svg class="ico" viewBox="0 0 20 20"><circle cx="10" cy="10" r="3.5" stroke="currentColor" stroke-width="1.4" fill="none"/><line x1="10" y1="2" x2="10" y2="4.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><line x1="10" y1="15.5" x2="10" y2="18" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><line x1="2" y1="10" x2="4.5" y2="10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><line x1="15.5" y1="10" x2="18" y2="10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>';
-  } else {
-    document.documentElement.classList.remove('tema-claro');
-    if(iconEl) iconEl.innerHTML = '<svg class="ico" viewBox="0 0 20 20"><path d="M14 4 Q10 4 8 7 Q6 10 8 13 Q10 16 14 16 Q11 14 11 10 Q11 6 14 4" stroke="currentColor" stroke-width="1.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>';
-  }
-  // Ocultar botón "Cambiar apariencia" en móvil
-  if(btnTema) btnTema.style.display = _esMobil() ? 'none' : '';
-  if(!_esMobil()) localStorage.setItem('fc_tema', t);
+  if(btnTema) btnTema.style.display = '';
   setTimeout(()=>{if(typeof renderDashboard==='function')renderDashboard();},80);
 }
 function toggleCoordMenu(){
@@ -918,7 +913,6 @@ function toggleCoordMenu(){
 }
 
 function toggleTema() {
-  if(_esMobil()) return; // No permitir cambio en móvil
   aplicarTema(temaActual === 'oscuro' ? 'claro' : 'oscuro');
 }
 // Aplicar tema guardado al cargar

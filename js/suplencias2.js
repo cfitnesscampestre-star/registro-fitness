@@ -427,7 +427,7 @@ function guardarSupLocal(){
 // ─── Arranque ───
 (function init(){
   // Aplicar tema guardado
-  aplicarTema(localStorage.getItem('fc_tema')||'oscuro');
+  aplicarTema(localStorage.getItem('fitness-tema')||'claro');
 
   // ── Inicializar hashes de contraseñas (migra texto plano → SHA-256) ──
   if(typeof inicializarHashes === 'function') inicializarHashes();
