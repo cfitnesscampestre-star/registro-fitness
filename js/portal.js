@@ -160,6 +160,44 @@ function instClaseAhora(clasesData) {
   return null;
 }
 
+// ─────────────────────────────────────────────
+// SUPLENCIAS PLANIFICADAS EN EL PORTAL
+// Las que la coordinación aprueba en "Suplencias" (suplenciasPlan) aparecen
+// en "Mis clases" y en "Mi horario" de los dos instructores:
+//  · al suplente, como una clase extra: "Suplencia · cubres a …"
+//  · al titular, en su propia clase: "Te cubre …"
+// Solo se muestran; la captura de asistentes sigue igual.
+// ─────────────────────────────────────────────
+function instSupsAprobadas() {
+  const lista = (typeof suplenciasPlan !== 'undefined' && Array.isArray(suplenciasPlan)) ? suplenciasPlan : [];
+  return lista.filter(s => s && s.fecha && s.hora && (s.estado === 'aprobado' || !s.estado));
+}
+function instNombreDe(id, nombreExt) {
+  const i = (id !== null && id !== undefined) ? instructores.find(x => String(x.id) === String(id)) : null;
+  return i ? i.nombre : (nombreExt || 'Suplente externo');
+}
+// Suplencias en las que este instructor es el suplente, para una fecha
+function instSupsQueCubro(instId, fecha) {
+  return instSupsAprobadas()
+    .filter(s => s.suplente_id !== null && s.suplente_id !== undefined && String(s.suplente_id) === String(instId) && s.fecha === fecha)
+    .sort((a,b) => String(a.hora).localeCompare(String(b.hora)));
+}
+// Suplencia planificada para una clase propia (este instructor es el titular)
+function instSupDeMiClase(instId, fecha, slot) {
+  return instSupsAprobadas().find(s =>
+    String(s.inst_id) === String(instId) && s.fecha === fecha && s.hora === slot.hora &&
+    (!s.dia || s.dia === slot.dia)) || null;
+}
+// Renglón de una clase que este instructor cubre como suplente
+function instLineaCubro(s, conFecha) {
+  const f = conFecha ? new Date(s.fecha + 'T12:00:00').toLocaleDateString('es-MX',{weekday:'short',day:'numeric',month:'short'}) : '';
+  return `<div class="ipg-line ipg-sup" style="--ac:var(--blue)">
+    <div class="t">${s.hora}</div>
+    <div class="b"><b>${s.clase||'Clase'}</b><small>${conFecha?f+' · ':''}Cubres a ${instNombreDe(s.inst_id)}${s.motivo?' · '+s.motivo:''}</small></div>
+    <div class="r"><span class="ipg-tag">Suplencia</span></div>
+  </div>`;
+}
+
 function instRenderHoy() {
   const inst = instructores.find(i => i.id === instActualId);
   if(!inst) return;
@@ -228,8 +266,16 @@ function instRenderHoy() {
       </div>`;
   })() : '';
 
+  // Clases que cubre como suplente ese día
+  const cubro = instSupsQueCubro(inst.id, fechaStr);
+  const cubroHtml = cubro.length
+    ? `<div class="ipg-h2">Suplencias que cubres</div>${cubro.map(s => instLineaCubro(s, false)).join('')}`
+    : '';
+
   if(clasesData.length === 0) {
-    listaEl.innerHTML = `<div class="empty ipg-empty">No tienes clases programadas este día.</div>`;
+    listaEl.innerHTML = (cubro.length
+      ? `<div class="ipg-sub">No tienes clases propias este día.</div>`
+      : `<div class="empty ipg-empty">No tienes clases programadas este día.</div>`) + cubroHtml;
     return;
   }
 
@@ -246,11 +292,15 @@ function instRenderHoy() {
       falta:    { txt:'Falta',         cls:'bad',  ac:'var(--red2)' },
       pendiente:{ txt:'Pendiente',     cls:'warn', ac:'var(--gold2)'}
     };
-    const est = estadoMap[estado] || estadoMap.pendiente;
+    let est = estadoMap[estado] || estadoMap.pendiente;
+    // Suplencia planificada: si todavía no hay registro, avisa quién lo cubre
+    const plan = instSupDeMiClase(inst.id, fechaStr, slot);
+    if(plan && !tieneReg) est = { txt:'Te cubren', cls:'info', ac:'var(--blue)' };
 
     const detalle = [
       tieneReg && asis !== null ? `${asis}${capN?' / '+capN:''} personas` : (capN ? `Cupo ${capN}` : ''),
-      (reg && (reg.suplente_id || reg.suplente_nombre)) ? `Suplente: ${nombreSuplenteReg(reg)}` : ''
+      (reg && (reg.suplente_id || reg.suplente_nombre)) ? `Suplente: ${nombreSuplenteReg(reg)}`
+        : plan ? `Te cubre: ${instNombreDe(plan.suplente_id, plan.suplente_nombre)}${plan.motivo?' · '+plan.motivo:''}` : ''
     ].filter(Boolean).join(' · ');
 
     return `
@@ -267,31 +317,70 @@ function instRenderHoy() {
         </div>
         <div class="r"><span class="${est.cls}">${est.txt}${afoP!==null?'<br>'+afoP+'%':''}</span></div>
       </div>`;
-  }).join('');
+  }).join('') + cubroHtml;
 }
 
 // ─────────────────────────────────────────────
-// TAB: MI HORARIO (la semana completa, igual que en Gerencia)
+// TAB: MI HORARIO (semana con fechas, igual que en Gerencia, más las
+// suplencias planificadas de esa semana)
 // ─────────────────────────────────────────────
+let _instHorSemana = 0;   // 0 = esta semana, 1 = la próxima, -1 = la pasada
+function instHorNav(n) { _instHorSemana = n === 0 ? 0 : _instHorSemana + n; instRenderHorario(); }
+
 function instRenderHorario() {
   const inst = instructores.find(i => i.id === instActualId);
   const el = document.getElementById('inst-horario-semana');
   if(!inst || !el) return;
   const hoyReal = (typeof instCapHoy === 'function') ? instCapHoy() : fechaLocalStr(new Date());
-  const slots = getHorarioEn(inst, hoyReal);
-  if(!slots.length) {
-    el.innerHTML = '<div class="empty ipg-empty">Todavía no tienes clases asignadas. Pide a la coordinación que te las asigne.</div>';
-    return;
-  }
-  const hoyIdx = (new Date(hoyReal + 'T12:00:00').getDay() + 6) % 7;
-  el.innerHTML = DIAS.map((dia, i) => {
-    const del = slots.filter(s => s.dia === dia).sort((a,b) => a.hora.localeCompare(b.hora));
-    return `<div class="ipg-h2 sm${i===hoyIdx?' hoy':''}">${dia}${i===hoyIdx?' · hoy':''}</div>` +
-      (del.length ? del.map(s => {
-        const cap = getCapClase(s.clase);
-        return `<div class="ipg-line"><div class="t">${s.hora}</div><div class="b"><b>${s.clase}</b>${cap?`<small>Cupo ${cap}</small>`:''}</div></div>`;
-      }).join('') : '<div class="ipg-sub">Sin clases</div>');
+  const hoyD = new Date(hoyReal + 'T12:00:00');
+  const lunes = new Date(hoyD);
+  lunes.setDate(hoyD.getDate() - ((hoyD.getDay() + 6) % 7) + _instHorSemana * 7);
+  const fechas = DIAS.map((_, i) => { const d = new Date(lunes); d.setDate(lunes.getDate() + i); return fechaLocalStr(d); });
+  const fCorta = f => new Date(f + 'T12:00:00').toLocaleDateString('es-MX',{day:'numeric',month:'short'});
+
+  // Próximas suplencias (desde hoy), las que cubre y las de sus clases
+  const prox = instSupsAprobadas()
+    .filter(s => s.fecha >= hoyReal && (String(s.inst_id) === String(inst.id) ||
+      (s.suplente_id !== null && s.suplente_id !== undefined && String(s.suplente_id) === String(inst.id))))
+    .sort((a,b) => a.fecha.localeCompare(b.fecha) || String(a.hora).localeCompare(String(b.hora)));
+  const proxHtml = prox.length ? `<div class="ipg-card ipg-prox">
+      <div class="ipg-prox-h"><b>Próximas suplencias</b><small>Planificadas por la coordinación</small></div>
+      ${prox.slice(0, 8).map(s => {
+        const cubro = String(s.inst_id) !== String(inst.id);
+        const f = new Date(s.fecha + 'T12:00:00').toLocaleDateString('es-MX',{weekday:'short',day:'numeric',month:'short'});
+        return `<div class="ipg-prox-r${cubro?' cubro':''}"><span>${f} · ${s.hora}</span><b>${s.clase||'Clase'}</b>
+          <em>${cubro ? 'Cubres a ' + instNombreDe(s.inst_id) : 'Te cubre ' + instNombreDe(s.suplente_id, s.suplente_nombre)}</em></div>`;
+      }).join('')}
+      ${prox.length > 8 ? `<small class="ipg-sub">y ${prox.length - 8} más.</small>` : ''}
+    </div>` : '';
+
+  const nav = `<div class="ipg-date">
+      <button class="ipg-ibtn" onclick="instHorNav(-1)" aria-label="Semana anterior"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15,6 9,12 15,18"/></svg></button>
+      <div class="ipg-date-lbl"><b>${_instHorSemana===0?'Esta semana':_instHorSemana===1?'Próxima semana':'Semana'} · ${fCorta(fechas[0])} al ${fCorta(fechas[6])}</b></div>
+      <button class="ipg-ibtn" onclick="instHorNav(1)" aria-label="Semana siguiente"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9,6 15,12 9,18"/></svg></button>
+      <button class="ipg-btn-sm" onclick="instHorNav(0)">Hoy</button>
+    </div>`;
+
+  let hayAlgo = false;
+  const dias = DIAS.map((dia, i) => {
+    const fecha = fechas[i];
+    const propias = getHorarioEn(inst, fecha).filter(s => s.dia === dia).map(s => {
+      const plan = instSupDeMiClase(inst.id, fecha, s);
+      const cap = getCapClase(s.clase);
+      return { hora: s.hora, html: `<div class="ipg-line"${plan?' style="--ac:var(--blue)"':''}><div class="t">${s.hora}</div>
+        <div class="b"><b>${s.clase}</b><small>${plan ? 'Te cubre: ' + instNombreDe(plan.suplente_id, plan.suplente_nombre) + (plan.motivo?' · '+plan.motivo:'') : (cap ? 'Cupo ' + cap : '')}</small></div>
+        ${plan ? '<div class="r"><span class="info">Te cubren</span></div>' : ''}</div>` };
+    });
+    const cubro = instSupsQueCubro(inst.id, fecha).map(s => ({ hora: String(s.hora), html: instLineaCubro(s, false) }));
+    const todas = propias.concat(cubro).sort((a,b) => a.hora.localeCompare(b.hora));
+    if(todas.length) hayAlgo = true;
+    const esHoy = fecha === hoyReal;
+    return `<div class="ipg-h2 sm${esHoy?' hoy':''}">${dia} ${fCorta(fecha)}${esHoy?' · hoy':''}</div>` +
+      (todas.length ? todas.map(x => x.html).join('') : '<div class="ipg-sub">Sin clases</div>');
   }).join('');
+
+  el.innerHTML = proxHtml + nav + (hayAlgo || getHorarioEn(inst, hoyReal).length ? dias
+    : '<div class="empty ipg-empty">Todavía no tienes clases asignadas. Pide a la coordinación que te las asigne.</div>');
 }
 
 // ─────────────────────────────────────────────
