@@ -219,3 +219,17 @@ html:not(.tema-claro) #instructor-screen .ipg-empty{background:transparent}
   #instructor-screen .ipg-kpis{grid-template-columns:repeat(2,1fr)}
   #instructor-screen .ipg-kpis>.ipg-kpi:last-child:nth-child(odd){grid-column:1/-1;min-height:0}
 }
+
+/* ---------- Suplencias planificadas ---------- */
+#instructor-screen .ipg-line.ipg-sup{background:linear-gradient(90deg,rgba(10,111,189,.07),var(--panel) 60%)}
+#instructor-screen .ipg-tag{display:inline-block;font-size:12px;font-weight:700;color:var(--blue);background:rgba(10,111,189,.1);
+  border:1px solid rgba(10,111,189,.25);border-radius:20px;padding:3px 10px}
+#instructor-screen .ipg-card{background:var(--panel);border:1px solid var(--border);border-radius:18px;box-shadow:var(--ipg-sh);padding:14px 16px;margin:4px 0 14px}
+#instructor-screen .ipg-prox{border-left:5px solid var(--blue)}
+#instructor-screen .ipg-prox-h b{display:block;font-size:16px;font-weight:700;color:var(--txt)}
+#instructor-screen .ipg-prox-h small{display:block;font-size:13px;color:var(--txt3);margin-bottom:6px}
+#instructor-screen .ipg-prox-r{display:grid;grid-template-columns:auto 1fr;gap:2px 12px;padding:9px 0;border-top:1px solid var(--border);font-size:13.5px}
+#instructor-screen .ipg-prox-r span{color:var(--txt3);white-space:nowrap}
+#instructor-screen .ipg-prox-r b{color:var(--txt);font-weight:600;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#instructor-screen .ipg-prox-r em{grid-column:2;font-style:normal;color:var(--txt2);font-size:13px}
+#instructor-screen .ipg-prox-r.cubro em{color:var(--blue);font-weight:600}

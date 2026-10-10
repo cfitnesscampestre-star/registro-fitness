@@ -1060,9 +1060,12 @@ async function inicializarFirebase(){
             nombreEl.textContent = inst.nombre;
           }
           // Re-renderizar tab activo del portal
-          const tabActivo = document.querySelector('.inst-tab[style*="var(--neon)"]');
-          if(tabActivo && tabActivo.dataset.t) instSwitchTab(tabActivo.dataset.t);
-          else instSwitchTab('hoy');
+          // (solo las pestañas de consulta: en firma, suplencias, mantenimiento o metodología
+          //  no se toca para no borrar lo que el instructor esté capturando)
+          const tabActivo = document.querySelector('.inst-tab-btn.on');
+          const t = tabActivo && tabActivo.dataset.t;
+          if(!t) instSwitchTab('hoy');
+          else if(t === 'hoy' || t === 'horario' || t === 'reporte') instSwitchTab(t);
         }
 
       } finally{
