@@ -29,10 +29,11 @@ html.tema-oscuro body{
 /* Las pantallas del celular tenían fondo liso encima del body: se dejan transparentes
    para que se vea la textura (las tarjetas conservan su propio fondo). */
 @media (max-width:640px){
-  html #mobile-home.on,
-  html .vista.on,
-  html #content-wrap,
-  html #layout-wrap{background:transparent !important;background-image:none !important}
+  /* (con prioridad suficiente para ganarle a depth.css, que pintaba la pantalla de inicio de color liso) */
+  html:is(.tema-claro,.tema-oscuro) body #mobile-home.on,
+  html:is(.tema-claro,.tema-oscuro) body .vista.on,
+  html:is(.tema-claro,.tema-oscuro) body #content-wrap,
+  html:is(.tema-claro,.tema-oscuro) body #layout-wrap{background:transparent !important;background-image:none !important}
 }
 
 /* Portal del instructor: misma textura sutil (antes era más marcada) */
