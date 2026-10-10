@@ -148,6 +148,7 @@ window._cargarXLSX=function(){
 })();
 </script>
 <link rel="stylesheet" href="css/gerencia-look.css?v=1">
+<link rel="stylesheet" href="css/prof-gerencia.css?v=1">
 </head>
 
 
@@ -260,91 +261,114 @@ window._cargarXLSX=function(){
 
 <div id="instructor-screen" style="display:none;position:fixed;inset:0;background:var(--bg);z-index:9998;flex-direction:column;overflow:hidden">
 
-  <!-- Header del portal instructor -->
+  <!-- Encabezado del portal instructor (igual que el portal del profesor de Control Gerencia):
+       en celular es la tarjeta de arriba; en computadora es el menú lateral (ver css/prof-gerencia.css) -->
   <div class="inst-portal-header">
-    <div style="display:flex;align-items:center;gap:11px;position:relative;z-index:1">
+    <div class="ipg-brand">
+      <div class="ipg-logo"><img src="img/login-logo.png" alt="Fitness Control"></div>
+      <div><b>Fitness</b><small>Portal del instructor</small></div>
+    </div>
+    <div class="ipg-who">
+      <div class="ipg-logo ipg-logo-m"><img src="img/login-logo.png" alt=""></div>
       <div class="inst-avatar-ring" id="inst-avatar-ring">
         <svg class="ico" id="inst-avatar-svg" viewBox="0 0 20 20" style="width:1.1em;height:1.1em"><circle cx="10" cy="6.5" r="3" stroke="currentColor" stroke-width="1.4" fill="none"/><path d="M4 18 Q4 13 10 13 Q16 13 16 18" stroke="currentColor" stroke-width="1.4" fill="none" stroke-linecap="round"/></svg>
         <img id="inst-avatar-img" src="" alt="" style="display:none;width:100%;height:100%;object-fit:cover;border-radius:50%">
       </div>
-      <div>
-        <div style="font-family:'Bebas Neue',sans-serif;font-size:1.1rem;letter-spacing:2.5px;color:var(--neon);line-height:1.1" id="inst-portal-nombre">Portal Instructor</div>
-        <div style="font-size:.56rem;color:var(--txt3);letter-spacing:1.2px;text-transform:uppercase;margin-top:1px">Club Campestre · Vista Personal</div>
+      <div class="ipg-who-t">
+        <b id="inst-portal-nombre">Portal Instructor</b>
+        <small>Instructor · Fitness</small>
       </div>
     </div>
-    <div style="display:flex;gap:.5rem;align-items:center;position:relative;z-index:1">
+    <div class="ipg-foot">
+      <div class="ipg-user"><b>Instructor</b><span id="inst-portal-nombre-pie"></span></div>
       <div id="inst-firma-badge" class="inst-firma-badge-pill" onclick="instAbrirFirma()">
         ✍ Firma pendiente
       </div>
-      <button class="inst-salir-btn" onclick="cerrarSesion()">
+      <button class="inst-salir-btn" onclick="cerrarSesion()" aria-label="Salir">
         <svg class="ico" viewBox="0 0 20 20" style="width:.85em;height:.85em"><path d="M7 3 H3 Q2 3 2 4 L2 16 Q2 17 3 17 L7 17" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round"/><line x1="10" y1="10" x2="18" y2="10" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><polyline points="15,7 18,10 15,13" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-        Salir
+        <span>Salir</span>
       </button>
     </div>
   </div>
 
-  <!-- Tabs del portal -->
+  <!-- Navegación del portal: barra inferior en celular, menú lateral en computadora -->
   <div class="inst-tabs-bar" id="inst-tabs">
     <button class="inst-tab-btn on" onclick="instSwitchTab('hoy')" data-t="hoy">
-      <svg class="ico tab-ico" viewBox="0 0 20 20" style="width:.9em;height:.9em"><circle cx="10" cy="10" r="7" stroke="currentColor" stroke-width="1.4" fill="none"/><polyline points="10,6 10,10 13,12" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
-      Mis Clases
+      <svg class="ico tab-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="4" width="14" height="17" rx="2"/><path d="M9 4V3h6v1"/><polyline points="9,13 11,15 15,11"/></svg>
+      <span class="tl">Mis clases</span><span class="ts">Hoy</span>
+    </button>
+    <button class="inst-tab-btn" onclick="instSwitchTab('horario')" data-t="horario">
+      <svg class="ico tab-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="2"/><line x1="3" y1="10" x2="21" y2="10"/><line x1="8" y1="3" x2="8" y2="7"/><line x1="16" y1="3" x2="16" y2="7"/></svg>
+      <span class="tl">Mi horario</span><span class="ts">Horario</span>
     </button>
     <button class="inst-tab-btn" onclick="instSwitchTab('mant')" data-t="mant" id="inst-tabn-mant" style="position:relative">
-      <svg class="ico tab-ico" viewBox="0 0 20 20" style="width:.9em;height:.9em" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M13.5 3.5a3.5 3.5 0 0 0-3.2 4.8L3.8 14.8a1.4 1.4 0 0 0 2 2l6.5-6.5a3.5 3.5 0 0 0 4.8-3.2l-2.2 2.2-1.9-.4-.4-1.9z"/></svg>
-      Mantenimiento
+      <svg class="ico tab-ico" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M13.5 3.5a3.5 3.5 0 0 0-3.2 4.8L3.8 14.8a1.4 1.4 0 0 0 2 2l6.5-6.5a3.5 3.5 0 0 0 4.8-3.2l-2.2 2.2-1.9-.4-.4-1.9z"/></svg>
+      <span class="tl">Mantenimiento</span><span class="ts">Equipo</span>
       <span id="inst-mant-badge" style="display:none;position:absolute;top:4px;right:4px;min-width:16px;height:16px;border-radius:8px;background:var(--red2);color:#fff;font-size:.52rem;font-weight:700;align-items:center;justify-content:center;padding:0 4px;line-height:1"></span>
     </button>
     <button class="inst-tab-btn" onclick="instSwitchTab('pruebas')" data-t="pruebas" id="inst-tabn-pruebas" style="display:none;position:relative">
-      <svg class="ico tab-ico" viewBox="0 0 20 20" style="width:.9em;height:.9em" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2 10h4l2-5 3 10 2-5h5"/></svg>
-      Metodología
+      <svg class="ico tab-ico" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2 10h4l2-5 3 10 2-5h5"/></svg>
+      <span class="tl">Metodología</span><span class="ts">Pruebas</span>
       <span id="inst-pruebas-badge" style="display:none;position:absolute;top:4px;right:4px;min-width:16px;height:16px;border-radius:8px;background:var(--red2);color:#fff;font-size:.52rem;font-weight:700;align-items:center;justify-content:center;padding:0 4px;line-height:1">0</span>
     </button>
     <button class="inst-tab-btn" onclick="instSwitchTab('reporte')" data-t="reporte">
-      <svg class="ico tab-ico" viewBox="0 0 20 20" style="width:.9em;height:.9em"><rect x="3" y="12" width="3" height="5" rx="1" stroke="currentColor" stroke-width="1.4" fill="none"/><rect x="8.5" y="8" width="3" height="9" rx="1" stroke="currentColor" stroke-width="1.4" fill="none"/><rect x="14" y="4" width="3" height="13" rx="1" stroke="currentColor" stroke-width="1.4" fill="none"/></svg>
-      Mi Reporte
+      <svg class="ico tab-ico" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="12" width="3" height="5" rx="1"/><rect x="8.5" y="8" width="3" height="9" rx="1"/><rect x="14" y="4" width="3" height="13" rx="1"/></svg>
+      <span class="tl">Mi reporte</span><span class="ts">Reporte</span>
     </button>
     <button class="inst-tab-btn" onclick="instSwitchTab('firma')" data-t="firma" id="inst-tabn-firma">
-      <svg class="ico tab-ico" viewBox="0 0 20 20" style="width:.9em;height:.9em"><path d="M4 14 Q6 10 8 12 Q10 14 12 8 Q13 5 15 6" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/><line x1="3" y1="17" x2="17" y2="17" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
-      Firma Digital
+      <svg class="ico tab-ico" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 14 Q6 10 8 12 Q10 14 12 8 Q13 5 15 6"/><line x1="3" y1="17" x2="17" y2="17"/></svg>
+      <span class="tl">Firma digital</span><span class="ts">Firma</span>
     </button>
     <button class="inst-tab-btn" onclick="instSwitchTab('suplencias')" data-t="suplencias" id="inst-tabn-suplencias" style="position:relative">
-      <svg class="ico tab-ico" viewBox="0 0 20 20" style="width:.9em;height:.9em" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><circle cx="7" cy="7" r="3"/><path d="M2 17 Q2 12 7 12 Q9.5 12 11 13.5"/><circle cx="15" cy="11" r="2.5"/><path d="M11 18 Q11 15 15 15 Q19 15 19 18"/><line x1="13.5" y1="8" x2="16.5" y2="8"/><line x1="15" y1="6.5" x2="15" y2="9.5"/></svg>
-      Suplencias
+      <svg class="ico tab-ico" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><circle cx="7" cy="7" r="3"/><path d="M2 17 Q2 12 7 12 Q9.5 12 11 13.5"/><circle cx="15" cy="11" r="2.5"/><path d="M11 18 Q11 15 15 15 Q19 15 19 18"/><line x1="13.5" y1="8" x2="16.5" y2="8"/><line x1="15" y1="6.5" x2="15" y2="9.5"/></svg>
+      <span class="tl">Suplencias</span><span class="ts">Suplencias</span>
       <span id="inst-sup-badge" style="display:none;position:absolute;top:4px;right:4px;min-width:16px;height:16px;border-radius:8px;background:var(--red2);color:#fff;font-size:.52rem;font-weight:700;align-items:center;justify-content:center;padding:0 4px;line-height:1"></span>
     </button>
   </div>
 
-  <!-- Avisos del portal: hoja de firmas / suplencias y equipos en mantenimiento -->
-  <div id="inst-alertas"></div>
-
   <!-- Contenido del portal (scrollable) -->
   <div style="flex:1;overflow-y:auto;padding:1rem;max-width:900px;width:100%;margin:0 auto;box-sizing:border-box" id="inst-content">
+
+    <!-- Avisos del portal: hoja de firmas / suplencias y equipos en mantenimiento -->
+    <div id="inst-alertas"></div>
 
     <!-- ── TAB: Mis Clases Hoy ── -->
     <div id="inst-panel-hoy" class="inst-panel">
 
-      <!-- Fecha y KPIs -->
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;flex-wrap:wrap;gap:.5rem">
-        <div>
-          <div style="font-family:'Bebas Neue',sans-serif;font-size:1.35rem;letter-spacing:2.5px;color:var(--neon);line-height:1" id="inst-hoy-titulo">HOY</div>
-          <div style="font-size:.68rem;color:var(--txt2);margin-top:3px;text-transform:capitalize" id="inst-hoy-fecha">—</div>
-        </div>
-        <input type="date" id="inst-date-picker" class="ctrl" style="font-size:.74rem;padding:5px 10px;border-radius:8px" onchange="instRenderHoy()">
+      <div class="ipg-sub" id="inst-hoy-titulo">Estas son tus clases de hoy. La que va según el horario aparece arriba.</div>
+
+      <!-- Fecha: flechas + "Hoy" (el calendario sigue disponible para saltar a cualquier día) -->
+      <div class="ipg-date">
+        <button class="ipg-ibtn" onclick="instNavDia(-1)" aria-label="Día anterior"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15,6 9,12 15,18"/></svg></button>
+        <label class="ipg-date-lbl"><b id="inst-hoy-fecha">—</b>
+          <input type="date" id="inst-date-picker" class="ctrl" onchange="instRenderHoy()" aria-label="Elegir fecha"></label>
+        <button class="ipg-ibtn" onclick="instNavDia(1)" aria-label="Día siguiente"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9,6 15,12 9,18"/></svg></button>
+        <button class="ipg-btn-sm" onclick="instIrHoy()">Hoy</button>
       </div>
 
       <!-- KPIs del día -->
-      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:.55rem;margin-bottom:1.1rem" id="inst-kpis-hoy"></div>
+      <div class="ipg-kpis" id="inst-kpis-hoy"></div>
+
+      <!-- Clase en curso / próxima -->
+      <div id="inst-ahora"></div>
 
       <!-- Lista de clases -->
-      <div class="inst-section-label">Clases programadas</div>
+      <div class="ipg-h2">Mis clases</div>
       <div id="inst-lista-clases">
         <div class="empty">Cargando...</div>
       </div>
     </div>
 
+    <!-- ── TAB: Mi horario ── -->
+    <div id="inst-panel-horario" class="inst-panel" style="display:none">
+      <div class="ipg-h2">Mi horario</div>
+      <div class="ipg-sub">Tus clases de la semana. El horario lo asigna la coordinación de Fitness.</div>
+      <div id="inst-horario-semana"></div>
+    </div>
+
     <!-- ── TAB: Mi Reporte ── -->
     <div id="inst-panel-reporte" class="inst-panel" style="display:none">
-      <div style="font-family:'Bebas Neue',sans-serif;font-size:1.2rem;letter-spacing:2.5px;color:var(--neon);margin-bottom:1rem">MI REPORTE PERSONAL</div>
+      <div class="ipg-h2" style="margin-top:4px">Mi reporte personal</div>
 
       <!-- Filtro de periodo -->
       <div style="display:flex;gap:.45rem;flex-wrap:wrap;margin-bottom:1.1rem">
@@ -355,7 +379,7 @@ window._cargarXLSX=function(){
       </div>
 
       <!-- KPIs globales -->
-      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:.6rem;margin-bottom:1.1rem" id="inst-rep-kpis"></div>
+      <div class="ipg-kpis k4" id="inst-rep-kpis"></div>
 
       <!-- Gráfica de aforo -->
       <div class="panel" style="margin-bottom:1rem">
@@ -3272,7 +3296,7 @@ window._cargarXLSX=function(){
 <script defer src="js/suplencias2.js"></script>
 <script defer src="js/mobile.js"></script>
 <script defer src="js/sidebar.js"></script>
-<script defer src="js/portal.js"></script>
+<script defer src="js/portal.js?v=2"></script>
 <script defer src="js/captura-prof.js?v=1"></script>
 <script defer src="js/gimnasia-gerencia.js?v=1"></script>
 <script defer src="js/pines.js?v=1"></script>
