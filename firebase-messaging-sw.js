@@ -30,7 +30,7 @@ messaging.onBackgroundMessage(payload => {
   const notifTitle = title || '📅 Recordatorio Fitness';
   const notifOpts  = {
     body:    body  || 'Tienes un evento próximo.',
-    icon:    icon  || '/img/icon-192.png',
+    icon:    icon  || 'img/icon-192-any.png',
     badge:        '/img/icon-96.png',
     tag:          data?.eventoId || 'fitness-recordatorio',
     renotify:     true,
@@ -78,7 +78,7 @@ self.addEventListener('message', event => {
 
     const opciones = {
       body:    `${nombre} comienza en ${minAntes} min`,
-      icon:    '/img/icon-192.png',
+      icon:    'img/icon-192-any.png',
       badge:   '/img/icon-96.png',
       tag:     'rec_' + eventoId,
       renotify: true,

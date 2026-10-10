@@ -1,0 +1,19 @@
+{
+  "name": "Fitness Control — Club Campestre",
+  "short_name": "Fitness",
+  "description": "Club Campestre Aguascalientes — Control de clases y fitness",
+  "id": "./",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#edf3f2",
+  "theme_color": "#0f7a5a",
+  "lang": "es-MX",
+  "icons": [
+    { "src": "img/icon-192-any.png",      "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "img/icon-512-any.png",      "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "img/icon-192-maskable.png", "sizes": "192x192", "type": "image/png", "purpose": "maskable" },
+    { "src": "img/icon-512-maskable.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}

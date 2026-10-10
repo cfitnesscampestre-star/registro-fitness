@@ -337,7 +337,7 @@ async function _dispararNotificacionLocal(r) {
   const titulo = '📅 Recordatorio · Fitness';
   const opts = {
     body: `${r.nombre} comienza en ${r.min} min`,
-    icon: 'img/icon-192.png',
+    icon: 'img/icon-192-any.png',
     badge: 'img/icon-96.png',
     tag: r.id,                 // mismo tag que el SW → no se duplica
     renotify: true,
@@ -452,7 +452,7 @@ async function _mostrarResumenDiario(forzar) {
     const reg = _swRegistration || await navigator.serviceWorker.ready;
     await reg.showNotification(titulo, {
       body: lineas.join('\n'),
-      icon: 'img/icon-192.png',
+      icon: 'img/icon-192-any.png',
       badge: 'img/icon-96.png',
       tag: 'resumen-dia',          // siempre reemplaza el anterior
       renotify: true,
