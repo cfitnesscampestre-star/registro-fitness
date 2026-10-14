@@ -153,7 +153,7 @@ window._cargarXLSX=function(){
 
 <link rel="stylesheet" href="css/gerencia-look.css?v=1">
 <link rel="stylesheet" href="css/prof-gerencia.css?v=3">
-<link rel="stylesheet" href="css/coord-mobile.css?v=3">
+<link rel="stylesheet" href="css/coord-mobile.css?v=5">
 <link rel="stylesheet" href="css/tema-oscuro.css?v=2">
 <link rel="stylesheet" href="css/textura.css?v=2">
 </head>
@@ -590,6 +590,13 @@ window._cargarXLSX=function(){
           text-align:left;cursor:pointer;display:flex;align-items:center;gap:.6rem;transition:background .15s"
           onmouseover="this.style.background='var(--panel2)'" onmouseout="this.style.background='none'">
           <span id="coord-tema-icon"><svg class="ico" viewBox="0 0 20 20"><path d="M14 4 Q10 4 8 7 Q6 10 8 13 Q10 16 14 16 Q11 14 11 10 Q11 6 14 4" stroke="currentColor" stroke-width="1.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></span> Cambiar apariencia
+        </button>
+        <button onclick="vciAbrirSelector()" style="width:100%;background:none;border:none;border-bottom:1px solid var(--border);
+          padding:.6rem 1rem;color:var(--txt);font-family:'Outfit',sans-serif;font-size:.82rem;
+          text-align:left;cursor:pointer;display:flex;align-items:center;gap:.6rem;transition:background .15s"
+          onmouseover="this.style.background='var(--panel2)'" onmouseout="this.style.background='none'">
+          <svg class="ico" viewBox="0 0 20 20"><path d="M2 10s3-6 8-6 8 6 8 6-3 6-8 6-8-6-8-6z" stroke="currentColor" stroke-width="1.4" fill="none"/><circle cx="10" cy="10" r="2.5" stroke="currentColor" stroke-width="1.4" fill="none"/></svg>
+          Ver como instructor
         </button>
         <button onclick="abrirModalCambiarPass();toggleCoordMenu()" style="width:100%;background:none;border:none;border-bottom:1px solid var(--border);
           padding:.6rem 1rem;color:var(--txt);font-family:'Outfit',sans-serif;font-size:.82rem;
@@ -1393,6 +1400,7 @@ window._cargarXLSX=function(){
     <div class="cm-mg"><div class="cm-mg-t">Equipo</div><div class="cm-mg-l"><button class="cm-mi" onclick="cerrarMenuCoord();navegarA('instructores')"><b>Instructores</b><small>Horarios, datos y PIN</small></button><button class="cm-mi" onclick="cerrarMenuCoord();navegarA('salones')"><b>Salones</b><small>Capacidad por salón</small></button></div></div>
     <div class="cm-mg"><div class="cm-mg-t">Análisis</div><div class="cm-mg-l"><button class="cm-mi" onclick="cerrarMenuCoord();navegarA('dashboard')"><b>Dashboard</b><small>Resumen general</small></button><button class="cm-mi" onclick="cerrarMenuCoord();navegarA('historial')"><b>Historial</b><small>Todos los registros</small></button><button class="cm-mi" onclick="cerrarMenuCoord();navegarA('ranking')"><b>Ranking</b><small>Mejores clases e instructores</small></button><button class="cm-mi" onclick="cerrarMenuCoord();navegarA('heatmap')"><b>Mapa de calor</b><small>Aforo por día y hora</small></button><button class="cm-mi" onclick="cerrarMenuCoord();navegarA('diagnostico')"><b>Diagnóstico</b><small>Qué clases ajustar</small></button><button class="cm-mi" onclick="cerrarMenuCoord();navegarA('comparar')"><b>Comparar</b><small>Periodos, clases o instructores</small></button></div></div>
     <div class="cm-mg"><div class="cm-mg-t">Reportes y seguimiento</div><div class="cm-mg-l"><button class="cm-mi" onclick="cerrarMenuCoord();abrirModal('m-reports');toggleRpt()"><b>Generar reporte</b><small>PDF o impresión</small></button><button class="cm-mi solo-admin" onclick="cerrarMenuCoord();navegarA('reporte-dep')"><b>Reporte deportivo</b></button><button class="cm-mi" onclick="cerrarMenuCoord();navegarA('eventos')"><b>Eventos</b></button><button class="cm-mi" onclick="cerrarMenuCoord();navegarA('recorridos')"><b>Recorridos</b><small>Recorridos realizados</small></button><button class="cm-mi" onclick="cerrarMenuCoord();navegarA('alertas')"><b>Alertas</b></button><button class="cm-mi" onclick="cerrarMenuCoord();navegarA('log')"><b>Bitácora de cambios</b></button></div></div>
+    <div class="cm-mg"><div class="cm-mg-t">Instructores</div><div class="cm-mg-l"><button class="cm-mi" onclick="cerrarMenuCoord();vciAbrirSelector()"><b>Ver como instructor</b><small>Abre la pantalla de un instructor, solo lectura</small></button></div></div>
     <div class="cm-mg"><div class="cm-mg-t">Cuenta</div><div class="cm-mg-l"><button class="cm-mi solo-admin" onclick="cerrarMenuCoord();toggleTema()"><b>Cambiar apariencia</b><small>Tema claro u oscuro</small></button><button class="cm-mi solo-admin" onclick="cerrarMenuCoord();abrirModal('m-cambiar-pass')"><b>Cambiar contraseña</b></button><button class="cm-mi solo-admin danger" onclick="cerrarMenuCoord();confirmarLimpiezaTotal()"><b>Borrar todos los datos</b></button><button class="cm-mi" onclick="cerrarMenuCoord();cerrarSesion()"><b>Salir</b><small>Cerrar sesión en este teléfono</small></button></div></div>
     </div>
   </div>
@@ -1611,6 +1619,7 @@ function cerrarMenuCoord(){ var m=document.getElementById('cm-menu'); if(m){ m.c
         <input class="ctrl" type="text" placeholder="🔍 Buscar instructor..." oninput="filterInst(this.value)" style="width:180px">
         <button class="btn solo-admin" onclick="pinesGenerar()" title="Genera PIN aleatorios para todos los profesores y descarga la lista">🔑 Generar PINs</button>
         <button class="btn solo-admin" onclick="pinesDescargarLista()" title="Descarga la lista con los PIN actuales">⬇ Lista de PINs</button>
+        <button class="btn" onclick="vciAbrirSelector()" title="Abre la pantalla de un instructor tal como él la ve (solo lectura)">👁 Ver como instructor</button>
         <button class="btn bg" onclick="abrirModalInstructor(null)">+ Nuevo</button>
       </div>
     </div>
@@ -3261,6 +3270,7 @@ function cerrarMenuCoord(){ var m=document.getElementById('cm-menu'); if(m){ m.c
 <script defer src="js/mobile.js"></script>
 <script defer src="js/sidebar.js"></script>
 <script defer src="js/portal.js?v=4"></script>
+<script defer src="js/ver-como-instructor.js?v=2"></script>
 <script defer src="js/captura-prof.js?v=1"></script>
 <script defer src="js/gimnasia-gerencia.js?v=1"></script>
 <script defer src="js/pines.js?v=1"></script>

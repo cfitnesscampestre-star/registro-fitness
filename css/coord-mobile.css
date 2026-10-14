@@ -144,3 +144,58 @@
   #v-sup-plan>div:first-child>div:last-child{width:100%;gap:8px!important}
   #v-sup-plan>div:first-child>div:last-child>.btn{flex:1;justify-content:center}
 }
+
+/* =====================================================================
+   Ver como instructor (js/ver-como-instructor.js): selector y aviso
+   ===================================================================== */
+#vci-picker{position:fixed;inset:0;z-index:10050;visibility:hidden;pointer-events:none}
+#vci-picker.on{visibility:visible;pointer-events:auto}
+#vci-picker .vci-fondo{position:absolute;inset:0;background:rgba(0,25,30,.45);opacity:0;transition:opacity .2s}
+#vci-picker.on .vci-fondo{opacity:1}
+#vci-picker .vci-hoja{position:absolute;left:50%;bottom:0;width:min(560px,100%);max-height:86dvh;display:flex;flex-direction:column;
+  transform:translate(-50%,100%);transition:transform .25s cubic-bezier(.4,0,.2,1);background:var(--bg,#edf3f2);
+  border-radius:24px 24px 0 0;box-shadow:0 -12px 40px rgba(0,25,30,.35);overflow:hidden;font-family:'Outfit',sans-serif}
+#vci-picker.on .vci-hoja{transform:translate(-50%,0)}
+@media (min-width:641px){
+  #vci-picker .vci-hoja{bottom:auto;top:50%;border-radius:22px;transform:translate(-50%,-40%);opacity:0;transition:transform .2s,opacity .2s}
+  #vci-picker.on .vci-hoja{transform:translate(-50%,-50%);opacity:1}
+}
+#vci-picker .vci-h{position:relative;padding:18px 20px 14px;color:#fff;background:url(../img/textura.svg) 0 0/352px 352px,var(--surf,linear-gradient(160deg,#00251f,#016a55 44%,#0269a8 82%,#033e78))}
+#vci-picker .vci-h b{display:block;font-size:20px;font-weight:700}
+#vci-picker .vci-h small{display:block;font-size:13px;color:rgba(255,255,255,.85);margin-top:2px}
+#vci-picker .vci-x{position:absolute;top:14px;right:14px;width:38px;height:38px;border-radius:12px;display:grid;place-items:center;cursor:pointer;
+  background:rgba(255,255,255,.18);border:1.5px solid rgba(255,255,255,.35);color:#fff}
+#vci-picker .vci-x svg{width:18px;height:18px}
+#vci-picker .vci-buscar{padding:12px 14px 6px}
+#vci-picker .vci-buscar input{width:100%;box-sizing:border-box;padding:11px 14px;border-radius:12px;border:1.5px solid var(--border,#dde7e6);
+  background:var(--panel,#fff);color:var(--txt,#10222b);font:500 15px 'Outfit',sans-serif}
+#vci-picker .vci-lista{overflow-y:auto;padding:6px 14px calc(18px + env(safe-area-inset-bottom));display:flex;flex-direction:column;gap:8px}
+#vci-picker .vci-item{display:flex;align-items:center;gap:12px;width:100%;text-align:left;padding:10px 12px;border-radius:14px;cursor:pointer;
+  border:1px solid var(--border,#dde7e6);background:var(--panel,#fff);color:var(--txt,#10222b);font-family:'Outfit',sans-serif}
+#vci-picker .vci-item:active{transform:scale(.99)}
+#vci-picker .vci-item>svg{width:18px;height:18px;color:var(--txt3,#748792);flex:none}
+#vci-picker .vci-av{width:42px;height:42px;border-radius:50%;overflow:hidden;flex:none;display:grid;place-items:center;
+  background:linear-gradient(135deg,#2f9a3f,#0f7a5a 50%,#0a62b0);color:#fff;font-weight:700;font-size:14px}
+#vci-picker .vci-av img{width:100%;height:100%;object-fit:cover}
+#vci-picker .vci-t{flex:1;min-width:0}
+#vci-picker .vci-t b{display:block;font-size:15px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#vci-picker .vci-t small{display:block;font-size:12.5px;color:var(--txt3,#748792)}
+#vci-picker .vci-vacio{padding:24px;text-align:center;color:var(--txt3,#748792)}
+
+/* Aviso "Viendo como …" sobre el portal del instructor */
+#vci-banner{display:none;position:fixed;z-index:10040;left:50%;transform:translateX(-50%);
+  bottom:calc(104px + env(safe-area-inset-bottom));width:min(560px,calc(100% - 20px));box-sizing:border-box;
+  align-items:center;gap:10px;padding:9px 10px 9px 12px;border-radius:16px;font-family:'Outfit',sans-serif;
+  background:#3b2a05;color:#fff7e6;border:1.5px solid #e0a52e;box-shadow:0 10px 28px rgba(0,0,0,.35)}
+html:not(.ver-como-inst) #vci-banner{display:none!important}
+#vci-banner .vci-ojo svg{width:20px;height:20px;color:#f5c869;display:block}
+#vci-banner .vci-txt{flex:1;min-width:0}
+#vci-banner .vci-txt b{display:block;font-size:13.5px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#vci-banner .vci-txt small{display:block;font-size:11.5px;color:#f5d38f}
+#vci-banner button{flex:none;border:1px solid rgba(255,255,255,.35);background:rgba(255,255,255,.12);color:#fff;border-radius:10px;
+  padding:7px 10px;font:600 12.5px 'Outfit',sans-serif;cursor:pointer}
+#vci-banner button.vci-volver{background:#f5c869;color:#3b2a05;border-color:#f5c869}
+@media (min-width:900px){ #vci-banner{bottom:18px;left:calc(50% + 136px)} }
+@media (max-width:380px){ #vci-banner .vci-txt small{display:none} }
+#vci-banner .vci-s{display:none}
+@media (max-width:480px){ #vci-banner .vci-l{display:none} #vci-banner .vci-s{display:inline} #vci-banner .vci-txt small{display:block!important} }
