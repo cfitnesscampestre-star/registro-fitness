@@ -4,8 +4,10 @@
    - Tras un login de instructor exitoso (app instalada) se guarda quién es.
    - La próxima vez la pantalla de login solo muestra su foto/nombre y el PIN
      (se ocultan Coordinador, Consulta y la lista de nombres).
-   - Mantener presionado el logo ~2 s borra lo recordado y regresa a la
-     pantalla inicial completa.
+   - Mantener presionado el logo ~2 s, o tocar "¿No eres tú? Cambiar de
+     perfil", borra lo recordado y regresa a la pantalla inicial completa.
+     (En iPad/iPhone el gesto usa eventos táctiles: Safari cancelaba la
+     pulsación larga sobre la imagen del logo.)
    El PIN sigue siendo obligatorio; no se toca bloqueo ni sesión.
    ═══════════════════════════════════════════════════════════════ */
 (function () {
@@ -68,7 +70,12 @@
       '#lr-nombre{font-size:1.15rem;font-weight:700;line-height:1.2}' +
       '#lr-hint{font-size:.62rem;opacity:.5;margin-top:2px}' +
       '#login-screen .login-logo{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none;touch-action:manipulation}' +
-      '#login-screen .login-logo.lr-pressing{opacity:.55;transition:opacity 1.8s linear}';
+      '#login-screen .login-logo.lr-pressing{opacity:.55;transition:opacity 1.8s linear}' +
+      /* En iPad/iPhone, mantener presionada la imagen abre "arrastrar/guardar imagen" y cancela el gesto */
+      '#login-screen .login-logo img{pointer-events:none;-webkit-user-drag:none;-webkit-touch-callout:none;-webkit-user-select:none;user-select:none}' +
+      '#lr-cambiar{margin-top:6px;background:none;border:1.5px solid rgba(15,122,90,.35);color:#0f7a5a;border-radius:10px;' +
+        'padding:7px 14px;font:600 .78rem Outfit,sans-serif;cursor:pointer;-webkit-tap-highlight-color:transparent}' +
+      'html.tema-oscuro #lr-cambiar{color:#86e6ba;border-color:rgba(134,230,186,.4)}';
     document.head.appendChild(st);
   }
 
@@ -80,8 +87,12 @@
     card = document.createElement('div');
     card.id = 'lr-card';
     card.innerHTML = '<div id="lr-avatar"></div><div id="lr-hola">Hola</div><div id="lr-nombre"></div>' +
-                     '<div id="lr-hint">Mantén presionado el logo para cambiar de perfil</div>';
+                     '<div id="lr-hint">Mantén presionado el logo para cambiar de perfil</div>' +
+                     '<button type="button" id="lr-cambiar">¿No eres tú? Cambiar de perfil</button>';
     campo.parentNode.insertBefore(card, campo);
+    // Botón visible: funciona igual en celular, iPad y computadora, sin depender del gesto
+    var bc = card.querySelector('#lr-cambiar');
+    if (bc) bc.addEventListener('click', function (e) { e.preventDefault(); olvidar(); });
     return card;
   }
 
@@ -170,11 +181,26 @@
       logo.classList.add('lr-pressing');
       timer = setTimeout(function () { timer = null; logo.classList.remove('lr-pressing'); olvidar(); }, LONG_MS);
     }
-    logo.addEventListener('pointerdown', function (e) { iniciar(e.clientX, e.clientY); });
+    var img = logo.querySelector('img'); if (img) img.setAttribute('draggable', 'false');
+    var tactil = false;   // en pantallas táctiles manda touch*: se ignoran los pointer* que iOS cancela
+    logo.addEventListener('touchstart', function (e) {
+      tactil = true;
+      if (e.cancelable) e.preventDefault();   // evita el menú de la imagen y la selección en iPad/iPhone
+      var t = e.touches[0]; iniciar(t.clientX, t.clientY);
+    }, { passive: false });
+    logo.addEventListener('touchmove', function (e) {
+      var t = e.touches[0];
+      if (timer && (Math.abs(t.clientX - x0) > 20 || Math.abs(t.clientY - y0) > 20)) cancelar();
+    }, { passive: true });
+    ['touchend', 'touchcancel'].forEach(function (ev) { logo.addEventListener(ev, function () { cancelar(); setTimeout(function () { tactil = false; }, 400); }); });
+    logo.addEventListener('pointerdown', function (e) { if (!tactil && e.pointerType !== 'touch') iniciar(e.clientX, e.clientY); });
     logo.addEventListener('pointermove', function (e) {
+      if (tactil || e.pointerType === 'touch') return;
       if (timer && (Math.abs(e.clientX - x0) > 14 || Math.abs(e.clientY - y0) > 14)) cancelar();
     });
-    ['pointerup', 'pointercancel', 'pointerleave'].forEach(function (ev) { logo.addEventListener(ev, cancelar); });
+    ['pointerup', 'pointercancel', 'pointerleave'].forEach(function (ev) {
+      logo.addEventListener(ev, function (e) { if (tactil || e.pointerType === 'touch') return; cancelar(); });
+    });
     logo.addEventListener('contextmenu', function (e) { e.preventDefault(); });
     logo._lrIniciar = iniciar; // para pruebas
   }
