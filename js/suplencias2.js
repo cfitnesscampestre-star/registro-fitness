@@ -433,9 +433,9 @@ function guardarSupLocal(){
   if(typeof inicializarHashes === 'function') inicializarHashes();
 
   // ── Respaldo: eventos de red del navegador ──
+  // (la reconexión en sí la fuerza firmas.js → _fbRevisarConexion; al conectar sube lo pendiente)
   window.addEventListener('online', ()=>{
-    setIndicador('🟡 Red recuperada · Sincronizando...');
-    setTimeout(()=>{ if(!fbSyncing) sincronizarFirebase(); }, 900);
+    setIndicador('🟡 Red recuperada · Reconectando...');
   });
   window.addEventListener('offline', ()=>{
     setIndicador('🔴 Sin conexión · Cambios guardados localmente');
