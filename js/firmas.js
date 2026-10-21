@@ -796,6 +796,8 @@ function _fd_generarPDFConFirmas() {
 })();
 async function inicializarFirebase(){
   if(!FIREBASE_ACTIVO){ setIndicador('⚪ Modo offline'); return; }
+  if(fbDb || _fbIniciando) return;          // ya conectado o arrancando
+  _fbIniciando = true;
   try{
     await Promise.all([
       cargarScript('https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js'),
@@ -809,19 +811,29 @@ async function inicializarFirebase(){
     // ── Monitor de conexión ──────────────────
     fbDb.ref('.info/connected').on('value', snap => {
       const online = snap.val() === true;
+      fbConectado = online;
       if(online){
+        _fbDesconectadoDesde = 0;
+        _fbIntentos = 0;
         if(fbWasOffline){
           fbWasOffline = false;
-          setIndicador('🟡 Reconectado · Sincronizando...');
-          // Solo subir si ya recibimos la primera respuesta de Firebase
-          // (el listener se re-activará solo al reconectar y manejará la lógica)
-          setTimeout(()=>{ if(!fbSyncing && fbInicializado) sincronizarFirebase(); }, 2000);
+          if(_hayCambiosSinSubir()){
+            setIndicador('🟡 Reconectado · Sincronizando...');
+            // Solo subir si ya recibimos la primera respuesta de Firebase
+            // (el listener se re-activará solo al reconectar y manejará la lógica)
+            setTimeout(()=>{ if(!fbSyncing && fbInicializado) sincronizarFirebase(); }, 2000);
+          } else {
+            setIndicador('🟢 En línea');   // nada pendiente: no se vuelve a subir toda la base
+          }
         } else {
           setIndicador('🟢 En línea');
         }
       } else {
         fbWasOffline = true;
-        setIndicador('🔴 Sin conexión · Guardando localmente');
+        if(!_fbDesconectadoDesde) _fbDesconectadoDesde = Date.now();
+        // Si la desconexión la provocamos nosotros para reconectar, no alarmar con rojo
+        if(Date.now() - _fbUltimoForzado < 4000) setIndicador('🟡 Reconectando...');
+        else setIndicador('🔴 Sin conexión · Guardando localmente');
       }
     });
 
@@ -1076,10 +1088,77 @@ async function inicializarFirebase(){
     setIndicador('🟢 Firebase conectado');
 
   } catch(e){
-    console.warn('Firebase error:', e.message);
+    console.warn('Firebase error:', e && e.message);
     setIndicador('🟡 Sin Firebase · Solo datos locales');
+    // Antes se quedaba así hasta recargar la página. Ahora se reintenta solo
+    // (y de inmediato al volver la red o al regresar a la app, ver _fbRevisarConexion).
+    clearTimeout(_fbReintentoInit);
+    _fbReintentoInit = setTimeout(inicializarFirebase, 8000);
+  } finally{
+    _fbIniciando = false;
   }
 }
+
+// ═══════════════════════════════════════════
+// RECONEXIÓN RÁPIDA
+// ═══════════════════════════════════════════
+// El SDK de Realtime Database reintenta solo, pero con espera creciente (x1.3 por intento,
+// hasta 5 minutos), y en el celular el evento 'online' casi nunca llega al cambiar de wifi
+// a datos o al despertar el teléfono: por eso tardaba en reconectar aunque hubiera señal.
+// Aquí se fuerza la reconexión (goOffline/goOnline reinicia la espera del SDK y conecta ya)
+// de TODAS las apps de Firebase de la página (Fitness, Gerencia, Mantenimiento):
+//   • al recuperar la red ('online')
+//   • al volver a la app (visible / pageshow), siempre si estuvo oculta ≥ 30 s,
+//     porque el socket pudo morir sin avisar mientras el teléfono dormía
+//   • como respaldo, cada pocos segundos si sigue sin conexión con la app abierta.
+let fbConectado = false;
+let _fbIniciando = false;
+let _fbReintentoInit = null;
+let _fbDesconectadoDesde = Date.now();
+let _fbUltimoForzado = 0;
+let _fbIntentos = 0;
+let _fbOcultoDesde = 0;
+
+function _hayCambiosSinSubir(){
+  const local  = parseInt(localStorage.getItem('fc_local_ts')     || '0');
+  const subido = parseInt(localStorage.getItem('fc_ult_subida_ts') || '0');
+  return local > subido;
+}
+
+function forzarReconexionFirebase(){
+  if(typeof firebase === 'undefined' || !firebase.apps || !firebase.apps.length) return;
+  _fbUltimoForzado = Date.now();
+  _fbIntentos++;
+  firebase.apps.forEach(app => {
+    try{ const db = app.database(); db.goOffline(); db.goOnline(); }catch(e){}
+  });
+}
+
+function _fbRevisarConexion(motivo){
+  if(!FIREBASE_ACTIVO || document.visibilityState === 'hidden' || navigator.onLine === false) return;
+  // El SDK no cargó (sin señal al abrir la app): volver a intentarlo ya
+  // (la vigilancia periódica no lo hace: para eso está el reintento cada 8 s)
+  if(!fbDb){ if(motivo !== 'vigilancia'){ clearTimeout(_fbReintentoInit); inicializarFirebase(); } return; }
+  const t = Date.now();
+  if(t - _fbUltimoForzado < 2500) return;                     // dar tiempo al intento anterior
+  if(motivo === 'online' || motivo === 'despertar' || (motivo === 'visible' && !fbConectado)){
+    forzarReconexionFirebase(); return;
+  }
+  if(fbConectado || !_fbDesconectadoDesde) return;
+  // Sin conexión con internet disponible: reintentar a los 6 s, luego cada 10, 20 y 30 s como máximo
+  const espera = Math.min(30000, [6000, 10000, 20000][_fbIntentos] || 30000);
+  if(t - Math.max(_fbDesconectadoDesde, _fbUltimoForzado) >= espera) forzarReconexionFirebase();
+}
+
+window.addEventListener('online', () => _fbRevisarConexion('online'));
+window.addEventListener('pageshow', e => { if(e.persisted) _fbRevisarConexion('despertar'); });
+document.addEventListener('visibilitychange', () => {
+  if(document.visibilityState === 'hidden'){ _fbOcultoDesde = Date.now(); return; }
+  const largo = _fbOcultoDesde && (Date.now() - _fbOcultoDesde >= 30000);
+  _fbOcultoDesde = 0;
+  _fbRevisarConexion(largo ? 'despertar' : 'visible');
+});
+setInterval(() => _fbRevisarConexion('vigilancia'), 3000);
 
 // ── Limpiar todos los datos ───────────────────
 async function confirmarLimpiezaTotal(){
@@ -1118,13 +1197,19 @@ async function confirmarLimpiezaTotal(){
 }
 
 // ── Helpers ───────────────────────────────────
+const _scriptsCargando = {};
 function cargarScript(src){
-  return new Promise((res, rej)=>{
-    if(document.querySelector(`script[src="${src}"]`)){ res(); return; }
+  // Se guarda la promesa por URL: si el script falló (sin señal), se borra para poder
+  // reintentarlo. Antes, un <script> fallido seguía en la página y los reintentos lo daban por cargado.
+  if(_scriptsCargando[src]) return _scriptsCargando[src];
+  if(document.querySelector(`script[src="${src}"]`)) return Promise.resolve();
+  _scriptsCargando[src] = new Promise((res, rej)=>{
     const s = document.createElement('script');
-    s.src = src; s.onload = res; s.onerror = rej;
+    s.src = src; s.onload = res;
+    s.onerror = () => { s.remove(); delete _scriptsCargando[src]; rej(new Error('No se pudo cargar ' + src)); };
     document.head.appendChild(s);
   });
+  return _scriptsCargando[src];
 }
 
 function setIndicador(txt){

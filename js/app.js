@@ -986,6 +986,7 @@ async function sincronizarFirebase(){
   }
 
   fbSyncing = true;
+  let _subirPendientes = false;
   try{
     const ts = Date.now();
     // Incluir hoja de firmas activa para que instructores en otros dispositivos la vean
@@ -1009,9 +1010,14 @@ async function sincronizarFirebase(){
       eventos:     _eventos,
       ts
     };
-    await fbDb.ref('fitness').set(payload);
+    // update() y no set(): set() sobre 'fitness' borraba en cada guardado los nodos que no van en
+    // el payload (fitness/notif_tokens de las notificaciones, fitness/firmasSuplencias, …).
+    await fbDb.ref('fitness').update(payload);
     // Actualizar fc_local_ts para que otros dispositivos sepan cuándo fue esto
-    localStorage.setItem('fc_local_ts', String(ts));
+    // (sin bajarlo: si hubo cambios mientras la subida esperaba la red, siguen marcados como pendientes)
+    if(parseInt(localStorage.getItem('fc_local_ts') || '0') < ts) localStorage.setItem('fc_local_ts', String(ts));
+    localStorage.setItem('fc_ult_subida_ts', String(ts));   // al reconectar solo se sube si hubo cambios después
+    _subirPendientes = typeof _hayCambiosSinSubir === 'function' && _hayCambiosSinSubir();
     // Actualizar contadores máximos tras subida exitosa
     if(registros.length  > _fbMaxRegistros)  _fbMaxRegistros  = registros.length;
     if(recorridos.length > _fbMaxRecorridos) _fbMaxRecorridos = recorridos.length;
@@ -1022,7 +1028,8 @@ async function sincronizarFirebase(){
     console.warn('Firebase sync error:', e.message);
     setIndicador('🔴 Sin conexión — datos guardados localmente');
   } finally{
-    setTimeout(()=>{ fbSyncing = false; }, 600);
+    // Si mientras esperaba la red hubo más cambios (se descartaban por fbSyncing), subirlos ahora
+    setTimeout(()=>{ fbSyncing = false; if(_subirPendientes) sincronizarFirebase(); }, 600);
   }
 }
 

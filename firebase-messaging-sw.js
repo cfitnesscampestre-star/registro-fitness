@@ -150,8 +150,17 @@ self.addEventListener('notificationclick', event => {
   );
 });
 
-// ── 6. Caché básico heredado (mantiene compatibilidad con pwa.js) ──
-const CACHE_VERSION = 'fitness-ctrl-v5-notif';
+// ── 6. Caché de la app ─────────────────────────────────────────
+// Antes: TODO GET pasaba por aquí, incluidas las peticiones a Firebase (base de datos, login)
+// y las librerías del CDN; los .js/.css/.html se pedían siempre a la red sin guardarse,
+// así que con poca señal la app esperaba hasta que el navegador se rindiera y sin
+// internet no abría. Ahora:
+//   • Firebase y cualquier otro servicio externo: el SW no se mete (van directo a la red).
+//   • Librerías con versión fija en la URL (gstatic/firebasejs, cdnjs, fuentes): primero caché.
+//   • Archivos propios: primero la red (cambios inmediatos); si en 4 s no contesta y hay
+//     copia guardada, se usa la copia y la red sigue actualizándola por detrás.
+const CACHE_VERSION = 'fitness-ctrl-v6';
+const ESPERA_RED_MS = 4000;
 
 self.addEventListener('install',  () => self.skipWaiting());
 self.addEventListener('activate', e  => {
@@ -164,22 +173,41 @@ self.addEventListener('activate', e  => {
   );
 });
 
+function esLibreriaVersionada(url) {
+  return (url.hostname === 'www.gstatic.com' && url.pathname.indexOf('/firebasejs/') === 0) ||
+         (url.hostname === 'cdnjs.cloudflare.com' && url.pathname.indexOf('/ajax/libs/') === 0) ||
+         url.hostname === 'fonts.gstatic.com';
+}
+
+function guardarEnCache(req, resp) {
+  if (resp && (resp.ok || resp.type === 'opaque')) {
+    const copia = resp.clone();
+    caches.open(CACHE_VERSION).then(c => c.put(req, copia)).catch(() => {});
+  }
+  return resp;
+}
+
 self.addEventListener('fetch', e => {
-  if (e.request.method !== 'GET') return;
-  const url = e.request.url;
-  // JS/CSS/HTML siempre de red (garantiza cambios inmediatos)
-  if (url.endsWith('.js') || url.endsWith('.css') || url.endsWith('.html') || url.includes('index')) {
+  const req = e.request;
+  if (req.method !== 'GET') return;
+  const url = new URL(req.url);
+
+  if (url.origin !== self.location.origin) {
+    if (!esLibreriaVersionada(url)) return;          // Firebase, Google, etc.: sin intervenir
     e.respondWith(
-      fetch(e.request, { cache: 'no-store' }).catch(() => caches.match(e.request))
+      caches.match(req).then(hit => hit || fetch(req).then(r => guardarEnCache(req, r)))
     );
     return;
   }
-  // Imágenes y fuentes: caché normal
+
+  const esCodigo = req.mode === 'navigate' || /\.(js|css|html)$/.test(url.pathname) || url.pathname.endsWith('/');
+  const red = fetch(req, esCodigo ? { cache: 'no-store' } : undefined).then(r => guardarEnCache(req, r));
+  red.catch(() => {});
   e.respondWith(
-    fetch(e.request).then(r => {
-      const rc = r.clone();
-      caches.open(CACHE_VERSION).then(c => c.put(e.request, rc));
-      return r;
-    }).catch(() => caches.match(e.request))
+    caches.match(req, { ignoreSearch: esCodigo }).then(hit => {
+      if (!hit) return red;
+      const plazo = new Promise(res => setTimeout(() => res(hit), ESPERA_RED_MS));
+      return Promise.race([red.catch(() => hit), plazo]);
+    })
   );
 });
