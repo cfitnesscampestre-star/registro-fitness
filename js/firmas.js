@@ -799,13 +799,17 @@ async function inicializarFirebase(){
   if(fbDb || _fbIniciando) return;          // ya conectado o arrancando
   _fbIniciando = true;
   try{
+    await cargarScript('https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js');
     await Promise.all([
-      cargarScript('https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js'),
-      cargarScript('https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js')
+      cargarScript('https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js'),
+      cargarScript('https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js')
     ]);
 
     // Evitar doble inicialización de la SDK
     fbApp = firebase.apps.length ? firebase.apps[0] : firebase.initializeApp(FIREBASE_CONFIG);
+    // Iniciar sesión (anónima) ANTES de escuchar: con las reglas de firebase/database.rules.json
+    // la base rechaza a quien no tenga sesión, y un listener rechazado no se reintenta solo.
+    await _fbAutenticar();
     fbDb  = firebase.database();
 
     // ── Monitor de conexión ──────────────────
@@ -841,7 +845,7 @@ async function inicializarFirebase(){
     // Eliminamos el listener anterior si existía (evita duplicados en HMR/reload)
     if(fbListener){ fbDb.ref('fitness').off('value', fbListener); }
 
-    fbListener = fbDb.ref('fitness').on('value', snap => {
+    _fbOnFitness = snap => {
       // Si NOSOTROS estamos subiendo, ignorar el eco
       if(fbSyncing) return;
 
@@ -1091,7 +1095,8 @@ async function inicializarFirebase(){
       } finally{
         fbReceiving = false;
       }
-    });
+    };
+    _fbEscucharFitness();
 
     setIndicador('🟢 Firebase conectado');
 
@@ -1119,6 +1124,45 @@ async function inicializarFirebase(){
 //   • al volver a la app (visible / pageshow), siempre si estuvo oculta ≥ 30 s,
 //     porque el socket pudo morir sin avisar mientras el teléfono dormía
 //   • como respaldo, cada pocos segundos si sigue sin conexión con la app abierta.
+// ═══════════════════════════════════════════
+// SESIÓN EN FIREBASE (Auth anónima)
+// ═══════════════════════════════════════════
+// Cada equipo obtiene una sesión anónima de Firebase que se conserva entre aperturas.
+// No sustituye al login de la app (contraseña/PIN): sirve para que las reglas de la base
+// rechacen a quien solo tenga la apiKey pública. Si falla (sin red), la app sigue y
+// se reintenta al conectar.
+let _fbOnFitness = null;
+async function _fbAutenticar(){
+  try{
+    if(!fbApp || typeof fbApp.auth !== 'function') return null;
+    const au = fbApp.auth();
+    // La sesión guardada se restaura de forma asíncrona: esperar el primer aviso
+    let user = au.currentUser || await Promise.race([
+      new Promise(res => { const off = au.onAuthStateChanged(u => { off(); res(u); }); }),
+      new Promise(res => setTimeout(() => res(null), 4000))
+    ]);
+    if(!user) user = (await Promise.race([
+      au.signInAnonymously(),
+      new Promise((_, rej) => setTimeout(() => rej(new Error('tiempo de espera')), 8000))
+    ])).user;
+    return user;
+  } catch(e){
+    console.warn('[Firebase] sin sesión anónima:', e && (e.code || e.message));
+    return null;
+  }
+}
+function _fbEscucharFitness(){
+  if(!fbDb || !_fbOnFitness) return;
+  if(fbListener) fbDb.ref('fitness').off('value', fbListener);
+  fbListener = fbDb.ref('fitness').on('value', _fbOnFitness, err => {
+    // Rechazado por las reglas (p. ej. la sesión aún no estaba lista): pedir sesión y volver a escuchar
+    console.warn('[Firebase] lectura rechazada:', err && err.message);
+    fbListener = null;
+    setIndicador('🔴 Sin permiso para leer la nube · reintentando');
+    setTimeout(async () => { await _fbAutenticar(); _fbEscucharFitness(); }, 8000);
+  });
+}
+
 let fbConectado = false;
 let _fbIniciando = false;
 let _fbReintentoInit = null;

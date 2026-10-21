@@ -1,0 +1,31 @@
+{
+  "rules": {
+    ".read": false,
+    ".write": false,
+
+    "fitness": {
+      ".read": "auth != null",
+      ".write": "auth != null",
+
+      "instructores": {
+        "$i": {
+          "pin": { ".validate": false },
+          "pinHash": { ".validate": "newData.isString() && newData.val().beginsWith('pbkdf2$') && newData.val().length < 200" }
+        }
+      },
+
+      "cfg": {
+        "acceso": {
+          "$rol": {
+            ".validate": "($rol === 'admin' || $rol === 'usuario') && newData.isString() && newData.val().length < 200 && (newData.val().beginsWith('pbkdf2$') || newData.val().length === 64)"
+          }
+        }
+      }
+    },
+
+    "fc_sup_firmas": {
+      ".read": "auth != null",
+      ".write": "auth != null"
+    }
+  }
+}

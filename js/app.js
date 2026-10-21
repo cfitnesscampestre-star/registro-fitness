@@ -866,7 +866,7 @@ const FIREBASE_ACTIVO = true;
 // ⚠ SEGURIDAD: Esta apiKey es pública (GitHub Pages). Protege la base de datos
 // configurando Firebase Security Rules en:
 // https://console.firebase.google.com → Realtime Database → Rules
-// Usa el archivo firebase-security-rules.json incluido en este proyecto.
+// Usa el archivo firebase/database.rules.json incluido en este proyecto (ver firebase/README.md).
 // Además, en Firebase Console → Project Settings → API restrictions,
 // limita el uso de esta key SOLO al dominio cfitnesscampestre-star.github.io
 const FIREBASE_CONFIG = {

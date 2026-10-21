@@ -4,9 +4,9 @@
 // Club Campestre Fitness · notificaciones push al coordinador
 // ═══════════════════════════════════════════════════════════════
 
-// ── 1. Importar Firebase desde CDN (versión compat para SW) ────
-importScripts('https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js');
-importScripts('https://www.gstatic.com/firebasejs/10.12.0/firebase-messaging-compat.js');
+// ── 1. Importar Firebase desde CDN (versión compat para SW; la misma 9.22.0 que la página) ────
+importScripts('https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js');
+importScripts('https://www.gstatic.com/firebasejs/9.22.0/firebase-messaging-compat.js');
 
 // ── 2. Inicializar Firebase con la misma config del proyecto ───
 firebase.initializeApp({
