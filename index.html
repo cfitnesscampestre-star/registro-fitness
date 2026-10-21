@@ -1618,7 +1618,7 @@ function cerrarMenuCoord(){ var m=document.getElementById('cm-menu'); if(m){ m.c
       <div style="display:flex;gap:.5rem;flex-wrap:wrap">
         <input class="ctrl" type="text" placeholder="🔍 Buscar instructor..." oninput="filterInst(this.value)" style="width:180px">
         <button class="btn solo-admin" onclick="pinesGenerar()" title="Genera PIN aleatorios para todos los profesores y descarga la lista">🔑 Generar PINs</button>
-        <button class="btn solo-admin" onclick="pinesDescargarLista()" title="Descarga la lista con los PIN actuales">⬇ Lista de PINs</button>
+        <button class="btn solo-admin" onclick="pinesDescargarLista()" title="Descarga la lista de profesores que tienen o no tienen PIN">⬇ Lista de PINs</button>
         <button class="btn" onclick="vciAbrirSelector()" title="Abre la pantalla de un instructor tal como él la ve (solo lectura)">👁 Ver como instructor</button>
         <button class="btn bg" onclick="abrirModalInstructor(null)">+ Nuevo</button>
       </div>
@@ -2132,7 +2132,7 @@ function cerrarMenuCoord(){ var m=document.getElementById('cm-menu'); if(m){ m.c
 <div class="modal narrow">
   <button class="mcls" onclick="cerrarModal('m-cambiar-pass')"><svg class="ico" viewBox="0 0 20 20"><line x1="5" y1="5" x2="15" y2="15" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><line x1="15" y1="5" x2="5" y2="15" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></button>
   <div class="mttl"><svg class="ico" viewBox="0 0 20 20"><circle cx="7" cy="9" r="4" stroke="currentColor" stroke-width="1.4" fill="none"/><line x1="10.8" y1="11" x2="17" y2="17" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><line x1="14" y1="15" x2="16" y2="13" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg> Cambiar Contraseña</div>
-  <div style="font-size:.72rem;color:var(--txt2);margin-bottom:1rem">Las contraseñas se guardan localmente en este dispositivo. Si usas el sistema en otro equipo, deberás cambiarla allí también.</div>
+  <div style="font-size:.72rem;color:var(--txt2);margin-bottom:1rem">La contraseña nueva aplica en todos los equipos en cuanto este se conecta. Usa al menos 8 caracteres.</div>
   <div style="background:var(--panel2);border:1px solid var(--border);border-radius:10px;padding:.9rem;margin-bottom:.8rem">
     <div style="font-size:.68rem;text-transform:uppercase;letter-spacing:1px;color:var(--neon);margin-bottom:.6rem"><svg class="ico" viewBox="0 0 20 20"><path d="M10 2 L17 5 L17 11 Q17 16 10 19 Q3 16 3 11 L3 5 Z" stroke="currentColor" stroke-width="1.4" fill="none" stroke-linejoin="round"/></svg>️ Coordinador</div>
     <div class="fg"><label>Contraseña actual</label><input type="password" id="cp-admin-actual" placeholder="Contraseña actual..."></div>
@@ -2242,10 +2242,10 @@ function cerrarMenuCoord(){ var m=document.getElementById('cm-menu'); if(m){ m.c
   <div class="fr solo-admin" style="margin-bottom:.2rem">
     <div class="fg">
       <label>PIN de acceso al portal</label>
-      <input type="text" id="mi-pin" maxlength="6" placeholder="4–6 dígitos (def. 1234)"
+      <input type="text" id="mi-pin" maxlength="6" placeholder="4–6 dígitos"
         style="font-family:'DM Mono',monospace;letter-spacing:3px;font-size:1rem"
         oninput="this.value=this.value.replace(/[^0-9]/g,'')">
-      <span style="font-size:.63rem;color:var(--txt3);margin-top:2px">El instructor usa este PIN para entrar a su portal desde cualquier dispositivo.</span>
+      <span style="font-size:.63rem;color:var(--txt3);margin-top:2px">El instructor usa este PIN para entrar a su portal desde cualquier dispositivo. Por seguridad, después de guardarlo ya no se puede consultar: anótalo o entrégalo en ese momento.</span>
     </div>
   </div>
 

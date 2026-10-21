@@ -17,27 +17,34 @@ function renderPines(){
   if(!instructores.length){cont.innerHTML='<div class="empty">Sin instructores cargados.</div>';return;}
   cont.innerHTML=`<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:.5rem">
     ${instructores.map(inst=>{
-      const pinGuardado=inst.pin||localStorage.getItem(`fc_pin_${inst.id}`)||'1234';
+      const tiene=instTienePin(inst);
       return`<div style="background:var(--panel2);border:1px solid var(--border);border-radius:10px;padding:.65rem .85rem;display:flex;align-items:center;gap:.6rem">
-        <div style="flex:1;font-size:.82rem;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${inst.nombre.split(' ')[0]}</div>
-        <input type="text" maxlength="6" value="${pinGuardado}"
+        <div style="flex:1;min-width:0">
+          <div style="font-size:.82rem;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${escHtml(inst.nombre.split(' ')[0])}</div>
+          <div style="font-size:.62rem;color:${tiene?'var(--txt3)':'var(--red,#c0392b)'}">${tiene?'Con PIN':'Sin PIN · no puede entrar'}</div>
+        </div>
+        <input type="text" inputmode="numeric" maxlength="6" value="" placeholder="Nuevo"
+          aria-label="Nuevo PIN de ${escHtml(inst.nombre)}"
           style="width:64px;background:var(--panel);border:1px solid var(--border);border-radius:6px;padding:4px 7px;color:var(--gold2);font-family:'DM Mono',monospace;font-size:.85rem;text-align:center;outline:none"
-          onchange="guardarPinInst(${inst.id},this.value)"
-          title="PIN de ${inst.nombre}">
+          oninput="this.value=this.value.replace(/[^0-9]/g,'')"
+          onchange="guardarPinInst(${Number(inst.id)},this.value)">
       </div>`;
     }).join('')}
   </div>
   <div style="font-size:.65rem;color:var(--txt3);margin-top:.5rem">
-    ✏️ Haz clic en el PIN para editarlo · Los instructores usan este PIN para entrar al portal
+    ✏️ Escribe un PIN nuevo para cambiarlo · Por seguridad los PIN guardados ya no se pueden consultar
   </div>`;
 }
 
-function guardarPinInst(instId, pin){
-  if(!pin||pin.length<4){showToast('El PIN debe tener al menos 4 caracteres','err');return;}
-  // Guardar en el objeto instructor
-  const idx=instructores.findIndex(i=>i.id===instId);
-  if(idx>=0){instructores[idx].pin=pin;guardarLocal();sincronizarFirebase();}
-  localStorage.setItem(`fc_pin_${instId}`,pin);
+async function guardarPinInst(instId, pin){
+  if(!pinValido(pin)){showToast('El PIN debe tener de 4 a 6 dígitos','err');return;}
+  const inst=instructores.find(i=>String(i.id)===String(instId));
+  if(!inst) return;
+  try{
+    await asignarPinInst(inst,pin);
+    guardarLocal();sincronizarFirebase();renderPines();
+    showToast(`PIN de ${inst.nombre} actualizado.`,'ok');
+  }catch(e){ console.warn('PIN:',e); showToast('No se pudo guardar el PIN. Intenta de nuevo.','err'); }
 }
 
 // ── Solicitudes de instructores ────────────
