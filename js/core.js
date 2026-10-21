@@ -3,6 +3,31 @@ let rolActual = null;
 let rolLoginSeleccionado = 'admin';
 let instActualId = null;
 
+// ═══ TEXTO SEGURO ═══
+// La app arma casi todas las pantallas con innerHTML y plantillas (${...}), también dentro
+// de onclick="...('${...}')". Un nombre guardado en la base con < > " ' & podía inyectar
+// código que corre en todos los teléfonos. Dos defensas:
+//   • escHtml(): escapar al insertar (usar en código nuevo).
+//   • limpiarDatosEntrantes(): todo texto que llega de Firebase o de localStorage cambia esos
+//     caracteres por equivalentes visuales (‹ › ” ’ ＆ ／), así las ~70 plantillas existentes
+//     quedan protegidas sin tocarlas una por una. Las fotos/firmas (data:...) no se tocan.
+function escHtml(t){
+  return String(t==null?'':t).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+const _TXT_SEGURO={'<':'‹','>':'›','"':'”',"'":'’','`':'’','&':'＆','\\':'／'};
+function textoSeguro(t){
+  if(typeof t!=='string'||!/[<>"'`&\\]/.test(t)) return t;
+  if(/^data:image\/(png|jpe?g|webp|gif);base64,/i.test(t)) return t;   // fotos y firmas
+  if(/^https?:\/\//i.test(t)) return t.replace(/[<>"'`\\]/g,c=>_TXT_SEGURO[c]);  // URL: conservar &
+  return t.replace(/[<>"'`&\\]/g,c=>_TXT_SEGURO[c]);
+}
+function limpiarDatosEntrantes(v){
+  if(typeof v==='string') return textoSeguro(v);
+  if(Array.isArray(v)){ for(let i=0;i<v.length;i++) v[i]=limpiarDatosEntrantes(v[i]); return v; }
+  if(v&&typeof v==='object'){ for(const k of Object.keys(v)) v[k]=limpiarDatosEntrantes(v[k]); return v; }
+  return v;
+}
+
 // ═══ SISTEMA DE TOAST ═══
 (function(){
   const ICONS={ok:'✔',err:'✖',warn:'⚠',info:'ℹ'};
@@ -508,8 +533,9 @@ function abrirModalInstructor(id){
     document.getElementById('mi-del').style.display='block';
     _miPrepararVigencia(inst);
     // Cargar PIN guardado del instructor
+    // El PIN ya no se puede ver (solo se guarda su hash): el campo sirve para poner uno nuevo
     const pinEl=document.getElementById('mi-pin');
-    if(pinEl) pinEl.value=inst.pin||localStorage.getItem(`fc_pin_${id}`)||'1234';
+    if(pinEl){ pinEl.value=''; pinEl.placeholder=instTienePin(inst)?'Tiene PIN · escribe otro para cambiarlo':'Sin PIN · escribe 4–6 dígitos'; }
   } else {
     document.getElementById('mi-ttl').textContent='+ Nuevo Instructor';
     document.getElementById('mi-id').value='';
@@ -523,9 +549,9 @@ function abrirModalInstructor(id){
     tmpSlots=[];
     document.getElementById('mi-del').style.display='none';
     _miPrepararVigencia(null);
-    // PIN por defecto para nuevo instructor
+    // Sin PIN por defecto: el instructor no puede entrar hasta que se le asigne uno
     const pinEl=document.getElementById('mi-pin');
-    if(pinEl) pinEl.value='1234';
+    if(pinEl){ pinEl.value=''; pinEl.placeholder='Escribe 4–6 dígitos'; }
   }
   renderSlots();
   document.getElementById('m-instructor').classList.add('on');
@@ -593,7 +619,7 @@ function _vClearAll(ids) { ids.forEach(id => _vClear(id)); }
 function guardarInstructor(){
   _vClearAll(['mi-nombre','mi-tipo']);
   const id=parseInt(document.getElementById('mi-id').value)||0;
-  const nombre=document.getElementById('mi-nombre').value.trim();
+  const nombre=textoSeguro(document.getElementById('mi-nombre').value.trim());
   let ok=true;
   if(!nombre){ _vErr('mi-nombre','El nombre es requerido'); showToast('Ingresa el nombre del instructor','err'); ok=false; }
   if(!ok) return;
@@ -604,13 +630,15 @@ function guardarInstructor(){
   // Mínimo 1 clase en horario si es nuevo
   if(!id && tmpSlots.length===0) showToast('Recuerda agregar el horario del instructor después','info');
   const fotoData=document.getElementById('mi-foto-data').value||null;
-  // PIN del instructor — leer del nuevo campo
+  // PIN: vacío = se queda el que tenía; si se escribe uno, se guarda solo su hash (ver más abajo)
   const pinEl=document.getElementById('mi-pin');
-  const pinVal=(pinEl&&pinEl.value.trim().length>=4)?pinEl.value.trim():'1234';
+  const pinVal=pinEl?pinEl.value.trim():'';
+  if(pinVal && !pinValido(pinVal)){ _vErr('mi-pin','El PIN debe tener de 4 a 6 dígitos'); showToast('El PIN debe tener de 4 a 6 dígitos','err'); return; }
   const data={nombre,tipo:document.getElementById('mi-tipo').value,
     turno:document.getElementById('mi-turno').value,
-    esp:document.getElementById('mi-esp').value.trim(),
-    foto:fotoData,pin:pinVal};
+    esp:textoSeguro(document.getElementById('mi-esp').value.trim()),
+    foto:fotoData};
+  let instGuardado=null;
   let cambioHorario=false, desdeStr='';
   if(id){
     const idx=instructores.findIndex(i=>String(i.id)===String(id));
@@ -619,15 +647,20 @@ function guardarInstructor(){
       // Horario: se aplica A PARTIR de la fecha elegida; lo anterior queda intacto
       desdeStr=(document.getElementById('mi-vigencia')||{}).value||fechaLocalStr(new Date());
       cambioHorario=aplicarCambioHorario(instructores[idx], tmpSlots, desdeStr);
+      instGuardado=instructores[idx];
     } else{ showToast('No se encontró el instructor. Intenta de nuevo.','err'); return; }
-    // Sincronizar también el localStorage de PIN para que auth.js lo encuentre
-    localStorage.setItem(`fc_pin_${id}`, pinVal);
   } else {
     const nid=instructores.reduce((m,i)=>Math.max(m,i.id||0),0)+1;
-    instructores.push({id:nid,...data,horario:[...tmpSlots]});
-    localStorage.setItem(`fc_pin_${nid}`, pinVal);
+    instGuardado={id:nid,...data,horario:[...tmpSlots]};
+    instructores.push(instGuardado);
   }
   cerrarModal('m-instructor');renderAll();
+  if(pinVal){
+    asignarPinInst(instGuardado,pinVal).then(()=>renderAll())
+      .catch(e=>{ console.warn('PIN:',e); showToast('No se pudo guardar el PIN. Intenta de nuevo.','err'); });
+  } else if(!instTienePin(instGuardado)){
+    showToast(`${nombre} aún no tiene PIN: asígnale uno para que pueda entrar a su portal.`,'warn');
+  }
   registrarLog('instructor', `${id?'Editado':'Nuevo'}: ${nombre} · ${data.tipo}${cambioHorario?' · horario desde '+desdeStr:''}`);
   showToast(cambioHorario?`Instructor actualizado · nuevo horario desde ${desdeStr.split('-').reverse().join('/')} (lo anterior se conserva)`:`Instructor ${id?'actualizado':'agregado'}`,'ok');
 }

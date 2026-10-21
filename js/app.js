@@ -917,12 +917,14 @@ function cargarLocal(){
     const sals = localStorage.getItem('fc_salones');
     const sups = localStorage.getItem('fc_suplencias');
     const sols = localStorage.getItem('fc_solicitudes');
-    if(inst) instructores    = JSON.parse(inst);
-    if(regs) registros       = JSON.parse(regs);
-    if(recs) recorridos      = JSON.parse(recs);
-    if(sals) salones         = JSON.parse(sals);
-    if(sups) suplenciasPlan  = JSON.parse(sups);
-    if(sols) solicitudesInst = JSON.parse(sols);
+    // limpiarDatosEntrantes (core.js): lo guardado pudo venir de la nube antes de esta protección
+    const leer = t => limpiarDatosEntrantes(JSON.parse(t));
+    if(inst) instructores    = leer(inst);
+    if(regs) registros       = leer(regs);
+    if(recs) recorridos      = leer(recs);
+    if(sals) salones         = leer(sals);
+    if(sups) suplenciasPlan  = leer(sups);
+    if(sols) solicitudesInst = leer(sols);
     normalizarRegistros();
     const ts = localStorage.getItem('fc_ts');
     

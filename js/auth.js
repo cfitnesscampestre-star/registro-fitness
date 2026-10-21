@@ -64,43 +64,130 @@ function tiempoRestante(hasta) {
   return `${min}:${seg.toString().padStart(2, '0')}`;
 }
 
-// ── Contraseñas por defecto (hasheadas) — se migran al primer uso ──
-// Estos son los hashes de 'fitness2025' y 'campestre'
-// Si el usuario ya cambió la contraseña, se usa la guardada en localStorage
-const HASH_ADMIN_DEFAULT   = 'a8f2c1e4b9d3f6a5c2e8b7d4f1a3c6e9b2d5f8a1c4e7b0d3f6a9c2e5b8d1f4a7'; // placeholder
-const HASH_USUARIO_DEFAULT = 'c3d6f9a2e5b8d1f4a7c0e3b6d9f2a5c8e1b4d7f0a3c6e9b2d5f8a1c4e7b0d3f6'; // placeholder
+// ── Contraseñas de fábrica: solo su hash (el texto ya no está en el código) ──
+// Valen únicamente mientras coordinación no haya puesto una propia. En cuanto se cambia,
+// la nueva se guarda en Firebase (fitness/cfg/acceso) y aplica en todos los equipos.
+const HASH_ADMIN_DEFAULT   = '5df9b9796ea44ee9668fafaa0792d4c6e377325d7cf522458c6197435732bfe6';
+const HASH_USUARIO_DEFAULT = '4c2ea9c645083b32f144c3ac4d72b23b88e68a172a8063b21982a9a75a911359';
+function _hashDefault(rol) { return rol === 'admin' ? HASH_ADMIN_DEFAULT : HASH_USUARIO_DEFAULT; }
+
+// ── Hash con sal (PBKDF2-SHA256) para contraseñas y PIN ──
+// Formato guardado: pbkdf2$<iteraciones>$<sal hex>$<hash hex>. También se aceptan los
+// SHA-256 sin sal de la versión anterior (64 hex), que se actualizan al entrar.
+const PBKDF2_ITER = 120000;
+function _hex(buf) { return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join(''); }
+function _deHex(h) { return new Uint8Array((h.match(/../g) || []).map(x => parseInt(x, 16))); }
+async function _pbkdf2(texto, salHex, iter) {
+  const clave = await crypto.subtle.importKey('raw', new TextEncoder().encode(texto), 'PBKDF2', false, ['deriveBits']);
+  const bits = await crypto.subtle.deriveBits({ name: 'PBKDF2', hash: 'SHA-256', salt: _deHex(salHex), iterations: iter }, clave, 256);
+  return _hex(bits);
+}
+async function hashSecreto(texto) {
+  const sal = _hex(crypto.getRandomValues(new Uint8Array(16)));
+  return `pbkdf2$${PBKDF2_ITER}$${sal}$${await _pbkdf2(texto, sal, PBKDF2_ITER)}`;
+}
+async function verificarSecreto(texto, guardado) {
+  if (!guardado || typeof guardado !== 'string') return false;
+  const m = guardado.match(/^pbkdf2\$(\d+)\$([0-9a-f]+)\$([0-9a-f]{64})$/);
+  if (m) return (await _pbkdf2(texto, m[2], parseInt(m[1], 10))) === m[3];
+  if (/^[0-9a-f]{64}$/.test(guardado)) return (await sha256(texto)) === guardado;
+  return false;
+}
+function hashValido(h) { return typeof h === 'string' && (/^pbkdf2\$\d+\$[0-9a-f]+\$[0-9a-f]{64}$/.test(h) || /^[0-9a-f]{64}$/.test(h)); }
 
 // ── Inicializar hashes en primer arranque ──
 async function inicializarHashes() {
   // Migrar texto plano si existía (versión anterior)
   const passViejaAdmin = localStorage.getItem('fc_pass_admin');
   const passViejaUser  = localStorage.getItem('fc_pass_usuario');
-
-  if (passViejaAdmin) {
-    const h = await sha256(passViejaAdmin);
-    localStorage.setItem('fc_hash_admin', h);
-    localStorage.removeItem('fc_pass_admin');
-  } else {
-    const hashExistente = localStorage.getItem('fc_hash_admin');
-    // Si no hay hash o tiene longitud incorrecta (no es SHA-256 válido = 64 chars)
-    if (!hashExistente || hashExistente.length !== 64) {
-      localStorage.setItem('fc_hash_admin', await sha256('fitness2025'));
-    }
-  }
-
-  if (passViejaUser) {
-    const h = await sha256(passViejaUser);
-    localStorage.setItem('fc_hash_usuario', h);
-    localStorage.removeItem('fc_pass_usuario');
-  } else {
-    const hashExistenteU = localStorage.getItem('fc_hash_usuario');
-    if (!hashExistenteU || hashExistenteU.length !== 64) {
-      localStorage.setItem('fc_hash_usuario', await sha256('campestre'));
-    }
-  }
+  if (passViejaAdmin) { localStorage.setItem('fc_hash_admin', await hashSecreto(passViejaAdmin)); localStorage.removeItem('fc_pass_admin'); }
+  if (passViejaUser)  { localStorage.setItem('fc_hash_usuario', await hashSecreto(passViejaUser)); localStorage.removeItem('fc_pass_usuario'); }
+  if (!hashValido(localStorage.getItem('fc_hash_admin')))   localStorage.setItem('fc_hash_admin', HASH_ADMIN_DEFAULT);
+  if (!hashValido(localStorage.getItem('fc_hash_usuario'))) localStorage.setItem('fc_hash_usuario', HASH_USUARIO_DEFAULT);
+  // Copias en texto plano de PIN que guardaban versiones anteriores: ya no se usan
+  try {
+    Object.keys(localStorage).filter(k => /^fc_pin_/.test(k)).forEach(k => localStorage.removeItem(k));
+  } catch (e) {}
 }
 
-// ── Selección de rol en la pantalla de login ──
+// ── Contraseñas compartidas entre equipos (fitness/cfg/acceso en Firebase) ──
+// Este equipo guarda una copia (fc_hash_<rol>) para poder entrar sin conexión.
+// Si un cambio no alcanzó a subir, queda marcado como pendiente y se sube al conectar.
+function _publicarAcceso(rol) {
+  const h = localStorage.getItem('fc_hash_' + rol);
+  if (!hashValido(h)) return;
+  localStorage.setItem('fc_acceso_pend_' + rol, '1');
+  if (typeof fbDb === 'undefined' || !fbDb) return;
+  fbDb.ref('fitness/cfg/acceso/' + rol).set(h)
+    .then(() => localStorage.removeItem('fc_acceso_pend_' + rol))
+    .catch(e => console.warn('[Acceso] no se pudo guardar en la nube:', e && e.message));
+}
+// La llama firmas.js cada vez que llegan datos de la nube
+function aplicarAccesoNube(acceso) {
+  ['admin', 'usuario'].forEach(rol => {
+    const local = localStorage.getItem('fc_hash_' + rol);
+    const nube = acceso && acceso[rol];
+    if (localStorage.getItem('fc_acceso_pend_' + rol)) { _publicarAcceso(rol); return; }
+    if (hashValido(nube)) { if (nube !== local) localStorage.setItem('fc_hash_' + rol, nube); return; }
+    // La nube aún no tiene contraseña: la sube solo un equipo con sesión de coordinación y
+    // solo si la de este equipo NO es la de fábrica (así la de fábrica nunca pisa una real).
+    if (typeof rolActual !== 'undefined' && rolActual === 'admin' && hashValido(local) && local !== _hashDefault(rol)) _publicarAcceso(rol);
+  });
+}
+
+async function cambiarPass(rol) {
+  const v = id => (document.getElementById(id) || {}).value || '';
+  const limpiar = ids => ids.forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
+  if (typeof rolActual === 'undefined' || rolActual !== 'admin') { showToast('Solo coordinación puede cambiar contraseñas.', 'err'); return; }
+  const nueva    = rol === 'admin' ? v('cp-admin-nueva')    : v('cp-user-nueva');
+  const confirma = rol === 'admin' ? v('cp-admin-confirma') : v('cp-user-confirma');
+  if (rol === 'admin' && !(await verificarSecreto(v('cp-admin-actual'), localStorage.getItem('fc_hash_admin')))) {
+    showToast('La contraseña actual no es correcta.', 'err'); return;
+  }
+  if (nueva.length < 8) { showToast('La contraseña nueva debe tener al menos 8 caracteres.', 'err'); return; }
+  if (nueva !== confirma) { showToast('La confirmación no coincide con la contraseña nueva.', 'err'); return; }
+  if ((await sha256(nueva)) === _hashDefault(rol)) { showToast('Esa es la contraseña de fábrica. Elige otra.', 'err'); return; }
+  localStorage.setItem('fc_hash_' + rol, await hashSecreto(nueva));
+  limpiarIntentos(rol);
+  _publicarAcceso(rol);
+  limpiar(rol === 'admin' ? ['cp-admin-actual', 'cp-admin-nueva', 'cp-admin-confirma'] : ['cp-user-nueva', 'cp-user-confirma']);
+  const enLinea = typeof fbDb !== 'undefined' && fbDb && (typeof fbConectado === 'undefined' || fbConectado);
+  showToast(`Contraseña de ${rol === 'admin' ? 'Coordinador' : 'Consulta'} cambiada. ` +
+            (enLinea ? 'Ya aplica en todos los equipos.' : 'Se enviará a los demás equipos al volver la conexión.'), 'ok');
+  if (rol === 'admin') cerrarModal('m-cambiar-pass');
+}
+
+// ── PIN de instructores ──
+// Se guarda solo el hash (inst.pinHash). Quien lea la base ya no ve los PIN, aunque con
+// 4 dígitos el hash solo frena la lectura casual: la protección real son las reglas de Firebase.
+function instTienePin(inst) { return !!(inst && (hashValido(inst.pinHash) || inst.pin)); }
+async function verificarPinInst(inst, pin) {
+  if (!inst || !pin) return false;
+  if (hashValido(inst.pinHash)) return verificarSecreto(pin, inst.pinHash);
+  return !!inst.pin && String(inst.pin) === pin;          // PIN viejo aún sin migrar
+}
+function pinValido(pin) { return /^\d{4,6}$/.test(pin); }
+async function asignarPinInst(inst, pin) {
+  inst.pinHash = await hashSecreto(pin);
+  delete inst.pin;
+  inst.updatedAt = Date.now();
+}
+// Coordinación convierte los PIN en texto plano que aún queden en la base
+let _migrandoPines = false;
+async function migrarPinesInstructores() {
+  if (_migrandoPines || typeof rolActual === 'undefined' || rolActual !== 'admin') return;
+  const pendientes = (typeof instructores !== 'undefined' ? instructores : []).filter(i => i && i.pin);
+  if (!pendientes.length) return;
+  _migrandoPines = true;
+  try {
+    for (const inst of pendientes) await asignarPinInst(inst, String(inst.pin));
+    if (typeof guardarLocal === 'function') guardarLocal();
+    if (typeof sincronizarFirebase === 'function') sincronizarFirebase();
+    console.log(`[Acceso] ${pendientes.length} PIN convertidos a hash`);
+  } catch (e) { console.warn('[Acceso] migración de PIN:', e); }
+  finally { _migrandoPines = false; }
+}
+
 function seleccionarRol(rol) {
   rolLoginSeleccionado = rol;
   document.getElementById('role-btn-admin').classList.toggle('selected', rol === 'admin');
@@ -112,7 +199,7 @@ function seleccionarRol(rol) {
   if (rol === 'instructor') {
     const sel = document.getElementById('login-instructor-sel');
     sel.innerHTML = '<option value="">— Selecciona tu nombre —</option>' +
-      (instructores || []).filter(i => instActivo(i)).map(i => `<option value="${i.id}">${i.nombre}</option>`).join('');
+      (instructores || []).filter(i => instActivo(i)).map(i => `<option value="${escHtml(i.id)}">${escHtml(i.nombre)}</option>`).join('');
     instWrap.style.display = 'block';
     passLbl.textContent = 'PIN (4 dígitos)';
     document.getElementById('login-pass').placeholder = 'Ingresa tu PIN...';
@@ -167,7 +254,7 @@ async function intentarLogin() {
   const errTxt = document.getElementById('login-error-txt');
   errEl.style.display = 'none';
 
-  // ── Login instructor (PIN numérico — sin hashear, cortos) ──
+  // ── Login instructor (PIN de 4–6 dígitos, se compara contra su hash) ──
   if (rolLoginSeleccionado === 'instructor') {
     const instId = parseInt(document.getElementById('login-instructor-sel').value);
     if (!instId) {
@@ -175,27 +262,37 @@ async function intentarLogin() {
       errEl.style.display = 'block';
       return;
     }
-    // Leer PIN en orden de prioridad:
-    // 1. inst.pin en el objeto en memoria (viene de Firebase via listener)
-    // 2. localStorage fc_pin_X (respaldo local)
-    // 3. Default 1234
     const instObj = (typeof instructores !== 'undefined')
       ? instructores.find(i => i.id === instId || String(i.id) === String(instId))
       : null;
-    const pinDeObj = instObj ? (instObj.pin || '') : '';
-    const pinDeLS  = localStorage.getItem(`fc_pin_${instId}`) || '';
-    const pinGuardado = pinDeObj || pinDeLS || '1234';
-    if (pass === pinGuardado) {
-      // Al hacer login exitoso, sincronizar el pin al localStorage del dispositivo
-      if(pinDeObj) localStorage.setItem(`fc_pin_${instId}`, pinDeObj);
+    // Mismo bloqueo por intentos que coordinación, por instructor (antes no había límite)
+    const claveBloq = 'instructor_' + instId;
+    const bloqInst = getRolBloqueado(claveBloq);
+    if (bloqInst) {
+      errTxt.textContent = `⛔ Demasiados intentos. Espera ${tiempoRestante(bloqInst)} para intentar de nuevo.`;
+      errEl.style.display = 'block';
+      return;
+    }
+    if (!instObj) {
+      _loginFallido('instructor', 'Aún no se cargan los datos de instructores. Revisa tu conexión e intenta de nuevo.');
+      return;
+    }
+    if (!instTienePin(instObj)) {
+      _loginFallido('instructor', 'Aún no tienes PIN. Pídeselo a coordinación.');
+      return;
+    }
+    if (await verificarPinInst(instObj, pass)) {
+      limpiarIntentos(claveBloq);
       _loginExitoso('instructor', instId);
     } else {
-      _loginFallido('instructor', 'PIN incorrecto. Intenta de nuevo.');
+      const restantes = MAX_INTENTOS - registrarIntentoFallido(claveBloq);
+      _loginFallido('instructor', restantes > 0
+        ? `PIN incorrecto. ${restantes} intento(s) restante(s).`
+        : `⛔ Demasiados intentos. Espera ${tiempoRestante(getRolBloqueado(claveBloq))} para intentar de nuevo.`);
     }
     return;
   }
 
-  // ── Verificar bloqueo antes de validar contraseña ──
   const bloqueadoHasta = getRolBloqueado(rolLoginSeleccionado);
   if (bloqueadoHasta) {
     errTxt.textContent = `⛔ Cuenta bloqueada. Espera ${tiempoRestante(bloqueadoHasta)}.`;
@@ -204,14 +301,25 @@ async function intentarLogin() {
   }
 
   // ── Hashear lo que ingresó el usuario y comparar ──
-  const hashIngresado = await sha256(pass);
-  const hashGuardado  = rolLoginSeleccionado === 'admin'
-    ? localStorage.getItem('fc_hash_admin')
-    : localStorage.getItem('fc_hash_usuario');
+  const rol = rolLoginSeleccionado;
+  const hashGuardado = localStorage.getItem('fc_hash_' + rol);
 
-  if (hashIngresado === hashGuardado) {
-    limpiarIntentos(rolLoginSeleccionado);
-    _loginExitoso(rolLoginSeleccionado, null);
+  if (await verificarSecreto(pass, hashGuardado)) {
+    limpiarIntentos(rol);
+    const deFabrica = hashGuardado === _hashDefault(rol);
+    // Hash viejo sin sal (no de fábrica): actualizarlo y compartirlo
+    if (!deFabrica && /^[0-9a-f]{64}$/.test(hashGuardado)) {
+      localStorage.setItem('fc_hash_' + rol, await hashSecreto(pass));
+      if (rol === 'admin') _publicarAcceso(rol);
+    }
+    _loginExitoso(rol, null);
+    if (rol === 'admin') {
+      setTimeout(migrarPinesInstructores, 1500);
+      if (deFabrica) setTimeout(() => {
+        showToast('Estás usando la contraseña de fábrica, que cualquiera puede conocer. Cámbiala ahora: aplicará en todos los equipos.', 'warn');
+        abrirModal('m-cambiar-pass');
+      }, 1200);
+    }
   } else {
     const intentos = registrarIntentoFallido(rolLoginSeleccionado);
     const restantes = MAX_INTENTOS - intentos;

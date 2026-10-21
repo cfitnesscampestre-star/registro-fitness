@@ -864,6 +864,11 @@ async function inicializarFirebase(){
         return;
       }
 
+      // Texto seguro para todo lo que llega (ver limpiarDatosEntrantes en core.js)
+      limpiarDatosEntrantes(data);
+      // Contraseñas de coordinación/consulta compartidas entre equipos (auth.js)
+      try { aplicarAccesoNube(data.cfg && data.cfg.acceso); } catch(e){ console.warn('Acceso:', e); }
+
       // Firebase tiene datos reales → marcar como recibidos y actualizar máximos
       fbDataRecibida = true;
       const _fbRegCount = data.registros ? Object.keys(data.registros).length : 0;
@@ -908,8 +913,11 @@ async function inicializarFirebase(){
         }
 
         // ─── Aplicar / Fusionar datos de Firebase ──────────────────────────
-        if(Array.isArray(data.instructores) && data.instructores.length > 0)
+        if(Array.isArray(data.instructores) && data.instructores.length > 0){
           instructores = data.instructores;
+          // Si aún hay PIN en texto plano en la base, coordinación los convierte a hash
+          if(rolActual === 'admin') setTimeout(migrarPinesInstructores, 1000);
+        }
 
         // Merge por ID para registros y recorridos
         registros   = mergeColeccion(registros,   data.registros);
