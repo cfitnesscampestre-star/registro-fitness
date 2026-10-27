@@ -77,9 +77,10 @@ registros.forEach(r => {
     if (!(c > 0)) add('aviso', 'Sin capacidad', `${desc(r)}: sin cupo, no entra al aforo promedio`);
     else if (a > c * 1.5) add('error', 'Asistentes muy por encima del cupo', `${desc(r)}: ${a} de ${c} (${Math.round(a / c * 100)}%)`);
     else if (a > c) add('aviso', 'Asistentes sobre el cupo', `${desc(r)}: ${a} de ${c}`);
+    // Regla del club: cada clase es 1 hora; solo las listas de gimnasia (Gerencia) duran lo que dura el grupo
     const dur = parseInt(r.dur, 10);
-    if (!(dur > 0)) add('aviso', 'Duración vacía', `${desc(r)}: cuenta como 60 min`);
-    else if (dur > 240) add('aviso', 'Duración muy larga', `${desc(r)}: ${dur} min`);
+    if (r.ger_id) { if (dur > 240) add('aviso', 'Duración muy larga', `${desc(r)}: ${dur} min`); }
+    else if (dur > 0 && dur !== 60) add('aviso', 'Clase que no dura 1 hora', `${desc(r)}: ${dur} min → suma ${(dur / 60).toFixed(1)} h en el resumen en vez de 1 h`);
     if (r.ger_id && !Array.isArray(r.ger_insts) && typeof r.ger_insts !== 'object') add('aviso', 'Gimnasia sin profesoras del grupo', `${desc(r)}: importado antes del cambio; sus horas extra salen Pendiente hasta la próxima sincronización`);
     if (!r.ger_id && r.tipo !== 'falta') {
       const inst = instPorId.get(String(r.inst_id));

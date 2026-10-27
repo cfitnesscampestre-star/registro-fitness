@@ -55,11 +55,13 @@ Preferir manejar la app como lo hace la persona (las funciones de los botones: `
 6. Portal: clase con suplencia programada se guarda como suplencia.
 7. Ids únicos.
 
-### Hallazgos conocidos (esperan decisión, no "arreglar" sin preguntar)
+### Reglas del club (decididas por coordinación, octubre 2026)
 
-- **Aforo promedio del dashboard**: promedia por instructor y cuenta 0% a quien no tuvo clases en el periodo. Por clase daría otro número.
-- **Horas de una suplencia**: se suman al titular (`inst_id`), no al suplente.
-- **Reporte mensual**: cuenta 1 clase = 1 hora; el dashboard usa `dur`.
+- **Horas**: cada clase cuenta 1 hora; solo las listas de gimnasia de Gerencia duran lo que dura el grupo (`dur` del registro).
+- **Suplencias**: las horas y la clase se suman al **titular** (`inst_id`), no al suplente. El suplente aparece en el reporte de suplencias y en su hoja de firmas.
+- **Aforo**: por instructor = promedio de sus clases ("Reporte por instructor"); por disciplina = promedio de todas las clases de ese tipo, sin importar quién la dio ("Reporte por disciplina"); el aforo general del dashboard y del PDF completo = promedio de los instructores **que dieron clase** en el periodo (igual que el reporte mensual; quien no tuvo clases no cuenta como 0%).
+
+Si una prueba choca con estas reglas, la regla manda: preguntar antes de cambiarla.
 
 ## 2. Revisión de datos reales (`tests/revisar-datos.js`)
 

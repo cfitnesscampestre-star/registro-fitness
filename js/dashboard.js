@@ -67,7 +67,10 @@ function renderDashboard(){
   const totFalt=allS.reduce((a,i)=>a+i.faltas,0);
   // totAsis calculado directamente desde regsBase para evitar doble conteo por suplencias
   const totAsis=regsBase.filter(r=>r.estado==='ok'||r.estado==='sub').reduce((a,r)=>a+(parseInt(r.asistentes)||0),0);
-  const aforoProm=allS.length>0?Math.round(allS.reduce((a,i)=>a+i.aforo,0)/allS.length):0;
+  // Promedio de los instructores que dieron clase en el periodo (igual que el reporte mensual):
+  // quien no tuvo clases no cuenta como 0%
+  const conClases=allS.filter(i=>i.impartidas>0);
+  const aforoProm=conClases.length>0?Math.round(conClases.reduce((a,i)=>a+i.aforo,0)/conClases.length):0;
   const pct=totProg>0?Math.round(totImp/totProg*100):0;
   const totSuplencias=regsBase.filter(r=>r.estado==='sub').length;
   // Estimación de género: 70% mujeres, 30% hombres

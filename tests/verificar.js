@@ -56,48 +56,93 @@ const ESCENARIOS = [];
 const escenario = (nombre, fn) => ESCENARIOS.push({ nombre, fn });
 
 // 1 ─ Números del resumen y de los reportes ─────────────────────────
-escenario('resumen: horas, asistentes, faltas y suplencias cuadran en todos los reportes', async env => {
-  // Ana: Yoga ok 10/20 · Yoga ok 15/20 · Pilates falta · Pilates suplencia (Beto) 8/20
-  // Beto: RPM ok 20/20 de 90 min · Carla: sin clases
+// Reglas del club: cada clase cuenta 1 hora (solo gimnasia de Gerencia dura lo que dura el grupo);
+// la suplencia se suma al titular; el aforo por instructor promedia sus clases y el de una
+// disciplina promedia todas las clases de ese tipo, sin importar quién las dio.
+escenario('resumen: horas, asistentes, aforo, faltas y suplencias cuadran en todos los reportes', async env => {
+  // Ana:   Yoga ok 10/20 (50%) · Yoga ok 15/20 (75%) · Pilates falta · Pilates suplencia de Beto 8/20 (40%)
+  //        → 3 impartidas, 1 falta, 3 h, aforo (50+75+40)/3 = 55%, 33 asistentes
+  // Beto:  Yoga ok 20/20 (100%) → 1 h · Carla: sin clases (no debe bajar el promedio)
+  // Sara:  lista de gimnasia de Gerencia, 18/20 (90%), grupo de 2 h → 2 h
+  // Dashboard: 5 impartidas, 1 falta, 71 asistentes, 1 suplencia, aforo (55+100+90)/3 = 82%
+  // Disciplina Yoga: 3 sesiones, 45 asistentes, aforo (50+75+100)/3 = 75%
   env.db.sembrar(nube({
     instructores: [inst(1, 'Ana Uno', [['Lunes', '08:00', 'Yoga'], ['Lunes', '09:00', 'Pilates']]),
-                   inst(2, 'Beto Dos', [['Lunes', '08:00', 'RPM']]), inst(3, 'Carla Tres', [['Martes', '10:00', 'Zumba']])],
+                   inst(2, 'Beto Dos', [['Lunes', '08:00', 'Yoga']]), inst(3, 'Carla Tres', [['Martes', '10:00', 'Zumba']]),
+                   inst(4, 'Sara Ruiz', [['Lunes', '17:00', 'GIMNASIA EQUIPO'], ['Lunes', '18:00', 'GIMNASIA EQUIPO']])],
     registros: [
       reg({ inst_id: 1, dia: 'Lunes', hora: '08:00', clase: 'Yoga', fecha: '2026-10-19', asistentes: 10 }),
       reg({ inst_id: 1, dia: 'Lunes', hora: '08:00', clase: 'Yoga', fecha: LUNES, asistentes: 15 }),
       reg({ inst_id: 1, dia: 'Lunes', hora: '09:00', clase: 'Pilates', fecha: '2026-10-19', estado: 'falta', tipo: 'falta', cap: 0, dur: 0 }),
       reg({ inst_id: 1, dia: 'Lunes', hora: '09:00', clase: 'Pilates', fecha: LUNES, estado: 'sub', suplente_id: 2, asistentes: 8, motivo_suplencia: 'permiso' }),
-      reg({ inst_id: 2, dia: 'Lunes', hora: '08:00', clase: 'RPM', fecha: '2026-10-19', asistentes: 20, dur: 90 }),
+      reg({ inst_id: 2, dia: 'Lunes', hora: '08:00', clase: 'Yoga', fecha: '2026-10-19', asistentes: 20 }),
+      reg({ inst_id: 4, dia: 'Lunes', hora: '17:00', clase: 'Equipo', fecha: LUNES, asistentes: 18, dur: 120, ger_id: 'eq_' + LUNES, asis_ger: 18, ger_insts: [4], origen: 'gerencia' }),
     ]
   }));
   const d = await env.abrir('coordinación', { hora: A_LAS('18:30') });
 
   const st = await d.ev(() => instructores.map(i => statsInst(i)));
-  check('Ana: impartidas/faltas/horas/aforo/asistentes', st[0], { impartidas: 3, faltas: 1, horas: '3.0', aforo: 55, totalAsis: 33 });
-  check('Beto: clase de 90 min cuenta 1.5 h', st[1], { impartidas: 1, faltas: 0, horas: '1.5', aforo: 100, totalAsis: 20 });
+  check('Ana: 3 impartidas, 1 falta, 3 h (la suplencia cuenta al titular), aforo 55%, 33 asistentes', st[0], { impartidas: 3, faltas: 1, horas: '3.0', aforo: 55, totalAsis: 33 });
+  check('Beto: su clase 1 h; la que suplió no se le suma', st[1], { impartidas: 1, faltas: 0, horas: '1.0', aforo: 100, totalAsis: 20 });
+  check('Sara: la lista de gimnasia de 2 h cuenta 2 h', st[3].horas, '2.0');
 
   const k = await kpisDashboard(d);
-  check('Dashboard · Impartidas', k['Impartidas'], '4');
+  check('Dashboard · Impartidas', k['Impartidas'], '5');
   check('Dashboard · Faltas', k['Faltas'], '1');
-  check('Dashboard · Total asistentes', k['Total Asistentes'], '53');
+  check('Dashboard · Total asistentes', k['Total Asistentes'], '71');
   check('Dashboard · Suplencias', k['Suplencias'], '1');
+  check('Dashboard · Aforo promedio (sin contar a quien no tuvo clases)', k['Aforo Prom.'], '82%');
+
+  // KPIs de un reporte impreso: etiqueta → valor
+  const leerKpis = () => {
+    const o = {};
+    document.querySelectorAll('#print-body div').forEach(x => {
+      const n = x.nextElementSibling;
+      if (x.children.length === 0 && n && n.children.length === 0) o[x.textContent.trim()] = n.textContent.trim();
+    });
+    return o;
+  };
+  const rango = ['2026-09-26', LUNES];
 
   // Reporte mensual (rango) del mismo periodo debe decir lo mismo que el dashboard
-  const m = await d.ev(([ini, fin]) => {
+  const m = await d.ev(([[ini, fin], leer]) => {
     document.getElementById('rpt-mes').value = 'rango';
     document.getElementById('rpt-mes-fecha-ini').value = ini;
     document.getElementById('rpt-mes-fecha-fin').value = fin;
     const cs = document.getElementById('rpt-clase-sel'); if (cs) cs.value = '';
     genReporteMensual();
-    const o = {};
-    document.querySelectorAll('#print-body div').forEach(x => {
-      const n = x.nextElementSibling;
-      if (x.children.length === 0 && n && /^(Clases impartidas|Faltas|Suplencias|Asistentes totales)$/.test(x.textContent.trim())) o[x.textContent.trim()] = n.textContent.trim();
-    });
-    return o;
-  }, ['2026-09-26', LUNES]);
+    return eval(leer)();
+  }, [rango, leerKpis.toString()]);
   check('Reporte mensual = dashboard (impartidas, faltas, suplencias, asistentes)',
-    [m['Clases impartidas'], m['Faltas'], m['Suplencias'], m['Asistentes totales']], ['4', '1', '1', '53']);
+    [m['Clases impartidas'], m['Faltas'], m['Suplencias'], m['Asistentes totales']], ['5', '1', '1', '71']);
+
+  // Reporte por instructor: promedia solo lo que dio ese profesor
+  const ri = await d.ev(([[ini, fin], leer]) => {
+    const si = document.getElementById('rpt-inst-sel');
+    if (![...si.options].some(o => o.value === '1')) si.add(new Option('Ana Uno', '1'));
+    si.value = '1';
+    document.getElementById('rpt-inst-periodo').value = 'rango';
+    document.getElementById('rpt-inst-fecha-ini').value = ini;
+    document.getElementById('rpt-inst-fecha-fin').value = fin;
+    const cs = document.getElementById('rpt-clase-sel'); if (cs) cs.value = '';
+    genReporteInstructor();
+    return eval(leer)();
+  }, [rango, leerKpis.toString()]);
+  check('Reporte por instructor (Ana): 3 sesiones, 33 asistentes, aforo 55%, 1 suplencia',
+    [ri['Sesiones'], ri['Asistentes'], ri['Aforo prom.'], ri['Suplencias']], ['3', '33', '55%', '1']);
+
+  // Reporte por disciplina: promedia todas las clases de Yoga, sin importar el profesor
+  const rd = await d.ev(([[ini, fin], leer]) => {
+    const cs = document.getElementById('rpt-clase-sel');
+    if (![...cs.options].some(o => o.value === 'Yoga')) cs.add(new Option('Yoga', 'Yoga'));
+    cs.value = 'Yoga';
+    document.getElementById('rpt-disc-fecha-ini').value = ini;
+    document.getElementById('rpt-disc-fecha-fin').value = fin;
+    genReporteDisciplina();
+    return eval(leer)();
+  }, [rango, leerKpis.toString()]);
+  check('Reporte por disciplina (Yoga, Ana + Beto): 3 sesiones, 45 asistentes, aforo 75%',
+    [rd['Sesiones'], rd['Total asistentes'], rd['Aforo promedio']], ['3', '45', '75%']);
 
   // Reporte de suplencias
   const s = await d.ev(([ini, fin]) => {
@@ -106,17 +151,8 @@ escenario('resumen: horas, asistentes, faltas y suplencias cuadran en todos los 
     document.getElementById('sup-filtro-inst').value = '';
     renderReporteSuplencias();
     return { n: (window.lastSuplencias || []).length, sup: (document.querySelector('#sup-body tbody tr td:nth-child(3)') || {}).textContent };
-  }, ['2026-09-26', LUNES]);
+  }, rango);
   check('Reporte de suplencias: 1 suplencia, cubierta por Beto', [s.n, s.sup], [1, 'Beto Dos']);
-
-  // Hallazgos que esperan decisión
-  hallazgo('Aforo promedio del dashboard', k['Aforo Prom.'] !== '66%',
-    `muestra ${k['Aforo Prom.']}: promedia por instructor y cuenta 0% a quien no tuvo clases (Carla). Por clase sería 66%.`);
-  hallazgo('Horas de una suplencia', st[0].horas === '3.0',
-    'la clase que cubrió Beto suma a las horas de Ana (titular), no a las de Beto.');
-  const horasMensual = await d.ev(() => (typeof genReporteMensual === 'function') && /const horas\s*=\s*imp\.length/.test(genReporteMensual.toString()));
-  hallazgo('Horas en el reporte mensual', horasMensual,
-    'cuenta 1 clase = 1 hora; el dashboard usa la duración real (la clase de 90 min y las listas de gimnasia de 2-3 h salen distinto).');
 });
 
 // 2 ─ Pantalla Hoy y gimnasia desde Gerencia ─────────────────────────
