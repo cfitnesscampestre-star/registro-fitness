@@ -1096,9 +1096,18 @@ async function sincronizarFirebase(){
 // ── renderAll con auto-guardado ───────────────
 // IMPORTANTE: sobreescribimos renderAll UNA SOLA VEZ aquí
 const _renderAllBase = renderAll;
+// La pantalla de inicio del celular ("Hoy" con la lista de clases) no la redibujaba renderAll:
+// después de guardar un recorrido o una clase había que recargar para verlo.
+function refrescarHomeMovil(){
+  try {
+    const mh = document.getElementById('mobile-home');
+    if(mh && mh.classList.contains('on') && rolActual !== 'instructor' && typeof renderMobileHome === 'function') renderMobileHome();
+  } catch(e){ console.warn('renderMobileHome', e); }
+}
 renderAll = function(){
   refrescarHorariosVigentes(); // aplica cambios de horario cuya fecha ya llegó
   _renderAllBase();
+  refrescarHomeMovil();
   guardarLocal();
   // Subir a Firebase con un pequeño debounce para no saturar en ediciones rápidas
   clearTimeout(renderAll._timer);

@@ -921,7 +921,10 @@ async function inicializarFirebase(){
           normalizarRegistros();
           guardarLocal();                                  // fbReceiving=true: no cambia fc_local_ts
           try {
-            if(rolActual !== 'instructor'){ if(typeof _renderAllBase === 'function') _renderAllBase(); }
+            if(rolActual !== 'instructor'){
+              if(typeof _renderAllBase === 'function') _renderAllBase();
+              if(typeof refrescarHomeMovil === 'function') refrescarHomeMovil();
+            }
             else if(typeof instRenderHoy === 'function') instRenderHoy();
           } catch(e){}
           fbReceiving = false;
