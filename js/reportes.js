@@ -1751,7 +1751,8 @@ function exportarPDFCompleto() {
   const totImp=allS.reduce((a,i)=>a+i.impartidas,0);
   const totFalt=allS.reduce((a,i)=>a+i.faltas,0);
   const totAsis=allS.reduce((a,i)=>a+i.totalAsis,0);
-  const aforoProm=allS.length>0?Math.round(allS.reduce((a,i)=>a+i.aforo,0)/allS.length):0;
+  const conClases=allS.filter(i=>i.impartidas>0);   // quien no tuvo clases no cuenta como 0% (igual que el dashboard)
+  const aforoProm=conClases.length>0?Math.round(conClases.reduce((a,i)=>a+i.aforo,0)/conClases.length):0;
   const pct=totProg>0?Math.round(totImp/totProg*100):0;
 
   const kpis=[
