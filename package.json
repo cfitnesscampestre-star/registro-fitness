@@ -1,0 +1,12 @@
+{
+  "name": "registro-fitness",
+  "private": true,
+  "description": "Fitness Control · Club Campestre Aguascalientes",
+  "scripts": {
+    "test": "node tests/verificar.js",
+    "revisar-datos": "node tests/revisar-datos.js"
+  },
+  "devDependencies": {
+    "playwright": "1.63.0"
+  }
+}
