@@ -784,8 +784,7 @@ function _fd_generarPDFConFirmas() {
       (inst.horario || []).forEach(slot => {
         if(slot.dia !== diaHoy) return;
         const tieneReg = registros.some(r =>
-          String(r.inst_id)===String(inst.id) && r.fecha === hoyStr &&
-          r.dia === slot.dia && r.hora === slot.hora
+          r.fecha === hoyStr && regEnSlot(r, inst.id, slot.dia, slot.hora)
         );
         if(!tieneReg) pend++;
       });
@@ -886,10 +885,14 @@ async function inicializarFirebase(){
       const localTs = parseInt(localStorage.getItem('fc_local_ts') || '0');
       const fbTs    = parseInt(data.ts || '0');
 
+      // Marcas de borrado (app.js): lo borrado a propósito en cualquier dispositivo no regresa
+      const _borr = (typeof borradosFusionar === 'function') ? borradosFusionar(data.borrados) : null;
+      const _vivo = col => x => !(_borr && x && _borr[col] && _borr[col][String(x.id)]);
+
       // ── Helper: merge de colección por ID, gana el registro más reciente ────
-      function mergeColeccion(locales, fbObj){
-        if(!fbObj) return locales;
-        const fbArr = Object.values(fbObj);
+      function mergeColeccion(locales, fbObj, col){
+        if(!fbObj) return col ? locales.filter(_vivo(col)) : locales;
+        const fbArr = Object.values(fbObj).filter(r => r && typeof r === 'object');
         // Construir mapa local por id
         const mapa = {};
         locales.forEach(r => { mapa[String(r.id)] = r; });
@@ -904,13 +907,23 @@ async function inicializarFirebase(){
             if(tsFb > tsLocal) mapa[key] = r; // Firebase más nuevo
           }
         });
-        return Object.values(mapa);
+        const res = Object.values(mapa);
+        return col ? res.filter(_vivo(col)) : res;
       }
 
       fbReceiving = true;
       try{
         if(localTs > fbTs + 3000 && !esPrimeraVez){
-          // Datos locales más recientes → subir, no recibir
+          // Datos locales más recientes → subir. Pero antes se fusiona lo que otros dispositivos
+          // capturaron (antes se ignoraba y esa copia sin ello reemplazaba la de la nube).
+          registros  = mergeColeccion(registros,  data.registros,  'registros');
+          recorridos = mergeColeccion(recorridos, data.recorridos, 'recorridos');
+          normalizarRegistros();
+          guardarLocal();                                  // fbReceiving=true: no cambia fc_local_ts
+          try {
+            if(rolActual !== 'instructor'){ if(typeof _renderAllBase === 'function') _renderAllBase(); }
+            else if(typeof instRenderHoy === 'function') instRenderHoy();
+          } catch(e){}
           fbReceiving = false;
           setTimeout(sincronizarFirebase, 500);
           return;
@@ -924,14 +937,14 @@ async function inicializarFirebase(){
         }
 
         // Merge por ID para registros y recorridos
-        registros   = mergeColeccion(registros,   data.registros);
-        recorridos  = mergeColeccion(recorridos,  data.recorridos);
+        registros   = mergeColeccion(registros,   data.registros,  'registros');
+        recorridos  = mergeColeccion(recorridos,  data.recorridos, 'recorridos');
 
         if(Array.isArray(data.salones) && data.salones.length > 0)
           salones = data.salones;
 
         if(data.suplencias)
-          suplenciasPlan = Object.values(data.suplencias);
+          suplenciasPlan = Object.values(data.suplencias).filter(x => x && typeof x === 'object').filter(_vivo('suplencias'));
 
         if(data.solicitudes)
           solicitudesInst = Object.values(data.solicitudes);

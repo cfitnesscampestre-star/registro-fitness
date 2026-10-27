@@ -277,6 +277,8 @@ function slk_preLlenarModalClase() {
     if (sup.suplente_id) {
       var selSup = document.getElementById('rc-suplente');
       if (selSup) selSup.value = String(sup.suplente_id);
+    } else if (sup.suplente_nombre && typeof suplenteExtSet === 'function') {
+      suplenteExtSet('rc-suplente', sup.suplente_nombre);
     }
 
     // Pre-llenar motivo
@@ -312,6 +314,8 @@ function slk_preLlenarRecorrido() {
     });
 
     if (!sup) return;
+    // Ya registrada: turboMostrar mostró lo guardado (no se pisa con el plan)
+    if (typeof recGuardadoDe === 'function' && recGuardadoDe(c)) return;
 
     // Auto-seleccionar estado "sub"
     if (typeof turboSetPres === 'function') turboSetPres('sub');
@@ -341,7 +345,7 @@ function slk_preLlenarRecorrido() {
 function slk_sincronizarDesdeClase() {
   try {
     var recientes = (registros || [])
-      .filter(function(r) { return r.estado === 'sub' && r.suplente_id; })
+      .filter(function(r) { return r.estado === 'sub' && (r.suplente_id || r.suplente_nombre); })
       .sort(function(a, b) { return (b.updatedAt || 0) - (a.updatedAt || 0); });
 
     var reg = recientes[0];
@@ -355,7 +359,7 @@ function slk_sincronizarDesdeRecorrido() {
   try {
     if (typeof recActual === 'undefined' || !recActual || !recActual.items) return;
     recActual.items.forEach(function(item) {
-      if (item.presente !== 'sub' || !item.suplente_id) return;
+      if (item.presente !== 'sub' || (!item.suplente_id && !item.suplente_nombre)) return;
       slk_upsertSuplenciaPlan({
         inst_id:          item.inst_id,
         clase:            item.clase,
@@ -363,6 +367,7 @@ function slk_sincronizarDesdeRecorrido() {
         hora:             item.hora,
         fecha:            recActual.fecha,
         suplente_id:      item.suplente_id,
+        suplente_nombre:  item.suplente_id ? null : (item.suplente_nombre || null),
         motivo_suplencia: item.motivo_suplencia || 'permiso',
         nota:             item.obs || '',
         estado:           'sub'
@@ -377,7 +382,7 @@ async function slk_upsertSuplenciaPlan(reg) {
       id:              Date.now(),
       inst_id:         parseInt(reg.inst_id),
       suplente_id:     reg.suplente_id ? parseInt(reg.suplente_id) : null,
-      suplente_nombre: null,
+      suplente_nombre: reg.suplente_id ? null : (reg.suplente_nombre || null),
       clase:           reg.clase,
       dia:             reg.dia,
       hora:            reg.hora,

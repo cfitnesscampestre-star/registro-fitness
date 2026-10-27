@@ -111,6 +111,7 @@ function renderAuditoria() {
 
 function _eliminarRegistrosPorId(ids) {
   const idSet = new Set(ids.map(Number));
+  if (typeof marcarBorrado === 'function') marcarBorrado('registros', registros.filter(r => idSet.has(parseInt(r.id))).map(r => r.id));
   registros = registros.filter(r => !idSet.has(parseInt(r.id)));
   if (typeof guardarLocal === 'function') guardarLocal();
   if (typeof renderAll === 'function') renderAll();

@@ -892,6 +892,51 @@ function normalizarRegistros(){
   }));
 }
 
+// ── Borrados con marca (registros, recorridos, suplencias) ─────────
+// Antes cada subida REEMPLAZABA la colección completa en la nube: si un teléfono subía su copia
+// sin tener todavía lo que otro acababa de capturar (sin señal, el portal de un instructor, la
+// compu y el celular a la vez), eso se borraba de la nube. Por eso "unas se guardaban y otras no".
+// Ahora cada elemento se sube por su propia ruta (registros/<id>) y solo se borra en la nube lo
+// que alguien borró a propósito. La marca evita que otro dispositivo que aún lo tenga lo resucite.
+const COLS_CON_MARCA = ['registros','recorridos','suplencias'];
+const _BORRADOS_DIAS = 120;                         // las marcas viejas se descartan
+function borradosLeer(){
+  let b = {};
+  try { b = JSON.parse(localStorage.getItem('fc_borrados') || '{}') || {}; } catch(e){}
+  const lim = Date.now() - _BORRADOS_DIAS*864e5;
+  COLS_CON_MARCA.forEach(c => {
+    b[c] = (b[c] && typeof b[c] === 'object') ? b[c] : {};
+    Object.keys(b[c]).forEach(id => { if(!(parseInt(b[c][id]) > lim)) delete b[c][id]; });
+  });
+  return b;
+}
+function _borradosGuardar(b){ try { localStorage.setItem('fc_borrados', JSON.stringify(b)); } catch(e){} }
+function marcarBorrado(col, ids){
+  const b = borradosLeer(), t = Date.now();
+  [].concat(ids).forEach(id => { if(id !== undefined && id !== null && id !== '') b[col][String(id)] = t; });
+  _borradosGuardar(b);
+}
+// Junta las marcas que llegan de la nube con las de este dispositivo
+function borradosFusionar(remotos){
+  const b = borradosLeer();
+  if(remotos && typeof remotos === 'object'){
+    COLS_CON_MARCA.forEach(c => Object.entries(remotos[c] || {}).forEach(([id, t]) => {
+      if(!b[c][id] || parseInt(t) > parseInt(b[c][id])) b[c][id] = parseInt(t) || Date.now();
+    }));
+    _borradosGuardar(b);
+  }
+  return b;
+}
+// Id único para un registro nuevo. "El más alto + 1" repetía ids entre dispositivos y,
+// al fusionar, el registro de uno pisaba al del otro.
+function nuevoIdRegistro(lista){
+  const arr = lista || registros;
+  let id;
+  do { id = Date.now() * 1000 + Math.floor(Math.random() * 1000); }
+  while (arr.some(r => String(r.id) === String(id)));
+  return id;
+}
+
 // ── Guardar en localStorage ───────────────────
 function guardarLocal(){
   try{
@@ -1002,16 +1047,29 @@ async function sincronizarFirebase(){
 
     const payload = {
       instructores,
-      registros:   registros.reduce((a,r)=>{ a[String(r.id)]=r; return a; },{}),
-      recorridos:  recorridos.reduce((a,r)=>{ a[String(r.id)]=r; return a; },{}),
       salones,
-      suplencias:  suplenciasPlan.reduce((a,s)=>{ a[String(s.id)]=s; return a; },{}),
       solicitudes: solicitudesInst.reduce((a,s)=>{ a[String(s.id)]=s; return a; },{}),
       hojaFirmasActiva: _hojaFirmas,
       agendaNotas: _agendaNotas,
       eventos:     _eventos,
       ts
     };
+    // Registros, recorridos y suplencias: cada uno por su ruta (no se reemplaza la colección,
+    // así no se borra lo que otro dispositivo subió y este aún no tiene). Lo borrado a propósito
+    // se quita con su marca.
+    const _borr = borradosLeer();
+    [['registros', registros], ['recorridos', recorridos], ['suplencias', suplenciasPlan]].forEach(([col, arr]) => {
+      arr.forEach(x => {
+        if(!x || x.id === undefined || x.id === null || x.id === '') return;
+        const k = String(x.id);
+        if(/[.#$\[\]\/]/.test(k) || _borr[col][k]) return;
+        payload[col + '/' + k] = x;
+      });
+      Object.entries(_borr[col]).forEach(([k, t]) => {
+        payload[col + '/' + k] = null;
+        payload['borrados/' + col + '/' + k] = t;
+      });
+    });
     // update() y no set(): set() sobre 'fitness' borraba en cada guardado los nodos que no van en
     // el payload (fitness/notif_tokens de las notificaciones, fitness/firmasSuplencias, …).
     await fbDb.ref('fitness').update(payload);
@@ -1133,7 +1191,7 @@ function calcularAlertas() {
   instructores.forEach(inst => {
     getHorarioSemana(inst, iniSemStr).forEach(h => {
       if(!diasSemana.includes(h.dia)) return;
-      const tieneReg = registros.some(r=>r.inst_id===inst.id&&r.dia===h.dia&&r.hora===h.hora&&
+      const tieneReg = registros.some(r=>regEnSlot(r,inst.id,h.dia,h.hora)&&
         (r.fecha||'')>=iniSemStr&&(r.fecha||'')<finSemStr&&(r.estado==='ok'||r.estado==='sub'||r.estado==='falta'));
       if(!tieneReg) sinRegistro.push({label:`${h.clase} (${inst.nombre.split(' ')[0]}) ${h.dia} ${h.hora}`, inst_id:inst.id, dia:h.dia, hora:h.hora});
     });

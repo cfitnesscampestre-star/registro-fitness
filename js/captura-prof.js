@@ -75,8 +75,7 @@
   // ── Estado de captura de una clase ───────────────────────────────
   function regDe(inst, slot, fecha) {
     const regs = registros.filter(r =>
-      String(r.inst_id) === String(inst.id) && r.fecha === fecha &&
-      r.dia === slot.dia && r.hora === slot.hora);
+      r.fecha === fecha && regEnSlot(r, inst.id, slot.dia, slot.hora));
     return regs.length ? regs[regs.length - 1] : null;
   }
   // Minutos desde medianoche en hora de México (reloj del servidor)
@@ -361,10 +360,14 @@
       let rec, campos = null;
 
       if (modo === 'nueva') {
+        // Si la clase tiene suplencia programada, se guarda como suplencia (no como impartida por el titular)
+        const plan = typeof instSupDeMiClase === 'function' ? instSupDeMiClase(inst.id, S.fecha, S.slot) : null;
         rec = {
           id: nuevoId(), inst_id: inst.id, dia: S.slot.dia, clase: S.slot.clase, hora: S.slot.hora,
-          asistentes: n, cap: cap || 20, dur: 60, estado: 'ok', fecha: S.fecha, tipo: 'clase',
-          suplente_id: null, suplente_nombre: null, motivo_suplencia: null,
+          asistentes: n, cap: cap || 20, dur: 60, estado: plan ? 'sub' : 'ok', fecha: S.fecha, tipo: 'clase',
+          suplente_id: plan && plan.suplente_id ? plan.suplente_id : null,
+          suplente_nombre: plan && !plan.suplente_id ? (plan.suplente_nombre || null) : null,
+          motivo_suplencia: plan ? (plan.motivo || 'permiso') : null,
           captura_por: 'inst', asis_prof: n, asis_prof_nota: nota, asis_prof_ts: t, updatedAt: t
         };
         registros.push(rec);

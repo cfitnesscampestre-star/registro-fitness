@@ -154,6 +154,10 @@ function turboMostrar(){
     document.getElementById('tc-obs').value='';
   }
 
+  // Si esta clase ya se registró (en este recorrido o antes ese día), se muestra lo guardado:
+  // así, al volver a pasar para actualizar el número, no se pierde la suplencia ni la falta.
+  const yaReg=turboPrefillExistente(c);
+
   // Chips de progreso
   turboActualizarChips();
 
@@ -162,12 +166,59 @@ function turboMostrar(){
   card.style.transition='transform .18s,opacity .18s,border-color .18s';
   card.style.transform='translateX(0) rotate(0deg)';
   card.style.opacity='1';
-  card.style.borderColor=supPlan?'rgba(41,128,185,.5)':'var(--border)';
+  card.style.borderColor=(supPlan||turboPresEstado==='sub')?'rgba(41,128,185,.5)':'var(--border)';
   document.getElementById('turbo-hint-left').style.opacity='0';
   document.getElementById('turbo-hint-right').style.opacity='0';
 
   // Focus al número
   setTimeout(()=>document.getElementById('tc-asis').focus(),200);
+}
+
+// Lo último que se guardó de esta clase: primero lo capturado en este mismo recorrido,
+// si no, el registro de esa fecha. Se devuelve con la forma de un registro.
+function recGuardadoDe(c){
+  const it=(recActual.items||[]).find(i=>String(i.inst_id)===String(c.inst_id)&&i.hora===c.hora&&i.clase===c.clase&&!i.saltado);
+  if(it) return {estado:it.presente==='no'?'falta':it.presente==='sub'?'sub':'ok', asistentes:it.asis, cap:it.cap,
+    suplente_id:it.suplente_id, suplente_nombre:it.suplente_nombre, motivo_suplencia:it.motivo_suplencia, obs:it.obs};
+  return registros.filter(r=>String(r.inst_id)===String(c.inst_id)&&r.clase===c.clase&&r.dia===c.dia&&
+    r.hora===c.hora&&r.fecha===recActual.fecha).pop()||null;
+}
+// Elige al suplente en el selector; si ya no está activo (no viene en la lista) se agrega
+function selSuplenteId(selId, id){
+  const sel=document.getElementById(selId); if(!sel||!id) return;
+  if(!sel.querySelector(`option[value="${String(id)}"]`)){
+    const i=instructores.find(x=>String(x.id)===String(id));
+    const o=document.createElement('option'); o.value=String(id); o.textContent=i?i.nombre:'Suplente';
+    sel.appendChild(o);
+  }
+  sel.value=String(id);
+}
+function turboPrefillExistente(c){
+  const ex=recGuardadoDe(c);
+  if(!ex) return false;
+  document.getElementById('tc-asis').value=parseInt(ex.asistentes)||0;
+  if(parseInt(ex.cap)>0) document.getElementById('tc-cap').value=parseInt(ex.cap);
+  const pres=ex.estado==='sub'?'sub':ex.estado==='falta'?'no':'si';
+  turboSetPres(pres);
+  if(pres==='sub'){
+    const sel=document.getElementById('tc-suplente');
+    const opts=instructoresActivos().filter(i=>String(i.id)!==String(c.inst_id)).map(i=>`<option value="${i.id}">${i.nombre}</option>`).join('');
+    sel.innerHTML='<option value="">— Seleccionar suplente —</option>'+opts;
+    if(ex.suplente_id) selSuplenteId('tc-suplente', ex.suplente_id);
+    else if(ex.suplente_nombre) suplenteExtSet('tc-suplente', ex.suplente_nombre);
+    const m=document.getElementById('tc-motivo'); if(m&&ex.motivo_suplencia) m.value=ex.motivo_suplencia;
+  } else if(pres==='no'){
+    const m=document.getElementById('tc-motivo-falta'); if(m&&ex.motivo_suplencia) m.value=ex.motivo_suplencia;
+  }
+  if(ex.obs) document.getElementById('tc-obs').value=ex.obs;
+  const aviso=document.getElementById('tc-aviso-sup');
+  if(aviso){
+    const txt=pres==='sub'?`con suplente: <strong>${escHtml(nombreSuplenteReg(ex))}</strong>`:pres==='no'?'como falta':'como impartida';
+    aviso.innerHTML=`✎ Ya registrada ${txt} · ${parseInt(ex.asistentes)||0} personas. Al guardar se actualiza.`;
+    aviso.style.display='block';
+  }
+  turboActualizarColor();
+  return true;
 }
 
 function turboActualizarChips(){
@@ -366,10 +417,10 @@ function turboIniciarSwipe(){
       turboSetPres('no');
       setTimeout(()=>{turboGuardar();},180);
     } else if(dx>80){
-      // Swipe derecha = presente + guardar con valor actual
+      // Swipe derecha = guardar con valor actual (presente; si estaba con suplente, sigue con suplente)
       card.style.transform='translateX(120vw) rotate(12deg)';
       card.style.opacity='0';
-      turboSetPres('si');
+      if(turboPresEstado!=='sub') turboSetPres('si');
       setTimeout(()=>{turboGuardar();},180);
     } else {
       // Volver al centro
@@ -421,6 +472,22 @@ function mostrarClaseRec(){
     document.getElementById('rcc-suplente-row').style.display='none';
     const faltaRow=document.getElementById('rcc-falta-motivo-row');
     if(faltaRow) faltaRow.style.display='none';
+  }
+  // Ya registrada (en este recorrido o antes ese día): se muestra lo guardado para no perder suplencia/falta
+  const ex=recGuardadoDe(c);
+  if(ex){
+    document.getElementById('rcc-asis').value=parseInt(ex.asistentes)||0;
+    if(parseInt(ex.cap)>0) document.getElementById('rcc-cap').value=parseInt(ex.cap);
+    const pres=ex.estado==='sub'?'sub':ex.estado==='falta'?'no':'si';
+    document.getElementById('rcc-pres').value=pres;
+    toggleSuplenteRec();
+    if(pres==='sub'){
+      if(ex.suplente_id) selSuplenteId('rcc-suplente', ex.suplente_id);
+      else if(ex.suplente_nombre) suplenteExtSet('rcc-suplente', ex.suplente_nombre);
+    }
+    const m=document.getElementById('rcc-motivo'); if(m&&ex.motivo_suplencia&&pres!=='si') m.value=ex.motivo_suplencia;
+    if(ex.obs) document.getElementById('rcc-obs').value=ex.obs;
+    if(avisoRcc){ avisoRcc.textContent=`✎ Ya registrada${pres==='sub'?' con suplente: '+nombreSuplenteReg(ex):pres==='no'?' como falta':''} · ${parseInt(ex.asistentes)||0} personas. Al guardar se actualiza.`; avisoRcc.style.display='block'; }
   }
   document.getElementById('rcc-asis').focus();
 }
@@ -504,7 +571,7 @@ function guardarRecorrido(){
   const suplentes=recActual.items.filter(i=>i.presente==='sub').length;
   // Guardar resumen del recorrido
   recorridos.push({
-    id:recorridos.length+1,fecha:recActual.fecha,hora:recActual.hora,dia:recActual.dia,
+    id:typeof nuevoIdRegistro==='function'?nuevoIdRegistro(recorridos):recorridos.length+1,fecha:recActual.fecha,hora:recActual.hora,dia:recActual.dia,
     visitadas:vis.length,totalAsis,aforoProm,ausentes,suplentes,items:[...recActual.items]
   });
   // Guardar cada item como registro individual en el historial
@@ -530,9 +597,8 @@ function guardarRecorrido(){
       ex.captura_por='coord';   // el número principal ahora es el de coordinación
       ex.updatedAt=Date.now();
     } else {
-      const maxId=registros.reduce((m,r)=>Math.max(m,parseInt(r.id)||0),0);
       registros.push({
-        id:maxId+1,
+        id:nuevoIdRegistro(),
         inst_id:instIdNum,
         dia:item.dia,clase:item.clase,hora:item.hora,
         asistentes:parseInt(item.asis)||0,
@@ -623,6 +689,7 @@ function renderRecorridos(){
 }
 function eliminarRecorrido(id){
   if(!confirm('¿Eliminar este recorrido? Esta acción no se puede deshacer.'))return;
+  if(typeof marcarBorrado==='function') marcarBorrado('recorridos', id);
   recorridos=recorridos.filter(r=>r.id!==id);
   renderRecorridos();
   renderAll();

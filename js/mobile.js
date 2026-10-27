@@ -95,8 +95,7 @@ function renderHoy() {
     getHorarioEn(inst, hoyStr).forEach(slot => {
       if(slot.dia !== diaHoy) return;
       const regs = registros.filter(r =>
-        String(r.inst_id)===String(inst.id) && r.fecha === hoyStr &&
-        r.dia === slot.dia && r.hora === slot.hora
+        r.fecha === hoyStr && regEnSlot(r, inst.id, slot.dia, slot.hora)
       );
       const reg = regs.length > 0 ? regs[regs.length - 1] : null;
       const capN = (reg && parseInt(reg.cap) > 0) ? parseInt(reg.cap) : getCapClase(slot.clase);
@@ -155,7 +154,7 @@ function renderHoy() {
       let p=0;
       instructores.forEach(inst=>(inst.horario||[]).forEach(slot=>{
         if(slot.dia!==dHoy)return;
-        if(!registros.some(r=>String(r.inst_id)===String(inst.id)&&r.fecha===hStr&&r.dia===slot.dia&&r.hora===slot.hora))p++;
+        if(!registros.some(r=>r.fecha===hStr&&regEnSlot(r,inst.id,slot.dia,slot.hora)))p++;
       }));
       return p;
     })();
@@ -226,8 +225,7 @@ function verificarClasesSinRegistrar(silencioso = false) {
     (inst.horario || []).forEach(slot => {
       if(slot.dia !== diaHoy) return;
       const tieneReg = registros.some(r =>
-        String(r.inst_id)===String(inst.id) && r.fecha === hoyStr &&
-        r.dia === slot.dia && r.hora === slot.hora
+        r.fecha === hoyStr && regEnSlot(r, inst.id, slot.dia, slot.hora)
       );
       if(!tieneReg) pendientes.push(`${slot.hora} ${slot.clase} (${inst.nombre.split(' ')[0]})`);
     });
@@ -1029,7 +1027,7 @@ function renderMobileHome() {
     getHorarioEn(inst, hoyStr).forEach(slot => {
       if(slot.dia !== diaHoy) return;
       const reg = registros.filter(r =>
-        String(r.inst_id)===String(inst.id) && r.fecha===hoyStr && r.dia===slot.dia && r.hora===slot.hora
+        r.fecha===hoyStr && regEnSlot(r, inst.id, slot.dia, slot.hora)
       ).pop() || null;
       clasesHoy.push({ inst, slot, reg });
     });
