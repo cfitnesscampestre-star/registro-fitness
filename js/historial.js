@@ -241,6 +241,7 @@ function guardarEdicionRegistro(){
 function eliminarRegistro(){
   const id=parseInt(document.getElementById('er-id').value);
   if(!confirm('¿Eliminar este registro? Esta acción no se puede deshacer.'))return;
+  if(typeof marcarBorrado==='function') marcarBorrado('registros', id);   // para que no regrese de otro dispositivo
   registros=registros.filter(r=>r.id!==id);
   cerrarModal('m-edit-reg');
   renderAll();

@@ -1574,6 +1574,7 @@ window.sfv2_cargarHoja         = sfv2_cargarHoja;
           }
           if (idx >= 0) {
             var borrada = suplenciasPlan.splice(idx, 1)[0];
+            if (borrada && typeof marcarBorrado === 'function') marcarBorrado('suplencias', borrada.id);
             // Persistir
             try {
               localStorage.setItem('fc_suplencias', JSON.stringify(suplenciasPlan));
@@ -1681,6 +1682,57 @@ window.sfv2_cargarHoja         = sfv2_cargarHoja;
     else if (n > 0) setTimeout(function(){ wait(fn, n-1); }, 150);
   }
 
+  // ── Suplencias programadas (aprobadas, ya pasadas) que NO cuentan en el reporte ──
+  // El reporte cuenta registros de clase con estado "Con suplente". Si la clase nunca se
+  // registró, o se registró como impartida/falta, la suplencia programada no aparece.
+  // Esta lista las muestra para corregirlas con un toque.
+  window.sfv2_programadasSinRegistro = function(ini, fin, filtInst) {
+    var hoy  = (typeof fechaLocalStr === 'function') ? fechaLocalStr(new Date()) : new Date().toISOString().slice(0,10);
+    var tope = fin < hoy ? fin : hoy;
+    var esc  = function(t){ return (typeof escHtml === 'function') ? escHtml(t) : String(t == null ? '' : t); };
+    var nom  = function(id, ext){
+      var i = id ? (instructores||[]).find(function(x){ return String(x.id) === String(id); }) : null;
+      return i ? i.nombre : (ext || 'Suplente externo');
+    };
+    var lista = (typeof suplenciasPlan !== 'undefined' && Array.isArray(suplenciasPlan) ? suplenciasPlan : [])
+      .filter(function(s){
+        return s && s.fecha && s.fecha >= ini && s.fecha <= tope && (s.estado === 'aprobado' || !s.estado) &&
+               (!filtInst || String(s.suplente_id) === String(filtInst));
+      })
+      .map(function(s){
+        var regs = (registros||[]).filter(function(r){
+          return String(r.inst_id) === String(s.inst_id) && r.fecha === s.fecha && r.hora === s.hora &&
+                 (!s.dia || r.dia === s.dia);
+        });
+        if (regs.some(function(r){ return r.estado === 'sub'; })) return null;
+        return { s: s, reg: regs.length ? regs[regs.length-1] : null };
+      })
+      .filter(Boolean)
+      .sort(function(a,b){ return a.s.fecha.localeCompare(b.s.fecha) || String(a.s.hora).localeCompare(String(b.s.hora)); });
+    if (!lista.length) return '';
+    var filas = lista.map(function(x){
+      var s = x.s, r = x.reg;
+      var fd = new Date(s.fecha+'T12:00:00').toLocaleDateString('es-MX',{day:'2-digit',month:'short'});
+      var est = !r ? 'La clase no se registró'
+              : r.estado === 'ok' ? 'Registrada como impartida (' + (parseInt(r.asistentes)||0) + ' pers.)'
+              : r.estado === 'falta' ? 'Registrada como falta' : 'Registrada sin suplente';
+      var accion = r ? 'abrirEditarRegistro(' + JSON.stringify(r.id) + ')'
+                     : 'abrirRegistroDesdeCalendario(' + JSON.stringify(s.inst_id) + ',' + JSON.stringify(s.dia||'') + ',' + JSON.stringify(s.hora) + ',' + JSON.stringify(s.clase||'') + ',' + JSON.stringify(s.fecha) + ')';
+      return '<tr style="border-bottom:1px solid var(--border)">' +
+        '<td style="padding:6px 8px;font-family:monospace;font-size:.76rem">' + fd + ' ' + esc(s.hora) + '</td>' +
+        '<td style="padding:6px 8px"><b>' + esc((s.clase||'').toUpperCase()) + '</b><br><span style="font-size:.7rem;color:var(--txt2)">' +
+          esc(nom(s.inst_id)) + ' → <span style="color:var(--blue)">' + esc(nom(s.suplente_id, s.suplente_nombre)) + '</span></span></td>' +
+        '<td style="padding:6px 8px;font-size:.74rem;color:var(--gold2)">' + est + '</td>' +
+        '<td style="padding:6px 8px;text-align:right"><button type="button" class="abtn" onclick="cerrarModal(\'m-suplencias\');' + accion.replace(/"/g,'&quot;') + '">' + (r ? 'Corregir' : 'Registrar') + '</button></td>' +
+      '</tr>';
+    }).join('');
+    return '<div style="margin-top:1rem;border:1px solid var(--gold);border-radius:10px;padding:.7rem .8rem;background:rgba(232,184,75,.08)">' +
+      '<div style="font-weight:700;font-size:.82rem;color:var(--gold2);margin-bottom:.2rem">⚠ ' + lista.length + ' suplencia(s) programada(s) que no cuentan en este reporte</div>' +
+      '<div style="font-size:.72rem;color:var(--txt2);margin-bottom:.5rem">Estaban en Suplencias Plan., pero la clase no quedó registrada "Con suplente". Toca para corregirla.</div>' +
+      '<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:.78rem"><tbody>' + filas + '</tbody></table></div>' +
+    '</div>';
+  };
+
   wait(function() {
 
     // ── 1. Tabla de consulta (dentro del modal m-suplencias) ──────────
@@ -1700,9 +1752,10 @@ window.sfv2_cargarHoja         = sfv2_cargarHoja;
 
       var bodyEl     = document.getElementById('sup-body');
       var exportBtns = document.getElementById('sup-export-btns');
+      var revision   = sfv2_programadasSinRegistro(ini, fin, filtInst);
 
       if (!window.lastSuplencias.length) {
-        bodyEl.innerHTML = '<div class="empty">Sin suplencias en el periodo seleccionado</div>';
+        bodyEl.innerHTML = '<div class="empty">Sin suplencias registradas en el periodo seleccionado</div>' + revision;
         if (exportBtns) exportBtns.style.display = 'none';
         return;
       }
@@ -1712,8 +1765,8 @@ window.sfv2_cargarHoja         = sfv2_cargarHoja;
       }).join('');
 
       var filas = window.lastSuplencias.map(function(r, n) {
-        var instOrig = instructores.find(function(i){ return i.id === r.inst_id; });
-        var sup      = instructores.find(function(i){ return i.id === r.suplente_id; });
+        var instOrig = instructores.find(function(i){ return String(i.id) === String(r.inst_id); });
+        var sup      = r.suplente_id ? instructores.find(function(i){ return String(i.id) === String(r.suplente_id); }) : null;
         var fd  = new Date(r.fecha+'T12:00:00').toLocaleDateString('es-MX',{day:'2-digit',month:'short',year:'numeric'});
         var mot = motivoLabel(r);
         var bg  = n%2 ? 'var(--panel2)' : 'transparent';
@@ -1737,7 +1790,7 @@ window.sfv2_cargarHoja         = sfv2_cargarHoja;
             '<thead><tr style="position:sticky;top:0;background:var(--panel2)">'+ths+'</tr></thead>' +
             '<tbody>'+filas+'</tbody>' +
           '</table>' +
-        '</div>';
+        '</div>' + revision;
       if (exportBtns) exportBtns.style.display = 'flex';
     };
 
@@ -1752,8 +1805,8 @@ window.sfv2_cargarHoja         = sfv2_cargarHoja;
       }).join('');
 
       var filas = window.lastSuplencias.map(function(r, n) {
-        var instOrig = (typeof instructores !== 'undefined') ? instructores.find(function(i){ return i.id===r.inst_id; }) : null;
-        var sup      = (typeof instructores !== 'undefined') ? instructores.find(function(i){ return i.id===r.suplente_id; }) : null;
+        var instOrig = (typeof instructores !== 'undefined') ? instructores.find(function(i){ return String(i.id)===String(r.inst_id); }) : null;
+        var sup      = (typeof instructores !== 'undefined' && r.suplente_id) ? instructores.find(function(i){ return String(i.id)===String(r.suplente_id); }) : null;
         var fd  = new Date(r.fecha+'T12:00:00').toLocaleDateString('es-MX',{day:'2-digit',month:'short',year:'numeric'});
         var mot = motivoLabel(r);
         var bg  = n%2 ? '#f9fdf9' : '#fff';

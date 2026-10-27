@@ -46,7 +46,7 @@ function guardarClase(){
   }
   // Detectar duplicado exacto en el mismo día/hora/fecha — BLOQUEAR
   const duplicado=registros.find(r=>
-    r.inst_id===instId && r.clase===claseNombre &&
+    String(r.inst_id)===String(instId) && r.clase===claseNombre &&
     r.dia===diaVal && r.hora===horaVal && r.fecha===fechaVal &&
     (r.estado==='ok'||r.estado==='sub'||r.estado==='falta')
   );
@@ -58,7 +58,7 @@ function guardarClase(){
   }
   if(!ok) return;
 
-  const nuevoIdClase=(registros.reduce((m,r)=>Math.max(m,parseInt(r.id)||0),0))+1;
+  const nuevoIdClase=nuevoIdRegistro();
   registros.push({id:nuevoIdClase,inst_id:instId,
     dia:diaVal, clase:claseNombre, hora:horaVal,
     asistentes:asisVal, cap:capInput,
@@ -97,7 +97,7 @@ function guardarFalta(){
     if(yaTieneFalta) showToast(`${inst.nombre} ya tiene falta registrada para ${claseVal} el ${fechaVal}`,'warn');
   }
   if(!ok) return;
-  const nuevoIdFalta=(registros.reduce((m,r)=>Math.max(m,parseInt(r.id)||0),0))+1;
+  const nuevoIdFalta=nuevoIdRegistro();
   registros.push({id:nuevoIdFalta,inst_id:instId,dia:diaVal,
     clase:claseVal,hora:'00:00',asistentes:0,cap:0,dur:0,estado:'falta',
     fecha:fechaVal,tipo:'falta',

@@ -360,10 +360,14 @@
       let rec, campos = null;
 
       if (modo === 'nueva') {
+        // Si la clase tiene suplencia programada, se guarda como suplencia (no como impartida por el titular)
+        const plan = typeof instSupDeMiClase === 'function' ? instSupDeMiClase(inst.id, S.fecha, S.slot) : null;
         rec = {
           id: nuevoId(), inst_id: inst.id, dia: S.slot.dia, clase: S.slot.clase, hora: S.slot.hora,
-          asistentes: n, cap: cap || 20, dur: 60, estado: 'ok', fecha: S.fecha, tipo: 'clase',
-          suplente_id: null, suplente_nombre: null, motivo_suplencia: null,
+          asistentes: n, cap: cap || 20, dur: 60, estado: plan ? 'sub' : 'ok', fecha: S.fecha, tipo: 'clase',
+          suplente_id: plan && plan.suplente_id ? plan.suplente_id : null,
+          suplente_nombre: plan && !plan.suplente_id ? (plan.suplente_nombre || null) : null,
+          motivo_suplencia: plan ? (plan.motivo || 'permiso') : null,
           captura_por: 'inst', asis_prof: n, asis_prof_nota: nota, asis_prof_ts: t, updatedAt: t
         };
         registros.push(rec);

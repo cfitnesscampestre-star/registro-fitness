@@ -385,6 +385,7 @@ async function eliminarSuplencia(id){
     }
   }
 
+  if(typeof marcarBorrado==='function') marcarBorrado('suplencias', idDel);
   suplenciasPlan=suplenciasPlan.filter(s=>s.id!==idDel);
   guardarLocal();
   if(fbDb){
