@@ -75,8 +75,7 @@
   // ── Estado de captura de una clase ───────────────────────────────
   function regDe(inst, slot, fecha) {
     const regs = registros.filter(r =>
-      String(r.inst_id) === String(inst.id) && r.fecha === fecha &&
-      r.dia === slot.dia && r.hora === slot.hora);
+      r.fecha === fecha && regEnSlot(r, inst.id, slot.dia, slot.hora));
     return regs.length ? regs[regs.length - 1] : null;
   }
   // Minutos desde medianoche en hora de México (reloj del servidor)

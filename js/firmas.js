@@ -784,8 +784,7 @@ function _fd_generarPDFConFirmas() {
       (inst.horario || []).forEach(slot => {
         if(slot.dia !== diaHoy) return;
         const tieneReg = registros.some(r =>
-          String(r.inst_id)===String(inst.id) && r.fecha === hoyStr &&
-          r.dia === slot.dia && r.hora === slot.hora
+          r.fecha === hoyStr && regEnSlot(r, inst.id, slot.dia, slot.hora)
         );
         if(!tieneReg) pend++;
       });

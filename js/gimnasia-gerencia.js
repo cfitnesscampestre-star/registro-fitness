@@ -14,14 +14,18 @@
 //  · Mientras coordinación no corrija nada, el registro sigue al de Gerencia.
 //
 // Campos que agrega a cada registro importado:
-//   ger_id         id del aforo en Gerencia (grupoId_fecha) — también lo marca como importado.
-//                  Si el grupo dura varias horas o tiene varias profesoras, los demás
-//                  horarios llevan  grupoId_fecha@instId@HH:MM (mismo aforo en todos)
+//   ger_id         id del aforo en Gerencia (grupoId_fecha) — también lo marca como importado
 //   asis_ger       último número que trajo Gerencia (siempre se conserva aparte)
 //   ger_aut        'autorizado' | 'descartado'   decisión de coordinación
 //   ger_aut_val    el número de Gerencia sobre el que se decidió (si Gerencia cambia, se reabre)
 //   asis_coord_prev  número que tenía coordinación antes de autorizar
 //   origen         'gerencia'  (solo si el registro lo creó este módulo)
+//   ger_insts      ids de Fitness de TODAS las profesoras del grupo ese día
+//
+// Igual que en Gerencia: una lista = UN registro, con la duración completa del grupo y el
+// total de niñas (un grupo de 3 h con 20 niñas cuenta 3 h y 20 niñas, no 20 por hora).
+// Los horarios por hora que esas profesoras tienen en Fitness dentro del bloque se dan por
+// cubiertos con ese registro (ver regEnSlot en core.js), así no quedan "Pendiente".
 //
 // Solo corre con la sesión de coordinación (rol admin), nunca en el portal del instructor.
 // ═══════════════════════════════════════════════════════════════════
@@ -163,110 +167,53 @@
       const gerId = String(a.id || k), nGer = Math.max(0, num(a.asistentes));
       const wd = wdIdx(a.fecha), h = horaDelDia(g, wd);
 
-      // ya importado: seguir a Gerencia salvo que coordinación lo haya corregido
-      const seguir = (r, dur) => {
+      // todas las profesoras del grupo ese día (el equipo lo dan Jimena y Sara; cualquiera pasa lista)
+      const ids = profIdsDelDia(g, wd);
+      const pid = (a.porProf && ids.includes(a.porProf)) ? a.porProf : ids[0];
+      const insts = [...new Set([pid, ...ids].filter(Boolean))]
+        .map(id => instDePersona((profs[id] && profs[id].nombre) || (id === pid ? (a.porNom || g.prof || '') : '')))
+        .filter(Boolean).map(i => i.id);
+      const gerInsts = insts.filter((i, k) => insts.findIndex(j => String(j) === String(i)) === k);
+      const mismosInsts = r => Array.isArray(r.ger_insts) && r.ger_insts.length === gerInsts.length &&
+        gerInsts.every(i => r.ger_insts.some(j => String(j) === String(i)));
+
+      let r = porGer.get(gerId);
+      if (r) {                                              // ya importado: seguir a Gerencia salvo que coordinación lo haya corregido
         const corregido = hayNum(r.asis_ger) && num(r.asistentes) !== num(r.asis_ger);
         let cambio = false;
         if (!corregido && num(r.asistentes) !== nGer) { r.asistentes = nGer; cambio = true; }
         if (num(r.asis_ger) !== nGer || !hayNum(r.asis_ger)) { r.asis_ger = nGer; cambio = true; }
-        if (dur && r.origen === 'gerencia' && num(r.dur) !== dur) { r.dur = dur; cambio = true; }
+        if (gerInsts.length && !mismosInsts(r)) { r.ger_insts = gerInsts; cambio = true; }
         if (cambio) { r.updatedAt = ahora++; cambios++; }
-      };
-
-      // Profesoras del grupo ese día. Un grupo puede tener varias (p. ej. el equipo: Jimena y Sara);
-      // en Gerencia solo una pasa lista, pero ese número vale para los horarios de TODAS.
-      const ids = profIdsDelDia(g, wd);
-      const pid = (a.porProf && ids.includes(a.porProf)) ? a.porProf : ids[0];
-      const nombreDe = id => (profs[id] && profs[id].nombre) || (id === pid ? (a.porNom || g.prof || '') : '');
-      const lista = [...new Set([pid, ...ids].filter(Boolean))].map(id => ({ id, nombre: nombreDe(id) })).filter(x => x.nombre);
-      if (!lista.length) lista.push({ id: pid, nombre: a.porNom || g.prof || '' });
-      const insts = [], sinInst = [];
-      lista.forEach(x => {
-        const inst = instDePersona(x.nombre);
-        if (!inst) { sinInst.push(x.nombre || '(sin profesora)'); return; }
-        if (!insts.some(y => y.inst.id === inst.id)) insts.push({ inst, capturo: x.id === pid });
-      });
-      sinInst.forEach(nm => { sinMatch[nm] = (sinMatch[nm] || 0) + 1; });
-      const principal = porGer.get(gerId);
-      if (!insts.length) {
-        if (principal) seguir(principal); else omitidos++;
         return;
       }
 
+      // profesora que pasó lista (el registro queda a su nombre)
+      const nombreProf = (profs[pid] && profs[pid].nombre) || a.porNom || g.prof || '';
+      const inst = instDePersona(nombreProf);
+      if (!inst) { const nm = nombreProf || '(sin profesora)'; sinMatch[nm] = (sinMatch[nm] || 0) + 1; omitidos++; return; }
+
       const clase = String(g.nombre || 'Gimnasia');
-      const dia = DIAS[wd];
-      const cap = parseInt(g.cupo, 10) > 0 ? parseInt(g.cupo, 10) : (typeof getCapClase === 'function' ? getCapClase(clase) : 20);
+      const dia = DIAS[wd], hora = h.hi || '00:00';
 
-      // En Gerencia un grupo es UNA lista aunque dure varias horas (p. ej. 17:00–19:00);
-      // en Fitness cada profesora tiene un horario por hora (17:00 y 18:00).
-      // Se crea un registro por cada horario de Fitness de cada profesora del grupo que cae
-      // dentro del bloque, todos con el mismo aforo, para que ninguna hora quede "Pendiente".
-      const iniG = minutos(h.hi), finG = minutos(h.hf);
-      const bloque = (finG != null && iniG != null && finG > iniG) ? finG - iniG : 60;
-      const pares = [];                                         // { inst, hora, dur }
-      insts.forEach(({ inst }) => {
-        let slots = (typeof getHorarioEn === 'function' ? getHorarioEn(inst, a.fecha) : (inst.horario || []))
-          .filter(s => s && s.dia === dia && minutos(s.hora) != null)
-          .filter(s => {
-            const m = minutos(s.hora);
-            return iniG != null && finG != null && finG > iniG ? (m >= iniG && m < finG) : hhmm(s.hora) === h.hi;
-          });
-        const deGim = slots.filter(s => /gimnas/.test(norm(s.clase)));
-        if (deGim.length) slots = deGim;
-        const horas = [...new Set(slots.map(s => hhmm(s.hora)))].sort();
-        horas.forEach((hora, i) => {
-          const ini = minutos(hora);
-          // la última hora llega hasta el final del bloque solo si la profesora da el grupo sola;
-          // con varias profesoras cada quien cuenta únicamente sus horas
-          const fin = i + 1 < horas.length ? minutos(horas[i + 1])
-            : (finG != null && finG > ini ? (insts.length > 1 ? Math.min(finG, ini + 60) : finG) : ini + 60);
-          pares.push({ inst, hora, dur: fin > ini ? fin - ini : 60 });
-        });
-      });
-      // Nadie tiene horario en Fitness dentro del bloque: como antes, un solo registro para quien pasó lista
-      if (!pares.length) pares.push({ inst: (insts.find(x => x.capturo) || insts[0]).inst, hora: h.hi || '00:00', dur: bloque });
-
-      // El registro principal (ger_id = gerId) es el de la primera hora de quien pasó lista;
-      // los demás llevan ger_id = gerId@instId@HH:MM
-      let pp;
-      if (principal) {
-        pp = pares.find(x => String(x.inst.id) === String(principal.inst_id) && x.hora === hhmm(principal.hora));
-        if (!pp) {
-          const ip = insts.find(x => String(x.inst.id) === String(principal.inst_id));
-          pp = { inst: ip ? ip.inst : insts[0].inst, hora: hhmm(principal.hora), dur: 0 };
-          pares.unshift(pp);
-        }
-      } else {
-        const cap0 = insts.find(x => x.capturo);
-        pp = (cap0 && pares.find(x => x.inst.id === cap0.inst.id)) || pares[0];
+      // ¿ya existe un registro de Fitness a esa hora (capturado antes por coordinación)? → se adopta
+      const previo = registros.find(x => !x.ger_id && String(x.inst_id) === String(inst.id) && x.fecha === a.fecha &&
+        hhmm(x.hora) === hora && (x.estado === 'ok' || x.estado === 'sub' || x.estado === 'falta'));
+      if (previo) {
+        if (previo.estado === 'falta') { omitidos++; return; }        // coordinación la marcó como falta: no se toca
+        previo.ger_id = gerId; previo.asis_ger = nGer; previo.ger_insts = gerInsts; previo.updatedAt = ahora++;
+        porGer.set(gerId, previo); cambios++; return;
       }
 
-      pares.forEach(par => {
-        const { inst, hora, dur } = par;
-        const esPrincipal = par === pp;
-        const clave = esPrincipal ? gerId : `${gerId}@${inst.id}@${hora}`;
-        let r = porGer.get(clave);
-        if (r) { seguir(r, dur); return; }
-
-        // ¿ya hay un registro de Fitness en esa hora (capturado antes por coordinación)?
-        const previo = registros.filter(x => String(x.inst_id) === String(inst.id) && x.fecha === a.fecha && hhmm(x.hora) === hora).pop();
-        if (previo && previo.ger_id) {
-          if (!esPrincipal) return;                                // esa hora ya la ocupa otro grupo de Gerencia
-        } else if (previo) {
-          if (previo.estado === 'falta') { omitidos++; return; }   // coordinación la marcó como falta: no se toca
-          if (previo.estado !== 'ok' && previo.estado !== 'sub') return;
-          previo.ger_id = clave; previo.asis_ger = nGer; previo.updatedAt = ahora++;
-          porGer.set(clave, previo); cambios++; return;
-        }
-
-        const nuevo = {
-          id: idDe(clave), inst_id: inst.id, dia, clase, hora, asistentes: nGer, cap, dur,
-          estado: 'ok', fecha: a.fecha, tipo: 'clase', captura_por: 'ger',
-          suplente_id: null, motivo_suplencia: null, motivo_falta: null,
-          ger_id: clave, asis_ger: nGer, origen: 'gerencia', updatedAt: ahora++
-        };
-        registros.push(nuevo); porGer.set(clave, nuevo); nuevos++; cambios++;
-      });
+      const dur = (minutos(h.hf) != null && minutos(h.hi) != null && minutos(h.hf) > minutos(h.hi)) ? minutos(h.hf) - minutos(h.hi) : 60;
+      const cap = parseInt(g.cupo, 10) > 0 ? parseInt(g.cupo, 10) : (typeof getCapClase === 'function' ? getCapClase(clase) : 20);
+      const nuevo = {
+        id: idDe(gerId), inst_id: inst.id, dia, clase, hora, asistentes: nGer, cap, dur,
+        estado: 'ok', fecha: a.fecha, tipo: 'clase', captura_por: 'ger',
+        suplente_id: null, motivo_suplencia: null, motivo_falta: null,
+        ger_id: gerId, asis_ger: nGer, ger_insts: gerInsts, origen: 'gerencia', updatedAt: ahora++
+      };
+      registros.push(nuevo); porGer.set(gerId, nuevo); nuevos++; cambios++;
     });
 
     G.sinMatch = sinMatch; G.omitidos = omitidos; G.ts = Date.now();

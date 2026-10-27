@@ -229,8 +229,7 @@ function instRenderHoy() {
 
   const clasesData = slots.map(slot => {
     const regs = registros.filter(r =>
-      String(r.inst_id) === String(inst.id) &&
-      r.fecha === fechaStr && r.dia === slot.dia && r.hora === slot.hora
+      r.fecha === fechaStr && regEnSlot(r, inst.id, slot.dia, slot.hora)
     );
     const reg = regs.length > 0 ? regs[regs.length-1] : null;
     const capN = (reg && parseInt(reg.cap) > 0) ? parseInt(reg.cap) : getCapClase(slot.clase);

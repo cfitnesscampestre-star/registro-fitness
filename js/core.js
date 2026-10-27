@@ -103,6 +103,17 @@ function getHorarioEn(inst, fechaStr){
   });
   return ((vig || min).slots) || [];
 }
+// ¿El registro r corresponde a la clase (instId, dia, hora)? Además del registro de esa misma hora,
+// una lista de Gerencia (gimnasia) es UN registro por grupo con la duración completa del bloque:
+// cubre cada hora del bloque para todas las profesoras del grupo (r.ger_insts). La fecha la compara quien llama.
+function regEnSlot(r, instId, dia, hora){
+  if(!r || r.dia!==dia) return false;
+  if(String(r.inst_id)===String(instId) && r.hora===hora) return true;
+  if(!r.ger_id || !Array.isArray(r.ger_insts) || !r.ger_insts.some(i=>String(i)===String(instId))) return false;
+  const min=t=>{ const m=String(t||'').match(/(\d{1,2}):(\d{2})/); return m ? (+m[1])*60+(+m[2]) : null; };
+  const ini=min(r.hora), h=min(hora);
+  return ini!==null && h!==null && h>=ini && h<ini+(parseInt(r.dur)||60);
+}
 function fechaDeDiaSemana(lunesStr, dia){
   const d = new Date(lunesStr + 'T12:00:00');
   d.setDate(d.getDate() + Math.max(0, DIAS.indexOf(dia)));

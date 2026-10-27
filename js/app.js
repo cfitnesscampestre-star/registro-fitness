@@ -1133,7 +1133,7 @@ function calcularAlertas() {
   instructores.forEach(inst => {
     getHorarioSemana(inst, iniSemStr).forEach(h => {
       if(!diasSemana.includes(h.dia)) return;
-      const tieneReg = registros.some(r=>r.inst_id===inst.id&&r.dia===h.dia&&r.hora===h.hora&&
+      const tieneReg = registros.some(r=>regEnSlot(r,inst.id,h.dia,h.hora)&&
         (r.fecha||'')>=iniSemStr&&(r.fecha||'')<finSemStr&&(r.estado==='ok'||r.estado==='sub'||r.estado==='falta'));
       if(!tieneReg) sinRegistro.push({label:`${h.clase} (${inst.nombre.split(' ')[0]}) ${h.dia} ${h.hora}`, inst_id:inst.id, dia:h.dia, hora:h.hora});
     });

@@ -288,7 +288,7 @@ function renderCal(){
       // Comparar fechas como strings para evitar bugs de zona horaria
       const recs=registros.filter(r=>{
         const f=r.fecha||'';
-        return r.inst_id===inst.id&&r.dia===h.dia&&r.hora===h.hora
+        return regEnSlot(r,inst.id,h.dia,h.hora)
           &&(r.estado==='ok'||r.estado==='sub')&&f>=lunesStr&&f<=domStr;
       });
       const promAsis=recs.length>0?Math.round(recs.reduce((a,r)=>a+(parseInt(r.asistentes)||0),0)/recs.length):null;

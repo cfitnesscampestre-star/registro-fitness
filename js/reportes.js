@@ -137,8 +137,7 @@ function genReporteDiario(){
       let rec = null;
       if(fechaEsp){
         rec = registros.find(r=>
-          r.inst_id===inst.id && r.dia===dia &&
-          r.hora===h.hora && r.clase===h.clase &&
+          regEnSlot(r,inst.id,dia,h.hora) && (r.clase===h.clase || r.ger_id) &&
           r.fecha===fechaEsp
         );
       }
