@@ -856,6 +856,7 @@ async function inicializarFirebase(){
       fbInicializado = true;
 
       if(!data){
+        if(typeof fbRegistrarNube === 'function') fbRegistrarNube(null);   // la nube no tiene nada: subir todo
         // Firebase está vacío → somos la fuente de verdad, subir si tenemos datos locales
         // fbDataRecibida permanece false — indicamos que Firebase confirmó estar vacío
         fbDataRecibida = false;
@@ -869,6 +870,8 @@ async function inicializarFirebase(){
 
       // Texto seguro para todo lo que llega (ver limpiarDatosEntrantes en core.js)
       limpiarDatosEntrantes(data);
+      // Lo que la nube tiene ahora: las subidas solo mandan lo que difiera (app.js)
+      if(typeof fbRegistrarNube === 'function') fbRegistrarNube(data);
       // Contraseñas de coordinación/consulta compartidas entre equipos (auth.js)
       try { aplicarAccesoNube(data.cfg && data.cfg.acceso); } catch(e){ console.warn('Acceso:', e); }
 
@@ -918,6 +921,12 @@ async function inicializarFirebase(){
           // capturaron (antes se ignoraba y esa copia sin ello reemplazaba la de la nube).
           registros  = mergeColeccion(registros,  data.registros,  'registros');
           recorridos = mergeColeccion(recorridos, data.recorridos, 'recorridos');
+          // Instructores y salones: si aquí no se cambiaron, se toma la versión de la nube
+          // (antes se subía la copia local y podía regresar un salón o un horario viejo)
+          if(typeof fbBaseLocal === 'function' && typeof firmaDato === 'function'){
+            if(Array.isArray(data.salones) && data.salones.length && firmaDato(salones) === fbEnNube.base.salones){ salones = data.salones; fbBaseLocal(['salones']); }
+            if(Array.isArray(data.instructores) && data.instructores.length && firmaDato(instructores) === fbEnNube.base.instructores){ instructores = data.instructores; fbBaseLocal(['instructores']); }
+          }
           normalizarRegistros();
           guardarLocal();                                  // fbReceiving=true: no cambia fc_local_ts
           try {
@@ -951,6 +960,9 @@ async function inicializarFirebase(){
 
         if(data.solicitudes)
           solicitudesInst = Object.values(data.solicitudes);
+
+        // Lo que quedó de instructores y salones es la versión de la nube: base para saber si cambian aquí
+        if(typeof fbBaseLocal === 'function') fbBaseLocal();
 
         // ── Sincronizar Agenda (notas) desde Firebase ─────────────────────
         if(Array.isArray(data.agendaNotas) && data.agendaNotas.length > 0) {

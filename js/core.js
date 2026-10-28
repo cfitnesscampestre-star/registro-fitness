@@ -444,9 +444,9 @@ function autoRellenarHorario(){
   document.getElementById('rc-dia').value   = slot.dia;
   document.getElementById('rc-hora').value  = slot.hora;
 
-  // Capacidad automática desde salones
-  const capAuto = getCapClase(slot.clase);
-  document.getElementById('rc-cap').value = capAuto;
+  // Capacidad: la del salón (o el último cupo guardado si la clase no tiene salón)
+  document.getElementById('rc-cap').value = capSugerida(instId, slot.clase, slot.dia, slot.hora);
+  notaCapSinSalon('rc-cap', slot.clase);
 
   // Mostrar tarjeta visual
   if(preview){

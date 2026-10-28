@@ -53,7 +53,10 @@ Preferir manejar la app como lo hace la persona (las funciones de los botones: `
 4. Reporte de suplencias: avisa de las programadas que no cuentan y por qué.
 5. Sincronización: dos dispositivos a la vez, uno sin señal, borrados que no regresan, mismos datos al final.
 6. Portal: clase con suplencia programada se guarda como suplencia.
-7. Ids únicos.
+7. Cupo: "+ Clase" y recorrido proponen el mismo cupo (salón, o el último guardado si la clase no tiene salón) y respetan un cambio de salón.
+8. Salones: un teléfono que estuvo sin señal no regresa el cupo viejo de un salón.
+9. Rendimiento: abrir la app no sube nada; guardar o editar un registro sube solo ese (con 3,000 registros).
+10. Ids únicos.
 
 ### Reglas del club (decididas por coordinación, octubre 2026)
 
@@ -76,7 +79,9 @@ Al reportar resultados a la persona: decir cuántos registros y qué periodo, lo
 
 - Clase ↔ registro: por instructor + fecha + día + hora (`regEnSlot` en `core.js`); las listas de Gerencia cubren todo su bloque para las profesoras de `ger_insts`.
 - Impartidas = estado `ok` o `sub`; faltas = `falta`; suplencias = `sub`. Horas = `dur`/60 (60 si falta).
-- Subidas a la nube por ruta (`registros/<id>`), nunca reemplazando la colección; borrar = `marcarBorrado(col, id)` + quitarlo de la lista.
+- Subidas a la nube por ruta (`registros/<id>`), nunca reemplazando la colección, y **solo lo que difiere de la nube** (`fbEnNube` + `firmaDato` en `app.js`): subir todos por ruta congelaba el celular 3-4 s por guardado. Borrar = `marcarBorrado(col, id)` + quitarlo de la lista.
+- Instructores y salones se suben completos solo si cambiaron en ese dispositivo desde la última lectura (`fbEnNube.base`); si no, gana la nube.
+- Cupo propuesto al registrar: `capSugerida()` (salón → último cupo guardado de la clase → 20), igual en "+ Clase" y recorrido.
 - Ids nuevos con `nuevoIdRegistro()`, nunca "el más alto + 1".
 - Todo guardado pasa por `renderAll()` (guarda local, sube y redibuja, incluida la pantalla de inicio del celular).
 - Al cambiar un `js/*.js`, subir su `?v=` en `index.html`.

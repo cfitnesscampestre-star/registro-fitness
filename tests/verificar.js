@@ -37,8 +37,8 @@ const inst = (id, nombre, slots) => ({ id, nombre, tipo: 'Planta', horario: slot
 let _id = 1000;
 const reg = o => Object.assign({ id: _id++, tipo: 'clase', estado: 'ok', dur: 60, cap: 20, asistentes: 0, suplente_id: null, updatedAt: 1 }, o);
 const mapa = arr => arr.reduce((a, x) => { a[String(x.id)] = x; return a; }, {});
-const nube = ({ instructores, registros = [], suplencias = [] }) =>
-  ({ fitness: { ts: 1, instructores, registros: mapa(registros), suplencias: mapa(suplencias) } });
+const nube = ({ instructores, registros = [], suplencias = [], salones }) =>
+  ({ fitness: Object.assign({ ts: 1, instructores, registros: mapa(registros), suplencias: mapa(suplencias) }, salones ? { salones } : {}) });
 
 // Lee los KPI del dashboard por su etiqueta
 const kpisDashboard = d => d.ev(() => {
@@ -326,6 +326,87 @@ escenario('portal: la clase con suplencia programada se guarda como suplencia', 
   await d.calma(1500);
   const n = Object.values(env.db.leer('fitness/registros') || {});
   check('Se guardó UN registro como suplencia de Cristi, con 9 personas', n.map(r => [r.estado, r.suplente_id, r.motivo_suplencia, r.asistentes]), [['sub', 2, 'incapacidad', 9]]);
+});
+
+// 7a ─ Cupo de las clases ───────────────────────────────────────────
+escenario('cupo: "+ Clase" y recorrido proponen el cupo del salón (o el último guardado)', async env => {
+  env.db.sembrar(nube({
+    salones: [{ id: 1, nombre: 'Estudio Spinning', cap: 25, tipo: 'spinning', clases: ['RPM'] }],
+    instructores: [inst(1, 'Cristi Romo', [['Lunes', '18:00', 'RPM']]), inst(2, 'Mateo Padilla', [['Lunes', '18:00', 'BOX'], ['Martes', '18:00', 'BOX']]),
+                   inst(3, 'Ana Romo', [['Lunes', '18:00', 'Step']])],
+    registros: [reg({ inst_id: 2, dia: 'Martes', hora: '18:00', clase: 'BOX', fecha: '2026-10-20', asistentes: 6, cap: 12 })]   // BOX sin salón, se escribió 12
+  }));
+  const d = await env.abrir('coordinación', { hora: A_LAS('18:30') });
+  const capClase = (instId, clase) => d.ev(async ([instId, clase]) => {
+    abrirRegistroDesdeCalendario(instId, 'Lunes', '18:00', clase, '2026-10-26');
+    await new Promise(r => setTimeout(r, 250));
+    const v = document.getElementById('rc-cap').value, nota = document.getElementById('rc-cap-nota');
+    cerrarModal('m-clase');
+    return [v, !!(nota && nota.style.display !== 'none' && nota.textContent)];
+  }, [instId, clase]);
+  const capRec = clase => d.ev(async clase => {
+    recActual = { fecha: '2026-10-26', hora: '18:10', dia: 'Lunes', items: [], clasesActivas: getClasesActivas('Lunes', '18:10', '2026-10-26') };
+    recIdx = recActual.clasesActivas.findIndex(c => c.clase === clase); modoRecorrido = 'turbo'; iniciarTurbo();
+    await new Promise(r => setTimeout(r, 300));
+    const v = document.getElementById('tc-cap').value;
+    document.getElementById('turbo-screen').style.display = 'none';
+    return v;
+  }, clase);
+
+  check('+ Clase · RPM (salón Spinning): cupo 25, sin aviso', await capClase(1, 'RPM'), ['25', false]);
+  check('Recorrido · RPM: cupo 25', await capRec('RPM'), '25');
+  // Cambiar el cupo del salón como lo hace la persona (Salones → editar → guardar)
+  await d.ev(() => { abrirModalSalon(1); document.getElementById('ms-cap').value = '30'; guardarSalon(); });
+  await d.calma(1200);
+  check('Tras cambiar el salón a 30: "+ Clase" propone 30', await capClase(1, 'RPM'), ['30', false]);
+  check('Tras cambiar el salón a 30: recorrido propone 30', await capRec('RPM'), '30');
+  check('+ Clase · BOX sin salón: el último cupo guardado (12), con aviso', await capClase(2, 'BOX'), ['12', true]);
+  check('Recorrido · BOX sin salón: 12', await capRec('BOX'), '12');
+  check('+ Clase · Step nunca registrada y sin salón: 20', (await capClase(3, 'Step'))[0], '20');
+});
+
+escenario('salones: un teléfono que estuvo sin señal no regresa el cupo viejo', async env => {
+  env.db.sembrar(nube({
+    salones: [{ id: 1, nombre: 'Estudio Spinning', cap: 25, tipo: 'spinning', clases: ['RPM'] }],
+    instructores: [inst(1, 'Cristi Romo', [['Lunes', '18:00', 'RPM']])]
+  }));
+  const cel = await env.abrir('celular', { hora: A_LAS('18:30') });
+  const compu = await env.abrir('compu', { hora: A_LAS('18:30') });
+  await cel.quitarSenal();
+  await cel.ev(() => { registros.push({ id: nuevoIdRegistro(), inst_id: 1, dia: 'Lunes', hora: '18:00', clase: 'RPM', fecha: '2026-10-26',
+    estado: 'ok', asistentes: 15, cap: 25, dur: 60, tipo: 'clase', updatedAt: Date.now() }); renderAll(); });
+  await cel.calma(1500);
+  await compu.ev(() => { abrirModalSalon(1); document.getElementById('ms-cap').value = '30'; guardarSalon(); });
+  await compu.calma(1500);
+  await cel.volverSenal();
+  await cel.calma(2500);
+  const s = env.db.leer('fitness/salones');
+  check('La nube conserva el cupo nuevo del salón (30)', s && s[0] && s[0].cap, 30);
+  check('El celular también lo tiene', await cel.ev(() => salones[0].cap), 30);
+  check('Y el registro que hizo sin señal llegó', Object.values(env.db.leer('fitness/registros') || {}).length, 1);
+});
+
+// 7b ─ Rendimiento ──────────────────────────────────────────────────
+escenario('rendimiento: cada guardado sube solo lo que cambió', async env => {
+  // Subir todos los registros por ruta en cada guardado congelaba el celular 3-4 s (3,000 registros).
+  const regs = [];
+  for (let i = 0; i < 3000; i++) regs.push(reg({ id: 50000 + i, inst_id: 1, dia: 'Lunes', hora: '08:00', clase: 'Yoga',
+    fecha: `2026-${String(1 + (i % 9)).padStart(2, '0')}-${String(1 + (i % 28)).padStart(2, '0')}`, asistentes: i % 20 }));
+  env.db.sembrar(nube({ instructores: [inst(1, 'Ana Uno', [['Lunes', '08:00', 'Yoga']])], registros: regs }));
+  const d = await env.abrir('coordinación', { hora: A_LAS('09:00') });
+  await d.calma(2000);
+  const subidos = () => env.db.escrituras.filter(e => e.op === 'update').reduce((a, e) => a + e.registros, 0);
+  check('Abrir la app no vuelve a subir los 3,000 registros', subidos(), 0);
+  env.db.escrituras = [];
+  await d.ev(() => { registros.push({ id: nuevoIdRegistro(), inst_id: 1, dia: 'Lunes', hora: '08:00', clase: 'Yoga', fecha: '2026-10-26',
+    estado: 'ok', asistentes: 9, cap: 20, dur: 60, tipo: 'clase', updatedAt: Date.now() }); renderAll(); });
+  await d.calma(2000);
+  check('Guardar una clase sube 1 registro', subidos(), 1);
+  env.db.escrituras = [];
+  await d.ev(() => { const r = registros.find(x => x.id === 50010); r.asistentes = 19; r.updatedAt = Date.now(); renderAll(); });
+  await d.calma(2000);
+  check('Editar un registro sube solo ese', subidos(), 1);
+  check('La nube conserva los 3,001 registros', Object.keys(env.db.leer('fitness/registros') || {}).length, 3001);
 });
 
 // 7 ─ Ids ───────────────────────────────────────────────────────────

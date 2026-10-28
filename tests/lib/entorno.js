@@ -35,7 +35,7 @@ const partes = p => String(p || '').replace(/^\/+|\/+$/g, '').split('/').filter(
 
 // ── Nube falsa ─────────────────────────────────────────────────────
 class FakeDB {
-  constructor() { this.data = {}; this.subs = []; }
+  constructor() { this.data = {}; this.subs = []; this.escrituras = []; }
   leer(p) {
     let n = this.data;
     for (const k of partes(p)) { if (n == null || typeof n !== 'object') return null; n = n[k]; }
@@ -51,6 +51,9 @@ class FakeDB {
   }
   sembrar(datos) { Object.entries(datos).forEach(([k, v]) => this._poner(k, v)); }
   aplicar(op) {
+    // Bitácora: cuántos elementos de cada colección viajan en cada escritura (mide el costo de guardar)
+    const llaves = op.op === 'update' ? Object.keys(op.v || {}) : [partes(op.path).slice(1).join('/')];
+    this.escrituras.push({ op: op.op, path: op.path, registros: llaves.filter(k => /^registros\//.test(k) || /^fitness\/registros\//.test(op.path + '/' + k)).length });
     if (op.op === 'set') this._poner(op.path, op.v);
     if (op.op === 'update') Object.entries(op.v || {}).forEach(([k, v]) => this._poner(partes(op.path).concat(partes(k)).join('/'), v));
   }

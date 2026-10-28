@@ -134,10 +134,10 @@ function turboMostrar(){
   }
 
   // Capacidad: si la clase tiene salón asignado se respeta SIEMPRE su capacidad; solo si no tiene, se usa el último registro
-  const capSalon=getCapClase(c.clase)||20;
+  // Capacidad: la del salón (o el último cupo guardado si la clase no tiene salón), igual que en "+ Clase"
   const histRecsAll=registros.filter(r=>String(r.inst_id)===String(c.inst_id)&&r.clase===c.clase&&r.dia===c.dia).sort((a,b)=>(b.fecha||'').localeCompare(a.fecha||''));
-  const capPrev=getSalonDeClase(c.clase)?capSalon:(histRecsAll.length>0&&parseInt(histRecsAll[0].cap)>0?parseInt(histRecsAll[0].cap):capSalon);
-  document.getElementById('tc-cap').value=capPrev;
+  document.getElementById('tc-cap').value=capSugerida(c.inst_id,c.clase,c.dia,c.hora);
+  notaCapSinSalon('tc-cap', c.clase);
   const histRecs=histRecsAll.filter(r=>r.estado==='ok'||r.estado==='sub');
   const sugerido=histRecs.length>0?histRecs[0].asistentes:0;
   document.getElementById('tc-asis').value=sugerido;
@@ -445,9 +445,8 @@ function mostrarClaseRec(){
   document.getElementById('rcc-asis').value=0;
   document.getElementById('rcc-obs').value='';
   // Inicializar capacidad: del último registro histórico si existe, si no del salón
-  const histCap=registros.filter(r=>r.inst_id===c.inst_id&&r.clase===c.clase&&r.dia===c.dia&&parseInt(r.cap)>0).sort((a,b)=>(b.fecha||'').localeCompare(a.fecha||''));
-  const capDefault=getSalonDeClase(c.clase)?getCapClase(c.clase):(histCap.length>0?parseInt(histCap[0].cap):getCapClase(c.clase)||20);
-  document.getElementById('rcc-cap').value=capDefault;
+  document.getElementById('rcc-cap').value=capSugerida(c.inst_id,c.clase,c.dia,c.hora);
+  notaCapSinSalon('rcc-cap', c.clase);
 
   // Fix: aviso de suplencia planificada específico para esta clase
   const supPlan=(suplenciasPlan||[]).find(s=>

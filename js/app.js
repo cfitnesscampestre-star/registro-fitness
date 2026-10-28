@@ -25,6 +25,35 @@ function getCapClase(nombreClase) {
   const cap = salon ? parseInt(salon.cap) : 0;
   return cap > 0 ? cap : 20;
 }
+// Cupo que se propone al registrar una clase, igual en "+ Clase" y en el recorrido:
+// el de su salón; si la clase no tiene salón, el último cupo guardado para esa clase (primero el
+// del mismo instructor, día y hora); 20 solo si nunca se ha guardado. Antes "+ Clase" ponía 20
+// siempre que la clase no tuviera salón, aunque ya se hubiera escrito otro cupo.
+function capSugerida(instId, clase, dia, hora) {
+  if (getSalonDeClase(clase)) return getCapClase(clase);
+  const n = _normClase(clase);
+  const prev = (typeof registros !== 'undefined' ? registros : [])
+    .filter(r => _normClase(r.clase) === n && parseInt(r.cap) > 0 && (r.estado === 'ok' || r.estado === 'sub') && !r.ger_id)
+    .sort((a, b) => (b.fecha || '').localeCompare(a.fecha || '') || (parseInt(b.updatedAt) || 0) - (parseInt(a.updatedAt) || 0));
+  const mismo = prev.find(r => String(r.inst_id) === String(instId) && r.dia === dia && r.hora === hora);
+  const r = mismo || prev[0];
+  return r ? parseInt(r.cap) : 20;
+}
+// Aviso bajo el campo de capacidad cuando la clase no tiene salón asignado
+function notaCapSinSalon(inputId, clase) {
+  const inp = document.getElementById(inputId);
+  if (!inp) return;
+  let nota = document.getElementById(inputId + '-nota');
+  if (!nota) {
+    nota = document.createElement('div');
+    nota.id = inputId + '-nota';
+    nota.style.cssText = 'font-size:.66rem;color:var(--gold2);margin-top:4px;line-height:1.3';
+    (inp.closest('.fg') || inp.parentNode).appendChild(nota);
+  }
+  const sinSalon = clase && !getSalonDeClase(clase);
+  nota.textContent = sinSalon ? `"${clase}" no tiene salón: se usa el último cupo guardado. Asígnala en Salones para que siempre tome el cupo del salón.` : '';
+  nota.style.display = sinSalon ? 'block' : 'none';
+}
 
 function getTipoIcon(tipo) {
   const icons = {salon:'<svg class="ico" viewBox="0 0 20 20"><line x1="2" y1="10" x2="18" y2="10" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/><rect x="2" y="8" width="2.5" height="4" rx="0.8" stroke="currentColor" stroke-width="1.2" fill="none"/><rect x="5" y="7" width="2.5" height="6" rx="0.8" stroke="currentColor" stroke-width="1.2" fill="none"/><rect x="12.5" y="7" width="2.5" height="6" rx="0.8" stroke="currentColor" stroke-width="1.2" fill="none"/><rect x="15.5" y="8" width="2.5" height="4" rx="0.8" stroke="currentColor" stroke-width="1.2" fill="none"/><circle cx="10" cy="10" r="1.5" fill="currentColor"/></svg>️',spinning:'<svg class="ico" viewBox="0 0 20 20"><circle cx="5" cy="14" r="3.5" stroke="currentColor" stroke-width="1.3" fill="none"/><circle cx="15" cy="14" r="3.5" stroke="currentColor" stroke-width="1.3" fill="none"/><path d="M5 14 L8 8 L12 8 L15 14 M8 8 L10 5" stroke="currentColor" stroke-width="1.3" fill="none" stroke-linecap="round" stroke-linejoin="round"/><circle cx="10" cy="5" r="1" fill="currentColor"/></svg>',yoga:'<svg class="ico" viewBox="0 0 20 20"><circle cx="10" cy="4" r="1.8" stroke="currentColor" stroke-width="1.3" fill="none"/><path d="M10 6 L10 12 M10 8 L7 10 M10 8 L13 10 M10 12 L8 16 M10 12 L12 16" stroke="currentColor" stroke-width="1.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>',funcional:'<svg class="ico" viewBox="0 0 20 20"><path d="M12 4 Q16 5 15 9 L14 11 Q15 14 13 16 Q10 18 7 15 L5 12 Q3 9 6 7 L9 8 L11 5 Z" stroke="currentColor" stroke-width="1.3" fill="none" stroke-linejoin="round"/></svg>',cardio:'<svg class="ico" viewBox="0 0 20 20"><circle cx="12" cy="4" r="1.8" stroke="currentColor" stroke-width="1.3" fill="none"/><path d="M12 6 L10 10 L7 13 M10 10 L13 13 L15 17 M12 6 L14 9" stroke="currentColor" stroke-width="1.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>',piscina:'<svg class="ico" viewBox="0 0 20 20"><circle cx="13" cy="5" r="1.8" stroke="currentColor" stroke-width="1.3" fill="none"/><path d="M3 10 Q7 7 10 10 Q13 13 17 10" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round"/><path d="M3 14 Q7 11 10 14 Q13 17 17 14" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round"/><path d="M13 7 L10 9" stroke="currentColor" stroke-width="1.4" fill="none" stroke-linecap="round"/></svg>',exterior:'<svg class="ico" viewBox="0 0 20 20"><path d="M5 16 Q8 8 16 4 Q14 12 8 15 Z" stroke="currentColor" stroke-width="1.3" fill="none" stroke-linejoin="round"/><line x1="5" y1="16" x2="12" y2="9" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>',multiusos:'<svg class="ico" viewBox="0 0 20 20"><path d="M4 10a6 6 0 0 1 6-6 6 6 0 0 1 5.2 3" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round"/><path d="M16 10a6 6 0 0 1-6 6 6 6 0 0 1-5.2-3" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round"/><polyline points="14.5,7 15.5,3.8 18.5,5" stroke="currentColor" stroke-width="1.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/><polyline points="5.5,13 4.5,16.2 1.5,15" stroke="currentColor" stroke-width="1.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>'};
@@ -927,6 +956,36 @@ function borradosFusionar(remotos){
   }
   return b;
 }
+// Lo que la nube ya tiene, por colección (id → firma). Se llena con cada lectura de la nube y con
+// cada subida, para que cada guardado suba SOLO lo que cambió: subir todos los registros por su
+// ruta en cada guardado congelaba el celular 3-4 s (medido: 3,000 registros ≈ 3 s; 1 registro ≈ 3 ms).
+const fbEnNube = { registros:{}, recorridos:{}, suplencias:{}, borrados:{ registros:{}, recorridos:{}, suplencias:{} } };
+// JSON con llaves ordenadas y sin vacíos: la nube devuelve las llaves en otro orden y no guarda null ni []
+function firmaDato(x){
+  if(x === null || x === undefined) return 'null';
+  if(typeof x !== 'object') return JSON.stringify(x);
+  const vacio = v => v === null || v === undefined || (typeof v === 'object' && Object.keys(v).length === 0);
+  if(Array.isArray(x)) return '[' + x.map(firmaDato).join(',') + ']';
+  return '{' + Object.keys(x).filter(k => !vacio(x[k])).sort().map(k => JSON.stringify(k) + ':' + firmaDato(x[k])).join(',') + '}';
+}
+// Instructores y salones se suben completos, pero SOLO si cambiaron en este dispositivo desde la
+// última lectura de la nube. Antes iban en cada subida: un teléfono sin señal guardaba un registro y,
+// al reconectar, su copia vieja pisaba el salón (o el horario) que otro había cambiado mientras tanto.
+fbEnNube.base = {};
+function fbBaseLocal(campos){
+  (campos || ['instructores', 'salones']).forEach(c => { fbEnNube.base[c] = firmaDato(c === 'instructores' ? instructores : salones); });
+}
+function fbRegistrarNube(data){
+  COLS_CON_MARCA.forEach(col => {
+    const m = {}, o = data && data[col];
+    if(o && typeof o === 'object') Object.entries(o).forEach(([k, v]) => { if(v && typeof v === 'object') m[k] = firmaDato(v); });
+    fbEnNube[col] = m;
+    const b = {};
+    Object.keys((data && data.borrados && data.borrados[col]) || {}).forEach(k => { b[k] = 1; });
+    fbEnNube.borrados[col] = b;
+  });
+}
+
 // Id único para un registro nuevo. "El más alto + 1" repetía ids entre dispositivos y,
 // al fusionar, el registro de uno pisaba al del otro.
 function nuevoIdRegistro(lista){
@@ -1046,8 +1105,6 @@ async function sincronizarFirebase(){
     try { _eventos = JSON.parse(localStorage.getItem('fitness_eventos_v1') || '[]'); } catch(e){}
 
     const payload = {
-      instructores,
-      salones,
       solicitudes: solicitudesInst.reduce((a,s)=>{ a[String(s.id)]=s; return a; },{}),
       hojaFirmasActiva: _hojaFirmas,
       agendaNotas: _agendaNotas,
@@ -1055,24 +1112,37 @@ async function sincronizarFirebase(){
       ts
     };
     // Registros, recorridos y suplencias: cada uno por su ruta (no se reemplaza la colección,
-    // así no se borra lo que otro dispositivo subió y este aún no tiene). Lo borrado a propósito
-    // se quita con su marca.
-    const _borr = borradosLeer();
+    // así no se borra lo que otro dispositivo subió y este aún no tiene), y SOLO los que cambiaron
+    // respecto a la nube. Lo borrado a propósito se quita con su marca.
+    const _fInst = firmaDato(instructores), _fSal = firmaDato(salones);
+    if(_fInst !== fbEnNube.base.instructores) payload.instructores = instructores;
+    if(_fSal !== fbEnNube.base.salones) payload.salones = salones;
+    const _borr = borradosLeer(), _enviados = [];
     [['registros', registros], ['recorridos', recorridos], ['suplencias', suplenciasPlan]].forEach(([col, arr]) => {
       arr.forEach(x => {
         if(!x || x.id === undefined || x.id === null || x.id === '') return;
         const k = String(x.id);
         if(/[.#$\[\]\/]/.test(k) || _borr[col][k]) return;
+        const f = firmaDato(x);
+        if(fbEnNube[col][k] === f) return;                  // la nube ya lo tiene igual
         payload[col + '/' + k] = x;
+        _enviados.push([col, k, f]);
       });
       Object.entries(_borr[col]).forEach(([k, t]) => {
+        if(!fbEnNube[col][k] && fbEnNube.borrados[col][k]) return;   // ya está borrado en la nube
         payload[col + '/' + k] = null;
         payload['borrados/' + col + '/' + k] = t;
+        _enviados.push([col, k, null]);
       });
     });
     // update() y no set(): set() sobre 'fitness' borraba en cada guardado los nodos que no van en
     // el payload (fitness/notif_tokens de las notificaciones, fitness/firmasSuplencias, …).
     await fbDb.ref('fitness').update(payload);
+    fbEnNube.base.instructores = _fInst; fbEnNube.base.salones = _fSal;
+    _enviados.forEach(([col, k, f]) => {
+      if(f === null){ delete fbEnNube[col][k]; fbEnNube.borrados[col][k] = 1; }
+      else fbEnNube[col][k] = f;
+    });
     // Actualizar fc_local_ts para que otros dispositivos sepan cuándo fue esto
     // (sin bajarlo: si hubo cambios mientras la subida esperaba la red, siguen marcados como pendientes)
     if(parseInt(localStorage.getItem('fc_local_ts') || '0') < ts) localStorage.setItem('fc_local_ts', String(ts));
