@@ -1132,10 +1132,14 @@ function _renderAllLigero(){
   }, 400);
 }
 renderAll = function(){
+  const t0 = Date.now();
   refrescarHorariosVigentes(); // aplica cambios de horario cuya fecha ya llegó
   _renderAllLigero();
   refrescarHomeMovil();
   guardarLocal();
+  // Si el teléfono tardó, los toques hechos mientras tanto caerían sobre otra cosa
+  // (otra clase, "Iniciar recorrido"): se descartan. Vale para cualquier guardado.
+  if(Date.now() - t0 > 150 && typeof bloquearToquesFantasma === 'function') bloquearToquesFantasma();
   // Subir a Firebase con un pequeño debounce para no saturar en ediciones rápidas
   clearTimeout(renderAll._timer);
   renderAll._timer = setTimeout(sincronizarFirebase, 800);

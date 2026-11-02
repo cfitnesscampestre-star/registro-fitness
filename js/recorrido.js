@@ -614,11 +614,17 @@ function guardarRecorrido(){
       });
     }
   });
+  // Primero cerrar y avisar (respuesta inmediata); el recálculo va después de pintar
+  if(typeof bloquearToquesFantasma==='function') bloquearToquesFantasma();
   cerrarModal('m-rec-res');
-  renderAll();
-  renderRecorridos();
-  registrarLog('recorrido', `Guardado: ${recActual.fecha} ${recActual.dia} ${recActual.hora} · ${vis.length} clase(s) · ${totalAsis} asistentes`);
   showToast(`Recorrido guardado — ${vis.length} clase(s) · ${totalAsis} asistentes · ${aforoProm}% aforo prom.`,'ok');
+  const logTxt=`Guardado: ${recActual.fecha} ${recActual.dia} ${recActual.hora} · ${vis.length} clase(s) · ${totalAsis} asistentes`;
+  setTimeout(()=>{
+    renderAll();
+    renderRecorridos();
+    registrarLog('recorrido', logTxt);
+    if(typeof bloquearToquesFantasma==='function') bloquearToquesFantasma();
+  }, 30);
 }
 function imprimirRecorrido(){
   const vis=recActual.items.filter(i=>!i.saltado);
