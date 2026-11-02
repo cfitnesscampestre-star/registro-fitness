@@ -1,3 +1,15 @@
+// ═══ TOQUES FANTASMA ═══
+// Si el teléfono tarda al guardar y el usuario vuelve a tocar, esos toques se aplicaban
+// al cerrarse la ventana sobre lo que quedaba debajo (otra clase, "Iniciar recorrido").
+// Durante un instante después de guardar se ignoran.
+let _toquesBloqueadosHasta = 0;
+function bloquearToquesFantasma(ms){
+  _toquesBloqueadosHasta = Date.now() + (ms || 600);
+}
+document.addEventListener('click', e=>{
+  if(Date.now() < _toquesBloqueadosHasta){ e.stopPropagation(); e.preventDefault(); }
+}, true);
+
 // ═══ GUARDAR CLASE ═══
 function guardarClase(){
   _vClearAll(['rc-inst','rc-horario','rc-asis','rc-cap','rc-fecha','rc-suplente','rc-suplente-ext']);
@@ -67,9 +79,15 @@ function guardarClase(){
     motivo_suplencia:motivoSup,
     motivo_falta:motivoFalta,
     updatedAt:Date.now()});
-  cerrarModal('m-clase');renderAll();
-  registrarLog('clase', `${inst.nombre} · ${claseNombre} · ${diaVal} ${horaVal} · ${fechaVal} · ${est==='sub'?'Suplencia':'Ok'} · ${asisVal} asis.`);
+  // Primero cerrar y avisar (respuesta inmediata); el recálculo va después de pintar
+  bloquearToquesFantasma();
+  cerrarModal('m-clase');
   showToast(`Clase registrada para ${inst.nombre}`,'ok');
+  setTimeout(()=>{
+    renderAll();
+    registrarLog('clase', `${inst.nombre} · ${claseNombre} · ${diaVal} ${horaVal} · ${fechaVal} · ${est==='sub'?'Suplencia':'Ok'} · ${asisVal} asis.`);
+    bloquearToquesFantasma();
+  }, 30);
 }
 function guardarFalta(){
   _vClearAll(['rf-inst','rf-dia','rf-clase','rf-fecha']);

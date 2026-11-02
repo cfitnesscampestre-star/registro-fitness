@@ -1104,11 +1104,42 @@ function refrescarHomeMovil(){
     if(mh && mh.classList.contains('on') && rolActual !== 'instructor' && typeof renderMobileHome === 'function') renderMobileHome();
   } catch(e){ console.warn('renderMobileHome', e); }
 }
+// Vistas pesadas: si no están a la vista se redibujan después, en segundo plano.
+// Antes se recalculaban todas al instante y en el celular la app se congelaba
+// varios segundos al guardar una clase (navegarA las vuelve a dibujar al abrirlas).
+function _vistaVisible(id){
+  const v = document.getElementById(id);
+  return !!(v && v.classList.contains('on') && v.getClientRects().length > 0);
+}
+function _renderVistasPesadas(soloVisibles){
+  [['v-dashboard', ()=>renderDashboard()],
+   ['v-instructores', ()=>renderInst()],
+   ['v-ranking', ()=>renderRanking()]].forEach(([id, fn])=>{
+    if(soloVisibles && !_vistaVisible(id)) return;
+    try { fn(); } catch(e){ console.warn('render '+id, e); }
+  });
+}
+function _renderAllLigero(){
+  _renderVistasPesadas(true);
+  if(document.getElementById('v-calendario')?.classList.contains('on')) renderCal();
+  if(document.getElementById('v-hoy')?.classList.contains('on')) renderHoy();
+  if(document.getElementById('v-salones')?.classList.contains('on')) renderSalones();
+  // Lo que no se ve se actualiza cuando el teléfono está libre
+  clearTimeout(_renderAllLigero._t);
+  _renderAllLigero._t = setTimeout(()=>{
+    const correr = ()=>_renderVistasPesadas(false);
+    if(window.requestIdleCallback) requestIdleCallback(correr, {timeout: 3000}); else correr();
+  }, 400);
+}
 renderAll = function(){
+  const t0 = Date.now();
   refrescarHorariosVigentes(); // aplica cambios de horario cuya fecha ya llegó
-  _renderAllBase();
+  _renderAllLigero();
   refrescarHomeMovil();
   guardarLocal();
+  // Si el teléfono tardó, los toques hechos mientras tanto caerían sobre otra cosa
+  // (otra clase, "Iniciar recorrido"): se descartan. Vale para cualquier guardado.
+  if(Date.now() - t0 > 150 && typeof bloquearToquesFantasma === 'function') bloquearToquesFantasma();
   // Subir a Firebase con un pequeño debounce para no saturar en ediciones rápidas
   clearTimeout(renderAll._timer);
   renderAll._timer = setTimeout(sincronizarFirebase, 800);
