@@ -615,7 +615,7 @@ function guardarRecorrido(){
     }
   });
   // Primero cerrar y avisar (respuesta inmediata); el recálculo va después de pintar
-  if(typeof bloquearToquesFantasma==='function') bloquearToquesFantasma();
+  const _t0=performance.now()+1;
   cerrarModal('m-rec-res');
   showToast(`Recorrido guardado — ${vis.length} clase(s) · ${totalAsis} asistentes · ${aforoProm}% aforo prom.`,'ok');
   const logTxt=`Guardado: ${recActual.fecha} ${recActual.dia} ${recActual.hora} · ${vis.length} clase(s) · ${totalAsis} asistentes`;
@@ -623,7 +623,7 @@ function guardarRecorrido(){
     renderAll();
     renderRecorridos();
     registrarLog('recorrido', logTxt);
-    if(typeof bloquearToquesFantasma==='function') bloquearToquesFantasma();
+    if(typeof marcarOcupado==='function') marcarOcupado(_t0);
   }, 30);
 }
 function imprimirRecorrido(){

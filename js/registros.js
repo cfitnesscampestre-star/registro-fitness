@@ -1,13 +1,22 @@
 // ═══ TOQUES FANTASMA ═══
 // Si el teléfono tarda al guardar y el usuario vuelve a tocar, esos toques se aplicaban
 // al cerrarse la ventana sobre lo que quedaba debajo (otra clase, "Iniciar recorrido").
-// Durante un instante después de guardar se ignoran.
-let _toquesBloqueadosHasta = 0;
-function bloquearToquesFantasma(ms){
-  _toquesBloqueadosHasta = Date.now() + (ms || 600);
+// Se descartan SOLO los toques hechos mientras el teléfono estaba ocupado (según la hora
+// del propio toque); un toque nuevo, hecho después, nunca se bloquea.
+let _ocupadoDesde = -1, _ocupadoHasta = -1;
+function marcarOcupado(desde){
+  const ahora = performance.now();
+  if(desde > _ocupadoHasta + 50) _ocupadoDesde = desde;   // tramo nuevo
+  _ocupadoHasta = ahora;
+}
+function _horaToque(e){
+  let t = e.timeStamp || 0;
+  if(t > 1e12) t -= (performance.timeOrigin || 0);          // navegadores viejos: hora de reloj
+  return t;
 }
 document.addEventListener('click', e=>{
-  if(Date.now() < _toquesBloqueadosHasta){ e.stopPropagation(); e.preventDefault(); }
+  const t = _horaToque(e);
+  if(t > 0 && t >= _ocupadoDesde && t < _ocupadoHasta){ e.stopPropagation(); e.preventDefault(); }
 }, true);
 
 // ═══ GUARDAR CLASE ═══
@@ -80,13 +89,13 @@ function guardarClase(){
     motivo_falta:motivoFalta,
     updatedAt:Date.now()});
   // Primero cerrar y avisar (respuesta inmediata); el recálculo va después de pintar
-  bloquearToquesFantasma();
+  const _t0 = performance.now() + 1;   // los toques posteriores al de "Guardar"
   cerrarModal('m-clase');
   showToast(`Clase registrada para ${inst.nombre}`,'ok');
   setTimeout(()=>{
     renderAll();
     registrarLog('clase', `${inst.nombre} · ${claseNombre} · ${diaVal} ${horaVal} · ${fechaVal} · ${est==='sub'?'Suplencia':'Ok'} · ${asisVal} asis.`);
-    bloquearToquesFantasma();
+    marcarOcupado(_t0);
   }, 30);
 }
 function guardarFalta(){

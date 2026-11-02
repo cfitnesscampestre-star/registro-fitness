@@ -980,7 +980,67 @@ function cargarLocal(){
   }
 }
 
-// ── Subir TODOS los datos a Firebase ─────────
+// ── Subir solo lo que cambió ─────────────────
+// Antes cada guardado mandaba a la nube TODOS los registros de la historia (miles, ~1.5 MB)
+// aunque solo cambiara uno: en el celular eso hacía lento el guardado.
+// Ahora se recuerda cómo está cada cosa en la nube (lo que llegó de ella o lo que ya se subió
+// bien) y solo se sube lo que es distinto. Si hay duda, se sube: nunca se deja algo sin subir.
+const _enNube = {};   // 'registros/123', 'instructores', … → firma de lo que hay en la nube
+function _firmaNube(v){
+  // Firma estable: claves ordenadas y sin vacíos (Firebase no guarda null, {} ni [])
+  if(v === null || v === undefined) return '';
+  if(Array.isArray(v)) return '[' + v.map(_firmaNube).join(',') + ']';
+  if(typeof v === 'object'){
+    const ks = Object.keys(v).filter(k => _firmaNube(v[k]) !== '' ).sort();
+    if(!ks.length) return '';
+    return '{' + ks.map(k => JSON.stringify(k) + ':' + _firmaNube(v[k])).join(',') + '}';
+  }
+  return JSON.stringify(v);
+}
+// Calcular la firma cuesta; JSON.stringify es mucho más rápido, así que se memoriza por texto
+const _memoFirma = new Map();
+function _firmaRapida(v){
+  if(v === null || v === undefined) return '';
+  const j = JSON.stringify(v);
+  let f = _memoFirma.get(j);
+  if(f === undefined){
+    if(_memoFirma.size > 40000) _memoFirma.clear();
+    f = _firmaNube(v); _memoFirma.set(j, f);
+  }
+  return f;
+}
+const _NUBE_SUELTOS = ['instructores','salones','solicitudes','hojaFirmasActiva','agendaNotas','eventos'];
+const _NUBE_COLS    = ['registros','recorridos','suplencias'];
+// Lo que hay en la nube: un mapa por colección (rehacerlo es barato) y otro para lo demás
+let _enNubeCol = { registros: new Map(), recorridos: new Map(), suplencias: new Map() };
+function _nubeGet(k){
+  const i = k.indexOf('/'), col = i > 0 ? k.slice(0, i) : '';
+  return _enNubeCol[col] ? _enNubeCol[col].get(k.slice(i + 1)) : _enNube[k];
+}
+function _nubeSet(k, f){
+  const i = k.indexOf('/'), col = i > 0 ? k.slice(0, i) : '';
+  if(_enNubeCol[col]) _enNubeCol[col].set(k.slice(i + 1), f); else _enNube[k] = f;
+}
+// Se llama con cada foto de la nube que llega (firmas.js)
+function fbRecordarNube(data){
+  if(!data) return;
+  try {
+    _NUBE_SUELTOS.forEach(k => { _enNube[k] = _firmaRapida(data[k]); });
+    _NUBE_COLS.forEach(col => {
+      const m = new Map();
+      const obj = data[col];
+      if(obj && typeof obj === 'object') Object.keys(obj).forEach(k => { m.set(k, _firmaRapida(obj[k])); });
+      const bor = data.borrados && data.borrados[col];
+      if(bor && typeof bor === 'object') Object.keys(bor).forEach(k => {
+        _enNube['borrados/' + col + '/' + k] = String(bor[k]);
+        if(!(obj && obj[k])) m.set(k, '');
+      });
+      _enNubeCol[col] = m;
+    });
+  } catch(e){ console.warn('fbRecordarNube', e); }
+}
+
+// ── Subir a Firebase lo que cambió ───────────
 async function sincronizarFirebase(){
   if(!FIREBASE_ACTIVO || !fbDb || fbSyncing || fbReceiving) return;
 
@@ -1045,15 +1105,22 @@ async function sincronizarFirebase(){
     let _eventos = [];
     try { _eventos = JSON.parse(localStorage.getItem('fitness_eventos_v1') || '[]'); } catch(e){}
 
-    const payload = {
+    const todo = {
       instructores,
       salones,
       solicitudes: solicitudesInst.reduce((a,s)=>{ a[String(s.id)]=s; return a; },{}),
       hojaFirmasActiva: _hojaFirmas,
       agendaNotas: _agendaNotas,
-      eventos:     _eventos,
-      ts
+      eventos:     _eventos
     };
+    const payload = { ts };
+    const _firmasSubidas = {};
+    const _poner = (k, v) => {
+      const f = _firmaRapida(v);
+      if(_nubeGet(k) === f) return;         // la nube ya lo tiene igual
+      payload[k] = v; _firmasSubidas[k] = f;
+    };
+    Object.entries(todo).forEach(([k, v]) => _poner(k, v));
     // Registros, recorridos y suplencias: cada uno por su ruta (no se reemplaza la colección,
     // así no se borra lo que otro dispositivo subió y este aún no tiene). Lo borrado a propósito
     // se quita con su marca.
@@ -1063,16 +1130,18 @@ async function sincronizarFirebase(){
         if(!x || x.id === undefined || x.id === null || x.id === '') return;
         const k = String(x.id);
         if(/[.#$\[\]\/]/.test(k) || _borr[col][k]) return;
-        payload[col + '/' + k] = x;
+        _poner(col + '/' + k, x);
       });
       Object.entries(_borr[col]).forEach(([k, t]) => {
-        payload[col + '/' + k] = null;
-        payload['borrados/' + col + '/' + k] = t;
+        if(_nubeGet(col + '/' + k) === '' && _enNube['borrados/' + col + '/' + k] === String(t)) return;
+        payload[col + '/' + k] = null;               _firmasSubidas[col + '/' + k] = '';
+        payload['borrados/' + col + '/' + k] = t;    _firmasSubidas['borrados/' + col + '/' + k] = String(t);
       });
     });
     // update() y no set(): set() sobre 'fitness' borraba en cada guardado los nodos que no van en
     // el payload (fitness/notif_tokens de las notificaciones, fitness/firmasSuplencias, …).
     await fbDb.ref('fitness').update(payload);
+    Object.entries(_firmasSubidas).forEach(([k, f]) => _nubeSet(k, f));   // ya está en la nube
     // Actualizar fc_local_ts para que otros dispositivos sepan cuándo fue esto
     // (sin bajarlo: si hubo cambios mientras la subida esperaba la red, siguen marcados como pendientes)
     if(parseInt(localStorage.getItem('fc_local_ts') || '0') < ts) localStorage.setItem('fc_local_ts', String(ts));
@@ -1132,14 +1201,14 @@ function _renderAllLigero(){
   }, 400);
 }
 renderAll = function(){
-  const t0 = Date.now();
+  const t0 = performance.now();
   refrescarHorariosVigentes(); // aplica cambios de horario cuya fecha ya llegó
   _renderAllLigero();
   refrescarHomeMovil();
   guardarLocal();
   // Si el teléfono tardó, los toques hechos mientras tanto caerían sobre otra cosa
   // (otra clase, "Iniciar recorrido"): se descartan. Vale para cualquier guardado.
-  if(Date.now() - t0 > 150 && typeof bloquearToquesFantasma === 'function') bloquearToquesFantasma();
+  if(performance.now() - t0 > 150 && typeof marcarOcupado === 'function') marcarOcupado(t0);
   // Subir a Firebase con un pequeño debounce para no saturar en ediciones rápidas
   clearTimeout(renderAll._timer);
   renderAll._timer = setTimeout(sincronizarFirebase, 800);

@@ -309,6 +309,61 @@ escenario('sincronización: dos dispositivos guardando a la vez, sin señal y bo
   check('Ids sin repetir', ids.length, new Set(ids).size);
 });
 
+escenario('guardado rápido: solo se sube lo que cambió y no se bloquea la pantalla', async env => {
+  const muchos = [];
+  for (let i = 0; i < 300; i++) muchos.push(reg({ id: 5000 + i, inst_id: 1, dia: 'Lunes', hora: '08:00', clase: 'Yoga', fecha: '2026-10-19', asistentes: i % 10 }));
+  env.db.sembrar(nube({ instructores: [inst(1, 'Ana Uno', [['Lunes', '08:00', 'Yoga'], ['Lunes', '09:00', 'Pilates']])], registros: muchos }));
+  const cel = await env.abrir('celular', { hora: A_LAS('18:30') });
+  let subidos = [];
+  const orig = env.db.aplicar.bind(env.db);
+  env.db.aplicar = o => { if (o.op === 'update') subidos.push(...Object.keys(o.v || {})); return orig(o); };
+
+  // Nueva clase: solo viaja ese registro (y la marca de hora)
+  await cel.ev(() => {
+    registros.push({ id: 777, inst_id: 1, dia: 'Lunes', hora: '09:00', clase: 'Pilates', fecha: '2026-10-26', estado: 'ok', asistentes: 6, cap: 20, dur: 60, tipo: 'clase', updatedAt: Date.now() });
+    renderAll();
+  });
+  await cel.calma(2000);
+  check('Nueva clase: solo se sube ese registro', subidos.filter(k => k.startsWith('registros/')), ['registros/777']);
+  check('Nueva clase: llegó a la nube', (env.db.leer('fitness/registros/777') || {}).asistentes, 6);
+
+  // Editar uno viejo: se sube solo ese y con el dato nuevo
+  subidos = [];
+  await cel.ev(() => { const r = registros.find(x => x.id === 5003); r.asistentes = 15; r.updatedAt = Date.now(); renderAll(); });
+  await cel.calma(2000);
+  check('Edición: solo se sube el registro editado', subidos.filter(k => k.startsWith('registros/')), ['registros/5003']);
+  check('Edición: la nube tiene el dato nuevo', (env.db.leer('fitness/registros/5003') || {}).asistentes, 15);
+  check('Los demás registros siguen en la nube', Object.keys(env.db.leer('fitness/registros') || {}).length, 301);
+
+  // Con el aviso en pantalla se puede seguir trabajando: un toque nuevo sí abre la clase
+  const abre = await cel.ev(async () => {
+    showToast('Clase registrada', 'ok');
+    marcarOcupado(performance.now() - 500);         // el teléfono estuvo ocupado hasta ahora
+    await new Promise(r => setTimeout(r, 50));
+    document.getElementById('m-clase').classList.remove('on');
+    const item = document.querySelector('.mob-clase-item') || document.querySelector('[onclick^="abrirRegistroDesdeCalendario"]');
+    if (!item) return 'sin tarjeta';
+    item.click();
+    await new Promise(r => setTimeout(r, 150));
+    return document.getElementById('m-clase').classList.contains('on');
+  });
+  check('Toque nuevo con el aviso visible: abre la clase', abre, true);
+  // Un toque hecho mientras estaba ocupado se descarta
+  const fantasma = await cel.ev(() => {
+    document.getElementById('m-clase').classList.remove('on');
+    const t = performance.now();
+    marcarOcupado(t - 300);
+    const ev = new MouseEvent('click', { bubbles: true, cancelable: true });
+    Object.defineProperty(ev, 'timeStamp', { value: t - 100 });
+    let llego = false; const f = () => { llego = true; };
+    document.body.addEventListener('click', f);
+    document.body.dispatchEvent(ev);
+    document.body.removeEventListener('click', f);
+    return llego;
+  });
+  check('Toque hecho mientras estaba ocupado: se descarta', fantasma, false);
+});
+
 // 6 ─ Portal de la profesora ────────────────────────────────────────
 escenario('portal: la clase con suplencia programada se guarda como suplencia', async env => {
   env.db.sembrar(nube({
