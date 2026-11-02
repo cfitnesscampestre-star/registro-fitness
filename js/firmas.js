@@ -869,6 +869,8 @@ async function inicializarFirebase(){
 
       // Texto seguro para todo lo que llega (ver limpiarDatosEntrantes en core.js)
       limpiarDatosEntrantes(data);
+      // Recordar qué hay en la nube para subir después solo lo que cambie (app.js)
+      if(typeof fbRecordarNube === 'function') fbRecordarNube(data);
       // Contraseñas de coordinación/consulta compartidas entre equipos (auth.js)
       try { aplicarAccesoNube(data.cfg && data.cfg.acceso); } catch(e){ console.warn('Acceso:', e); }
 
@@ -922,7 +924,7 @@ async function inicializarFirebase(){
           guardarLocal();                                  // fbReceiving=true: no cambia fc_local_ts
           try {
             if(rolActual !== 'instructor'){
-              if(typeof _renderAllBase === 'function') _renderAllBase();
+              if(typeof _renderAllLigero === 'function') _renderAllLigero(); else if(typeof _renderAllBase === 'function') _renderAllBase();
               if(typeof refrescarHomeMovil === 'function') refrescarHomeMovil();
             }
             else if(typeof instRenderHoy === 'function') instRenderHoy();
