@@ -1917,18 +1917,18 @@ function agEvtRenderLista() {
   const sub  = document.getElementById('ag-evt-subtitulo');
   if(!cont) return;
 
-  const ev = evtCargarDatos();
+  const ev = (typeof evtConGerencia==='function') ? evtConGerencia() : evtCargarDatos();
   const hoyStr = fechaLocalStr(new Date());
 
   // Si hay día seleccionado, mostrar eventos de ese día
   let lista, subtitulo;
   if(_agCalDiaSelec) {
-    lista = ev.filter(e => e.fecha === _agCalDiaSelec);
+    lista = ev.filter(e => evtEnDia(e, _agCalDiaSelec));
     const [y,m,d] = _agCalDiaSelec.split('-');
     const fmtFecha = new Date(+y,+m-1,+d).toLocaleDateString('es-MX',{weekday:'long',day:'numeric',month:'long'});
     subtitulo = `Eventos del ${fmtFecha}`;
   } else {
-    lista = ev.filter(e => e.fecha >= hoyStr && e.estado !== 'cancelado')
+    lista = ev.filter(e => evtFinDe(e) >= hoyStr && e.estado !== 'cancelado')
               .sort((a,b) => a.fecha.localeCompare(b.fecha))
               .slice(0, 10);
     subtitulo = ev.length > 0 ? `Próximos eventos (${lista.length})` : 'Sin eventos registrados';
@@ -1957,7 +1957,7 @@ function agEvtRenderLista() {
                     diasDiff === 1 ? 'Mañana' : `en ${diasDiff}d`;
     const col = colEst[e.estado] || 'var(--v2)';
     const ico = icoEst[e.estado] || '📅';
-    const partsInfo = [e.deporte, e.lugar, e.horaIni ? e.horaIni+' h' : null].filter(Boolean);
+    const partsInfo = [e.ger ? 'Gerencia' : null, e.deporte, e.lugar, e.horaIni ? e.horaIni+' h' : null].filter(Boolean);
     return `<div onclick="agAbrirEditarEvento('${e.id}')"
       style="display:flex;align-items:stretch;gap:0;background:var(--panel2);border:1px solid var(--border);border-radius:12px;overflow:hidden;cursor:pointer;transition:all .15s;active:opacity:.7;">
       <!-- Borde color estado -->
@@ -1969,7 +1969,7 @@ function agEvtRenderLista() {
       </div>
       <!-- Contenido -->
       <div style="flex:1;min-width:0;padding:8px 10px;">
-        <div style="font-size:.8rem;font-weight:700;color:var(--txt);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:2px;">${e.nombre || '—'}</div>
+        <div style="font-size:.8rem;font-weight:700;color:var(--txt);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:2px;">${e.ger?'🏛 ':''}${e.nombre || '—'}</div>
         <div style="font-size:.63rem;color:var(--txt2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${partsInfo.join(' · ')}</div>
         ${e.participantes ? `<div style="font-size:.6rem;color:var(--txt3);margin-top:2px;">👥 ${e.participantes} participantes</div>` : ''}
       </div>
@@ -2000,10 +2000,10 @@ function agActualizarPreviewDia() {
   const items = [];
 
   // Eventos del día
-  evtCargarDatos().filter(e => e.fecha === _agCalDiaSelec).forEach(e => {
+  ((typeof evtConGerencia==='function') ? evtConGerencia() : evtCargarDatos()).filter(e => evtEnDia(e, _agCalDiaSelec)).forEach(e => {
     items.push({
       dot: colEst[e.estado] || 'var(--v2)',
-      texto: `🏆 ${e.nombre || e.deporte}${e.horaIni ? ' · ' + e.horaIni : ''}`,
+      texto: `${e.ger ? '🏛' : '🏆'} ${e.nombre || e.deporte}${e.horaIni ? ' · ' + e.horaIni : ''}`,
       tipo: 'evento',
       accion: `agAbrirEditarEvento('${e.id}')`
     });
@@ -2197,10 +2197,15 @@ function renderAgendaCal(){
   // ── Días con eventos ────────────────────────────────────────────
   const diasConEvento = {};
   try {
-    evtCargarDatos().forEach(e=>{
+    ((typeof evtConGerencia==='function') ? evtConGerencia() : evtCargarDatos()).forEach(e=>{
       if(!e.fecha || e.estado==='cancelado') return;
-      const [ey,em,ed] = e.fecha.split('-').map(Number);
-      if(ey===_agCalYear && em-1===_agCalMonth) diasConEvento[ed] = true;
+      // cada día del rango (los eventos de Gerencia pueden durar varios días)
+      const fin = evtFinDe(e); let f = e.fecha, guard = 0;
+      while(f <= fin && guard++ < 62){
+        const [ey,em,ed] = f.split('-').map(Number);
+        if(ey===_agCalYear && em-1===_agCalMonth) diasConEvento[ed] = true;
+        const nx = new Date(ey, em-1, ed+1); f = fechaLocalStr(nx);
+      }
     });
   } catch(x){}
 

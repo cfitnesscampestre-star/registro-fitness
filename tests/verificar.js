@@ -393,6 +393,46 @@ escenario('ids: los registros nuevos nunca repiten id', async env => {
   check('3000 ids seguidos: todos distintos y enteros seguros', r, [3000, true]);
 });
 
+// ─ Eventos de Control Gerencia en el calendario de eventos ─────────
+escenario('eventos de Gerencia: aparecen en el calendario y la agenda, solo lectura y sin guardarse en Fitness', async env => {
+  env.db.sembrar(nube({ instructores: [inst(1, 'Cristi Romo', [['Lunes', '18:00', 'RPM']])] }));
+  env.db.sembrar({
+    'fitness/eventos': [{ id: 'evt_1', nombre: 'Rodada propia', deporte: 'Ciclismo', fecha: '2026-10-30', estado: 'planificado' }],
+    'gerencia_deportes/cfg/areas': { fit: { id: 'fit', nombre: 'Fitness', vinculo: true }, gim: { id: 'gim', nombre: 'Gimnasia' } },
+    'gerencia_deportes/data/fit/eventos': {
+      e1: { id: 'e1', nombre: 'Clinica <b>Zumba</b>', fecha: '2026-10-28', fechaFin: '2026-10-29', hora: '9:00', lugar: 'Salón 2', tipo: 'Curso', estado: 'planificado' },
+    },
+    'gerencia_deportes/data/gim/eventos': { x: { id: 'x', nombre: 'Otra área', fecha: '2026-10-28' } },
+  });
+  const d = await env.abrir('coordinación', { hora: A_LAS('10:00') });
+  await d.esperar(() => typeof evtGerencia === 'function' && evtGerencia().length > 0, null, 15000, 'eventos de Gerencia');
+  const g = await d.ev(() => evtGerencia().map(e => [e.id, e.nombre, e.fecha, e.fechaFin, e.horaIni]));
+  check('Solo llegan los del área vinculada, con el nombre limpio', g, [['ger_e1', 'Clinica bZumba/b', '2026-10-28', '2026-10-29', '09:00']]);
+
+  const cal = await d.ev(() => {
+    _evtCalFecha = new Date(2026, 9, 1); evtVista('calendario');
+    const chips = [...document.querySelectorAll('#evtCalGrid div[title]')].map(c => c.textContent);
+    const prox = document.getElementById('evtProxLista').innerText;
+    return { chips: chips.filter(t => t.includes('Zumba')).length, propio: chips.some(t => t.includes('Rodada propia')), prox: /Zumba/.test(prox) && /Gerencia/.test(prox) };
+  });
+  check('Calendario: el evento de 2 días sale en los 2 días, junto a los propios', [cal.chips, cal.propio], [2, true]);
+  check('Próximos: aparece marcado como Gerencia', cal.prox, true);
+
+  const ro = await d.ev(() => { abrirModalEvento('ger_e1');
+    return { ficha: document.getElementById('ov-evt-ger').classList.contains('on'), edita: document.getElementById('ov-evento').classList.contains('on') }; });
+  check('Al abrirlo: ficha de solo lectura, no el formulario de edición', ro, { ficha: true, edita: false });
+
+  const ag = await d.ev(() => { _agCalYear = 2026; _agCalMonth = 9; _agCalDiaSelec = '2026-10-29'; agEvtRenderLista();
+    return /Zumba/.test(document.getElementById('ag-evt-lista').innerText); });
+  check('Agenda del celular: aparece en su segundo día', ag, true);
+
+  const kpi = await d.ev(() => [evtCargarDatos().length, document.getElementById('evtK1').textContent]);
+  check('No se mezclan con los eventos de Fitness (KPIs y datos guardados)', kpi, [1, '1']);
+  await d.calma();
+  const nube2 = env.db.leer('fitness/eventos') || [];
+  check('Nada de Gerencia se guarda en la nube de Fitness', Object.values(nube2).map(e => e.id), ['evt_1']);
+});
+
 // ═══════════════════════════════════════════════════════════════════
 (async () => {
   const lista = ESCENARIOS.filter(e => !filtro || e.nombre.toLowerCase().includes(filtro));

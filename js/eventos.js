@@ -123,6 +123,14 @@ function evtGuardarDatos(arr){
   // Sincronizar con Firebase para que otros dispositivos lo vean
   if(typeof sincronizarFirebase === 'function') setTimeout(sincronizarFirebase, 600);
 }
+// Eventos propios + los de Control Gerencia (solo para mostrarse en calendarios; ver eventos-gerencia.js)
+function evtConGerencia(){
+  const ger = (typeof evtGerencia==='function') ? evtGerencia() : [];
+  return evtCargarDatos().concat(ger);
+}
+// Un evento de varios días (fechaFin) aparece en cada día de su rango
+function evtEnDia(e, d){ return e.fecha===d || (!!e.fechaFin && e.fecha<=d && d<=e.fechaFin); }
+function evtFinDe(e){ return (e.fechaFin && e.fechaFin>e.fecha) ? e.fechaFin : e.fecha; }
 function evtId(){
   return 'evt_'+Date.now()+'_'+Math.random().toString(36).slice(2,7);
 }
@@ -181,7 +189,7 @@ function evtActualizarKPIs(){
 
 // ── CALENDARIO ───────────────────────────────────────────────
 function evtRenderCalendario(){
-  const ev = evtCargarDatos();
+  const ev = evtConGerencia();
   const anio = _evtCalFecha.getFullYear();
   const mes  = _evtCalFecha.getMonth();
   const MESES = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
@@ -205,7 +213,7 @@ function evtRenderCalendario(){
 
   for(let d=1;d<=diasMes;d++){
     const dStr = `${anio}-${String(mes+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
-    const evsDia = ev.filter(e=>e.fecha===dStr);
+    const evsDia = ev.filter(e=>evtEnDia(e,dStr));
     const esHoy = dStr===hoyStr;
 
     const cell = document.createElement('div');
@@ -222,9 +230,9 @@ function evtRenderCalendario(){
       chip.style.cssText = `font-size:.58rem;background:${colores[e.estado]||'var(--v2)'};color:#000;
         border-radius:3px;padding:1px 4px;margin-bottom:1px;cursor:pointer;
         white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-weight:600;
-        opacity:.92;`;
-      chip.textContent = (e.deporte||'') + (e.nombre ? ': '+e.nombre : '');
-      chip.title = e.nombre || e.deporte;
+        opacity:.92;${e.ger?'outline:1px dashed rgba(0,0,0,.45);outline-offset:-2px;':''}`;
+      chip.textContent = e.ger ? '🏛 '+(e.nombre||'') : (e.deporte||'') + (e.nombre ? ': '+e.nombre : '');
+      chip.title = e.ger ? (e.nombre+' · Control Gerencia') : (e.nombre || e.deporte);
       chip.onclick = ()=>abrirModalEvento(e.id);
       cell.appendChild(chip);
     });
@@ -251,14 +259,14 @@ function evtCalHoy(){
 
 // ── PRÓXIMOS EVENTOS ─────────────────────────────────────────
 function evtRenderProximos(){
-  const ev = evtCargarDatos();
+  const ev = evtConGerencia();
   const hoyStr = fechaLocalStr(new Date());
-  const prox = ev.filter(e=>e.fecha >= hoyStr && e.estado!=='cancelado')
+  const prox = ev.filter(e=>evtFinDe(e) >= hoyStr && e.estado!=='cancelado')
                  .sort((a,b)=>a.fecha.localeCompare(b.fecha)).slice(0,8);
   const cont = document.getElementById('evtProxLista');
   if(!prox.length){ cont.innerHTML='<div class="empty">No hay eventos próximos registrados.</div>'; return; }
   cont.innerHTML = prox.map(e=>{
-    const dias = Math.ceil((new Date(e.fecha+' 00:00') - new Date()) / 86400000);
+    const dias = Math.max(0, Math.ceil((new Date(e.fecha+' 00:00') - new Date()) / 86400000));
     const diasLbl = dias===0 ? '<span style="color:var(--neon);font-weight:700">¡HOY!</span>' :
                     dias===1 ? '<span style="color:var(--gold2)">Mañana</span>' :
                     `<span style="color:var(--txt2)">En ${dias} días</span>`;
@@ -269,8 +277,8 @@ function evtRenderProximos(){
         <div style="font-size:.55rem;color:var(--txt2);text-transform:uppercase">${['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'][new Date(e.fecha+'T00:00').getMonth()]}</div>
       </div>
       <div style="flex:1;min-width:0">
-        <div style="font-size:.82rem;font-weight:600;color:var(--txt)">${e.nombre||'Sin nombre'}</div>
-        <div style="font-size:.7rem;color:var(--txt2)">${e.deporte||''}${e.lugar ? ' · '+e.lugar : ''}${e.horaIni ? ' · '+e.horaIni : ''}</div>
+        <div style="font-size:.82rem;font-weight:600;color:var(--txt)">${e.ger?'🏛 ':''}${e.nombre||'Sin nombre'}</div>
+        <div style="font-size:.7rem;color:var(--txt2)">${e.ger?'Gerencia · ':''}${e.deporte||''}${e.lugar ? ' · '+e.lugar : ''}${e.horaIni ? ' · '+e.horaIni : ''}</div>
       </div>
       <div style="text-align:right;flex-shrink:0">
         ${diasLbl}
@@ -455,6 +463,7 @@ function evtGenerarRecomendaciones(){
 
 // ── MODAL NUEVO/EDITAR ────────────────────────────────────────
 function abrirModalEvento(id){
+  if(id && String(id).startsWith('ger_')){ if(typeof evtVerGerencia==='function') evtVerGerencia(id); return; }   // de Control Gerencia: solo lectura
   _evtEditing = id;
   _evtResultados = [];
 
