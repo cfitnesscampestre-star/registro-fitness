@@ -394,32 +394,35 @@ escenario('ids: los registros nuevos nunca repiten id', async env => {
 });
 
 // ─ Eventos de Control Gerencia en el calendario de eventos ─────────
-escenario('eventos de Gerencia: aparecen en el calendario y la agenda, solo lectura y sin guardarse en Fitness', async env => {
+escenario('eventos de Gerencia (Fitness y Gimnasia): aparecen en el calendario y la agenda, solo lectura y sin guardarse en Fitness', async env => {
   env.db.sembrar(nube({ instructores: [inst(1, 'Cristi Romo', [['Lunes', '18:00', 'RPM']])] }));
   env.db.sembrar({
     'fitness/eventos': [{ id: 'evt_1', nombre: 'Rodada propia', deporte: 'Ciclismo', fecha: '2026-10-30', estado: 'planificado' }],
-    'gerencia_deportes/cfg/areas': { fit: { id: 'fit', nombre: 'Fitness', vinculo: true }, gim: { id: 'gim', nombre: 'Gimnasia' } },
+    'gerencia_deportes/cfg/areas': { fit: { id: 'fit', nombre: 'Fitness', vinculo: true }, gimnasia: { id: 'gimnasia', nombre: 'Gimnasia' }, tenis: { id: 'tenis', nombre: 'Tenis' } },
     'gerencia_deportes/data/fit/eventos': {
       e1: { id: 'e1', nombre: 'Clinica <b>Zumba</b>', fecha: '2026-10-28', fechaFin: '2026-10-29', hora: '9:00', lugar: 'Salón 2', tipo: 'Curso', estado: 'planificado' },
     },
-    'gerencia_deportes/data/gim/eventos': { x: { id: 'x', nombre: 'Otra área', fecha: '2026-10-28' } },
+    'gerencia_deportes/data/gimnasia/eventos': { g1: { id: 'g1', nombre: 'Exhibicion ritmica', fecha: '2026-10-31', hora: '11:00', tipo: 'Exhibición', estado: 'planificado' } },
+    'gerencia_deportes/data/tenis/eventos': { x: { id: 'x', nombre: 'Otra área', fecha: '2026-10-28' } },
   });
   const d = await env.abrir('coordinación', { hora: A_LAS('10:00') });
-  await d.esperar(() => typeof evtGerencia === 'function' && evtGerencia().length > 0, null, 15000, 'eventos de Gerencia');
-  const g = await d.ev(() => evtGerencia().map(e => [e.id, e.nombre, e.fecha, e.fechaFin, e.horaIni]));
-  check('Solo llegan los del área vinculada, con el nombre limpio', g, [['ger_e1', 'Clinica bZumba/b', '2026-10-28', '2026-10-29', '09:00']]);
+  await d.esperar(() => typeof evtGerencia === 'function' && evtGerencia().length > 1, null, 15000, 'eventos de Gerencia');
+  const g = await d.ev(() => evtGerencia().map(e => [e.id, e.nombre, e.fecha, e.fechaFin, e.horaIni, e.gerArea]));
+  check('Llegan los de Fitness (vinculada) y Gimnasia, no los de otras áreas; nombre limpio', g, [
+    ['ger_fit__e1', 'Clinica bZumba/b', '2026-10-28', '2026-10-29', '09:00', 'Fitness'],
+    ['ger_gimnasia__g1', 'Exhibicion ritmica', '2026-10-31', '', '11:00', 'Gimnasia']]);
 
   const cal = await d.ev(() => {
     _evtCalFecha = new Date(2026, 9, 1); evtVista('calendario');
     const chips = [...document.querySelectorAll('#evtCalGrid div[title]')].map(c => c.textContent);
     const prox = document.getElementById('evtProxLista').innerText;
-    return { chips: chips.filter(t => t.includes('Zumba')).length, propio: chips.some(t => t.includes('Rodada propia')), prox: /Zumba/.test(prox) && /Gerencia/.test(prox) };
+    return { chips: chips.filter(t => t.includes('Zumba')).length, gim: chips.filter(t => t.includes('ritmica')).length, propio: chips.some(t => t.includes('Rodada propia')), prox: /Zumba/.test(prox) && /Gerencia Gimnasia/.test(prox) };
   });
-  check('Calendario: el evento de 2 días sale en los 2 días, junto a los propios', [cal.chips, cal.propio], [2, true]);
+  check('Calendario: el evento de 2 días sale en los 2 días, el de Gimnasia y los propios', [cal.chips, cal.gim, cal.propio], [2, 1, true]);
   check('Próximos: aparece marcado como Gerencia', cal.prox, true);
 
-  const ro = await d.ev(() => { abrirModalEvento('ger_e1');
-    return { ficha: document.getElementById('ov-evt-ger').classList.contains('on'), edita: document.getElementById('ov-evento').classList.contains('on') }; });
+  const ro = await d.ev(() => { abrirModalEvento('ger_gimnasia__g1');
+    return { ficha: document.getElementById('ov-evt-ger').classList.contains('on') && /área Gimnasia/.test(document.getElementById('ov-evt-ger').innerText), edita: document.getElementById('ov-evento').classList.contains('on') }; });
   check('Al abrirlo: ficha de solo lectura, no el formulario de edición', ro, { ficha: true, edita: false });
 
   const ag = await d.ev(() => { _agCalYear = 2026; _agCalMonth = 9; _agCalDiaSelec = '2026-10-29'; agEvtRenderLista();
