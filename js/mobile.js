@@ -1957,7 +1957,7 @@ function agEvtRenderLista() {
                     diasDiff === 1 ? 'Mañana' : `en ${diasDiff}d`;
     const col = colEst[e.estado] || 'var(--v2)';
     const ico = icoEst[e.estado] || '📅';
-    const partsInfo = [e.ger ? 'Gerencia' : null, e.deporte, e.lugar, e.horaIni ? e.horaIni+' h' : null].filter(Boolean);
+    const partsInfo = [e.ger ? ('Gerencia' + (e.gerArea ? ' ' + e.gerArea : '')) : null, e.deporte, e.lugar, e.horaIni ? e.horaIni+' h' : null].filter(Boolean);
     return `<div onclick="agAbrirEditarEvento('${e.id}')"
       style="display:flex;align-items:stretch;gap:0;background:var(--panel2);border:1px solid var(--border);border-radius:12px;overflow:hidden;cursor:pointer;transition:all .15s;active:opacity:.7;">
       <!-- Borde color estado -->

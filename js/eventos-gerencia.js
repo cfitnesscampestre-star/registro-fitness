@@ -1,8 +1,9 @@
 // ═══════════════════════════════════════════════════════════════════
 // EVENTOS ← CONTROL GERENCIA  (Gerencia → Fitness, SOLO LECTURA de Gerencia)
 //
-// Los eventos que la dirección captura en Control Gerencia (área vinculada con
-// Fitness Control, la que tiene "vinculo") aparecen también en el calendario de
+// Los eventos que se capturan en Control Gerencia en las áreas que Fitness
+// Control concentra —Fitness (la vinculada, con "vinculo") y Gimnasia— aparecen
+// también en el calendario de
 // eventos de Fitness: calendario de escritorio, "Próximos eventos" y la Agenda
 // del celular. Se ven con la etiqueta "Gerencia" y se abren en solo lectura.
 //
@@ -25,6 +26,9 @@
   };
   const DB_ROOT = 'gerencia_deportes';          // igual que DB_ROOT en Control Gerencia
   const AREA_DEF = 'fitness';                   // si Gerencia no tiene ninguna área marcada como vinculada
+  // Áreas de Gerencia cuyos eventos se traen además de la vinculada (Fitness concentra todo; Gerencia lo divide).
+  // Se reconocen por id o por nombre, sin acentos ni mayúsculas.
+  const AREAS_EXTRA = ['gimnasia'];
   const FB_VER = '9.22.0';
   const SRC_APP  = `https://www.gstatic.com/firebasejs/${FB_VER}/firebase-app-compat.js`;
   const SRC_DB   = `https://www.gstatic.com/firebasejs/${FB_VER}/firebase-database-compat.js`;
@@ -32,7 +36,8 @@
   const CACHE = 'fc_evt_gerencia_v1';
   const ESTADOS = ['planificado', 'realizado', 'cancelado', 'pospuesto'];
 
-  const E = { iniciado: false, estado: 'off', msg: '', aid: '', lista: [], ref: null, t: null };
+  const E = { iniciado: false, estado: 'off', msg: '', aids: [], porArea: {}, lista: [], refs: [], t: null };
+  const norm = s => String(s == null ? '' : s).normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim();
 
   const sleep = ms => new Promise(r => setTimeout(r, ms));
   const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
@@ -68,14 +73,15 @@
   }
 
   // Evento de Gerencia → forma de evento de Fitness (solo para mostrarse)
-  function adaptar(raw) {
+  function adaptar(raw, aid, areaNom) {
     const out = [];
     Object.entries(raw || {}).forEach(([k, e]) => {
       if (!e || typeof e !== 'object' || !fechaOk(e.fecha) || !e.nombre) return;
       const fin = fechaOk(e.fechaFin) && e.fechaFin > e.fecha ? e.fechaFin : '';
       out.push({
-        id: 'ger_' + String(e.id || k).replace(/[^\w-]/g, '_'),
+        id: 'ger_' + String(aid).replace(/[^\w-]/g, '_') + '__' + String(e.id || k).replace(/[^\w-]/g, '_'),
         ger: true,
+        gerArea: limpio(areaNom || aid),
         nombre: limpio(e.nombre),
         fecha: e.fecha,
         fechaFin: fin,
@@ -102,29 +108,43 @@
   }
 
   function desdeCache() {
-    try { const c = JSON.parse(localStorage.getItem(CACHE)); if (c && Array.isArray(c.lista)) { E.lista = c.lista; E.aid = c.aid || ''; } } catch (e) {}
+    try { const c = JSON.parse(localStorage.getItem(CACHE)); if (c && Array.isArray(c.lista) && c.v === 2) { E.lista = c.lista; E.aids = c.aids || []; } } catch (e) {}
   }
   function aCache() {
-    try { localStorage.setItem(CACHE, JSON.stringify({ ts: Date.now(), aid: E.aid, lista: E.lista })); } catch (e) {}
+    try { localStorage.setItem(CACHE, JSON.stringify({ v: 2, ts: Date.now(), aids: E.aids, lista: E.lista })); } catch (e) {}
   }
 
   async function iniciar() {
     E.iniciado = true; E.estado = 'conectando';
     try {
       const db = await getDb();
-      // El área de Gerencia vinculada con Fitness Control (la que tiene "vinculo")
+      // Áreas de Gerencia que Fitness concentra: la vinculada (Fitness) + Gimnasia
       const sa = await db.ref(`${DB_ROOT}/cfg/areas`).once('value');
       const areas = sa.val() || {};
-      const vinc = Object.values(areas).find(a => a && a.vinculo);
-      E.aid = (vinc && vinc.id) || Object.keys(areas).find(k => areas[k] && areas[k].vinculo) || AREA_DEF;
-      E.ref = db.ref(`${DB_ROOT}/data/${E.aid}/eventos`);
-      E.ref.on('value', snap => {
-        E.lista = adaptar(snap.val()); E.estado = 'ok'; E.msg = '';
-        aCache(); refrescar();
-      }, err => {
-        E.estado = 'error'; E.msg = (err && err.message) || String(err);
-        console.warn('[Eventos Gerencia] No se pudo leer:', E.msg);
-        E.iniciado = false;                      // se reintenta en el siguiente ciclo
+      const lista = Object.keys(areas).map(k => Object.assign({ id: k }, areas[k] || {}));
+      const vinc = lista.find(a => a.vinculo);
+      const aids = [(vinc && vinc.id) || AREA_DEF];
+      AREAS_EXTRA.forEach(x => {
+        const a = lista.find(a => norm(a.id) === x) || lista.find(a => norm(a.nombre).includes(x));
+        const id = a ? a.id : (lista.length ? null : x);
+        if (id && !aids.includes(id)) aids.push(id);
+      });
+      const nombre = id => { const a = lista.find(z => z.id === id); return (a && a.nombre) || id; };
+      E.refs.forEach(r => { try { r.off(); } catch (e) {} });
+      E.aids = aids; E.porArea = {}; E.refs = [];
+      aids.forEach(aid => {
+        const ref = db.ref(`${DB_ROOT}/data/${aid}/eventos`);
+        E.refs.push(ref);
+        ref.on('value', snap => {
+          E.porArea[aid] = adaptar(snap.val(), aid, nombre(aid));
+          E.lista = [].concat(...aids.map(a => E.porArea[a] || [])).sort((a, b) => a.fecha.localeCompare(b.fecha));
+          E.estado = 'ok'; E.msg = '';
+          aCache(); refrescar();
+        }, err => {
+          E.estado = 'error'; E.msg = (err && err.message) || String(err);
+          console.warn('[Eventos Gerencia] No se pudo leer ' + aid + ':', E.msg);
+          E.iniciado = false;                    // se reintenta en el siguiente ciclo
+        });
       });
     } catch (e) {
       E.estado = 'error'; E.msg = (e && e.message) || String(e);
@@ -135,7 +155,7 @@
 
   // ── API para eventos.js y mobile.js ──────────────────────────────
   window.evtGerencia = () => E.lista.slice();
-  window.evtGerenciaEstado = () => ({ estado: E.estado, msg: E.msg, area: E.aid, n: E.lista.length });
+  window.evtGerenciaEstado = () => ({ estado: E.estado, msg: E.msg, areas: E.aids.slice(), n: E.lista.length });
 
   // Ficha de solo lectura
   window.evtVerGerencia = function (id) {
@@ -147,7 +167,7 @@
     ov.innerHTML = `<div class="modal" style="max-width:460px">
       <button class="mcls" onclick="document.getElementById('ov-evt-ger').classList.remove('on')">✕</button>
       <div class="mttl">🏛 ${esc(e.nombre)}</div>
-      <div style="font-size:.72rem;color:var(--txt2);margin:-.2rem 0 .8rem">Evento registrado en Control Gerencia · solo lectura</div>
+      <div style="font-size:.72rem;color:var(--txt2);margin:-.2rem 0 .8rem">Evento registrado en Control Gerencia${e.gerArea ? ' · área ' + esc(e.gerArea) : ''} · solo lectura</div>
       ${fila('Fecha', esc(fmt(e.fecha)) + (e.fechaFin ? ' al ' + esc(fmt(e.fechaFin)) : ''))}
       ${fila('Hora', esc(e.horaIni))}
       ${fila('Lugar', esc(e.lugar))}

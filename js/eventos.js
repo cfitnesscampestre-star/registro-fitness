@@ -232,7 +232,7 @@ function evtRenderCalendario(){
         white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-weight:600;
         opacity:.92;${e.ger?'outline:1px dashed rgba(0,0,0,.45);outline-offset:-2px;':''}`;
       chip.textContent = e.ger ? '🏛 '+(e.nombre||'') : (e.deporte||'') + (e.nombre ? ': '+e.nombre : '');
-      chip.title = e.ger ? (e.nombre+' · Control Gerencia') : (e.nombre || e.deporte);
+      chip.title = e.ger ? (e.nombre+' · Control Gerencia'+(e.gerArea?' ('+e.gerArea+')':'')) : (e.nombre || e.deporte);
       chip.onclick = ()=>abrirModalEvento(e.id);
       cell.appendChild(chip);
     });
@@ -278,7 +278,7 @@ function evtRenderProximos(){
       </div>
       <div style="flex:1;min-width:0">
         <div style="font-size:.82rem;font-weight:600;color:var(--txt)">${e.ger?'🏛 ':''}${e.nombre||'Sin nombre'}</div>
-        <div style="font-size:.7rem;color:var(--txt2)">${e.ger?'Gerencia · ':''}${e.deporte||''}${e.lugar ? ' · '+e.lugar : ''}${e.horaIni ? ' · '+e.horaIni : ''}</div>
+        <div style="font-size:.7rem;color:var(--txt2)">${e.ger?'Gerencia'+(e.gerArea?' '+e.gerArea:'')+' · ':''}${e.deporte||''}${e.lugar ? ' · '+e.lugar : ''}${e.horaIni ? ' · '+e.horaIni : ''}</div>
       </div>
       <div style="text-align:right;flex-shrink:0">
         ${diasLbl}
