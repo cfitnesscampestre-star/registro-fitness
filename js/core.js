@@ -372,6 +372,17 @@ function cargarClasesInst(pref){
   document.getElementById(pref+'-clase').innerHTML=opts;
 }
 
+// Horarios que se ofrecen en "+ Clase": los que regían en la FECHA elegida (igual que el recorrido y
+// el portal del profesor). Antes se usaba el horario actual y, si el profesor había cambiado de horario,
+// la clase capturada no coincidía con la del recorrido o la del portal.
+function slotsRegistroClase(inst){
+  const f = (document.getElementById('rc-fecha') || {}).value || fechaLocalStr(new Date());
+  const ordenDias = ['Lunes','Martes','Miércoles','Jueves','Viernes','Sábado','Domingo'];
+  return [...getHorarioEn(inst, f)].sort((a,b)=>{
+    const di = ordenDias.indexOf(a.dia) - ordenDias.indexOf(b.dia);
+    return di !== 0 ? di : String(a.hora).localeCompare(String(b.hora));
+  });
+}
 // ── Carga los horarios del instructor seleccionado en el modal "+ Clase" ──
 function cargarHorariosInst(){
   const instId = parseInt(document.getElementById('rc-inst').value);
@@ -387,7 +398,7 @@ function cargarHorariosInst(){
   if(preview)  preview.style.display  = 'none';
   if(sinMsg)   sinMsg.style.display   = 'none';
 
-  if(!inst || !(inst.horario||[]).length){
+  if(!inst || !slotsRegistroClase(inst).length){
     selHor.innerHTML = '<option value="">— Sin horarios asignados —</option>';
     selHor.disabled  = true;
     if(sinMsg && inst) sinMsg.style.display = 'block';
@@ -396,11 +407,7 @@ function cargarHorariosInst(){
 
   selHor.disabled = false;
   // Ordenar slots: por día de la semana primero, luego por hora
-  const ordenDias = ['Lunes','Martes','Miércoles','Jueves','Viernes','Sábado','Domingo'];
-  const slots = [...inst.horario].sort((a,b)=>{
-    const di = ordenDias.indexOf(a.dia) - ordenDias.indexOf(b.dia);
-    return di !== 0 ? di : a.hora.localeCompare(b.hora);
-  });
+  const slots = slotsRegistroClase(inst);
 
   selHor.innerHTML = '<option value="">— Selecciona un horario —</option>' +
     slots.map((s,i) =>
@@ -430,11 +437,7 @@ function autoRellenarHorario(){
     return;
   }
 
-  const ordenDias = ['Lunes','Martes','Miércoles','Jueves','Viernes','Sábado','Domingo'];
-  const slots = [...inst.horario].sort((a,b)=>{
-    const di = ordenDias.indexOf(a.dia) - ordenDias.indexOf(b.dia);
-    return di !== 0 ? di : a.hora.localeCompare(b.hora);
-  });
+  const slots = slotsRegistroClase(inst);
 
   const slot = slots[parseInt(idx)];
   if(!slot) return;

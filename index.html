@@ -2332,7 +2332,7 @@ function cerrarMenuCoord(){ var m=document.getElementById('cm-menu'); if(m){ m.c
     <div class="fg"><label>Capacidad</label><input type="number" id="rc-cap" value="20" min="1" max="200"></div>
   </div>
   <div class="fr">
-    <div class="fg"><label>Fecha</label><input type="date" id="rc-fecha"></div>
+    <div class="fg"><label>Fecha</label><input type="date" id="rc-fecha" onchange="if(document.getElementById('rc-inst').value)cargarHorariosInst()"></div>
     <div class="fg"><label>Duración (min)</label><input type="number" id="rc-dur" value="60"></div>
   </div>
   <div class="fg"><label>Estado</label>
@@ -3220,6 +3220,10 @@ function cerrarMenuCoord(){ var m=document.getElementById('cm-menu'); if(m){ m.c
 
   <div style="font-size:.72rem;text-transform:uppercase;letter-spacing:1.5px;color:var(--txt2);margin:1rem 0 .4rem">Clases sin profesor ni salón asignado</div>
   <div id="aud-clase-body"></div>
+
+  <div style="font-size:.72rem;text-transform:uppercase;letter-spacing:1.5px;color:var(--txt2);margin:1rem 0 .4rem">Clases registradas dos veces</div>
+  <div style="font-size:.7rem;color:var(--txt3);margin-bottom:.4rem">La misma clase (instructor, clase, hora y fecha) guardada desde dos lugares: los asistentes se suman dos veces. Elige cuál se queda; el número del profesor se conserva aparte.</div>
+  <div id="aud-dup-body"></div>
 </div>
 </div>
 
@@ -3249,29 +3253,29 @@ function cerrarMenuCoord(){ var m=document.getElementById('cm-menu'); if(m){ m.c
 <!-- ═══ CDN adicional ═══ -->
 <script defer src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <!-- ═══ MÓDULOS JS — orden de dependencias ═══ -->
-<script defer src="js/core.js?v=2"></script>
+<script defer src="js/core.js?v=3"></script>
 <script defer src="js/dashboard.js?v=3"></script>
 <script defer src="js/analisis.js"></script>
-<script defer src="js/recorrido.js?v=4"></script>
-<script defer src="js/registros.js?v=4"></script>
+<script defer src="js/recorrido.js?v=5"></script>
+<script defer src="js/registros.js?v=5"></script>
 <script defer src="js/suplencias.js"></script>
 <script defer src="js/reportes.js?v=3"></script>
 <script defer src="js/historial.js?v=2"></script>
-<script defer src="js/auditoria.js?v=2"></script>
+<script defer src="js/auditoria.js?v=3"></script>
 <script defer src="js/importar-estimados.js"></script>
 <script defer src="js/mantenimiento.js"></script>
 <script defer src="js/pruebas-metodologia.js?v=1"></script>
 <script defer src="js/alertas-portal.js?v=1"></script>
-<script defer src="js/firmas.js?v=4"></script>
-<script defer src="js/app.js?v=6"></script>
+<script defer src="js/firmas.js?v=5"></script>
+<script defer src="js/app.js?v=7"></script>
 <script defer src="js/auth.js"></script>
 <script defer src="js/login-recordado.js?v=1"></script>
 <script defer src="js/suplencias2.js?v=2"></script>
-<script defer src="js/mobile.js?v=4"></script>
+<script defer src="js/mobile.js?v=5"></script>
 <script defer src="js/sidebar.js"></script>
 <script defer src="js/portal.js?v=5"></script>
 <script defer src="js/ver-como-instructor.js?v=2"></script>
-<script defer src="js/captura-prof.js?v=2"></script>
+<script defer src="js/captura-prof.js?v=3"></script>
 <script defer src="js/gimnasia-gerencia.js?v=4"></script>
 <script defer src="js/pines.js?v=1"></script>
 <script defer src="js/instalar-app.js?v=1"></script>

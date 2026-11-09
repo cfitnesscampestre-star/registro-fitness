@@ -274,22 +274,18 @@ function abrirRegistroDesdeCalendario(instId, dia, hora, clase, fechaStr) {
     // Seleccionar el instructor
     instSel.value = String(instId);
 
-    // Recargar los horarios para ese instructor
-    cargarHorariosInst();
-
-    // Poner la fecha
+    // Poner la fecha (antes de cargar los horarios: se ofrecen los que regían ese día)
     const fechaInp = document.getElementById('rc-fecha');
     if(fechaInp) fechaInp.value = fechaStr;
 
+    // Recargar los horarios para ese instructor
+    cargarHorariosInst();
+
     // Encontrar el índice del slot correcto (misma lógica que cargarHorariosInst)
     const inst = instructores.find(i => i.id === instId);
-    if(!inst || !(inst.horario || []).length) return;
-
-    const ordenDias = ['Lunes','Martes','Miércoles','Jueves','Viernes','Sábado','Domingo'];
-    const slots = [...inst.horario].sort((a, b) => {
-      const di = ordenDias.indexOf(a.dia) - ordenDias.indexOf(b.dia);
-      return di !== 0 ? di : a.hora.localeCompare(b.hora);
-    });
+    if(!inst) return;
+    const slots = slotsRegistroClase(inst);
+    if(!slots.length) return;
 
     const idx = slots.findIndex(s => s.dia === dia && s.hora === hora && s.clase === clase);
     if(idx >= 0) {
