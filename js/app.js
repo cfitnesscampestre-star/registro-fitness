@@ -927,6 +927,69 @@ function borradosFusionar(remotos){
   }
   return b;
 }
+// ── Una clase = un solo registro, desde cualquier dispositivo ─────────────
+// Antes cada teléfono buscaba la clase solo en SU lista y, si no la tenía (sin señal, la app sin
+// actualizar, dos teléfonos a la vez), creaba otro registro con otro id: la nube guardaba los dos y
+// los asistentes se sumaban dos veces (casos reales de octubre 2026: recorrido + portal del profesor,
+// "+ Clase" + portal, dos recorridos en dos teléfonos).
+// Ahora el id de un registro de clase sale de la clase misma (instructor + clase + hora + fecha), así
+// que todos los dispositivos escriben en el MISMO lugar de la nube; y al juntarse dos versiones se
+// fusionan (fusionarRegistro) con la regla del club: el número de coordinación es el principal y el
+// del profesor queda aparte (asis_prof).
+function _horaHHMM(h){ const m = String(h || '').match(/(\d{1,2}):(\d{2})/); return m ? String(m[1]).padStart(2, '0') + ':' + m[2] : ''; }
+// Igual que la llave que usa Control Gerencia: sin acentos, mayúsculas, espacios ni signos; hora HH:MM
+function claveClase(instId, clase, hora, fecha){
+  const c = String(clase == null ? '' : clase).normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().replace(/[^a-z0-9]/g, '');
+  return `${String(instId)}|${c}|${_horaHHMM(hora)}|${fecha || ''}`;
+}
+const claveDeRegistro = r => claveClase(r.inst_id, r.clase, r.hora, r.fecha);
+function _fnv32(s, semilla){ let h = semilla >>> 0; for(let i = 0; i < s.length; i++){ h ^= s.charCodeAt(i); h = Math.imul(h, 16777619) >>> 0; } return h >>> 0; }
+// Entero seguro entre 7e15 y 7e15+2^50 (los ids aleatorios, Date.now()*1000, no llegan ahí hasta el año 2191)
+function _idDeTexto(s){ return 7e15 + (_fnv32(s, 0x811c9dc5) >>> 7) * 33554432 + (_fnv32(s, 0x9e3779b9) >>> 7); }
+function idDeClase(instId, clase, hora, fecha){
+  const k = claveClase(instId, clase, hora, fecha);
+  const borr = typeof borradosLeer === 'function' ? borradosLeer().registros : {};
+  for(let n = 0; n < 50; n++){
+    const id = _idDeTexto(n ? `${k}#${n}` : k);
+    if(borr[String(id)]) continue;                       // se borró a propósito: la clase se vuelve a capturar en la siguiente variante
+    const o = registros.find(r => String(r.id) === String(id));
+    if(o && claveDeRegistro(o) !== k) continue;          // choque con otra clase (prácticamente imposible)
+    return id;
+  }
+  return nuevoIdRegistro();
+}
+// Registro existente de esa clase en este dispositivo (sin importar mayúsculas, acentos o 8:00/08:00).
+// Si por datos viejos hubiera dos, se devuelve el último guardado.
+function buscarRegClase(instId, clase, hora, fecha, filtro){
+  const k = claveClase(instId, clase, hora, fecha);
+  const hits = registros.filter(r => claveDeRegistro(r) === k && (!filtro || filtro(r)));
+  return hits.sort((a, b) => (parseInt(a.updatedAt) || 0) - (parseInt(b.updatedAt) || 0)).pop() || null;
+}
+// Junta dos versiones del MISMO registro (mismo id). Simétrica: da lo mismo en todos los dispositivos.
+//  · Gana la versión más reciente,
+//  · salvo que la más reciente sea la captura del profesor y la otra sea de coordinación (o de Gerencia):
+//    entonces se queda la de coordinación y el número del profesor se guarda aparte (asis_prof).
+//  · El número del profesor (asis_prof…) nunca se pierde.
+const _CAMPOS_PROF = ['asis_prof', 'asis_prof_nota', 'asis_prof_ts'];
+const _esDeCoord = r => !!r && (r.captura_por === 'coord' || r.captura_por === 'ger' || r.tipo === 'recorrido');
+function fusionarRegistro(a, b){
+  if(!a) return b; if(!b) return a;
+  const ta = parseInt(a.updatedAt || a.ts || 0) || 0, tb = parseInt(b.updatedAt || b.ts || 0) || 0;
+  let nuevo, viejo;
+  if(ta !== tb){ [nuevo, viejo] = ta > tb ? [a, b] : [b, a]; }
+  else { const sa = JSON.stringify(a), sb = JSON.stringify(b); if(sa === sb) return a; [nuevo, viejo] = sa > sb ? [a, b] : [b, a]; }
+  let res;
+  if(nuevo.captura_por === 'inst' && _esDeCoord(viejo)){
+    res = { ...viejo };
+    _CAMPOS_PROF.forEach(k => { if(nuevo[k] !== undefined && nuevo[k] !== null) res[k] = nuevo[k]; });
+    if(res.asis_prof === undefined || res.asis_prof === null) res.asis_prof = parseInt(nuevo.asistentes) || 0;
+    res.updatedAt = Math.max(ta, tb);
+  } else {
+    res = { ...nuevo };
+    _CAMPOS_PROF.forEach(k => { if((res[k] === undefined || res[k] === null) && viejo[k] !== undefined && viejo[k] !== null) res[k] = viejo[k]; });
+  }
+  return res;
+}
 // Id único para un registro nuevo. "El más alto + 1" repetía ids entre dispositivos y,
 // al fusionar, el registro de uno pisaba al del otro.
 function nuevoIdRegistro(lista){

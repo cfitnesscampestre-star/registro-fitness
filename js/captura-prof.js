@@ -74,8 +74,9 @@
 
   // ── Estado de captura de una clase ───────────────────────────────
   function regDe(inst, slot, fecha) {
+    const k = typeof claveClase === 'function' ? claveClase(inst.id, slot.clase, slot.hora, fecha) : null;
     const regs = registros.filter(r =>
-      r.fecha === fecha && regEnSlot(r, inst.id, slot.dia, slot.hora));
+      r.fecha === fecha && (regEnSlot(r, inst.id, slot.dia, slot.hora) || (k && !r.ger_id && claveDeRegistro(r) === k)));
     return regs.length ? regs[regs.length - 1] : null;
   }
   // Minutos desde medianoche en hora de México (reloj del servidor)
@@ -304,9 +305,11 @@
       return Promise.resolve('local');
     }
     const ref = fbDb.ref('fitness/registros/' + rec.id);
+    // Clase nueva: si otro dispositivo ya guardó esa misma clase (mismo id), se juntan en vez de pisarla
+    // (coordinación conserva su número y el del profesor queda aparte; ver fusionarRegistro en app.js).
     const op = campos
       ? ref.transaction(cur => cur ? Object.assign({}, cur, campos) : rec)
-      : ref.set(rec);
+      : ref.transaction(cur => (cur && typeof fusionarRegistro === 'function') ? fusionarRegistro(cur, rec) : rec);
     const limite = new Promise(res => setTimeout(() => res('local'), 7000));   // sin conexión
     return Promise.race([Promise.resolve(op).then(() => 'nube'), limite]).catch(e => {
       console.warn('[Captura] Firebase:', e);
@@ -363,7 +366,7 @@
         // Si la clase tiene suplencia programada, se guarda como suplencia (no como impartida por el titular)
         const plan = typeof instSupDeMiClase === 'function' ? instSupDeMiClase(inst.id, S.fecha, S.slot) : null;
         rec = {
-          id: nuevoId(), inst_id: inst.id, dia: S.slot.dia, clase: S.slot.clase, hora: S.slot.hora,
+          id: typeof idDeClase === 'function' ? idDeClase(inst.id, S.slot.clase, S.slot.hora, S.fecha) : nuevoId(), inst_id: inst.id, dia: S.slot.dia, clase: S.slot.clase, hora: S.slot.hora,
           asistentes: n, cap: cap || 20, dur: 60, estado: plan ? 'sub' : 'ok', fecha: S.fecha, tipo: 'clase',
           suplente_id: plan && plan.suplente_id ? plan.suplente_id : null,
           suplente_nombre: plan && !plan.suplente_id ? (plan.suplente_nombre || null) : null,

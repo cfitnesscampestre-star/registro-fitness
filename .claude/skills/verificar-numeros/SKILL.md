@@ -54,9 +54,11 @@ Preferir manejar la app como lo hace la persona (las funciones de los botones: `
 5. Sincronización: dos dispositivos a la vez, uno sin señal, borrados que no regresan, mismos datos al final.
 6. Portal: clase con suplencia programada se guarda como suplencia.
 7. Ids únicos.
+8. Duplicados: la misma clase guardada desde dos lugares (recorrido + portal, "+ Clase" + portal, dos recorridos) queda en un solo registro; borrar y volver a capturar funciona; la auditoría limpia los repetidos viejos.
 
 ### Reglas del club (decididas por coordinación, octubre 2026)
 
+- **Una clase = un registro**: el id de un registro de clase sale de instructor + clase + hora + fecha (`idDeClase`); dos versiones del mismo registro se juntan con `fusionarRegistro` (gana coordinación; el número del profesor queda en `asis_prof`).
 - **Horas**: cada clase cuenta 1 hora; solo las listas de gimnasia de Gerencia duran lo que dura el grupo (`dur` del registro).
 - **Suplencias**: las horas y la clase se suman al **titular** (`inst_id`), no al suplente. El suplente aparece en el reporte de suplencias y en su hoja de firmas.
 - **Aforo**: por instructor = promedio de sus clases ("Reporte por instructor"); por disciplina = promedio de todas las clases de ese tipo, sin importar quién la dio ("Reporte por disciplina"); el aforo general del dashboard y del PDF completo = promedio de los instructores **que dieron clase** en el periodo (igual que el reporte mensual; quien no tuvo clases no cuenta como 0%).

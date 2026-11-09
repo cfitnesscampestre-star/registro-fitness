@@ -66,11 +66,7 @@ function guardarClase(){
     showToast('El suplente no puede ser el mismo instructor','err'); ok=false;
   }
   // Detectar duplicado exacto en el mismo día/hora/fecha — BLOQUEAR
-  const duplicado=registros.find(r=>
-    String(r.inst_id)===String(instId) && r.clase===claseNombre &&
-    r.dia===diaVal && r.hora===horaVal && r.fecha===fechaVal &&
-    (r.estado==='ok'||r.estado==='sub'||r.estado==='falta')
-  );
+  const duplicado=buscarRegClase(instId,claseNombre,horaVal,fechaVal,r=>!r.ger_id&&(r.estado==='ok'||r.estado==='sub'||r.estado==='falta'));
   if(duplicado){
     showToast(`Ya existe un registro de ${claseNombre} para ${inst?.nombre} el ${fechaVal}. Usa Editar para modificarlo.`,'warn');
     cerrarModal('m-clase');
@@ -79,7 +75,7 @@ function guardarClase(){
   }
   if(!ok) return;
 
-  const nuevoIdClase=nuevoIdRegistro();
+  const nuevoIdClase=idDeClase(instId,claseNombre,horaVal,fechaVal);   // mismo id en todos los dispositivos: no se duplica
   registros.push({id:nuevoIdClase,inst_id:instId,
     dia:diaVal, clase:claseNombre, hora:horaVal,
     asistentes:asisVal, cap:capInput,

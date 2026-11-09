@@ -903,6 +903,8 @@ async function inicializarFirebase(){
           const key = String(r.id);
           if(!mapa[key]){
             mapa[key] = r; // nuevo en Firebase, agregar
+          } else if(col === 'registros' && typeof fusionarRegistro === 'function'){
+            mapa[key] = fusionarRegistro(mapa[key], r);   // la misma clase desde dos dispositivos: se juntan (ver app.js)
           } else {
             const tsLocal = parseInt(mapa[key].updatedAt || mapa[key].ts || 0);
             const tsFb    = parseInt(r.updatedAt || r.ts || 0);

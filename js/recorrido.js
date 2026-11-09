@@ -579,13 +579,8 @@ function guardarRecorrido(){
     const cap=parseInt(item.cap)||getCapClase(item.clase)||20;
     const instIdNum=parseInt(item.inst_id)||item.inst_id;
     // Comparación robusta: convierte ambos lados a string para evitar mismatch number/string de Firebase
-    const ex=registros.find(r=>
-      String(r.inst_id)===String(item.inst_id) &&
-      r.clase===item.clase &&
-      r.dia===item.dia &&
-      r.hora===item.hora &&
-      r.fecha===recActual.fecha
-    );
+    // Misma clase sin importar mayúsculas, acentos o 8:00/08:00 (ver claveClase en app.js)
+    const ex=buscarRegClase(item.inst_id,item.clase,item.hora,recActual.fecha,r=>!r.ger_id);
     const nuevoEst=item.presente==='no'?'falta':item.presente==='sub'?'sub':'ok';
     if(ex){
       ex.asistentes=parseInt(item.asis)||0;
@@ -598,7 +593,7 @@ function guardarRecorrido(){
       ex.updatedAt=Date.now();
     } else {
       registros.push({
-        id:nuevoIdRegistro(),
+        id:idDeClase(instIdNum,item.clase,item.hora,recActual.fecha),   // mismo id en todos los dispositivos: no se duplica
         inst_id:instIdNum,
         dia:item.dia,clase:item.clase,hora:item.hora,
         asistentes:parseInt(item.asis)||0,

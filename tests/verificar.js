@@ -383,6 +383,120 @@ escenario('portal: la clase con suplencia programada se guarda como suplencia', 
   check('Se guardó UN registro como suplencia de Cristi, con 9 personas', n.map(r => [r.estado, r.suplente_id, r.motivo_suplencia, r.asistentes]), [['sub', 2, 'incapacidad', 9]]);
 });
 
+// 6b ─ La misma clase capturada desde dos lugares no se duplica ─────
+// Casos reales de octubre 2026: cada teléfono buscaba la clase solo en SU lista; si no la tenía
+// (sin señal o sin actualizar) creaba otro registro con otro id y la nube guardaba los dos.
+// Regla del club: el número de coordinación es el principal; el del profesor queda aparte (asis_prof).
+escenario('duplicados: la misma clase guardada desde dos lugares queda en un solo registro', async env => {
+  env.db.sembrar(nube({
+    instructores: [inst(1, 'Cristi Diaz', [['Lunes', '08:00', 'Pilates']]),
+                   inst(2, 'Mateo Padilla', [['Lunes', '09:00', 'BOX'], ['Lunes', '19:00', 'TRX']])]
+  }));
+  const deLaNube = (clase) => Object.values(env.db.leer('fitness/registros') || {}).filter(r => r.clase === clase && r.fecha === LUNES);
+  const recorrido = (d, hora, asis) => d.ev(([hora, asis]) => {
+    recActual = { fecha: '2026-10-26', hora, dia: 'Lunes', items: [], clasesActivas: getClasesActivas('Lunes', hora, '2026-10-26') };
+    recIdx = 0; modoRecorrido = 'turbo'; iniciarTurbo();
+    document.getElementById('tc-asis').value = String(asis); turboGuardar();
+  }, [hora, asis]);
+  const terminar = d => d.ev(() => { window.confirm = () => true; guardarRecorrido(); });
+  const portal = async (d, clase, n) => {
+    await d.esperar(() => window._instHoyCtx && window._instHoyCtx.items && window._instHoyCtx.items.length > 0, null, 8000, 'clases del portal');
+    await d.ev(([clase, n]) => {
+      instCapAbrir(window._instHoyCtx.items.findIndex(x => x.slot.clase === clase));
+      document.getElementById('cp-num').value = String(n);
+      document.getElementById('cp-guardar').click();
+    }, [clase, n]);
+  };
+
+  // a) Pilates: recorrido de coordinación SIN SEÑAL (7) y después la profesora en su portal (9)
+  const coord = await env.abrir('coordinación', { hora: A_LAS('08:30') });
+  await coord.quitarSenal();
+  await recorrido(coord, '08:30', 7); await coord.page.waitForTimeout(450); await terminar(coord);
+  await coord.calma(800);
+  const cristi = await env.abrir('portal de Cristi', { hora: A_LAS('08:50'), rol: 'instructor', instId: 1 });
+  await portal(cristi, 'Pilates', 9);
+  await cristi.calma(1500);
+  await coord.volverSenal();
+  await coord.calma(2500); await cristi.calma(500);
+  const pil = deLaNube('Pilates');
+  check('Pilates: un solo registro en la nube', pil.length, 1);
+  check('Pilates: queda el número de coordinación (7) y el de la profesora aparte (9)', pil.map(r => [r.asistentes, r.asis_prof]), [[7, 9]]);
+  check('Pilates: coordinación ve un solo registro', await coord.ev(() => registros.filter(r => r.clase === 'Pilates').length), 1);
+
+  // b) TRX: el profesor captura en su portal (4); coordinación, con su copia SIN ACTUALIZAR, lo registra con "+ Clase"
+  await coord.quitarSenal();
+  const mateo = await env.abrir('portal de Mateo', { hora: A_LAS('19:20'), rol: 'instructor', instId: 2 });
+  await portal(mateo, 'TRX', 4);
+  await mateo.calma(1500);
+  await coord.ev(() => {
+    window.confirm = () => true;
+    abrirModal('m-clase');
+    document.getElementById('rc-inst').value = '2';
+    document.getElementById('rc-fecha').value = '2026-10-26';
+    cargarHorariosInst();
+    const sel = document.getElementById('rc-horario');
+    sel.value = [...sel.options].find(o => o.textContent.includes('TRX')).value;
+    autoRellenarHorario();
+    document.getElementById('rc-asis').value = '4';
+    document.getElementById('rc-est').value = 'ok';
+    guardarClase();
+  });
+  await coord.calma(800);
+  await coord.volverSenal();
+  await coord.calma(2500); await mateo.calma(500);
+  check('TRX: un solo registro en la nube', deLaNube('TRX').length, 1);
+
+  // c) BOX: dos teléfonos de coordinación sin señal hacen el recorrido (8 y luego 6 para corregir)
+  const cel = await env.abrir('celular de coordinación', { hora: A_LAS('09:35') });
+  await coord.quitarSenal(); await cel.quitarSenal();
+  await recorrido(coord, '09:30', 8); await coord.page.waitForTimeout(450); await terminar(coord);
+  await cel.page.waitForTimeout(1200);
+  await recorrido(cel, '09:35', 6); await cel.page.waitForTimeout(450); await terminar(cel);
+  await coord.volverSenal(); await coord.calma(2000);
+  await cel.volverSenal(); await cel.calma(2500); await coord.calma(800);
+  const box = deLaNube('BOX');
+  check('BOX: un solo registro en la nube, con la corrección (6)', box.map(r => r.asistentes), [6]);
+  check('Al final los dispositivos de coordinación ven lo mismo que la nube',
+    [await coord.ev(() => registros.length), await cel.ev(() => registros.length)],
+    [Object.keys(env.db.leer('fitness/registros') || {}).length, Object.keys(env.db.leer('fitness/registros') || {}).length]);
+});
+
+escenario('duplicados: borrar y volver a capturar, y limpiar los repetidos viejos desde la auditoría', async env => {
+  env.db.sembrar(nube({
+    instructores: [inst(1, 'Cristi Diaz', [['Lunes', '08:00', 'Pilates']]), inst(2, 'Mateo Padilla', [['Lunes', '09:00', 'BOX']])],
+    // repetidos que ya existen (ids viejos, aleatorios): Pilates 7 (recorrido) + 9 (profesora); BOX 8 + 6 (dos recorridos)
+    registros: [
+      reg({ id: 11, inst_id: 1, dia: 'Lunes', hora: '08:00', clase: 'Pilates', fecha: '2026-10-19', asistentes: 7, tipo: 'recorrido', captura_por: 'coord', updatedAt: 100 }),
+      reg({ id: 12, inst_id: 1, dia: 'Lunes', hora: '08:00', clase: 'Pilates', fecha: '2026-10-19', asistentes: 9, captura_por: 'inst', updatedAt: 200 }),
+      reg({ id: 13, inst_id: 2, dia: 'Lunes', hora: '09:00', clase: 'BOX', fecha: '2026-10-19', asistentes: 8, tipo: 'recorrido', captura_por: 'coord', updatedAt: 300 }),
+      reg({ id: 14, inst_id: 2, dia: 'Lunes', hora: '9:00', clase: 'Box', fecha: '2026-10-19', asistentes: 6, tipo: 'recorrido', captura_por: 'coord', updatedAt: 400 }),
+    ]
+  }));
+  const d = await env.abrir('coordinación', { hora: A_LAS('09:40') });
+  // Auditoría: detecta los dos grupos (aunque "Box 9:00" y "BOX 09:00" estén escritos distinto) y deja el recomendado
+  check('Auditoría: dos clases registradas dos veces', await d.ev(() => auditoriaDuplicados().map(x => x.regs.length)), [2, 2]);
+  await d.ev(() => { window.confirm = () => true; abrirAuditoria(); dejarRecomendadosDuplicados(); });
+  await d.calma(2000);
+  const viejos = Object.values(env.db.leer('fitness/registros') || {}).filter(r => r.fecha === '2026-10-19').sort((a, b) => a.inst_id - b.inst_id);
+  check('Pilates: queda el de coordinación (7) con el número de la profesora aparte (9)', viejos.filter(r => r.inst_id === 1).map(r => [r.asistentes, r.asis_prof]), [[7, 9]]);
+  check('BOX: queda el recorrido más reciente (6)', viejos.filter(r => r.inst_id === 2).map(r => r.asistentes), [6]);
+
+  // Capturar hoy, borrar y volver a capturar la misma clase: la nueva no desaparece por el borrado anterior
+  const capturar = n => d.ev(n => {
+    abrirModal('m-clase');
+    document.getElementById('rc-inst').value = '2'; document.getElementById('rc-fecha').value = '2026-10-26'; cargarHorariosInst();
+    const sel = document.getElementById('rc-horario'); sel.value = [...sel.options].find(o => o.textContent.includes('BOX')).value; autoRellenarHorario();
+    document.getElementById('rc-asis').value = String(n); document.getElementById('rc-est').value = 'ok'; guardarClase();
+  }, n);
+  await capturar(5); await d.calma(1200);
+  await d.ev(() => { window.confirm = () => true; document.getElementById('er-id').value = registros.find(r => r.fecha === '2026-10-26').id; eliminarRegistro(); });
+  await d.calma(1200);
+  await capturar(4); await d.calma(2000);
+  const hoyN = Object.values(env.db.leer('fitness/registros') || {}).filter(r => r.fecha === '2026-10-26');
+  check('Borrar y volver a capturar: queda la nueva captura (4) en la nube', hoyN.map(r => r.asistentes), [4]);
+  check('…y en el dispositivo', await d.ev(() => registros.filter(r => r.fecha === '2026-10-26').map(r => r.asistentes)), [4]);
+});
+
 // 7 ─ Ids ───────────────────────────────────────────────────────────
 escenario('ids: los registros nuevos nunca repiten id', async env => {
   env.db.sembrar(nube({ instructores: [inst(1, 'Ana Uno', [])] }));

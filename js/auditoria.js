@@ -51,6 +51,70 @@ function auditoriaCalcular() {
   };
 }
 
+// ── Clases registradas dos veces (antes de que cada clase tuviera un solo id; ver idDeClase en app.js) ──
+function auditoriaDuplicados() {
+  const grupos = {};
+  registros.forEach(r => {
+    if (!r || r.ger_id || !(r.estado === 'ok' || r.estado === 'sub') || !r.fecha) return;
+    const k = claveDeRegistro(r);
+    (grupos[k] = grupos[k] || []).push(r);
+  });
+  return Object.values(grupos).filter(g => g.length > 1).map(g => {
+    // recomendado: el de coordinación más reciente; si no hay, el más reciente
+    const orden = g.slice().sort((a, b) => (parseInt(b.updatedAt) || 0) - (parseInt(a.updatedAt) || 0));
+    const rec = orden.find(_esDeCoord) || orden[0];
+    return { regs: orden, recomendado: rec };
+  }).sort((a, b) => String(b.regs[0].fecha).localeCompare(String(a.regs[0].fecha)));
+}
+function _audOrigen(r) {
+  const o = r.estimado ? 'estimado' : r.tipo === 'recorrido' ? 'recorrido de coordinación' : r.captura_por === 'inst' ? 'captura del profesor' : r.captura_por === 'coord' ? 'registro de coordinación' : '';
+  const t = parseInt(r.updatedAt) > 1e11 ? new Date(parseInt(r.updatedAt)) : null;
+  return [o, t ? 'guardado ' + t.toLocaleString('es-MX', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }) : ''].filter(Boolean).join(' · ');
+}
+// Deja solo el registro elegido; el número del profesor de los demás se copia a él (asis_prof)
+function dejarSoloRegistro(id) {
+  const r = registros.find(x => String(x.id) === String(id)); if (!r) return;
+  const k = claveDeRegistro(r);
+  const otros = registros.filter(x => x !== r && !x.ger_id && (x.estado === 'ok' || x.estado === 'sub') && claveDeRegistro(x) === k);
+  if (!otros.length) { renderAuditoria(); return; }
+  otros.forEach(o => { if ((r.asis_prof === undefined || r.asis_prof === null) && o.captura_por === 'inst') { r.asis_prof = parseInt(o.asistentes) || 0; if (o.asis_prof_nota) r.asis_prof_nota = o.asis_prof_nota; } });
+  r.updatedAt = Date.now();
+  _eliminarRegistrosPorId(otros.map(o => o.id));
+  registrarLog('sistema', `Auditoría: clase registrada dos veces — ${r.clase} ${r.fecha} ${r.hora}: se dejó ${r.asistentes} asistentes, se quitaron ${otros.length}`);
+  showToast(`Listo: ${r.clase} queda con ${r.asistentes} asistentes`, 'ok');
+  renderAuditoria();
+}
+function dejarRecomendadosDuplicados() {
+  const ds = auditoriaDuplicados(); if (!ds.length) return;
+  const n = ds.reduce((a, d) => a + d.regs.length - 1, 0);
+  if (!confirm(`¿Quitar ${n} registro(s) repetido(s)? En cada clase se queda el recomendado (el de coordinación más reciente).\n\nEsta acción no se puede deshacer.`)) return;
+  ds.forEach(d => {
+    const r = d.recomendado;
+    d.regs.forEach(o => { if (o !== r && (r.asis_prof === undefined || r.asis_prof === null) && o.captura_por === 'inst') r.asis_prof = parseInt(o.asistentes) || 0; });
+    r.updatedAt = Date.now();
+  });
+  _eliminarRegistrosPorId(ds.flatMap(d => d.regs.filter(o => o !== d.recomendado).map(o => o.id)));
+  registrarLog('sistema', `Auditoría: quitados ${n} registro(s) de clases registradas dos veces`);
+  showToast(`${n} registro(s) repetido(s) quitado(s)`, 'ok');
+  renderAuditoria();
+}
+function _renderDuplicados() {
+  const el = document.getElementById('aud-dup-body'); if (!el) return;
+  const ds = auditoriaDuplicados();
+  if (!ds.length) { el.innerHTML = '<div class="empty">No hay clases registradas dos veces.</div>'; return; }
+  const inst = id => { const i = instructores.find(x => String(x.id) === String(id)); return i ? i.nombre : 'ID ' + id; };
+  const extra = ds.reduce((a, d) => a + d.regs.filter(o => o !== d.recomendado).reduce((b, o) => b + (parseInt(o.asistentes) || 0), 0), 0);
+  el.innerHTML = `<div style="display:flex;justify-content:space-between;align-items:center;gap:.6rem;flex-wrap:wrap;margin-bottom:.5rem">
+      <div style="font-size:.75rem;color:var(--txt2)">${ds.length} clase(s) · ${extra} asistentes de más</div>
+      <button class="btn bd" onclick="dejarRecomendadosDuplicados()">Dejar el recomendado en todas</button></div>` +
+    ds.map(d => `<div class="rec-card" style="margin-bottom:.5rem">
+      <div style="font-weight:700">${_audEsc(d.regs[0].clase)} · ${_audFecha(d.regs[0].fecha)} ${_audEsc(d.regs[0].hora || '')} <span style="color:var(--txt3);font-weight:400;font-size:.72rem">${_audEsc(inst(d.regs[0].inst_id))}</span></div>
+      ${d.regs.map(o => `<div style="display:flex;justify-content:space-between;align-items:center;gap:.6rem;margin-top:.35rem;flex-wrap:wrap">
+        <div style="font-size:.74rem"><b>${parseInt(o.asistentes) || 0} asistentes</b> <span style="color:var(--txt3)">· ${o.estado === 'sub' ? 'suplencia' : 'impartida'} · ${_audEsc(_audOrigen(o))}</span>${o === d.recomendado ? ' <span style="color:var(--neon);font-size:.7rem">(recomendado)</span>' : ''}</div>
+        <button class="btn" style="font-size:.72rem;padding:.25rem .6rem" onclick="dejarSoloRegistro('${_audEsc(String(o.id))}')">Dejar solo este</button></div>`).join('')}
+    </div>`).join('');
+}
+
 function _audEsc(s) {
   return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 }
@@ -74,6 +138,7 @@ function renderAuditoria() {
 
   document.getElementById('aud-todo-wrap').style.display = totalHuerfanos > 0 ? 'block' : 'none';
 
+  _renderDuplicados();
   const bodyInst = document.getElementById('aud-inst-body');
   bodyInst.innerHTML = d.gruposInst.length === 0
     ? '<div class="empty">Ningún registro apunta a un instructor inexistente.</div>'
