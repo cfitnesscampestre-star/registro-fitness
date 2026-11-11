@@ -73,6 +73,7 @@ const FIREBASE_FALSO = `(function(){
   function ref(p){
     p = String(p || '').replace(/^\\/+|\\/+$/g, '');
     return {
+      key: p.split('/').pop() || null,              // como el SDK real: push().key da la clave nueva
       on(ev, cb){
         if (p === '.info/connected') { setTimeout(() => cb(snap(true, p)), 0); return cb; }
         if (p === '.info/serverTimeOffset') { setTimeout(() => cb(snap(0, p)), 0); return cb; }

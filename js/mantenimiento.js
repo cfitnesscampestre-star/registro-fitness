@@ -38,7 +38,7 @@
     forzar: false, salonQR: false,
     query: null, lis: null, profId: null,
     vista: 'reportar',                      // 'reportar' | 'mis'
-    sel: null, todo: false, q: '',
+    sel: null, todo: false, q: '', libre: false, eqTxt: '',      // libre: el equipo no está en la lista y se escribe (eqTxt)
     chips: [], texto: '', urg: 'normal',
     salonManual: null, eligiendoSalon: false,
     enviando: false, iniciado: false, timer: null
@@ -364,7 +364,7 @@
   }
   function pintarReportar(soft) {
     const b = document.getElementById('mant-body'); if (!b) return;
-    if (soft && (document.activeElement && /^(mant-txt|mant-q)$/.test(document.activeElement.id))) { pintarLista(); pintarBoton(); return; }
+    if (soft && (document.activeElement && /^(mant-txt|mant-q|mant-eqtxt)$/.test(document.activeElement.id))) { pintarLista(); pintarBoton(); return; }
     if (!M.salones || !M.equipos) { b.innerHTML = '<div class="mant-vacio">Cargando equipos…</div>'; return; }
     const ctx = contexto();
     const cola = leerCola();
@@ -404,10 +404,15 @@
           <span style="color:var(--txt3)">Por ${esc(quien)}${ab.creado ? ' · ' + hace(Date.now() - ab.creado) : ''} · ${est}</span>
           ${M.forzar ? '' : '<br><button class="mant-link" data-act="forzar">Es otra falla distinta, reportar de todos modos</button>'}</div>`;
       }
+    } else if (M.libre) {
+      h += `<div class="mant-card"><div class="mant-sub" style="margin:0 0 .4rem">No está en la lista: escribe qué es. Mantenimiento lo recibe igual y, si es un equipo nuevo, lo da de alta.</div>
+        <input id="mant-eqtxt" class="mant-in" maxlength="120" placeholder="Ej. Bicicleta nueva sin número, puerta del salón" value="${esc(M.eqTxt)}" autocomplete="off">
+        <button class="mant-link" data-act="libreNo">← Buscar en la lista</button></div>`;
     } else {
       h += `<input id="mant-q" class="mant-in" type="search" placeholder="🔍 Buscar equipo…" value="${esc(M.q)}" autocomplete="off" style="margin-bottom:.6rem">
         <div id="mant-eq-list"></div>
-        <button class="mant-link" data-act="todo">${M.todo ? `← Ver solo equipos de ${esc(ctx.salonNombre)}` : 'Mi equipo no está en esta lista'}</button>`;
+        <button class="mant-link" data-act="todo">${M.todo ? `← Ver solo equipos de ${esc(ctx.salonNombre)}` : 'Mi equipo no está en esta lista'}</button>
+        ${M.todo ? '<button class="mant-link" data-act="libre">¿Tampoco aparece? Escríbelo (equipo nuevo, puerta, barandal…)</button>' : ''}`;
     }
 
     h += `<div class="mant-lbl">2 · ¿Qué falla tiene?</div><div class="mant-chips">${FALLAS.map(f => `<button class="mant-chip ${M.chips.includes(f) ? 'on' : ''}" data-act="chip" data-id="${esc(f)}">${esc(f)}</button>`).join('')}</div>
@@ -422,29 +427,30 @@
   function pintarBoton() {
     const btn = document.getElementById('mant-enviar'); if (!btn) return;
     const ctx = contexto();
-    btn.disabled = M.enviando || !M.sel || ctx.salonId == null || !(M.chips.length || M.texto.trim()) || (!!reporteAbierto(M.sel) && !M.forzar);
+    btn.disabled = M.enviando || !(M.sel || (M.libre && M.eqTxt.trim())) || ctx.salonId == null || !(M.chips.length || M.texto.trim()) || (!!reporteAbierto(M.sel) && !M.forzar);
     btn.textContent = M.enviando ? 'Enviando…' : 'Enviar a mantenimiento';
   }
 
   async function enviar() {
     if (M.enviando) return;
     const ctx = contexto(); const inst = ctx.inst;
-    const eq = M.sel && M.equipos ? M.equipos[M.sel] : null;
+    const eq = !M.libre && M.sel && M.equipos ? M.equipos[M.sel] : null, eqTxt = M.libre ? M.eqTxt.trim().slice(0, 120) : '';
     const desc = [M.chips.join(', '), M.texto.trim()].filter(Boolean).join('. ');
-    if (!inst || !eq || ctx.salonId == null || !desc) return;
-    if (reporteAbierto(M.sel) && !M.forzar) return;
+    if (!inst || !(eq || eqTxt) || ctx.salonId == null || !desc) return;
+    if (eq && reporteAbierto(M.sel) && !M.forzar) return;
     M.enviando = true; pintarBoton();
     const rep = {
-      equipoId: M.sel, desc, urg: M.urg, profId: inst.id, prof: inst.nombre, area: inst.esp || 'Fitness',
-      clase: ctx.clase, salonId: ctx.salonId, otroLugar: String(eq.salonId) !== String(ctx.salonId),
+      desc, urg: M.urg, profId: inst.id, prof: inst.nombre, area: inst.esp || 'Fitness',
+      clase: ctx.clase, salonId: ctx.salonId, otroLugar: eq ? String(eq.salonId) !== String(ctx.salonId) : false,
       creado: Date.now(), estado: 'nuevo',
       tipos: M.chips.slice(),                            // atajos elegidos: sirven para el control de tiempos por tipo de falla
       origen: 'fitness'
     };
+    if (eq) rep.equipoId = M.sel; else rep.equipoTxt = eqTxt;    // no está en el catálogo: Mantenimiento lo recibe con el nombre escrito
     const cola = leerCola();
     cola.push({ local: 'l' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6), key: null, rep });
     guardarCola(cola);                                   // primero se guarda local; luego se intenta enviar
-    M.sel = null; M.chips = []; M.texto = ''; M.urg = 'normal'; M.q = ''; M.todo = false; M.forzar = false;
+    M.sel = null; M.chips = []; M.texto = ''; M.urg = 'normal'; M.q = ''; M.todo = false; M.forzar = false; M.libre = false; M.eqTxt = '';
     if (M.salonQR) { M.salonManual = null; M.salonQR = false; }   // el salón venía del QR: no se queda fijo
     const n = await vaciarCola();
     M.enviando = false;
@@ -456,13 +462,13 @@
   function pintarMis() {
     const b = document.getElementById('mant-body'); if (!b) return;
     const inst = instActual(); if (!inst) return;
-    const nombreEq = id => (M.equipos && M.equipos[id] && M.equipos[id].nombre) || 'Equipo';
+    const nombreEq = (id, txt) => (M.equipos && M.equipos[id] && M.equipos[id].nombre) || txt || 'Equipo';
     const nombreSal = id => (M.salones && M.salones[id] && M.salones[id].nombre) || '';
     const urgTag = r => r.urg && r.urg !== 'normal' ? `<span class="mant-tag" style="color:${r.urg === 'fuera' ? 'var(--red2)' : 'var(--gold2)'}">${esc(URG_TXT[r.urg])}</span>` : '';
     let h = '';
     const cola = leerCola().filter(x => String(x.rep.profId) === String(inst.id));
     cola.forEach(x => {
-      h += `<div class="mant-rep cola"><div style="display:flex;justify-content:space-between;gap:8px;align-items:center"><div class="mant-big">${esc(nombreEq(x.rep.equipoId))}</div><span class="mant-tag" style="color:var(--gold2)">⏳ Por enviar</span></div>
+      h += `<div class="mant-rep cola"><div style="display:flex;justify-content:space-between;gap:8px;align-items:center"><div class="mant-big">${esc(nombreEq(x.rep.equipoId, x.rep.equipoTxt))}</div><span class="mant-tag" style="color:var(--gold2)">⏳ Por enviar</span></div>
         <div class="mant-sub">${esc(x.rep.desc)}</div></div>`;
     });
     const lista = Object.keys(M.reportes).map(id => Object.assign({ id }, M.reportes[id])).filter(r => r && r.estado)
@@ -474,7 +480,7 @@
       else if (r.estado === 'atencion') tag = '<span class="mant-tag" style="color:var(--gold2)">🟡 En atención</span>';
       else if (r.estado === 'resuelto') tag = '<span class="mant-tag" style="color:var(--neon)">🟢 Resuelto</span>';
       h += `<div class="mant-rep ${clase}">
-        <div style="display:flex;justify-content:space-between;gap:8px;align-items:flex-start"><div class="mant-big">${esc(nombreEq(r.equipoId))}</div>${urgTag(r)}</div>
+        <div style="display:flex;justify-content:space-between;gap:8px;align-items:flex-start"><div class="mant-big">${esc(nombreEq(r.equipoId, r.equipoTxt))}</div>${urgTag(r)}</div>
         <div class="mant-sub">${esc(r.desc)}</div>
         <div class="mant-sub" style="color:var(--txt3)">${esc(nombreSal(r.salonId))}${r.clase && r.clase !== 'Fuera de clase' ? ' · ' + esc(r.clase) : ''} · ${hace(Date.now() - (r.creado || Date.now()))}</div>
         <div style="margin-top:6px">${tag}</div>
@@ -530,7 +536,7 @@
         return String(donde) === String(sid);
       });
       if (!lista.length) return;
-      const nom = r => (M.equipos[r.equipoId] && M.equipos[r.equipoId].nombre) || 'Equipo';
+      const nom = r => (M.equipos[r.equipoId] && M.equipos[r.equipoId].nombre) || r.equipoTxt || 'Equipo';
       const hayFuera = lista.some(r => r.urg === 'fuera');
       const items = lista.slice(0, 4).map(r => `${esc(nom(r))} <em>(${r.urg === 'fuera' ? 'fuera de servicio' : r.estado === 'atencion' ? 'en reparación' : 'reportado'})</em>`);
       if (lista.length > 4) items.push(`y ${lista.length - 4} más`);
@@ -630,8 +636,10 @@
       case 'eq': M.sel = id; M.forzar = false; pintarReportar(); break;
       case 'cambiarEq': M.sel = null; M.forzar = false; if (M.salonQR) { M.salonManual = null; M.salonQR = false; } pintarReportar(); break;
       case 'todo': M.todo = !M.todo; M.q = ''; pintarReportar(); break;
-      case 'cambiarSalon': M.eligiendoSalon = true; M.sel = null; M.todo = false; M.q = ''; pintarReportar(); break;
-      case 'salon': M.salonQR = false; M.salonManual = id; M.eligiendoSalon = false; M.sel = null; M.todo = false; M.q = ''; pintarReportar(); break;
+      case 'libre': M.libre = true; M.sel = null; M.forzar = false; pintarReportar(); setTimeout(() => { const i = document.getElementById('mant-eqtxt'); if (i) i.focus(); }, 50); break;
+      case 'libreNo': M.libre = false; M.eqTxt = ''; pintarReportar(); break;
+      case 'cambiarSalon': M.eligiendoSalon = true; M.sel = null; M.libre = false; M.eqTxt = ''; M.todo = false; M.q = ''; pintarReportar(); break;
+      case 'salon': M.salonQR = false; M.salonManual = id; M.eligiendoSalon = false; M.sel = null; M.libre = false; M.eqTxt = ''; M.todo = false; M.q = ''; pintarReportar(); break;
       case 'chip': M.chips = M.chips.includes(id) ? M.chips.filter(c => c !== id) : M.chips.concat(id); el.classList.toggle('on'); pintarBoton(); break;
       case 'urg': M.urg = id; document.querySelectorAll('#mant-root .mant-urg button').forEach(x => x.classList.toggle('on', x.dataset.id === id)); break;
       case 'enviar': enviar(); break;
@@ -643,6 +651,7 @@
   document.addEventListener('input', e => {
     if (e.target.id === 'mant-q') { M.q = e.target.value; pintarLista(); }
     else if (e.target.id === 'mant-txt') { M.texto = e.target.value; pintarBoton(); }
+    else if (e.target.id === 'mant-eqtxt') { M.eqTxt = e.target.value; pintarBoton(); }
   });
 
   window.mantIniciar = mantIniciar;
