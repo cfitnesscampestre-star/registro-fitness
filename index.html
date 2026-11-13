@@ -2396,7 +2396,7 @@ function cerrarMenuCoord(){ var m=document.getElementById('cm-menu'); if(m){ m.c
 <div class="modal narrow">
   <button class="mcls" onclick="cerrarModal('m-rec-init')"><svg class="ico" viewBox="0 0 20 20"><line x1="5" y1="5" x2="15" y2="15" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><line x1="15" y1="5" x2="5" y2="15" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></button>
   <div class="mttl"><svg class="ico" viewBox="0 0 20 20"><circle cx="10" cy="4" r="2" stroke="currentColor" stroke-width="1.4" fill="none"/><path d="M10 6 L9 11 L7 16 M10 6 L11 11 L13 16 M9 11 L12 11" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg> Iniciar Recorrido</div>
-  <div class="fg"><label>Fecha</label><input type="date" id="ri-fecha"></div>
+  <div class="fg"><label>Fecha</label><input type="date" id="ri-fecha" onchange="riFechaCambio()"></div>
   <div class="fr">
     <div class="fg"><label>Hora</label><input type="time" id="ri-hora" value="07:30" oninput="previewClasesActivas()"></div>
     <div class="fg"><label>Día</label>
@@ -3256,7 +3256,7 @@ function cerrarMenuCoord(){ var m=document.getElementById('cm-menu'); if(m){ m.c
 <script defer src="js/core.js?v=3"></script>
 <script defer src="js/dashboard.js?v=3"></script>
 <script defer src="js/analisis.js"></script>
-<script defer src="js/recorrido.js?v=5"></script>
+<script defer src="js/recorrido.js?v=6"></script>
 <script defer src="js/registros.js?v=5"></script>
 <script defer src="js/suplencias.js"></script>
 <script defer src="js/reportes.js?v=3"></script>

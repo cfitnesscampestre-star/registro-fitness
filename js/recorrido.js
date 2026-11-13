@@ -17,14 +17,22 @@ function selModoRec(modo){
 }
 
 function iniciarRecorrido(){
-  document.getElementById('ri-fecha').value=fechaLocalStr(hoy);
+  // Usa la fecha elegida en "Resumen del día" (para ponerse al día con días atrasados)
+  const fSel=(typeof vistaFecha!=='undefined'&&vistaFecha instanceof Date&&!isNaN(vistaFecha))?vistaFecha:new Date();
+  document.getElementById('ri-fecha').value=fechaLocalStr(fSel);
   const ahora=new Date();
   document.getElementById('ri-hora').value=`${String(ahora.getHours()).padStart(2,'0')}:${String(ahora.getMinutes()).padStart(2,'0')}`;
-  const diaActual=DIAS[(ahora.getDay()+6)%7];
-  document.getElementById('ri-dia').value=diaActual;
+  document.getElementById('ri-dia').value=DIAS[(fSel.getDay()+6)%7];
   selModoRec('turbo');
   previewClasesActivas();
   document.getElementById('m-rec-init').classList.add('on');
+}
+// Al cambiar la fecha, el día de la semana se ajusta solo para que coincidan las clases
+function riFechaCambio(){
+  const v=document.getElementById('ri-fecha').value;
+  if(v){const [y,m,d]=v.split('-').map(Number);const f=new Date(y,m-1,d);
+    if(!isNaN(f))document.getElementById('ri-dia').value=DIAS[(f.getDay()+6)%7];}
+  previewClasesActivas();
 }
 function previewClasesActivas(){
   const hora=document.getElementById('ri-hora').value;
